@@ -19,6 +19,7 @@ TODO
 * Make this build and work on amd64. Help needed
 * Proper build system (remove pre-generated .deps). Help needed
 * Include AppDirAssistant tool
+* Follow http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html
 
 CHANGELOG
 =========
