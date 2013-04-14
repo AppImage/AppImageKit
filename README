@@ -19,7 +19,8 @@ TODO
 * Make this build and work on amd64. Help needed
 * Proper build system (remove pre-generated .deps). Help needed
 * Include AppDirAssistant tool
-* Follow http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html
+* Follow http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html (Version 0.8.0 introduced new location for the thumbnails)
+* Update http://www.portablelinuxapps.org/docs/1.0/ to remove all references to elficon; include changelog section
 
 CHANGELOG
 =========
