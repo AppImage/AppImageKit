@@ -133,7 +133,10 @@ class Assistant(gtk.Assistant):
         chooser = gtk.FileChooserWidget(gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER)
         chooser.connect("selection-changed", self.check_if_appdir_callback)
         chooser.connect("key-release-event", self.check_if_appdir_callback)
-        chooser.set_current_folder(os.environ.get('HOME'))
+        if len(sys.argv) > 1:
+            chooser.set_current_folder(sys.argv[1])
+        else:
+            chooser.set_current_folder(os.environ.get('HOME'))
         chooser.show()
         self.append_page(chooser)
         self.set_page_title(chooser, header)
