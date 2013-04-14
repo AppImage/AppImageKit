@@ -1,0 +1,463 @@
+Package: dpkg
+Version: 9:9.9.999
+Status: install ok installed
+
+Package: libc6
+Version: 9.9.99999999999999999999
+Status: install ok installed
+Comment: We NEVER want to include this in the CMG since it would segfault ###########
+
+Package: zlib1g
+Version: 1.999
+Status: install ok installed
+
+Package: libncurses5
+Version: 5.99999
+Status: install ok installed
+
+Package: libgcc1
+Version: 1:4.99999
+Status: install ok installed
+
+Package: locales
+Version: 2.3.99999
+Status: install ok installed
+
+Package: gcc-4.2-base
+Version: 4.2.1-5ubuntu4
+Status: install ok installed
+Comment: MUST BE PRECISE VERSION? - We cheat here, LSB version is older (change back if necessary) ###########
+
+Package: belocs-locales-bin
+Version: 2.4.99999
+Status: install ok installed
+
+Package: tzdata
+Version: 99999
+Status: install ok installed
+
+Package: libstdc++6
+Version: 4.9.99999
+Status: install ok installed
+Comment: We cheat here a bit by including 4.9 instead of just 4.1 (change back if this makes trouble)
+
+Package: libx11-6
+Version: 1.99999
+Status: install ok installed
+
+Package: libx11-data
+Version: 7.99999
+Status: install ok installed
+
+Package: libxau6
+Version: 1.99999
+Status: install ok installed
+
+Package: libxdmcp6
+Version: 1.99999
+Status: install ok installed 
+
+Package: x11-common
+Version: 1:99999
+Status: install ok installed 
+
+Package: debconf
+Version: 99999
+Status: install ok installed 
+
+Package: debianutils
+Version: 99999
+Status: install ok installed 
+
+Package: lsb-base
+Version: 99999
+Status: install ok installed
+
+Package: ncurses-bin
+Version: 5.5.9999
+Status: install ok installed
+
+Package: libxt6
+Version: 1.0.9999
+Status: install ok installed
+
+Package: libice6
+Version: 2:1.999
+Status: install ok installed
+
+Package: libsm6
+Version: 1.0.9999
+Status: install ok installed
+
+Package: libxext6
+Version: 1.0.9999
+Status: install ok installed
+
+Package: libice6
+Version: 1.0.9999
+Status: install ok installed
+
+Package: libsm6
+Version: 1.0.9999
+Status: install ok installed
+
+Package: libxi6
+Version: 9:1.9.9999
+Status: install ok installed
+
+Package: libfontconfig1
+Version: 2.9.9999
+Status: install ok installed
+
+Package: fontconfig-config
+Version: 2.3.9999
+Status: install ok installed
+
+Package: libexpat1xxxxxxxxxxxxxxxxxxxxxxxxxmissingonfedora7
+Version: 1.9999
+Status: install ok installed
+
+Package: libfreetype6
+Version: 9:9999
+Status: install ok installed
+
+Package: libpng12-0
+Version: 1.9999
+Status: install ok installed
+
+Package: libjpeg62
+Version: 6b-9999
+Status: install ok installed
+
+Package: libglib2.0-0
+Version: 9:2.99.9999
+Status: install ok installed
+Comment: Problematic since never sid applications require more recent version than is in base system - but if we include it, we get breakage 
+
+Package: libatk1.0-0
+Version: 9:1.12.9999
+Status: install ok installed
+
+Package: libpango1.0-0
+Version: 9:1.14.9999
+Status: install ok installed
+
+Package: libpango1.0-common
+Version: 1.14.9999
+Status: install ok installed
+
+Package: libxft2
+Version: 2.9999
+Status: install ok installed 
+
+Package: libcairo2
+Version: 1.2.9999
+Status: install ok installed 
+
+Package: libxrender1
+Version: 0.9999
+Status: install ok installed 
+
+Package: libgtk2.0-0
+Version: 2.10.9999
+Status: install ok installed
+
+Package: libqt3-mt
+Version: 3:3.3.9999
+Status: install ok installed 
+
+Package: libaudio2xxxxxxxxxxxxxxxxxxxxxxx
+Version: 1.9999
+Status: install ok installed
+Comment: Not in LSB, not in SUSE, not available for SUSE!
+
+Package: libxml2
+Version: 2.6.9999
+Status: install ok installed
+
+Package: gconf2
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libgconf2-4
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: liborbit2
+Version: 9:9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libidl0
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libgnomeui-0
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libbonoboui2-0
+Version: 2.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libbonobo2-0
+Version: 2.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libgnome2-0
+Version: 2.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libgnomecanvas2-0
+Version: 2.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: gnome-mime-data
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: kdelibs4c2a
+Version: 4:3.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: kdelibs5
+Version: 9:4.9999
+Status: install ok installed
+Comment: not part of LSB, KDE 4
+
+Package: kdebase-runtime
+Version: 9:9.9999
+Status: install ok installed
+Comment: not part of LSB, but we assume latest KDE to be installed
+
+Package: kdebase-runtime-data
+Version: 9:9.9999
+Status: install ok installed
+Comment: not part of LSB, but we assume latest KDE to be installed
+
+Package: kde-icons-oxygen
+Version: 9:9.9999
+Status: install ok installed
+Comment: not part of LSB, but we assume latest KDE to be installed
+
+Package: python
+Version: 2.5.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: python2.4
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: python2.5
+Version: 2.5.999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: python2.4-minimal
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: python-minimal
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: python-central
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: libperl5.8
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+ 
+Package: perl5
+Version: 9:5.9.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: perl
+Version: 9:9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: perl-base
+Version: 5.8.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: perl-base
+Version: 5.8.8-6.1
+Status: install ok installed
+Comment: not part of LSB, sid needs EXACTLY this version
+
+Package: xxxxxxxxxxxxxxxxtcl8.4
+Version: 8.4.9999
+Status: install ok installed
+Comment: not part of LSB #### not part of Kubuntu
+
+Package: xxxxxxxxxxxtk8.4
+Version: 8.4.9999
+Status: install ok installed
+Comment: not part of LSB #### not part of Kubuntu
+
+Package: xbitmaps
+Version: 9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: xxxxxxxxxxxxxxxxxxxxlibxfixes3
+Version: 1:4.9999
+Status: install ok installed
+Comment: not part of LSB #### not part of Knoppix 4
+
+Package: libxcursor1
+Version: 1:1.9999
+Status: install ok installed
+Comment: not part of LSB
+
+Package: adduser
+Version: 9.9.9999
+Status: install ok installed
+Comment: not part of LSB but lots of dependencies (remove if this causes trouble)
+
+Package: xxxxxxlibgnutls13xxxxxxmissinginsuse10.1
+Version: 13.9.9999
+Status: install ok installed
+Comment: not part of LSB but lots of dependencies (remove if this causes trouble)
+
+Package: libgtk2.0-0
+Version: 2.0.9999
+Status: install ok installed
+Comment: Provides gtk3.0-binver-2.10.0
+
+Package: libgtk2.0-0
+Version: 2.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs - LOTs of deps!
+
+Package: libcairo2
+Version: 2.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: fontconfig
+Version: 9.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: defoma
+Version: 9.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: libgnomevfs2-0
+Version: 2:2.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: libgnomeprint2.2-0
+Version: 2:2.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: libgnome-keyring0
+Version: 9.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: libglade2-0
+Version: 2:2.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: libgtkspell0
+Version: 9.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: udev
+Version: 9.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: gnome-terminal
+Version: 9.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: xbase-clients
+Version: 9.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: gtk2.0-binver-2.10.0
+Version: 2.10.0
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: gnome-icon-theme
+Version: 2.999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: libgnome-desktop-2
+Version: 9:999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: gnome-panel
+Version: 9:999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: gnome-menus
+Version: 9:999
+Status: install ok installed
+Comment: Not in LSB but we don't want to bundle such basic stuff into CMGs
+
+Package: yelp
+Version: 9:999
+Status: install ok installed
+Comment: GNOME; SEEMS NOT TO WORK
+
+Package: libgnomeprintui2.2-0
+Version: 2.999
+Status: install ok installed
+Comment: GNOME; SEEMS NOT TO WORK
+
+Package: mesa-utils
+Version: 9:999
+Status: install ok installed
+Comment: fix issue #243
+
+Package: libgl1-mesa-glx
+Version: 9:999
+Status: install ok installed
+Comment: fix issue #243
+
+Package: libgl1-mesa-dri
+Version: 9:999
+Status: install ok installed
+Comment: fix issue #243
+
+Package: libglu1-mesa
+Version: 9:999
+Status: install ok installed
+Comment: fix issue #243
+
+

@@ -1,0 +1,123 @@
+#!/usr/bin/env python
+
+# /**************************************************************************
+# 
+# Copyright (c) 2005-12 Simon Peter
+# 
+# All Rights Reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# 
+# **************************************************************************/
+
+from __future__ import division
+import os, sys
+import subprocess 
+import xdgappdir 
+import commands
+from locale import gettext as _
+
+
+# Also search for dependency binaries and libraries next to myself
+dependenciesdir = os.path.dirname(__file__) + "/usr/"
+os.environ['PATH'] =  dependenciesdir + "/bin:" + os.getenv('PATH')
+# print os.environ['PATH']
+lddp = os.getenv('LD_LIBRARY_PATH')
+if lddp == None: lddp = ""
+os.environ['LD_LIBRARY_PATH'] =  dependenciesdir + "/lib:" + lddp
+
+if len(sys.argv) == 2:
+    print "Assuming I should inject a new runtime"
+    destinationfile = os.path.realpath(sys.argv[1])
+    should_compress = False
+elif len(sys.argv) < 3:
+    print("")
+    print("This packs a direcory")
+    print("")
+    print("Usage: %s sourcedir destinationfile" % (os.path.basename(sys.argv[0])))
+    print("")
+    exit(1)
+else:
+    sourcedir = os.path.realpath(sys.argv[1])
+    destinationfile = os.path.realpath(sys.argv[2])
+    should_compress = True
+
+if should_compress == True:
+    if not os.path.exists(sourcedir):
+        print("Directory not found: %s" % (sourcedir))
+        exit(1)
+
+if should_compress == True:
+    H = xdgappdir.AppDirXdgHandler(sourcedir)
+    iconfile = H.get_icon_path_by_icon_name(H.get_icon_name_from_desktop_file(H.desktopfile))
+    if iconfile == None:
+        print "Icon could not be found based on information in desktop file, aborting"
+        exit(1)
+
+    print("Creating %s..." % (destinationfile))
+    if os.path.exists(destinationfile): 
+        print _("Destination path already exists, exiting") # xorriso would append another session to a pre-existing image
+        exit(1)
+    # As great as xorriso is, as cryptic its usage is :-(
+    command = ["xorriso", "-dev", 
+    destinationfile, "-padding", "0", "-map",
+    sourcedir, "/", "--", "-map", iconfile, "/.DirIcon", 
+    "-zisofs", "level=9:block_size=128k", "-chown_r", "0",
+    "/", "--", "set_filter_r", "--zisofs", "/" ]
+					
+    subprocess.Popen(command).communicate()
+
+    print "ok"
+
+else:
+    extracted_icon = "/tmp/icon"
+    try:
+        os.unlink(extracted_icon)
+    except:
+        pass
+    iconfile = extracted_icon
+
+print("Embedding icon into runtime...")
+
+elf = os.path.realpath(os.path.dirname(__file__)) + "/runtime"
+result, output = commands.getstatusoutput("cp " + elf + " /tmp/")
+    
+if int(os.stat("/tmp/runtime").st_size) > 32*1024: # 32k
+    print (_("Runtime does not fit into ISO header; probably the icon is too large"))
+    exit(1)
+
+print("Embedding runtime into the header of %s..." % (destinationfile))
+
+s = file("/tmp/runtime", 'r')	
+f = file(destinationfile, 'r+')
+f.write(s.read())
+f.close()
+s.close()
+result, output = commands.getstatusoutput("rm /tmp/runtime")
+
+print "ok"
+
+print("Making %s executable..." % (destinationfile))
+
+os.chmod(destinationfile, 0755)
+
+print "ok"
+
+filesize = int(os.stat(destinationfile).st_size)
+print (_("Size: %f MB") % (filesize/1024/1024))

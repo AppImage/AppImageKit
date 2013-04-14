@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# /**************************************************************************
+# 
+# Copyright (c) 2005-10 Simon Peter
+# 
+# All Rights Reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# 
+# **************************************************************************/
+
+DIRNAME=$(dirname $(readlink -f "${0}"))
+
+APP="${1}"
+APPDIR="./${APP}.appdir"
+
+set -e
+set -v
+
+sudo apt-get clean
+
+sudo apt-get --no-upgrade \
+    -y --force-yes install "${APP}" --download-only
+# -o Dir::State::status="${DIRNAME}/status"
+
+mkdir "${APPDIR}"
+cd "${APPDIR}"
+
+find /var/cache/apt/archives/*.deb -exec dpkg-deb -x {} . \;
+
+find . -type f -exec sed -i -e 's|/usr|././|g' {} \;
+find . -type f -exec sed -i -e 's|././/bin/env|/usr/bin/env|g' {} \;
+find . -type f -exec sed -i -e 's|././/bin/python|/usr/bin/python|g' {} \;
+### TODO: need proper IntelliPatch here ###
+
+cat > ./AppRun <<\EOF
+#!/bin/sh
+cd "$(dirname "${0}")/usr"
+EXEC=$(grep -m 1 -r Exec= ../*.desktop | cut -d "=" -f 2 | cut -d % -f 1)
+LD_LIBRARY_PATH="./lib:${LD_LIBRARY_PATH}" PATH="./bin/:./sbin/:./games/:../bin/:../sbin/:${PATH}" exec $EXEC $@
+EOF
+chmod a+x ./AppRun
+
+sudo apt-get clean
+
+find ./usr/share/py* > /dev/null 2>&1 && echo "Python code has been detected." && \
+echo "Probably you want to insert portability.py into the Python code to" && \
+echo "solve import errors."
+
+# Copy all desktop files to the topmost AppDir level
+# if it's more than one, then the user needs to delete all but one
+# or the result will be undefined
+find . -iname *.desktop -exec cp {} . \;
+
+./AppRun
+
+cd -
+

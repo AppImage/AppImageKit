@@ -1,0 +1,75 @@
+#!/bin/bash
+
+set -e
+# set -x
+
+HERE=$(dirname $(readlink -f "${0}"))
+export PATH=$HERE:$PATH
+
+if [ "$1x" == "x" ] ; then
+    echo "Please specify a squashfs base system to run the AppImage on"
+    exit 1
+fi
+
+if [ "$2x" == "x" ] ; then
+    echo "Please specify an AppImage to be run"
+    exit 1
+fi
+
+mkdir -p /tmp/unionfs/root
+mkdir -p /tmp/unionfs/rw
+mkdir -p /tmp/union
+
+trap atexit EXIT
+
+atexit()
+{
+echo ""
+echo "===================================================="
+echo ""
+    set +e
+    umount -l /tmp/union/var/lib/dbus
+    umount -l /tmp/union/etc/resolv.conf
+    umount -l /tmp/union/proc
+    umount -l /tmp/union/boot
+    umount -l /tmp/union
+    umount -l /tmp/unionfs/root
+    rm -r /tmp/unionfs/root
+    rm -r /tmp/unionfs/rw
+    rm -r /tmp/unionfs
+    rm -r /tmp/union
+}
+
+mount "$1" /tmp/unionfs/root -o loop
+
+unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/unionfs/,max_files=32768 /rw=RW:/root=RO /tmp/union
+
+ls /tmp/union/boot >/dev/null && MNT=/boot
+
+if [ "x$MNT" == "x" ] ; then
+    echo "Could not find free mountpoint"
+    exit 1
+fi
+
+mount "$2" /tmp/union/boot -o loop
+cat > /tmp/union/run.sh <<EOF
+#!/bin/sh
+cat /etc/*release
+echo ""
+# rm -rf /etc/pango
+# mkdir -p /etc/pango
+# pango-querymodules > '/etc/pango/pango.modules' # otherwise only squares instead of text
+$MNT/AppRun
+EOF
+chmod a+x /tmp/union/run.sh
+
+mount -t proc proc /tmp/union/proc
+mount --bind /var/lib/dbus /tmp/union/var/lib/dbus
+touch /tmp/union/etc/resolv.conf || echo ""
+mount --bind /etc/resolv.conf /tmp/union/etc/resolv.conf
+xhost local: # otherwise "cannot open display: :0.0"
+echo ""
+echo "===================================================="
+echo ""
+chroot /tmp/union/ /run.sh # $MNT/AppRun
+exit $?

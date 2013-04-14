@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=AppImageExtract
+Exec=appimageextract
+Icon=AppImageExtract
+Terminal=True
+Type=Application
+Categories=Development;
+StartupNotify=true

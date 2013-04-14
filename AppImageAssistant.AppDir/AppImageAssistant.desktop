@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=AppImageAssistant
+Exec=AppImageAssistant
+Icon=AppImageAssistant
+Terminal=false
+Type=Application
+Categories=Development;
+Comment=Turn AppDir into AppImage, part of AppImageKit
+StartupNotify=true

@@ -1,0 +1,277 @@
+#!/usr/bin/env python
+
+# /**************************************************************************
+# 
+# Copyright (c) 2005-13 Simon Peter
+# 
+# All Rights Reserved.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# 
+# ******************************************************
+
+__version__="0.9.3"
+
+#
+# TODO:
+# Find out why it freezes on Fedora 12
+#
+
+import os, sys, gtk, vte
+from locale import gettext as _
+
+import shutil
+import os
+from subprocess import *
+import tempfile
+import sys
+import bz2
+import xdgappdir 
+import commands
+import threading
+import glob
+
+import xdgappdir # bundled with this app
+import dialogs # part of kiwi; bundled with this app
+
+application_icon = os.path.join(os.path.dirname(sys.argv[0]), "AppImageAssistant.png")
+
+def error(string, fatal=True):
+    print(string)
+    if fatal == True:
+        buttontype = gtk.BUTTONS_CANCEL
+    else:
+        buttontype = gtk.BUTTONS_OK
+    message = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, buttontype, string)
+    resp = message.run()
+    message.destroy()
+    if fatal == True:
+        exit(1)
+
+    '''
+    returns 1 if yes was pressed,
+	    0 if no  was pressed,
+       -1 if dialog was cancled
+	       '''
+
+    d=gtk.GtkWindow()
+    hbox = gtk.GtkHButtonBox()
+    def delete_event(widget, event, d):
+        d.callback_return=-1
+        return gtk.FALSE
+    d.connect("delete_event", delete_event, d)
+    d.add(hbox)
+    def callback(widget, data):
+        d=data[0]
+        data=data[1]
+        d.hide()
+        d.callback_return=data
+
+    yes = gtk.GtkButton(yes_text)
+    yes.connect("clicked", callback, (d, 1))
+    hbox.pack_start(yes)
+
+    no = gtk.GtkButton(no_text)
+    no.connect("clicked", callback, (d, 0))
+    hbox.pack_start(no)
+
+    d.set_modal(gtk.TRUE)
+    d.show_all()
+    d.callback_return=None
+    while d.callback_return==None:
+        gtk.mainiteration(gtk.TRUE) # block until event occurs
+    return d.callback_return
+
+def threaded(f):
+    def wrapper(*args):
+        t = threading.Thread(target=f, args=args)
+        t.setDaemon(True)
+        t.start()
+    wrapper.__name__ = f.__name__
+    wrapper.__dict__ = f.__dict__
+    wrapper.__doc__  = f.__doc__
+    return wrapper
+
+class Assistant(gtk.Assistant):
+    def __init__(self):
+        gtk.Assistant.__init__(self)
+        self.connect('close', gtk.main_quit)
+        self.connect('cancel',gtk.main_quit)
+        #self.connect('prepare', self.callback_prepare) 
+        self.set_icon_from_file(application_icon)
+        self.set_size_request(640, 480)
+        self.init_intro_page()
+
+
+
+    def text_page(self, header, text):
+        label = gtk.Label(text)
+        label.show()
+        label.set_line_wrap(True)
+        self.append_page(label)
+        self.set_page_title(label, header)
+        self.set_page_complete(label, True)    
+        self.set_page_header_image(label, gtk.gdk.pixbuf_new_from_file(application_icon))
+
+    def chooser_page(self, header):
+        chooser = gtk.FileChooserWidget(gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER)
+        chooser.connect("selection-changed", self.check_if_appdir_callback)
+        chooser.connect("key-release-event", self.check_if_appdir_callback)
+        chooser.set_current_folder(os.environ.get('HOME'))
+        chooser.show()
+        self.append_page(chooser)
+        self.set_page_title(chooser, header)
+        self.set_page_complete(chooser, False)
+        self.set_page_header_image(chooser, gtk.gdk.pixbuf_new_from_file(application_icon))
+
+    def runner_page(self, callable):    
+        vbox = gtk.VBox()
+        vbox.set_name("MAIN_RUNNER_PAGE")
+        label = gtk.Label(_("Running..."))
+        label.set_line_wrap(True)
+        vbox.pack_start(label, False, False, 0)
+        runbox = RunBox(self)
+        runbox.connect('realize', callable)
+        vbox.pack_start(runbox, True, True, 0)
+        self.append_page(vbox)
+        self.set_page_title(vbox, "Running...")
+        self.set_page_header_image(vbox, gtk.gdk.pixbuf_new_from_file(application_icon))
+        vbox.show_all()
+        self.set_page_complete(vbox, True) ##############################
+        self.set_page_type(vbox, gtk.ASSISTANT_PAGE_PROGRESS) 
+
+        # UNTIL HERE IT IS GENERIC ====================================================
+
+    def result_page(self):
+        vbox = gtk.VBox()
+        icon = gtk.Image()
+        vbox.pack_start(icon, False, False, 0)
+        vbox.show_all()
+        self.append_page(vbox)
+        self.set_page_header_image(vbox, gtk.gdk.pixbuf_new_from_file(application_icon))
+        icon.show()
+        filetype = Popen(["file", "-k", "-r", self.targetname], stdout=PIPE).communicate()[0]
+        # print filetype
+        if "ISO 9660" in filetype and "32-bit LSB executable" in filetype:
+            icon.set_from_file(os.path.join(os.path.dirname(sys.argv[0]), "Gnome-emblem-default.png"))
+            self.set_page_title(vbox, "Done")
+            self.set_page_type(vbox, gtk.ASSISTANT_PAGE_SUMMARY)
+            basesystems = glob.glob('/cdrom/*.squashfs')
+            basesystems.append("/cdrom/casper/filesystem.squashfs")
+            for basesystem in basesystems:
+                print basesystem
+                button = gtk.Button(_("Run in %s") % (basesystem))
+                button.connect('clicked', self.testrun, basesystem, self.targetname)
+                vbox.pack_start(button)
+                button.show()
+        else:
+            icon.set_from_file(os.path.join(os.path.dirname(sys.argv[0]), "Gnome-dialog-warning.png"))
+            self.set_page_title(icon, "An error has occured")         
+
+    def testrun(self, sender, basesystem, appimage):
+        # Need an involved workaround because running as root means that we cannot access files inside the AppImage due to permissions
+        shutil.copyfile(os.path.join(os.path.dirname(sys.argv[0]), "testappimage"), "/tmp/testappimage")
+        shutil.copyfile(os.path.join(os.path.dirname(sys.argv[0]), "unionfs-fuse"), "/tmp/unionfs-fuse")
+        os.system("sudo chmod 755 /tmp/testappimage /tmp/unionfs-fuse")
+        os.system("sudo xterm -hold -e /tmp/testappimage  '" + basesystem + "' '" + appimage + "'")
+
+    def check_if_appdir_callback(self, widget, dummy=False):
+        print _("Checking whether %s is an AppDir" % (widget.get_filename()))
+        self.set_page_complete(widget, True)
+        candidate = widget.get_filename()
+        if not os.path.isfile(os.path.join(candidate, "AppRun")):
+            self.set_page_complete(widget, False)
+            return
+
+        self.H = xdgappdir.AppDirXdgHandler(candidate) 
+        print self.H
+        if self.H.desktopfile == None:
+            self.set_page_complete(widget, False)
+            error(_("Can't find this AppDir's desktop file"), False)
+            return
+        if self.H.executable == None:
+            self.set_page_complete(widget, False)
+            error(_("Can't find the executable in this AppDir's desktop file"), False)
+            return
+        if self.H.icon == None:
+            self.set_page_complete(widget, False)
+            error(_("Can't find the icon in this AppDir's desktop file"), False)
+            return
+
+        self.appdir = candidate
+        try:
+            self.targetname = os.path.join(os.path.dirname(self.appdir), self.H.name)
+        except:
+            self.targetname = os.path.join(os.path.dirname(self.appdir), os.path.basename(self.H.executable))
+
+        if os.path.exists(self.targetname):
+            self.set_page_complete(widget, False)
+            resp = dialogs.yesno(_("%s already exists, do you want to delete it?") % (self.targetname))
+            if resp == gtk.RESPONSE_YES:
+                try:
+                    os.unlink(self.targetname)
+                    self.set_page_complete(widget, True)
+                    self.set_current_page(self.get_current_page() + 1) # go to the next page        
+                except:
+                    error(_("%s already exists, delete it first if you want to create a new one") % (self.targetname), False)
+            return
+
+    def init_intro_page(self):
+        self.text_page("AppImageAssistant " + __version__, "This assistant helps you to package an AppDir for distribution as an AppImage. It is part of AppImageKit. \n\nPlease see http://portablelinuxapps.org/forum for more information.")
+        self.chooser_page("Please select the AppDir")
+        self.runner_page(self.run1_func)
+
+    @threaded # For this to work, the gtk.gdk.threads_init() function must be called before the gtk.main() function
+    def run1_func(self, widget):
+        command = ["python", os.path.join(os.path.dirname(sys.argv[0]), "package"), self.appdir, self.targetname]
+        print "Running command:"
+        print command
+        gtk.gdk.threads_enter() # this must be called in a function that is decorated with @threaded
+        widget.run_command(command) # this is the long-running command
+        gtk.gdk.threads_leave() # this must be called in a function that is decorated with @threaded
+
+class RunBox(vte.Terminal):
+    def __init__(self, assistant):
+        vte.Terminal.__init__(self)
+        self.connect('child-exited', self.run_command_done_callback)
+        self.assistant = assistant # the assistant is passed in here so that we can e.g., disable forward buttons
+
+
+    def run_command(self, command_list):
+        self.assistant.set_page_complete(self.assistant.get_nth_page(self.assistant.get_current_page()), False)
+        self.thread_running = True
+        command = command_list
+        pid =  self.fork_command(command=command[0], argv=command, directory=os.getcwd())
+        while self.thread_running:
+            gtk.main_iteration()
+
+    def run_command_done_callback(self, terminal):
+        print('child done')
+        self.assistant.set_page_complete(self.assistant.get_nth_page(self.assistant.get_current_page()), True) # enable the next page button
+        self.assistant.result_page() # only now initialize the results page because it needs to check whether we succeeded
+        self.assistant.set_current_page(self.assistant.get_current_page() + 1) # go to the next page
+        self.thread_running = False        
+
+
+if __name__=="__main__":
+    A = Assistant()
+    A.show()
+    gtk.gdk.threads_init() # The gtk.gdk.threads_init() function must be called before the gtk.main() function
+    gtk.main()
+
