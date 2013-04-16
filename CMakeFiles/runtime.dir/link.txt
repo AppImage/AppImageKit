@@ -1,0 +1,1 @@
+/usr/bin/cc      CMakeFiles/runtime.dir/runtime.c.o  -o runtime -rdynamic libfuseiso.a libisofs.a -lfuse -lpthread -lglib-2.0 -lz 

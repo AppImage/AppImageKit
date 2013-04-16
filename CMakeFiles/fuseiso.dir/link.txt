@@ -1,0 +1,2 @@
+/usr/bin/ar cr libfuseiso.a  CMakeFiles/fuseiso.dir/fuseiso.c.o
+/usr/bin/ranlib libfuseiso.a

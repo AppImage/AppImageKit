@@ -1,0 +1,6 @@
+/home/ubuntu/AppImageKit/CMakeFiles/AppImageAssistant.dir
+/home/ubuntu/AppImageKit/CMakeFiles/AppImageExtract.dir
+/home/ubuntu/AppImageKit/CMakeFiles/AppRun.dir
+/home/ubuntu/AppImageKit/CMakeFiles/fuseiso.dir
+/home/ubuntu/AppImageKit/CMakeFiles/isofs.dir
+/home/ubuntu/AppImageKit/CMakeFiles/runtime.dir

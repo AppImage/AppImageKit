@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ubuntu/AppImageKit/AppRun.c
+stdio.h
+-
+stdlib.h
+-
+unistd.h
+-
+libgen.h
+-
+dirent.h
+-
+string.h
+-
+
