@@ -85,32 +85,14 @@ if should_compress == True:
 
     print "ok"
 
-else:
-    extracted_icon = "/tmp/icon"
-    try:
-        os.unlink(extracted_icon)
-    except:
-        pass
-    iconfile = extracted_icon
-
-print("Embedding icon into runtime...")
+print("Embedding runtime...")
 
 elf = os.path.realpath(os.path.dirname(__file__)) + "/runtime"
-result, output = commands.getstatusoutput("cp " + elf + " /tmp/")
-    
-if int(os.stat("/tmp/runtime").st_size) > 32*1024: # 32k
-    print (_("Runtime does not fit into ISO header; probably the icon is too large"))
-    exit(1)
-
-print("Embedding runtime into the header of %s..." % (destinationfile))
-
-s = file("/tmp/runtime", 'r')	
+s = file(elf, 'r')	
 f = file(destinationfile, 'r+')
 f.write(s.read())
 f.close()
 s.close()
-result, output = commands.getstatusoutput("rm /tmp/runtime")
-
 print "ok"
 
 print("Making %s executable..." % (destinationfile))
