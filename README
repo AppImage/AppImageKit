@@ -1,23 +1,22 @@
 Copyright (c) 2004-13 Simon Peter <probono@puredarwin.org>
 All rights reserved. 
 Redistribution of this document is permitted only in unchanged form.
-Version 2013-04-14
+Version 2013-04-16
 
 BUILDING
 ========
 
  # Use an OLD system for building (at least 2-3 years old)
  # to ensure the binaries run on older systems too
- sudo apt-get update ; sudo apt-get -y install build-essential libselinux1-dev libfuse-dev libglib2.0-dev xorriso
+ sudo apt-get update ; sudo apt-get -y install libfuse-dev libglib2.0-dev cmake
  cd AppImageKit-master
- sudo cp /usr/lib/i386-linux-gnu/libglib-2.0.so /usr/lib/libglib-2.0.so # FIXME (how?)
- sudo cp /usr/lib/i386-linux-gnu/libfuse.so /usr/lib/libfuse.so # FIXME (how?)
+ cmake .
+ make
 
 TODO
 ====
 
 * Make this build and work on amd64. Help needed
-* Proper build system (remove pre-generated .deps). Help needed
 * Include AppDirAssistant tool
 * Follow http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html (Version 0.8.0 introduced new location for the thumbnails)
 * Update http://www.portablelinuxapps.org/docs/1.0/ to remove all references to elficon; include changelog section
