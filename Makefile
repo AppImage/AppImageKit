@@ -2,12 +2,14 @@ all: runtime AppRun AppImageAssistant AppImageExtract
 
 AppImageAssistant: runtime
 	cp runtime ./AppImageAssistant.AppDir
+	mkdir -p ./AppImageAssistant.AppDir/usr/bin/ ./AppImageAssistant.AppDir/usr/lib/
 	cp ./bundled-dependencies-i386/xorriso ./AppImageAssistant.AppDir/usr/bin/
 	cp ./bundled-dependencies-i386/libglade-2.0.so.0 ./bundled-dependencies-i386/libvte.so.9 ./bundled-dependencies-i386/libisofs.so.6 ./bundled-dependencies-i386/libisoburn.so.1 ./bundled-dependencies-i386/libburn.so.4 ./AppImageAssistant.AppDir/usr/lib/
 	./AppImageAssistant.AppDir/package ./AppImageAssistant.AppDir ./AppImageAssistant
 
 AppImageExtract: AppRun
 	cp AppRun ./AppImageExtract.AppDir
+	mkdir -p  ./AppImageExtract.AppDir/usr/bin/  ./AppImageExtract.AppDir/usr/lib/
 	cp ./bundled-dependencies-i386/xorriso ./AppImageExtract.AppDir/usr/bin/
 	cp ./bundled-dependencies-i386/libisofs.so.6 ./bundled-dependencies-i386/libisoburn.so.1 ./bundled-dependencies-i386/libburn.so.4 ./AppImageExtract.AppDir/usr/lib/
 	./AppImageAssistant.AppDir/package ./AppImageExtract.AppDir ./AppImageExtract
