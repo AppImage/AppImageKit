@@ -1,1 +1,0 @@
-/usr/bin/cc      CMakeFiles/build/AppRun.dir/AppRun.c.o  -o build/AppRun -rdynamic 

@@ -1,2 +1,0 @@
-/usr/bin/ar cr libisofs.a  CMakeFiles/isofs.dir/isofs.c.o
-/usr/bin/ranlib libisofs.a
