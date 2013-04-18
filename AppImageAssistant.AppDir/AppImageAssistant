@@ -33,7 +33,7 @@ __version__="0.9.3"
 # Find out why it freezes on Fedora 12
 #
 
-import os, sys, gtk, vte
+import os, sys
 from locale import gettext as _
 
 import shutil
@@ -47,6 +47,11 @@ import commands
 import threading
 import glob
 
+if len(sys.argv) == 3:
+    os.system(os.path.dirname(__file__) + "/package %s %s" % (sys.argv[1], sys.argv[2]))
+    exit(0)
+
+import  gtk, vte
 import xdgappdir # bundled with this app
 import dialogs # part of kiwi; bundled with this app
 
