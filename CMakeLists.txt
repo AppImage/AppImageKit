@@ -40,13 +40,13 @@ ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
   VERBATIM
 )
 
-ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun)
+ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   COMMAND cp AppRun ./AppImageExtract.AppDir
   COMMAND mkdir -p  ./AppImageExtract.AppDir/usr/bin/  ./AppImageExtract.AppDir/usr/lib/
   COMMAND cp ./bundled-dependencies-i386/xorriso ./AppImageExtract.AppDir/usr/bin/
   COMMAND cp ./bundled-dependencies-i386/libisofs.so.6 ./bundled-dependencies-i386/libisoburn.so.1 ./bundled-dependencies-i386/libburn.so.4 ./AppImageExtract.AppDir/usr/lib/
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageExtract.AppDir ./AppImageExtract
+  COMMAND ./AppImageAssistant ./AppImageExtract.AppDir ./AppImageExtract
   VERBATIM
 )
 
