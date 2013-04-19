@@ -1,6 +1,6 @@
 /**************************************************************************
 
-Copyright (c) 2005-10 Simon Peter
+Copyright (c) 2005-13 Simon Peter
 Copyright (c) 2007 Alexander Larsson
 
 All Rights Reserved.
@@ -35,6 +35,7 @@ THE SOFTWARE.
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
+
 
 /* ======================================================== Start helper functions for icon extraction */  
 /* 
@@ -132,6 +133,7 @@ static int uri_from_filename( const char *dir, char *newuri )
         return 1;
 }
 
+
 static void thumbname_from_uri(const char* uri, char* thumb)
 {
         char hexdigest[33];
@@ -140,7 +142,7 @@ static void thumbname_from_uri(const char* uri, char* thumb)
         hexdigest[0] = '\0';
         to_hex_char(hexdigest, digest, 16);
         hexdigest[32] = '\0';
-        sprintf(thumb, "%s/.thumbnails/normal/%s.png", getenv("HOME"), hexdigest);
+        sprintf(thumb, "%s.png", hexdigest);
 
 }
 
@@ -201,6 +203,15 @@ main (int argc, char *argv[])
   pid_t pid;
   char **real_argv;
   int i;
+
+  // We are using glib anyway for fuseiso, so we can use it here too to make our life easier
+  char *xdg_cache_home;
+  char thumbnails_medium_dir[FILE_MAX];
+  xdg_cache_home = (getenv("XDG_CACHE_HOME") == NULL
+    ? g_build_filename(g_get_home_dir(), ".cache", NULL)
+    : g_strdup(getenv("XDG_CACHE_HOME")));
+  sprintf(thumbnails_medium_dir, "%s/thumbnails/medium/", xdg_cache_home);
+  /*  printf("%s\n", thumbnails_medium_dir); */
 
   if (mkdtemp(mount_dir) == NULL) {
     exit (1);
@@ -268,6 +279,8 @@ main (int argc, char *argv[])
     }
     real_argv[i] = NULL;
 
+
+
     /* ======================================================== Start icon extraction */
 
 	int length;
@@ -278,8 +291,10 @@ main (int argc, char *argv[])
 	char theuri[URI_MAX];
 	uri_from_filename(fullpath, theuri);
 	/* printf("%s\n", theuri);  */
-	char resulting[URI_MAX];
-	thumbname_from_uri(theuri, resulting);
+	char path_to_thumbnail[URI_MAX];
+	char thumbname[URI_MAX];
+	thumbname_from_uri(theuri, thumbname);
+        sprintf(path_to_thumbnail, "%s%s", thumbnails_medium_dir, thumbname);
 
 	FILE *from, *to;
 	char ch;
@@ -296,13 +311,13 @@ main (int argc, char *argv[])
 	/* open destination file */
         char mkcmd[FILE_MAX];
         char iconsdir[FILE_MAX];
-        sprintf(iconsdir, resulting);
-        sprintf(mkcmd, "mkdir -p '%s'", dirname(iconsdir));
+
+        sprintf(mkcmd, "mkdir -p '%s'", thumbnails_medium_dir);
         system(mkcmd);
-	if((to = fopen(resulting, "wb"))==NULL) {
-		printf("Cannot open %s for writing\n", resulting);
-		exit(1);
-	}
+	if((to = fopen(path_to_thumbnail, "wb"))==NULL) {
+		printf("Cannot open %s for writing\n", path_to_thumbnail);
+		
+	} else {
 
 	/* copy the file */
 	while(!feof(from)) {
@@ -327,12 +342,13 @@ main (int argc, char *argv[])
 		printf("Error closing destination file\n");
 		exit(1);
 	}
+        }
 
 	/* If called with --icon, then do not run the main app, just print print a message and exit after extracting the icon */ 
 	char * arg;
 	arg=getArg(argc,argv,'-');
 	if (arg && strcmp(arg,"icon")==0) {
-		printf("Written %s\n", resulting);
+		printf("Written %s\n", path_to_thumbnail);
 		exit(0);
 	}
 
