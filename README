@@ -1,7 +1,7 @@
 Copyright (c) 2004-13 Simon Peter <probono@puredarwin.org>
 All rights reserved. 
 Redistribution of this document is permitted only in unchanged form.
-Version 2013-04-16
+Version 2013-04-19
 
 BUILDING
 ========
@@ -16,15 +16,15 @@ BUILDING
 TODO
 ====
 
-* Make this build and work on amd64. Help needed
 * Include AppDirAssistant tool
-* Follow http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html (Version 0.8.0 introduced new location for the thumbnails)
 * Update http://www.portablelinuxapps.org/docs/1.0/ to remove all references to elficon; include changelog section
 
 CHANGELOG
 =========
 
 -11
+* Builds on x86-64
+* Follow http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html (Version 0.8.0 introduced new location for the thumbnails)
 * Remove elficon as no one uses it; use thumbnails instead
 * Include AppImageExtract tool
 * Update AppImageAssistant.AppDir so that it runs on latest Ubuntu
