@@ -18,7 +18,7 @@ endforeach(LIB)
 
 ADD_DEFINITIONS(-g -O2 -D_FILE_OFFSET_BITS=64)
 
-INCLUDE_DIRECTORIES(/usr/include/glib-2.0/ /usr/lib/i386-linux-gnu/glib-2.0/include/ .)
+INCLUDE_DIRECTORIES(/usr/include/glib-2.0/ /usr/lib/glib-2.0/include/ .)
 
 ADD_EXECUTABLE(AppRun AppRun.c)
 add_custom_command(TARGET AppRun POST_BUILD COMMAND ${CMAKE_STRIP} AppRun)
