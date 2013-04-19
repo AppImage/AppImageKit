@@ -1,18 +1,19 @@
 #!/bin/bash
 
 # Put binary dependencies into the AppDirs depending on the architecture
-# of the build host
+# of the build host; this is supposed to be called by CMake automatically
 
 HERE="$(dirname "$(readlink -f "${0}")")"
+PARENT="${HERE}/.."
 ARCH=$(arch)
 BINARYDIR="${HERE}/${ARCH}"
 
-mkdir -p ./AppImageAssistant.AppDir/usr/bin/ AppImageAssistant.AppDir/usr/lib/
-cp "${BINARYDIR}"/xorriso ./AppImageAssistant.AppDir/usr/bin/
-cp "${BINARYDIR}"/libglade-2.0.so.0 "${BINARYDIR}"/libvte.so.9 "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 ./AppImageAssistant.AppDir/usr/lib/
-cp "${BINARYDIR}"/vte.so ./AppImageAssistant.AppDir/usr/share/pyshared/
+mkdir -p "${PARENT}"/AppImageAssistant.AppDir/usr/bin/ AppImageAssistant.AppDir/usr/lib/
+cp "${BINARYDIR}"/xorriso "${PARENT}"/AppImageAssistant.AppDir/usr/bin/
+cp "${BINARYDIR}"/libglade-2.0.so.0 "${BINARYDIR}"/libvte.so.9 "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 "${PARENT}"/AppImageAssistant.AppDir/usr/lib/
+cp "${BINARYDIR}"/vte.so "${PARENT}"/AppImageAssistant.AppDir/usr/share/pyshared/
 
-mkdir -p ./AppImageExtract.AppDir/usr/bin/ ./AppImageExtract.AppDir/usr/lib/
-cp "${BINARYDIR}"/xorriso ./AppImageExtract.AppDir/usr/bin/
-cp "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 ./AppImageExtract.AppDir/usr/lib/
+mkdir -p "${PARENT}"/AppImageExtract.AppDir/usr/bin/ "${PARENT}"/AppImageExtract.AppDir/usr/lib/
+cp "${BINARYDIR}"/xorriso "${PARENT}"/AppImageExtract.AppDir/usr/bin/
+cp "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 "${PARENT}"/AppImageExtract.AppDir/usr/lib/
 
