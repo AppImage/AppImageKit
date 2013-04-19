@@ -2,7 +2,7 @@
 
 # /**************************************************************************
 # 
-# Copyright (c) 2005-10 Simon Peter
+# Copyright (c) 2005-13 Simon Peter
 # 
 # All Rights Reserved.
 # 
@@ -29,11 +29,11 @@
 DIRNAME=$(dirname $(readlink -f "${0}"))
 
 APP="${1}"
-APPDIR="./${APP}.appdir"
+APPDIR="./${APP}.AppDir"
 
 set -e
-set -v
 
+rm -rf  "${APPDIR}"
 sudo apt-get clean
 
 sudo apt-get --no-upgrade \
@@ -50,13 +50,7 @@ find . -type f -exec sed -i -e 's|././/bin/env|/usr/bin/env|g' {} \;
 find . -type f -exec sed -i -e 's|././/bin/python|/usr/bin/python|g' {} \;
 ### TODO: need proper IntelliPatch here ###
 
-cat > ./AppRun <<\EOF
-#!/bin/sh
-cd "$(dirname "${0}")/usr"
-EXEC=$(grep -m 1 -r Exec= ../*.desktop | cut -d "=" -f 2 | cut -d % -f 1)
-LD_LIBRARY_PATH="./lib:${LD_LIBRARY_PATH}" PATH="./bin/:./sbin/:./games/:../bin/:../sbin/:${PATH}" exec $EXEC $@
-EOF
-chmod a+x ./AppRun
+cp "${DIRNAME}/../AppRun" . 
 
 sudo apt-get clean
 
@@ -69,7 +63,9 @@ echo "solve import errors."
 # or the result will be undefined
 find . -iname *.desktop -exec cp {} . \;
 
-./AppRun
-
 cd -
 
+echo ""
+echo "./${APP}.AppDir created. Now run:"
+echo "./AppImageAssistant ./${APP}.AppDir ./${APP}"
+echo ""
