@@ -210,7 +210,7 @@ main (int argc, char *argv[])
   xdg_cache_home = (getenv("XDG_CACHE_HOME") == NULL
     ? g_build_filename(g_get_home_dir(), ".cache", NULL)
     : g_strdup(getenv("XDG_CACHE_HOME")));
-  sprintf(thumbnails_medium_dir, "%s/thumbnails/medium/", xdg_cache_home);
+  sprintf(thumbnails_medium_dir, "%s/thumbnails/normal/", xdg_cache_home);
   /*  printf("%s\n", thumbnails_medium_dir); */
 
   if (mkdtemp(mount_dir) == NULL) {
