@@ -171,7 +171,10 @@ class Assistant(gtk.Assistant):
         icon = gtk.Image()
         vbox.pack_start(icon, False, False, 0)
         vbox.show_all()
-        self.append_page(vbox)
+        scrolled = gtk.ScrolledWindow()
+        scrolled.add_with_viewport(vbox)
+        scrolled.show()
+        self.append_page(scrolled)
         self.set_page_header_image(vbox, gtk.gdk.pixbuf_new_from_file(application_icon))
         icon.show()
         filetype = Popen(["file", "-k", "-r", self.targetname], stdout=PIPE).communicate()[0]
@@ -180,7 +183,7 @@ class Assistant(gtk.Assistant):
             icon.set_from_file(os.path.join(os.path.dirname(sys.argv[0]), "Gnome-emblem-default.png"))
             self.set_page_title(vbox, "Done")
             self.set_page_type(vbox, gtk.ASSISTANT_PAGE_SUMMARY)
-            basesystems = glob.glob('/cdrom/*.squashfs')
+            basesystems = glob.glob('/System/iso/*.iso')
             basesystems.append("/cdrom/casper/filesystem.squashfs")
             for basesystem in basesystems:
                 print basesystem

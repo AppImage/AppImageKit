@@ -59,6 +59,7 @@ atexit()
     umount -l /tmp/iso 2>/dev/null
     umount -l /tmp/iso 2>/dev/null
     umount -l /tmp/iso 2>/dev/null
+    sudo killall unionfs-fuse
     rm -r /tmp/unionfs/root
     rm -r /tmp/unionfs/rw
     rm -r /tmp/unionfs
