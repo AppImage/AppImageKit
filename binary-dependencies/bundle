@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Put binary dependencies into the AppDirs depending on the architecture
+# of the build host
+
+HERE="$(dirname "$(readlink -f "${0}")")"
+ARCH=$(arch)
+BINARYDIR="${HERE}/${ARCH}"
+
+mkdir -p ./AppImageAssistant.AppDir/usr/bin/ AppImageAssistant.AppDir/usr/lib/
+cp "${BINARYDIR}"/xorriso ./AppImageAssistant.AppDir/usr/bin/
+cp "${BINARYDIR}"/libglade-2.0.so.0 "${BINARYDIR}"/libvte.so.9 "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 ./AppImageAssistant.AppDir/usr/lib/
+cp "${BINARYDIR}"/vte.so ./AppImageAssistant.AppDir/usr/share/pyshared/
+
+mkdir -p ./AppImageExtract.AppDir/usr/bin/ ./AppImageExtract.AppDir/usr/lib/
+cp "${BINARYDIR}"/xorriso ./AppImageExtract.AppDir/usr/bin/
+cp "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 ./AppImageExtract.AppDir/usr/lib/
+

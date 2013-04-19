@@ -33,9 +33,7 @@ add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
 ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
   COMMAND cp runtime AppImageAssistant.AppDir/
-  COMMAND mkdir -p ./AppImageAssistant.AppDir/usr/bin/ AppImageAssistant.AppDir/usr/lib/
-  COMMAND cp ./bundled-dependencies-i386/xorriso ./AppImageAssistant.AppDir/usr/bin/
-  COMMAND cp ./bundled-dependencies-i386/libglade-2.0.so.0 ./bundled-dependencies-i386/libvte.so.9 ./bundled-dependencies-i386/libisofs.so.6 ./bundled-dependencies-i386/libisoburn.so.1 ./bundled-dependencies-i386/libburn.so.4 ./AppImageAssistant.AppDir/usr/lib/
+  COMMAND ./binary-dependencies/bundle
   COMMAND ./AppImageAssistant.AppDir/package ./AppImageAssistant.AppDir ./AppImageAssistant
   VERBATIM
 )
@@ -43,12 +41,10 @@ ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
 ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   COMMAND cp AppRun ./AppImageExtract.AppDir
-  COMMAND mkdir -p  ./AppImageExtract.AppDir/usr/bin/  ./AppImageExtract.AppDir/usr/lib/
-  COMMAND cp ./bundled-dependencies-i386/xorriso ./AppImageExtract.AppDir/usr/bin/
-  COMMAND cp ./bundled-dependencies-i386/libisofs.so.6 ./bundled-dependencies-i386/libisoburn.so.1 ./bundled-dependencies-i386/libburn.so.4 ./AppImageExtract.AppDir/usr/lib/
+  COMMAND ./binary-dependencies/bundle
   COMMAND ./AppImageAssistant ./AppImageExtract.AppDir ./AppImageExtract
   VERBATIM
 )
 
 SET_DIRECTORY_PROPERTIES(PROPERTIES   
- ADDITIONAL_MAKE_CLEAN_FILES "AppImageAssistant;AppImageExtract;./AppImageAssistant.AppDir/runtime;./AppImageAssistant.AppDir/usr/lib/;./AppImageExtract.AppDir/AppRun;./AppImageExtract.AppDir/usr/lib/;./AppImageAssistant.AppDir/usr/bin/xorriso;./AppImageExtract.AppDir/usr/bin/xorriso") 
+ ADDITIONAL_MAKE_CLEAN_FILES "AppImageAssistant;AppImageExtract;./AppImageAssistant.AppDir/runtime;./AppImageAssistant.AppDir/usr/share/pyshared/vte.so;./AppImageAssistant.AppDir/usr/lib/;./AppImageExtract.AppDir/AppRun;./AppImageExtract.AppDir/usr/lib/;./AppImageAssistant.AppDir/usr/bin/xorriso;./AppImageExtract.AppDir/usr/bin/xorriso") 
