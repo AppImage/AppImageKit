@@ -15,9 +15,9 @@ cmake .
 make
 ```
 
-Once you have built AppImageKit, try making an AppImage, e.g., of XChat:
+Once you have built AppImageKit, try making an AppImage, e.g., of Leafpad:
 
-    ./apt-appdir/apt-appdir xchat && ./AppImageAssistant xchat.AppDir XChat.AppImage
+    export APP=leafpad && ./apt-appdir/apt-appdir $APP && ./AppImageAssistant $APP.AppDir $APP.AppImage && ./$APP.AppImage
     
 (This is just a proof-of-concept, of in reality you should use AppDirAssistant to create proper AppDirs)
 
