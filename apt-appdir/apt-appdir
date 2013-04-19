@@ -63,6 +63,9 @@ echo "solve import errors."
 # or the result will be undefined
 find . -iname *.desktop -exec cp {} . \;
 
+# This, together with the environment variable set by AppRun, allows Vala apps to run
+glib-compile-schemas ./usr/share/glib-2.0/schemas/
+
 cd -
 
 echo ""
