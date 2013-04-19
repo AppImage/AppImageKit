@@ -47,6 +47,9 @@ THE SOFTWARE.
 #define NEW_QT_PLUGIN_PATH "QT_PLUGIN_PATH=./lib/qt4/plugins/:%s"
 #define NEW_PERLLIB "PERLLIB=./share/perl5/:./lib/perl5/:%s"
 
+// http://askubuntu.com/questions/251712/how-can-i-install-a-gsettings-schema-without-root-privileges
+#define NEW_GSETTINGS_SCHEMA_DIR "GSETTINGS_SCHEMA_DIR=./share/glib-2.0/schemas/:%s" 
+
 #define LINE_SIZE 255
 
 int filter (const struct dirent *dir)
@@ -172,6 +175,12 @@ int main(int argc, char *argv[])
     sprintf( new_env[5], NEW_PERLLIB, env );
     // printf( "  using %s\n", new_env[5] );
     putenv( new_env[5] );
+    
+    env = getenv("GSETTINGS_SCHEMA_DIR") ?: "";
+    new_env[6] = malloc( strlen(NEW_GSETTINGS_SCHEMA_DIR) + strlen(env) );
+    sprintf( new_env[6], NEW_GSETTINGS_SCHEMA_DIR, env );
+    // printf( "  using %s\n", new_env[6] );
+    putenv( new_env[6] );    
 
     /* Run */
     ret = execvp(executable, argv);
