@@ -16,7 +16,9 @@ make
 ```
 
 Once you have built AppImageKit, try making an AppImage, e.g., of XChat:
+
     ./apt-appdir/apt-appdir xchat && ./AppImageAssistant xchat.AppDir XChat.AppImage
+    
 (This is just a proof-of-concept, of in reality you should use AppDirAssistant to create proper AppDirs)
 
 TODO
@@ -121,8 +123,11 @@ This will always return the absolute path to the directory the script is located
 Assume you have a script /usr/bin/foo which wants to call /usr/bin/bar. 
 
 To make it relocateable, you need to change /usr/bin/foo so that instead of calling
+
     /usr/bin/bar --dosomething
+    
 it contains
+
     "${HERE}/bar" --dosomething
 
 Bundling Python apps
