@@ -5,7 +5,7 @@
 
 HERE="$(dirname "$(readlink -f "${0}")")"
 PARENT="${HERE}/.."
-ARCH=$(arch)
+ARCH=$(uname -m)
 BINARYDIR="${HERE}/${ARCH}"
 
 mkdir -p "${PARENT}"/AppImageAssistant.AppDir/usr/bin/ AppImageAssistant.AppDir/usr/lib/
