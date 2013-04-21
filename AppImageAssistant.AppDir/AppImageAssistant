@@ -179,7 +179,7 @@ class Assistant(gtk.Assistant):
         icon.show()
         filetype = Popen(["file", "-k", "-r", self.targetname], stdout=PIPE).communicate()[0]
         # print filetype
-        if "ISO 9660" in filetype and "32-bit LSB executable" in filetype:
+        if "ISO 9660" in filetype and "LSB executable" in filetype:
             icon.set_from_file(os.path.join(os.path.dirname(sys.argv[0]), "Gnome-emblem-default.png"))
             self.set_page_title(vbox, "Done")
             self.set_page_type(vbox, gtk.ASSISTANT_PAGE_SUMMARY)
