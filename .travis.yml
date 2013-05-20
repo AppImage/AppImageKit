@@ -5,4 +5,4 @@ before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse
 
-script: cmake . && ./configure && make
+script: cmake . && make
