@@ -40,7 +40,7 @@ THE SOFTWARE.
         exit( 1 );                              \
     } while (0);
 
-#define NEW_LD_LIBRARY_PATH "LD_LIBRARY_PATH=./lib:%s"
+#define NEW_LD_LIBRARY_PATH "LD_LIBRARY_PATH=./lib/:./lib/i386-linux-gnu/:./lib/x86_64-linux-gnu/:%s"
 #define NEW_PATH "PATH=./bin/:./sbin/:./games/:%s"
 #define NEW_PYTHONPATH "PYTHONPATH=./share/pyshared/:%s"
 #define NEW_XDG_DATA_DIRS "XDG_DATA_DIRS=./share/:%s"
