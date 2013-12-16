@@ -1,0 +1,159 @@
+About the libc header file generator
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The AppImageKit makes it possible to create bundles in a variety of ways.
+
+This utility is relevant for cases where you have a stack (program & dependencies)
+as source code on your computer and wish to build and bundle that stack.
+
+Particularly, this utility provides a method for selecting an arbitrary
+glibc ABI target version for the software you build on your modern linux
+distribution.
+
+Unfortunately the typical method employed for targetting an older version
+of glibc is to either build and install an alternative glibc on your
+machine, or to simply build your software on a very old linux distribution.
+
+We were not satisfied with this, and so we employ this technique instead.
+
+
+Compiling the generator
+~~~~~~~~~~~~~~~~~~~~~~~
+
+To compile the LibcWrapGenerator you will require:
+  o A vala compiler (https://wiki.gnome.org/Projects/Vala)
+  o libgee 0.8 or later (https://wiki.gnome.org/Projects/Libgee)
+
+The generator can be created with the following command:
+
+  valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 LibcWrapGenerator.vala
+
+
+How to use the generator
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Use the LibcWrapGenerator program to generate a header file
+for your system, we typically call this "libcwrap.h"
+
+A typical invocation will look like this:
+
+  LibcWrapGenerator --target 2.7 --libdir /lib --output libcwrap.h
+
+This will create the libcwrap.h header file in such a way that
+it will provide backwards compatibility down to the 2.7 ABI of glibc,
+regardless of what version of glibc you have installed in /lib.
+
+
+Ok, now I have a header file, what do I do with it ?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+When building your stack, you will probably be using some variety
+of build system (or you will be building software into a relocated
+directory by hand, package by package, which can work well if your
+dependency stack is relatively small).
+
+Regardless of how you build your stack, the technique is the same.
+
+These two variables need to be exported into your environment:
+
+  export CC='gcc -U_FORTIFY_SOURCE -include /path/to/libcwrap.h'
+  export CXX='g++ -U_FORTIFY_SOURCE -include /path/to/libcwrap.h'
+
+It is of paramount importance that the include of "libcwrap.h" comes
+before any other source code when compiling your C and C++ sources.
+
+This is why we override the CC and CXX variables instead of trying
+CFLAGS and CXXFLAGS variables (while the latter may work for some
+particular packages, using the CC and CXX variable overrides was
+found to be much more reliable).
+
+On more recent Ubuntu systems, gcc is distributed with an automatic
+definition of _FORTIFY_SOURCE, this definition enables alternative code
+paths to be enabled for runtime checking via glibc's header files.
+
+We forcefully undefine these variables because they often incur
+linkage to symbols for glibc which are very new.
+
+Having produced the "libcwrap.h" header file and compiled your
+software and dependencies using the prescribed techinique, your
+software will only require the glibc ABI version which you have
+specified at header generation time, otherwise your software will
+bail out with a linker error which might look like this:
+
+  "Undefined reference to fallocate@GLIBC_DONT_USE_THIS_VERSION_2.10"
+
+If you encounter any linker error like this, your source code must
+absolutely be patched to not use the fallocate() glibc function,
+which was introduced in glibc 2.10.
+
+
+How does the header file work ?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+For the brave hearted, and for posterity, here is brief explanation
+of how the "libcwrap.h" and it's generator work.
+
+The GNU toolchain provides a built in mechanism for providing forward
+compatibility in libraries. Not many libraries encode versioning information
+manually, but low level system libraries such as libc need to provide
+this, and usually do so in the form of linker scripts.
+
+What this forward compatibility does is ensure binary compatibility for
+older programs which were compiled for an older version of glibc, while
+allowing the library implementor some flexibility in changing their
+binary interface in the future. This is what symbol versioning is all about.
+
+So let's say that you had a version of glibc 2.10 on your system, and you
+compile a program which uses memcpy(). When the linker does it's magick,
+your resulting program links memcpy() to a versioned symbol in the glibc
+binary which is actually 'memcpy@GLIBC_2.2.5'
+
+Now, in glibc 2.14, it was decided that many programmers used memcpy() in
+cases where they actually desired the behaviour of memmove(), or their
+code was found to be unsafe, so in the interest of creating a more stable glibc,
+they have provided us with a new implementation of memcpy() which does that.
+That new symbol is named 'memcpy@GLIBC_2.14' in the new glibc ABI.
+
+If you update your system's glibc, or distribute that very same binary
+on a system with glibc 2.16, glibc will still contain the old version of
+memcpy() bound to the 'memcpy@GLIBC_2.2.5' symbol in it's lookup table.
+
+And there you have forward binary compatibility for your program.
+
+But what we want is the very opposite of the above. We want to use a modern
+GNU toolchain on a modern system with a modern glibc, but we want to have
+our programs backwards compatible for much older versions of glibc.
+
+Let's say that you actually have glibc 2.16 on your system and compile
+your stack against glibc, now you are linking against 'memcpy@GLIBC_2.14'
+and your program no longer works for older versions of glibc (but will
+maintain forward compatibility).
+
+The generated "libcwrap.h" file takes care of this by inserting a
+hand full of ".symver" directives, forcing the linker to link your
+new program to the newest possible version of any given symbol
+which exists *before* your target ABI version.
+
+For memcpy(), you will have a directive for gcc built in like so:
+
+    __asm__(".symver memcpy, memcpy@GLIBC_2.2.5");
+
+Of course, new symbols with no prior record will continue to be
+added to glibc, and it's possible that the version of glibc you
+want to target does not contain a symbol that your application
+requires.
+
+For these cases, we use the ".symver" directive to bind your
+application to a symbol which definitely does not exist, like so:
+
+    __asm__(".symver fallocate, fallocate@GLIBC_DONT_USE_THIS_VERSION_2.10");
+
+This generates a linker error when you try to link your program to
+fallocate(), informing the "libcwrap.h" user that the symbol they want
+simply does not exist in the target glibc version they selected. And
+also informs them in which version of glibc the symbol was initially
+added.
+
+The LibcWrapGenerator parses the output of 'objdump -T' on your
+system's C runtime libraries in order to introspect all the information
+needed to generate this header file for the system you are building on.
