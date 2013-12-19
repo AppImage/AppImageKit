@@ -31,27 +31,25 @@ static const string DEFAULT_TARGET_HELP = "Target glibc ABI (Default 2.7)";
 [Flags]
 public enum DF { 
 	COLLECT,
-	FILTER
+	FILTER,
+	VERSION_PARSE,
+	VERSION_COMPARE,
+	DUMP_FILES
 }
 
 static const GLib.DebugKey[] libcwrap_debug_keys = {
-	{ "collect", DF.COLLECT },
-	{ "filter", DF.FILTER } 
+	{ "collect",         DF.COLLECT         },
+	{ "filter",          DF.FILTER          },
+	{ "version-parse",   DF.VERSION_PARSE   },
+	{ "version-compare", DF.VERSION_COMPARE },
+	{ "dump-files",      DF.DUMP_FILES      }
 };
 
-private bool libcwrap_debug_initialized = false;
 private uint libcwrap_debug_mask = 0;
 public delegate void DebugFunc ();
 
 public void libcwrap_note (int domain, DebugFunc debug_func)
 {
-	if (!libcwrap_debug_initialized) {
-		string libcwrap_debug_env = GLib.Environment.get_variable ("LIBCWRAP_DEBUG");
-
-		libcwrap_debug_mask = GLib.parse_debug_string (libcwrap_debug_env, libcwrap_debug_keys);
-		libcwrap_debug_initialized = true;
-	}
-
 	if ((libcwrap_debug_mask & domain) != 0)
 		debug_func ();
 }
@@ -88,27 +86,38 @@ class VersionNumber : Object
 				revision = 0;
 		} catch (GLib.RegexError e) {
 			stdout.printf ("Error compiling regular expression: %s", e.message);
-			Posix.exit(-1);
+			Posix.exit (-1);
 		}
+
+		libcwrap_note (DF.VERSION_PARSE, () =>
+					   stdout.printf ("Version string '%s' parsed as major: %d minor: %d rev: %d\n", 
+									  originalString, major, minor, revision));
 	}
 
 	public bool newerThan(VersionNumber other) {
+		bool newerThanOther = false;
 
 		if (major > other.major) {
-			return true;
+			newerThanOther = true;
 		} else if (major == other.major) {
 
 			if (minor > other.minor) {
-				return true;
+				newerThanOther = true;
 			} else if (minor == other.minor) {
 
 				if(revision > other.revision) {
-					return true;
+					newerThanOther = true;
 				}
 			}
 		}
 
-		return false;
+		libcwrap_note (DF.VERSION_COMPARE, () =>
+					   stdout.printf ("Version '%s' is %s than version '%s'\n", 
+									  originalString,
+									  newerThanOther ? "newer" : "older",
+									  other.getString()));
+
+		return newerThanOther;
 	}
 
 	public string getString() {
@@ -139,6 +148,10 @@ public class Main : Object {
 	private static Gee.HashSet<string>filterMap;
 
 	public static int main (string[] args) {
+
+		/* Initialize debugging */
+		string libcwrap_debug_env = GLib.Environment.get_variable ("LIBCWRAP_DEBUG");
+		libcwrap_debug_mask = GLib.parse_debug_string (libcwrap_debug_env, libcwrap_debug_keys);
 
 		/* Initialize the default here */
 		target = DEFAULT_TARGET;
@@ -196,11 +209,17 @@ public class Main : Object {
 	}
 
 	private static void parseLibrary (Regex regex, FileInfo fileinfo) throws Error {
-
+		string commandToUse = "objdump -T";
 		string output, errorOutput;
 		int returnCode;
 
-		Process.spawn_command_line_sync ("objdump -T " + libdir + "/" + fileinfo.get_name(), 
+		/* For testing on objdump files which might be collected on other systems,
+		 * run the generator with --libdir /path/to/objdump/files/
+		 */
+		if ((libcwrap_debug_mask & DF.DUMP_FILES) != 0)
+			commandToUse = "cat";
+
+		Process.spawn_command_line_sync (commandToUse + " " + libdir + "/" + fileinfo.get_name(), 
 										 out output, out errorOutput, out returnCode);
 
 		if (returnCode != 0)
@@ -241,8 +260,33 @@ public class Main : Object {
 					 * minimum glibc version specified (or the only version of the symbol if
 					 * it's newer than the minimum version)
 					 */
-					if (version.newerThan (versionInMap) && minimumVersion.newerThan (version))
-						symbolMap.set (symbolName, version);
+
+					/* This symbol is <= minimumVersion
+					 */
+					if (!version.newerThan (minimumVersion)) {
+
+						/* What we have in the map is > minimumVersion, so we need this version */
+						if (versionInMap.newerThan (minimumVersion))
+							symbolMap.set (symbolName, version);
+
+						/* What we have in the map is already <= minimumVersion, but we want
+						 * the most recent acceptable symbol
+						 */
+						else if (version.newerThan (versionInMap))
+							symbolMap.set (symbolName, version);
+
+
+					} else { /* This symbol is > minimumVersion */
+
+						/* If there are only versions > minimumVersion, then we want
+						 * the lowest possible version, this is because we try to provide
+						 * information in the linker warning about what version the symbol
+						 * was initially introduced in.
+						 */
+						if (versionInMap.newerThan (minimumVersion) &&
+							versionInMap.newerThan (version))
+							symbolMap.set (symbolName, version);
+					}
 
 					/* While trucking along through the huge symbol list, remove symbols from
 					 * the 'safe to exclude' if there is a version found which is newer
@@ -251,7 +295,7 @@ public class Main : Object {
 					if (version.newerThan (minimumVersion)) {
 						filterMap.remove(symbolName);
 						libcwrap_note (DF.FILTER, () =>
-									   stdout.printf ("Removing symbol '%s %s' from the filter\n", 
+									   stdout.printf ("Removing symbol '%s' from the filter, found version '%s'\n", 
 													  symbolName, version.getString()));
 					}
 				}
