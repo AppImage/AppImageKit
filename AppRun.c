@@ -26,7 +26,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 **************************************************************************/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -34,164 +33,152 @@ THE SOFTWARE.
 #include <dirent.h>
 #include <string.h>
 
-#define die(...)                                \
-    do {                                        \
-        fprintf( stderr, "Error: " __VA_ARGS__ );   \
-        exit( 1 );                              \
-    } while (0);
+/* Debugging */
+#define d(x) x
 
-#define NEW_LD_LIBRARY_PATH "LD_LIBRARY_PATH=./lib/:./lib/i386-linux-gnu/:./lib/x86_64-linux-gnu/:%s"
-#define NEW_PATH "PATH=./bin/:./sbin/:./games/:%s"
-#define NEW_PYTHONPATH "PYTHONPATH=./share/pyshared/:%s"
-#define NEW_XDG_DATA_DIRS "XDG_DATA_DIRS=./share/:%s"
-#define NEW_QT_PLUGIN_PATH "QT_PLUGIN_PATH=./lib/qt4/plugins/:%s"
-#define NEW_PERLLIB "PERLLIB=./share/perl5/:./lib/perl5/:%s"
+/*
+ * We export the APP_IMAGE_ROOT environment and
+ * let the author of the AppRunScript.sh deal with
+ * setting up the environment based on this prefix.
+ */
+#define APP_IMAGE_ROOT_ENV  "APP_IMAGE_ROOT"
 
-// http://askubuntu.com/questions/251712/how-can-i-install-a-gsettings-schema-without-root-privileges
-#define NEW_GSETTINGS_SCHEMA_DIR "GSETTINGS_SCHEMA_DIR=./share/glib-2.0/schemas/:%s" 
+#define die(...)				    \
+  do {						    \
+    fprintf (stderr, "Error: " __VA_ARGS__ );	    \
+    exit (1);					    \
+  } while (0);
 
-#define LINE_SIZE 255
 
-int filter (const struct dirent *dir)
+static int
+find_script (const struct dirent *dir)
 {
-    char *p = (char*) &dir->d_name;
-    while (*++p);
-    while (*--p != '.');
+  if (strcmp (dir->d_name, "AppRunScript.sh") == 0)
+    return 1;
 
-    return !strcmp(p, ".desktop");
+  return 0;
 }
 
-int main(int argc, char *argv[])
+static char *
+setup_executable (const char *root_path, int argc, char **argv)
 {
-    char path[LINE_SIZE];
-    int ret;
-    FILE *f;
+  struct dirent **namelist;
+  int n_entries, i;
+  char *executable;
+  size_t arguments_size = 0;
 
-    char *dir = realpath( "/proc/self/exe", NULL );
-    if (!dir)
+  d (printf ("Scanning '%s' for startup script\n", root_path));
+
+  n_entries = scandir (root_path, &namelist, find_script, NULL);
+
+  if (n_entries < 0)
     {
-        die( "Could not access /proc/self/exe\n" );
+      die ("Could not scan directory %s\n", root_path);
+    }
+  else if (n_entries == 0)
+    {
+      die ("No AppRunScript.sh\n");
     }
 
-    sprintf( path, "%s", dirname(dir) );
-
-    // printf( "Moving to %s ...\n", path );
-
-    ret = chdir(path);
-
-    if ( ret != 0 )
+  /* Find out how much space we need for the arguments */
+  for (i = 1; i < argc; i++)
     {
-        die( "Could not cd into %s\n", path );
+      /* reserve space for a leading ' ' for each argument */
+      arguments_size += 1;
+      arguments_size += strlen (argv[i]);
     }
 
-    struct dirent **namelist;
+  /* 2 extry bytes, one for '\0' and one for '/' */
+  executable = malloc (strlen (root_path) + strlen (namelist[0]->d_name) + 2 + arguments_size);
 
-    ret = scandir( ".", &namelist, filter, NULL );
+  strcpy (executable, root_path);
+  strcat (executable, "/");
+  strcat (executable, namelist[0]->d_name);
 
-    if ( ret == 0 )
+  for (i = 1; i < argc; i++)
     {
-        die( "No .desktop files found\n" );
-    }
-    else if ( ret == -1 )
-    {
-        die( "Could not scan directory %s\n", path );
-    }
-
-
-    /* Extract executable from .desktop file 
-    printf( "Extracting executable name from '%s' ...\n",
-            namelist[0]->d_name ); */
-
-    f = fopen(namelist[0]->d_name, "r");
-
-    char *line = malloc(LINE_SIZE);
-    unsigned int n = LINE_SIZE;
-    int found = 0;
-
-    while (getline( &line, &n, f ) != -1)
-    {
-        if (!strncmp(line,"Exec=",5))
-        {
-            char *p = line+5;
-            while (*++p && *p != ' ' &&  *p != '%'  &&  *p != '\n' );
-            *p = 0;
-            found = 1;
-            break;
-        }
+      strcat (executable, " ");
+      strcat (executable, argv[i]);
     }
 
-    fclose( f );
+  d (printf ("Setup runner script as '%s'\n", executable));
 
-    if (!found)
+  return executable;
+}
+
+static char *
+setup_image_root (const char *root_path)
+{
+  char *root_env;
+
+  /* 2 extry bytes, one for '\0' and one for '=' */
+  root_env = malloc (strlen (root_path) + strlen (APP_IMAGE_ROOT_ENV) + 2);
+  strcpy (root_env, APP_IMAGE_ROOT_ENV);
+  strcat (root_env, "=");
+  strcat (root_env, root_path);
+
+  d (printf ("Setup root environment as '%s'\n", root_env));
+
+  return root_env;
+}
+
+static void
+run_script (char *executable)
+{
+  char *arguments[4];
+
+  /* Get a vector large enough to hold the arguments plus a null pointer */
+  arguments[0] = "/bin/sh";
+  arguments[1] = "-c";
+  arguments[2] = executable;
+  arguments[3] = NULL;
+
+  /* Run the AppRunScript.sh */
+  if (execvp (arguments[0], arguments) < 0)
     {
-        die( "Executable not found, make sure there is a line starting with 'Exec='\n" );
+      die ("Error executing '%s'\n", executable);
+    }
+}
+
+int
+main (int argc, char *argv[])
+{
+  char *root_path;
+  char *self_path;
+  char *executable;
+  char *root_env;
+
+  self_path = realpath ("/proc/self/exe", NULL);
+  if (!self_path)
+    {
+      die ("Could not access /proc/self/exe\n");
     }
 
-    /* Execution */
-    char *executable = basename(line+5);
-    // printf( "Executing '%s' ...\n", executable );
+  root_path = strdup (dirname (self_path));
+  d (printf ("Root path resolved as '%s'\n", root_path));
 
-    ret = chdir("usr");
-    if ( ret != 0 )
+  /* Resolve full path to the runner script and get a string for putenv() */
+  executable = setup_executable (root_path, argc, argv);
+  root_env   = setup_image_root (root_path);
+
+  /* Move to the AppDir root */
+  if (chdir (root_path) < 0)
     {
-        die( "Could not cd into %s\n", "usr" );
+      die ("Could not cd into: %s\n", root_path);
     }
 
-    /* Build environment */
-    char *env, *new_env[2];
-
-    env = getenv("LD_LIBRARY_PATH") ?: "";
-    new_env[0] = malloc( strlen(NEW_LD_LIBRARY_PATH) + strlen(env) );
-    sprintf( new_env[0], NEW_LD_LIBRARY_PATH, env );
-    // printf( "  using %s\n", new_env[0] );
-    putenv( new_env[0] );
-
-    env = getenv("PATH") ?: "";
-    new_env[1] = malloc( strlen(NEW_PATH) + strlen(env) );
-    sprintf( new_env[1], NEW_PATH, env );
-    // printf( "  using %s\n", new_env[1] );
-    putenv( new_env[1] );
-
-    env = getenv("PYTHONPATH") ?: "";
-    new_env[2] = malloc( strlen(NEW_PYTHONPATH) + strlen(env) );
-    sprintf( new_env[2], NEW_PYTHONPATH, env );
-    // printf( "  using %s\n", new_env[2] );
-    putenv( new_env[2] );
-
-    env = getenv("XDG_DATA_DIRS") ?: "";
-    new_env[3] = malloc( strlen(NEW_XDG_DATA_DIRS) + strlen(env) );
-    sprintf( new_env[3], NEW_XDG_DATA_DIRS, env );
-    // printf( "  using %s\n", new_env[3] );
-    putenv( new_env[3] );
-
-    env = getenv("QT_PLUGIN_PATH") ?: "";
-    new_env[4] = malloc( strlen(NEW_QT_PLUGIN_PATH) + strlen(env) );
-    sprintf( new_env[4], NEW_QT_PLUGIN_PATH, env );
-    // printf( "  using %s\n", new_env[4] );
-    putenv( new_env[4] );
-
-    env = getenv("PERLLIB") ?: "";
-    new_env[5] = malloc( strlen(NEW_PERLLIB) + strlen(env) );
-    sprintf( new_env[5], NEW_PERLLIB, env );
-    // printf( "  using %s\n", new_env[5] );
-    putenv( new_env[5] );
-    
-    env = getenv("GSETTINGS_SCHEMA_DIR") ?: "";
-    new_env[6] = malloc( strlen(NEW_GSETTINGS_SCHEMA_DIR) + strlen(env) );
-    sprintf( new_env[6], NEW_GSETTINGS_SCHEMA_DIR, env );
-    // printf( "  using %s\n", new_env[6] );
-    putenv( new_env[6] );    
-
-    /* Run */
-    ret = execvp(executable, argv);
-
-    if (ret == -1)
+  /* Setup environment root */
+  if (putenv (root_env) != 0)
     {
-        die( "Error executing '%s'\n", line+5 );
+      die ("Failed to set environment '%s'\n", root_env);
     }
 
-    free(new_env[0]);
-    free(new_env[1]);
-    free(line);
-    return 0;
+  /* Run the startup script */
+  run_script (executable);
+
+  free (root_path);
+  free (root_env);
+  free (executable);
+
+  return 0;
 }
