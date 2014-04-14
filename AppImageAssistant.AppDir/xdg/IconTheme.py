@@ -250,7 +250,7 @@ def getIconPath(iconname, size = None, theme = None, extensions = ["png", "svg",
 
     # more caching (icon looked up in the last 5 seconds?)
     tmp = "".join([iconname, str(size), theme, "".join(extensions)])
-    if eache.has_key(tmp):
+    if tmp in eache:
         if int(time.time() - eache[tmp][0]) >= xdg.Config.cache_time:
             del eache[tmp]
         else:
@@ -264,7 +264,7 @@ def getIconPath(iconname, size = None, theme = None, extensions = ["png", "svg",
 
     # cache stuff again (directories lookuped up in the last 5 seconds?)
     for directory in icondirs:
-        if (not dache.has_key(directory) \
+        if (directory not in dache \
             or (int(time.time() - dache[directory][1]) >= xdg.Config.cache_time \
             and dache[directory][2] < os.path.getmtime(directory))) \
             and os.path.isdir(directory):
@@ -277,7 +277,7 @@ def getIconPath(iconname, size = None, theme = None, extensions = ["png", "svg",
                     icon = os.path.join(dir, iconname + "." + extension)
                     eache[tmp] = [time.time(), icon]
                     return icon
-            except UnicodeDecodeError, e:
+            except UnicodeDecodeError as e:
                 if debug:
                     raise e
                 else:
@@ -319,7 +319,7 @@ def __parseTheme(file):
 
 def LookupIcon(iconname, size, theme, extensions):
     # look for the cache
-    if not cache.has_key(theme.name):
+    if theme.name not in cache:
         cache[theme.name] = []
         cache[theme.name].append(time.time() - (xdg.Config.cache_time + 1)) # [0] last time of lookup
         cache[theme.name].append(0)               # [1] mtime
@@ -331,7 +331,7 @@ def LookupIcon(iconname, size, theme, extensions):
         for subdir in theme.getDirectories():
             for directory in icondirs:
                 dir = os.path.join(directory,theme.name,subdir)
-                if (not cache[theme.name][2].has_key(dir) \
+                if (cache not in ncache[theme.name][2] \
                 or cache[theme.name][1] < os.path.getmtime(os.path.join(directory,theme.name))) \
                 and subdir != "" \
                 and os.path.isdir(dir):
@@ -344,7 +344,7 @@ def LookupIcon(iconname, size, theme, extensions):
                 if iconname + "." + extension in values[1]:
                     return os.path.join(dir, iconname + "." + extension)
 
-    minimal_size = sys.maxint
+    minimal_size = float("inf")
     closest_filename = ""
     for dir, values in cache[theme.name][2].items():
         distance = DirectorySizeDistance(values[0], size, theme)

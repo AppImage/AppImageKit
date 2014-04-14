@@ -56,7 +56,7 @@ def save_config_path(*resource):
     assert not resource.startswith('/')
     path = os.path.join(xdg_config_home, resource)
     if not os.path.isdir(path):
-        os.makedirs(path, 0700)
+        os.makedirs(path, 0o700)
     return path
 
 def save_data_path(*resource):
