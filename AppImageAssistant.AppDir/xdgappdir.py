@@ -26,9 +26,14 @@
 # 
 # **************************************************************************/
 
-import os, sys, commands, glob
+import os, sys, subprocess, glob
 import xdg.IconTheme, xdg.DesktopEntry # apt-get install python-xdg, present on Ubuntu
 from locale import gettext as _
+
+def get_status_output(*args, **kwargs):
+    p = subprocess.Popen(*args, **kwargs)
+    stdout, stderr = p.communicate()
+    return p.returncode, stdout, stderr
 
 class AppDirXdgHandler(object):
     
@@ -64,7 +69,7 @@ class AppDirXdgHandler(object):
     def _find_all_executables_in_appdir(self):
         """Return all executable files in the AppDir, or None"""
         results = []
-        result, executables = commands.getstatusoutput("find " + self.appdir + " -type f -perm -u+x")
+        result, executables = get_status_output("find " + self.appdir + " -type f -perm -u+x")
         executables = executables.split("\n")
         if result != 0:
             return None
@@ -108,9 +113,9 @@ class AppDirXdgHandler(object):
     
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print _("Usage: %s AppDir" % (sys.argv[0]))
+        print (_("Usage: %s AppDir" % (sys.argv[0])))
         exit(1)
     appdir = sys.argv[1]
     H = AppDirXdgHandler(appdir)
-    print H
+    print(H)
 

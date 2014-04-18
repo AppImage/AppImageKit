@@ -30,7 +30,6 @@ from __future__ import division
 import os, sys
 import subprocess 
 import xdgappdir 
-import commands
 from locale import gettext as _
 
 
@@ -43,7 +42,7 @@ if lddp == None: lddp = ""
 os.environ['LD_LIBRARY_PATH'] =  dependenciesdir + "/lib:" + lddp
 
 if len(sys.argv) == 2:
-    print "Assuming I should inject a new runtime"
+    print("Assuming I should inject a new runtime")
     destinationfile = os.path.realpath(sys.argv[1])
     should_compress = False
 elif len(sys.argv) < 3:
@@ -67,39 +66,38 @@ if should_compress == True:
     H = xdgappdir.AppDirXdgHandler(sourcedir)
     iconfile = H.get_icon_path_by_icon_name(H.get_icon_name_from_desktop_file(H.desktopfile))
     if iconfile == None:
-        print "Icon could not be found based on information in desktop file, aborting"
+        print("Icon could not be found based on information in desktop file, aborting")
         exit(1)
 
     print("Creating %s..." % (destinationfile))
-    if os.path.exists(destinationfile): 
-        print _("Destination path already exists, exiting") # xorriso would append another session to a pre-existing image
+    if os.path.exists(destinationfile):
+        print (_("Destination path already exists, exiting")) # xorriso would append another session to a pre-existing image
         exit(1)
     # As great as xorriso is, as cryptic its usage is :-(
-    command = ["xorriso", "-dev", 
+    command = ["xorriso", "-dev",
     destinationfile, "-padding", "0", "-map",
-    sourcedir, "/", "--", "-map", iconfile, "/.DirIcon", 
+    sourcedir, "/", "--", "-map", iconfile, "/.DirIcon",
     "-zisofs", "level=9:block_size=128k", "-chown_r", "0",
     "/", "--", "set_filter_r", "--zisofs", "/" ]
-					
+
     subprocess.Popen(command).communicate()
 
-    print "ok"
+    print("ok")
 
 print("Embedding runtime...")
-
 elf = os.path.realpath(os.path.dirname(__file__)) + "/runtime"
-s = file(elf, 'r')	
-f = file(destinationfile, 'r+')
-f.write(s.read())
+s = open(elf, 'rb')
+f = open(destinationfile, 'rb+')
+f.write(bytes(s.read()))
 f.close()
 s.close()
-print "ok"
+print("ok")
 
 print("Making %s executable..." % (destinationfile))
 
-os.chmod(destinationfile, 0755)
+os.chmod(destinationfile, 0o755)
 
-print "ok"
+print("ok")
 
 filesize = int(os.stat(destinationfile).st_size)
 print (_("Size: %f MB") % (filesize/1024/1024))

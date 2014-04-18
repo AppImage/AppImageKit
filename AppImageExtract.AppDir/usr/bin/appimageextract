@@ -21,15 +21,15 @@ else:
     response = dialog.run()
     if response == gtk.RESPONSE_OK:
         selection = dialog.get_filename()
-        print selection, 'selected'
+        print(selection, 'selected')
     elif response == gtk.RESPONSE_CANCEL:
-        print 'Closed, no files selected'
+        print('Closed, no files selected')
     dialog.destroy()
 
 name = os.path.basename(selection)
 appdir = os.path.expanduser("~/Desktop/" + name + ".AppDir")
 command = 'xorriso -indev "' + selection + '" -osirrox on -extract / "' + appdir + '"'
-print command
+print(command)
 os.system(command)
 os.system('sudo chown -R "${USER}" "' + appdir + '"')
 os.system('sudo chmod -R u+w "' + appdir + '"')

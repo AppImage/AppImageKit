@@ -2,10 +2,11 @@
 Base Class for DesktopEntry, IconTheme and IconData
 """
 
+import sys
 import re, os.path, codecs
-from Exceptions import *
 import xdg.Locale
 import gettext
+from . import Exceptions
 
 class IniFile:
     defaultGroup = ''
@@ -32,9 +33,9 @@ class IniFile:
             raise ParsingError("File not found", filename)
 
         try:
-            fd = file(filename, 'r')
-        except IOError, e:
-            if debug:
+            fd = open(filename, 'r')
+        except IOError as e:
+            if Exceptions.debug:
                 raise e
             else:
                 return
@@ -51,8 +52,8 @@ class IniFile:
             # new group
             elif line[0] == '[':
                 currentGroup = line.lstrip("[").rstrip("]")
-                if debug and self.hasGroup(currentGroup):
-                    raise DuplicateGroupError(currentGroup, filename)
+                if Exceptions.debug and self.hasGroup(currentGroup):
+                    raise Exceptions.DuplicateGroupError(currentGroup, filename)
                 else:
                     content[currentGroup] = {}
             # key
@@ -61,8 +62,8 @@ class IniFile:
                 key = line[0:index].strip()
                 value = line[index+1:].strip()
                 try:
-                    if debug and self.hasKey(key, currentGroup):
-                        raise DuplicateKeyError(key, currentGroup, filename)
+                    if Exceptions.debug and self.hasKey(key, currentGroup):
+                        raise Exceptions.DuplicateKeyError(key, currentGroup, filename)
                     else:
                         content[currentGroup][key] = value
                 except (IndexError, UnboundLocalError):
@@ -75,7 +76,7 @@ class IniFile:
 
         # check header
         for header in headers:
-            if content.has_key(header):
+            if header in content:
                 self.defaultGroup = header
                 break
         else:
@@ -93,7 +94,7 @@ class IniFile:
             group = self.defaultGroup
 
         # return key (with locale)
-        if self.content.has_key(group) and self.content[group].has_key(key):
+        if group in self.content and key in self.content[group]:
             if locale:
                 key = self.__addLocale(key, group)
                 if key.endswith(']') or not self.gettext_domain:
@@ -104,11 +105,11 @@ class IniFile:
             else:
                 value = self.content[group][key]
         else:
-            if debug:
-                if not self.content.has_key(group):
-                    raise NoGroupError(group, self.filename)
-                elif not self.content[group].has_key(key):
-                    raise NoKeyError(key, group, self.filename)
+            if Exceptions.debug:
+                if not groupt in self.content:
+                    raise Exceptions.NoGroupError(group, self.filename)
+                elif key not in self.content[group]:
+                    raise Exceptions.NoKeyError(key, group, self.filename)
             else:
                 value = ""
 
@@ -120,7 +121,8 @@ class IniFile:
 
         for value in values:
             if type == "string" and locale == True:
-                value = value.decode("utf-8", "ignore")
+                if sys.version_info[0] < 3:
+                    value = value.decode("utf-8", "ignore")
             elif type == "boolean":
                 value = self.__getBoolean(value)
             elif type == "integer":
@@ -175,7 +177,7 @@ class IniFile:
             group = self.defaultGroup
 
         for lang in xdg.Locale.langs:
-            if self.content[group].has_key(key+'['+lang+']'):
+            if key+'['+lang+']' in self.content[group]:
                 return key+'['+lang+']'
 
         return key
@@ -279,8 +281,11 @@ class IniFile:
             return 1
 
     def checkString(self, value):
+        if sys.version_info[0] < 3:
+            value = value.decode("utf-8", "ignore")
+
         # convert to ascii
-        if not value.decode("utf-8", "ignore").encode("ascii", 'ignore') == value:
+        if not value.encode("ascii", 'ignore') == value:
             return 1
 
     def checkRegex(self, value):
@@ -336,8 +341,8 @@ class IniFile:
 
     def addGroup(self, group):
         if self.hasGroup(group):
-            if debug:
-                raise DuplicateGroupError(group, self.filename)
+            if Exceptions.debug:
+                raise Exceptions.DuplicateGroupError(group, self.filename)
             else:
                 pass
         else:
@@ -351,7 +356,7 @@ class IniFile:
             self.tainted = True
         else:
             if debug:
-                raise NoGroupError(group, self.filename)
+                raise Exceptions.NoGroupError(group, self.filename)
         return existed
 
     def removeKey(self, key, group=None, locales=True):
@@ -369,12 +374,12 @@ class IniFile:
             del self.content[group][key]
             self.tainted = True
             return value
-        except KeyError, e:
+        except KeyError as e:
             if debug:
                 if e == group:
-                    raise NoGroupError(group, self.filename)
+                    raise Exceptions.NoGroupError(group, self.filename)
                 else:
-                    raise NoKeyError(key, group, self.filename)
+                    raise Exceptions.NoKeyError(key, group, self.filename)
             else:
                 return ""
 
@@ -383,7 +388,7 @@ class IniFile:
         return self.content.keys()
 
     def hasGroup(self, group):
-        if self.content.has_key(group):
+        if group in self.content:
             return True
         else:
             return False
@@ -393,7 +398,7 @@ class IniFile:
         if not group:
             group = self.defaultGroup
 
-        if self.content[group].has_key(key):
+        if key in self.content[group]:
             return True
         else:
             return False
