@@ -1,3 +1,5 @@
+![screenshot](https://cloud.githubusercontent.com/assets/2480569/3711041/71fdb282-14bb-11e4-9b3e-19d8c603a4fe.png)
+
 Copyright (c) 2004-14 Simon Peter <probono@puredarwin.org>
 All rights reserved. 
 Redistribution of this document is permitted only in unchanged form.
