@@ -1,7 +1,7 @@
-Copyright (c) 2004-13 Simon Peter <probono@puredarwin.org>
+Copyright (c) 2004-14 Simon Peter <probono@puredarwin.org>
 All rights reserved. 
 Redistribution of this document is permitted only in unchanged form.
-Version 2013-04-19
+Version 2014-07-26
 
 Building
 ========
