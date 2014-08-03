@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="AppImageKit : Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, debian and derivatives.">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>AppImageKit</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/probonopd/AppImageKit">View on GitHub</a>
+
+          <h1 id="project_title">AppImageKit</h1>
+          <h2 id="project_tagline">Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, debian and derivatives.</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/probonopd/AppImageKit/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/probonopd/AppImageKit/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <p><img src="https://cloud.githubusercontent.com/assets/2480569/3711041/71fdb282-14bb-11e4-9b3e-19d8c603a4fe.png" alt="screenshot"></p>
+
+<p>Copyright (c) 2004-14 Simon Peter <a href="mailto:probono@puredarwin.org">probono@puredarwin.org</a>
+All rights reserved. 
+Redistribution of this document is permitted only in unchanged form.
+Version 2014-07-26</p>
+
+<h1>
+<a name="building" class="anchor" href="#building"><span class="octicon octicon-link"></span></a>Building</h1>
+
+<p>Use an old system for building (at least 2-3 years old) to ensure the binaries run on older systems too.</p>
+
+<div class="highlight highlight-bash"><pre>sudo apt-get update <span class="p">;</span> sudo apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse <span class="c"># debian, Ubuntu</span>
+yum install git cmake binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel libpng12 <span class="c"># Fedora, RHEL, CentOS</span>
+git clone https://github.com/probonopd/AppImageKit.git
+<span class="nb">cd </span>AppImageKit
+cmake .
+make
+</pre></div>
+
+<p>Once you have built AppImageKit, try making an AppImage, e.g., of Leafpad:</p>
+
+<pre><code>export APP=leafpad &amp;&amp; ./apt-appdir/apt-appdir $APP &amp;&amp; ./AppImageAssistant $APP.AppDir $APP.AppImage &amp;&amp; ./$APP.AppImage
+</code></pre>
+
+<p>(This is just a proof-of-concept, of in reality you should use AppDirAssistant to create proper AppDirs)</p>
+
+<h1>
+<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
+
+<ul>
+<li>Include AppDirAssistant tool</li>
+<li>Update <a href="http://www.portablelinuxapps.org/docs/1.0/">http://www.portablelinuxapps.org/docs/1.0/</a> to remove all references to elficon; include changelog section</li>
+</ul><h1>
+<a name="changelog" class="anchor" href="#changelog"><span class="octicon octicon-link"></span></a>Changelog</h1>
+
+<p>-11</p>
+
+<ul>
+<li>Builds on x86-64</li>
+<li>Follow <a href="http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html">http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html</a> (Version 0.8.0 introduced new location for the thumbnails)</li>
+<li>Remove elficon as no one uses it; use thumbnails instead</li>
+<li>Include AppImageExtract tool</li>
+<li>Update AppImageAssistant.AppDir so that it runs on latest Ubuntu</li>
+<li>Use AppDir suffix</li>
+<li>Factor out dependency binaries to be bundled into ./bundled-dependencies-i386</li>
+</ul><p>-9</p>
+
+<ul>
+<li>Runtime extracts .DirIcon to $HOME/.thumbnails/normal/</li>
+<li>When called with "--icon", only extracts the icon, prints a message and exits</li>
+<li>Runtime sets environment variables APPIMAGE, APPDIR that the "inside" app may use</li>
+<li>AppRun appends to environment variables XDG_DATA_DIRS, QT_PLUGIN_PATH, PERLLIB</li>
+</ul><h1>
+<a name="appimage-format-definition" class="anchor" href="#appimage-format-definition"><span class="octicon octicon-link"></span></a>AppImage format definition</h1>
+
+<p>The AppImage format has the following properties:</p>
+
+<ul>
+<li>The AppImage is an ISO9660 file</li>
+<li>The contents of the ISO9660 file can be compressed with zf</li>
+<li>In the first 32k of the ISO9660 file, an ELF executable is embedded
+which mounts the AppImage, executes the application from the 
+mounted AppImage, and afterwards unmounts the AppImage again</li>
+<li>The ISO9660 file contains an AppDir as per the ROX AppDir specification</li>
+<li>The AppDir contains one desktop file as per the freedesktop.org specification</li>
+</ul><pre><code>++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++                                                                                  +
++   ISO9660                                                                        +
++                                                                                  +
++   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++   +
++   +                              +                                           +   +
++   +                              +                AppDir                     +   +
++   +                              +                 |_ .DirIcon               +   +
++   +                              +                 |_ appname.desktop        +   +
++   +             ELF              +                 |_ AppRun                 +   +
++   +                              +             (   |_ usr/                   +   +
++   +                              +                     |_ bin/               +   +
++   +                              +                     |_ lib/               +   +
++   +                              +                     |_ share/  )          +   +
++   +                              +                                           +   +
++   ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++   +
++                                                                                  +
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+</code></pre>
+
+<h1>
+<a name="creating-portable-appimages" class="anchor" href="#creating-portable-appimages"><span class="octicon octicon-link"></span></a>Creating portable AppImages</h1>
+
+<p>For an AppImage to run on most systems, the following conditions need to be met:
+1. The AppImage needs to include all libraries and other dependencies that are not part of all of the base systems that the AppImage is intended to run on
+2. The binaries contained in the AppImage need to be compiled on a system not newer than the oldest base system that the AppImage is intended to run on
+3. The AppImage should actually be tested on the base systems that it is intended to run on</p>
+
+<h2>
+<a name="libraries-and-other-dependencies" class="anchor" href="#libraries-and-other-dependencies"><span class="octicon octicon-link"></span></a>Libraries and other dependencies</h2>
+
+<h2>
+<a name="binaries-compiled-on-old-enough-base-system" class="anchor" href="#binaries-compiled-on-old-enough-base-system"><span class="octicon octicon-link"></span></a>Binaries compiled on old enough base system</h2>
+
+<p>The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on. Some core libaries, such as glibc, tend to break compatibility with older base systems quite frequently, which means that binaries will run on newer, but not on older base systems than the one the binaries were compiled on.</p>
+
+<p>If you run into errors like this</p>
+
+<pre><code>failed to initialize: /lib/tls/i686/cmov/libc.so.6: version `GLIBC_2.11' not found
+</code></pre>
+
+<p>then the binary is compiled on a newer system than the one you are trying to run it on. You should use a binary that has been compiled on an older system. Unfortunately, the complication is that distributions usually compile the latest versions of applications only on the latest systems, which means that you will have a hard time finding binaries of bleeding-edge softwares that run on older systems.</p>
+
+<h2>
+<a name="testing" class="anchor" href="#testing"><span class="octicon octicon-link"></span></a>Testing</h2>
+
+<p>To ensure that the AppImage runs on the intended base systems, it should be thoroughly tested on each of them. The following testing procedure is both efficient and effective: Get the previous version of Ubuntu, Fedora, and openSUSE Live CDs and test your AppImage there. Using the three largest distributions increases the chances that your AppImage will run on other distributions as well. Using the previous (current minus one) version ensures that your end users who might not have upgraded to the latest version yet can still run your AppImage. Using Live CDs has the advantage that unlike installed systems, you always have a system that is in a factory-fresh condition that can be easily reproduced. Most developers just test their software on their main working systems, which tend to be heavily customized through the installation of additional packages. By testing on Live CDs, you can be sure that end users will get the best experience possible.</p>
+
+<p>I use ISOs of Live CDs, loop-mount them, chroot into them, and run the AppImage there. This way, I need approximately 700 MB per supported base system (distribution) and can easily upgrade to never versions by just exchanging one ISO file. The following script automates this for Ubuntu-like (Casper-based) and Fedora-like (Dract-based) Live ISOs:</p>
+
+<pre><code>sudo ./AppImageAssistant.AppDir/testappimage /path/to/elementary-0.2-20110926.iso ./AppImageAssistant.AppImage
+</code></pre>
+
+<h1>
+<a name="support" class="anchor" href="#support"><span class="octicon octicon-link"></span></a>Support</h1>
+
+<p>I support open source projects that wish to distribute their software as an AppImage. For closed source applications, I offer AppImage packaging and testing as a service.</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">AppImageKit maintained by <a href="https://github.com/probonopd">probonopd</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
