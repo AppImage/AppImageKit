@@ -33,10 +33,7 @@
       <section id="main_content" class="inner">
         <p><img src="https://cloud.githubusercontent.com/assets/2480569/3711041/71fdb282-14bb-11e4-9b3e-19d8c603a4fe.png" alt="screenshot"></p>
 
-<p>Copyright (c) 2004-14 Simon Peter <a href="mailto:probono@puredarwin.org">probono@puredarwin.org</a>
-All rights reserved. 
-Redistribution of this document is permitted only in unchanged form.
-Version 2014-07-26</p>
+
 
 <h1>
 <a name="building" class="anchor" href="#building"><span class="octicon octicon-link"></span></a>Building</h1>
@@ -58,33 +55,9 @@ make
 
 <p>(This is just a proof-of-concept, of in reality you should use AppDirAssistant to create proper AppDirs)</p>
 
+
+
 <h1>
-<a name="todo" class="anchor" href="#todo"><span class="octicon octicon-link"></span></a>TODO</h1>
-
-<ul>
-<li>Include AppDirAssistant tool</li>
-<li>Update <a href="http://www.portablelinuxapps.org/docs/1.0/">http://www.portablelinuxapps.org/docs/1.0/</a> to remove all references to elficon; include changelog section</li>
-</ul><h1>
-<a name="changelog" class="anchor" href="#changelog"><span class="octicon octicon-link"></span></a>Changelog</h1>
-
-<p>-11</p>
-
-<ul>
-<li>Builds on x86-64</li>
-<li>Follow <a href="http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html">http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html</a> (Version 0.8.0 introduced new location for the thumbnails)</li>
-<li>Remove elficon as no one uses it; use thumbnails instead</li>
-<li>Include AppImageExtract tool</li>
-<li>Update AppImageAssistant.AppDir so that it runs on latest Ubuntu</li>
-<li>Use AppDir suffix</li>
-<li>Factor out dependency binaries to be bundled into ./bundled-dependencies-i386</li>
-</ul><p>-9</p>
-
-<ul>
-<li>Runtime extracts .DirIcon to $HOME/.thumbnails/normal/</li>
-<li>When called with "--icon", only extracts the icon, prints a message and exits</li>
-<li>Runtime sets environment variables APPIMAGE, APPDIR that the "inside" app may use</li>
-<li>AppRun appends to environment variables XDG_DATA_DIRS, QT_PLUGIN_PATH, PERLLIB</li>
-</ul><h1>
 <a name="appimage-format-definition" class="anchor" href="#appimage-format-definition"><span class="octicon octicon-link"></span></a>AppImage format definition</h1>
 
 <p>The AppImage format has the following properties:</p>
