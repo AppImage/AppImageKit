@@ -1,3 +1,6 @@
+AppImageKit [![Build Status](https://travis-ci.org/probonopd/AppImageKit.svg?branch=master)](https://travis-ci.org/probonopd/AppImageKit)
+===========
+
 ![screenshot](https://cloud.githubusercontent.com/assets/2480569/3711041/71fdb282-14bb-11e4-9b3e-19d8c603a4fe.png)
 
 Copyright (c) 2004-14 Simon Peter <probono@puredarwin.org>
@@ -6,7 +9,7 @@ Redistribution of this document is permitted only in unchanged form.
 Version 2014-07-26
 
 Building
-========
+--------
 
 Use an old system for building (at least 2-3 years old) to ensure the binaries run on older systems too.
 
@@ -26,13 +29,13 @@ Once you have built AppImageKit, try making an AppImage, e.g., of Leafpad:
 (This is just a proof-of-concept, of in reality you should use AppDirAssistant to create proper AppDirs)
 
 TODO
-====
+----
 
 * Include AppDirAssistant tool
 * Update http://www.portablelinuxapps.org/docs/1.0/ to remove all references to elficon; include changelog section
 
 Changelog
-=========
+---------
 
 -11
 * Builds on x86-64
@@ -50,7 +53,7 @@ Changelog
 * AppRun appends to environment variables XDG_DATA_DIRS, QT_PLUGIN_PATH, PERLLIB
 
 AppImage format definition
-==========================
+--------------------------
 
 The AppImage format has the following properties:
 * The AppImage is an ISO9660 file
@@ -114,6 +117,6 @@ I use ISOs of Live CDs, loop-mount them, chroot into them, and run the AppImage 
     sudo ./AppImageAssistant.AppDir/testappimage /path/to/elementary-0.2-20110926.iso ./AppImageAssistant.AppImage
 
 Support
-=======
+-------
 
 I support open source projects that wish to distribute their software as an AppImage. For closed source applications, I offer AppImage packaging and testing as a service.
