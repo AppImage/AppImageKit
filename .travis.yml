@@ -5,8 +5,13 @@ before_install:
  - sudo apt-add-repository -y ppa:vala-team/ppa
  - sudo apt-get update -qq
  - sudo apt-get install -qq libfuse-dev libglib2.0-dev cmake git libc6-dev binutils valac libgee-0.8-dev
- - valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 ./LibcWrapGenerator/LibcWrapGenerator.vala
+ - cd .//LibcWrapGenerator
+ - valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 ./LibcWrapGenerator.vala
  - sudo ./LibcWrapGenerator --target 2.7 --libdir /lib --output libcwrap.h
+ - sudo cp ./libcwrap.h /usr/include/
+ - cd -
  - find .
  
-script: cmake . && make
+script: 
+ - export CC='gcc -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
+ - cmake . && make
