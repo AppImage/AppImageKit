@@ -15,3 +15,19 @@ script:
  - export CC='gcc -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
  - cmake . && make
  - find . -type f
+
+before_deploy:
+  git fetch --tags
+deploy:
+  provider: releases
+  api_key:
+    secure: jJBKTduvxWOc+0ANQJ3o+j+Pb71S2k2BbqqhyYvWZM40H8jW4euy4/NaLWYf5oNnF5YslmUtvK53m98sBpvu63sHNQ3vK/aoZEGMozFne76Z+PkgL3SZCr8ia/Un+IwEQ0C50FPGBa/osy583r2ajca0rKLlTN0M8zCTACCKm3w=
+  skip_cleanup: true
+  file_glob: true
+  file: 
+   - ./AppImageExtract
+   - ./AppRun
+   - ./AppImageAssistant
+  on:
+    tags: true
+    all_branches: true
