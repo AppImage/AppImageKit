@@ -87,7 +87,7 @@ ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   COMMAND cp AppRun ./AppImageExtract.AppDir
   COMMAND ./binary-dependencies/bundle
-  COMMAND ./AppImageAssistant ./AppImageExtract.AppDir ./AppImageExtract
+  COMMAND ./AppImageAssistant.AppDir/package ./AppImageExtract.AppDir ./AppImageExtract
   VERBATIM
 )
 
