@@ -21,7 +21,7 @@ before_deploy:
 deploy:
   provider: releases
   api_key:
-    secure: jJBKTduvxWOc+0ANQJ3o+j+Pb71S2k2BbqqhyYvWZM40H8jW4euy4/NaLWYf5oNnF5YslmUtvK53m98sBpvu63sHNQ3vK/aoZEGMozFne76Z+PkgL3SZCr8ia/Un+IwEQ0C50FPGBa/osy583r2ajca0rKLlTN0M8zCTACCKm3w=
+    secure: Rtz7d+BKUnBT8D5FoE4XXCvVhRSQVdGK/c5VpI6IYuGhwmtx4RIvK78cICFPZq8k1xJm8yOuCOChX6EyElhUkYh5iPzDI/J7IiqBl+z+/V3aXx6W2PKyYLohZW3z9iomQbX2LQ6vHcZsNqQsjKZ2dW7Ja5Q9cZTFKiokMXsAERo=
   skip_cleanup: true
   file_glob: true
   file: 
