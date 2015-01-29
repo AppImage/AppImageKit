@@ -331,7 +331,7 @@ def LookupIcon(iconname, size, theme, extensions):
         for subdir in theme.getDirectories():
             for directory in icondirs:
                 dir = os.path.join(directory,theme.name,subdir)
-                if (cache not in ncache[theme.name][2] \
+                if (dir not in cache[theme.name][2] \
                 or cache[theme.name][1] < os.path.getmtime(os.path.join(directory,theme.name))) \
                 and subdir != "" \
                 and os.path.isdir(dir):
