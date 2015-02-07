@@ -12,7 +12,7 @@ before_install:
  - cd -
 
 script: 
- - export CC='gcc -m32 -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
+ - export CC='gcc -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
  - cmake . && make
  - find . -type f
 
