@@ -1,0 +1,263 @@
+#!/usr/bin/env python
+#coding:utf-8
+
+#
+# probono 1/11
+#
+# IMPORTANT:
+# My hypothesis is that using print statements
+# in treaded decorated areas causes random crashes
+#
+
+__appname__ = "AppDirAssistant"
+__version__ = "0.3.2"
+
+import sys, os, gtk, shutil, time, datetime
+import AppImageKit, AppImageKit.AppDir, AppImageKit.timesavers, AppImageKit.xxdg.DesktopEntry, AssistantKit # Needs to be bundled
+from AppImageKit.timesavers import run_shell_command as x
+
+
+sys.path.append(os.path.dirname(__file__))
+
+prescan_file = "/tmp/_prescan"
+postscan_file = "/tmp/_postscan"
+profiler_tool = os.path.abspath(os.path.dirname(__file__) + "/profileapp.py")
+
+welcome_text = """This tool helps you to bundle applications as AppImages.
+
+You will get the best results if do this on least recent of the distributions you would like to support with your AppImage."""
+
+steps_text = """This involves the following steps: 
+
+1. Prescan (baselining your system)
+2. Installing your app (using whatever method) 
+3. Postscan (to determine what has been changed)
+4. Selection of desktop file (define the entry point)
+5. Profiling your app (checking for uncommon dependencies)
+6. Manually fine-tuning the AppDir (deleting extraneous files)
+7. Creating the AppImage"""
+
+additional_intro_text = """You can skip steps 1-6 if you already have a readymade AppDir.
+In that case, call this tool with the path to the AppImage"""
+
+install_text = """Please install your application now.
+
+You can use whatever method you would like (e.g., apt-get, yum, rpm, make install, manually copying files, etc.)
+
+After this step, this tool will compare which files have been added to your system.
+"""
+
+toonew_text = """It looks like you are using a too recent base system. 
+
+Please note that by using such a recent base system, the AppDir you are going to create is unlikely to work on older base systems. Hence it is advisable that you cancel this now and build your AppImage on a less recent distribution (e.g., one that is a year old). Live CDs are well suitable for this.
+"""
+
+class WelcomePage(AssistantKit.TextPage):
+
+    def __init__(self, assistant, title, text=""):
+        AssistantKit.TextPage.__init__(self, assistant, title, text=welcome_text)
+        
+
+class TooNewPage(AssistantKit.TextPage):
+
+    def __init__(self, assistant, title, text=""):
+        AssistantKit.TextPage.__init__(self, assistant, title, text=toonew_text)
+
+
+class InstallNowPage(AssistantKit.TextPage):
+
+    def __init__(self, assistant, title, text=""):
+        AssistantKit.TextPage.__init__(self, assistant, title, text=install_text)
+ 
+        
+class PrescanPage(AssistantKit.ProgressPage):
+    
+    def __init__(self, assistant, title):
+        AssistantKit.ProgressPage.__init__(self, assistant, title)
+        self.file = prescan_file
+
+    @AssistantKit.threaded    
+    def prepare_cb(self):
+        self.a.set_page_complete(self.content, False)
+        x(" find /usr /bin /sbin /opt /etc 2>/dev/null | sort | uniq > '" + self.file + "' 2>/dev/null")
+        self.a.set_page_complete(self.content, True)
+        if os.path.isfile('/tmp/_prescan'):
+            self.a.go_to_next_page()
+        else:
+            self.a.errortext = "Prescan failed"
+            self.a.go_to_last_page()
+
+
+class DedupPage(AssistantKit.ProgressPage):
+
+    @AssistantKit.threaded    
+    def prepare_cb(self):
+        self.a.set_page_complete(self.content, False)
+        x("rdfind -makesymlinks true -makeresultsfile false '%s/'*" % (self.a.targetdir))
+        self.a.set_page_complete(self.content, True)
+        self.a.go_to_next_page()
+
+
+class SymlinkPage(AssistantKit.ProgressPage):
+
+    @AssistantKit.threaded    
+    def prepare_cb(self):
+        self.a.set_page_complete(self.content, False)
+        x("symlinks -c -r '%s'" % (self.a.targetdir))
+        self.a.set_page_complete(self.content, True)
+        self.a.go_to_next_page()
+
+        
+class PostscanPage(PrescanPage):
+
+    def __init__(self, assistant, title):
+        PrescanPage.__init__(self, assistant, title)
+        self.file = postscan_file
+
+        
+class IdentifyAddedFilesPage(AssistantKit.ProgressPage):
+
+    # @AssistantKit.threaded # SEEMS TO LEAD TO CRASHES, WHY?
+    def prepare_cb(self):
+        x('diff /tmp/_prescan /tmp/_postscan | grep "^> " | sed "s|> ||g" > /tmp/_addedfiles')
+        os.unlink(prescan_file)
+        os.unlink(postscan_file)
+        self.a.addedfiles = open("/tmp/_addedfiles").readlines()
+	os.unlink("/tmp/_addedfiles")
+        self.a.set_page_complete(self.content, True)
+        if len(self.a.addedfiles) > 0:
+            self.a.go_to_next_page() 
+        else:
+            self.a.errortext = "Could not identify any added files"
+            self.a.go_to_last_page()
+
+class DesktopChooserPage(AssistantKit.TextPage):
+
+    def compose_content(self):
+        box = gtk.VBox()
+        box.show()
+        self.content = box       
+    
+    def prepare_cb(self):
+        self.a.set_page_complete(self.content, False)
+        desktopfiles = []
+        for file in self.a.addedfiles:
+            file = file.replace("\n", "")
+            if file.endswith(".desktop"):
+                desktopfiles.append(file)
+        if len(desktopfiles) == 0:
+            label = gtk.Label("No desktop files found, ask user (not yet implemented)")
+            self.content.add(label)
+            binfiles = []
+            group = None
+            for file in self.a.addedfiles:
+                file = file.replace("\n", "") 
+                if not "bin/" in file or "games/" in file:
+                    continue
+                button = gtk.RadioButton(group=group, label=os.path.basename(file), use_underline=False)
+                button.set_name(os.path.basename(file))
+                button.connect("clicked", self.set_bin_file, None)
+                if group == None: group = button
+                self.content.add(button)
+                button.show()             
+            label.show()
+        if len(desktopfiles) == 1:
+            self.a.desktop_file = desktopfiles[0]
+            self.process_desktop_file()
+            self.a.go_to_next_page()
+        else:
+            group = None
+            for file in desktopfiles:
+                button = gtk.RadioButton(group=group, label=os.path.basename(file), use_underline=False)
+                button.set_name(file)
+                button.connect("clicked", self.set_desktop_file, None)
+                if group == None: group = button
+                self.content.add(button)
+                button.show()
+                
+    def set_desktop_file(self, sender, dummy):
+        self.a.desktop_file = sender.get_name()
+        # print self.a.desktop_file
+        self.process_desktop_file()
+
+    def set_bin_file(self, sender, dummy): # TODO: Move to next screen
+        d = AppImageKit.xxdg.DesktopEntry.DesktopEntry()
+        self.a.command = sender.get_name()
+        self.a.targetdir = os.path.expanduser("~/Desktop/") + self.a.command.capitalize() + ".AppDir"
+        if os.path.exists(self.a.targetdir):
+            shutil.rmtree(self.a.targetdir)
+        os.makedirs(self.a.targetdir)
+        a = AppImageKit.AppDir.AppDir(self.a.targetdir)
+        a.insert_desktop(self.a.command)
+        self.a.set_page_complete(self.content, True)
+        
+    def process_desktop_file(self): # TODO: Move to next screen
+        d = AppImageKit.xxdg.DesktopEntry.DesktopEntry()
+        d.parse(self.a.desktop_file)
+        command = os.path.basename(d.get("Exec").replace("%f", "").replace("%F", "").replace("%u", "").replace("%U", "").strip())
+        # print command
+        self.a.command = command
+        if self.a.command == "":
+            self.a.errortext = "Could not identify the executable in the desktop file"
+            self.a.go_to_last_page()
+        self.a.targetdir = os.path.expanduser("~/Desktop/") + self.a.command.capitalize() + ".AppDir"
+        if os.path.exists(self.a.targetdir):
+            shutil.rmtree(self.a.targetdir)
+        os.makedirs(self.a.targetdir)
+        shutil.copyfile(self.a.desktop_file, self.a.targetdir + "/" + os.path.basename(self.a.desktop_file))
+        self.a.set_page_complete(self.content, True)
+
+class ProfilerPage(AssistantKit.RunnerPage):    
+    
+    def prepare_cb(self):
+        AssistantKit.Page.prepare_cb(self)
+        self.copy_addedfiles()
+        self.command = [profiler_tool, self.a.targetdir, self.a.command]
+        self.run_command()
+    
+    # @AssistantKit.threaded
+    def copy_addedfiles(self):
+        # print "copy_addedfiles"
+        for file in self.a.addedfiles:
+            file = file.replace("\n", "")
+            dir = os.path.join(self.a.targetdir + os.path.dirname(file))
+            # print dir
+            # print file
+            try: os.makedirs(dir)
+            except: pass
+            try: shutil.copy(file, dir)
+            except: pass
+        
+def main():
+    pages = [ 
+                [WelcomePage, "Welcome"],
+                #[AppDirSelectionPage, "Select AppDir"],
+                [PrescanPage, "Prescanning..."],
+                [InstallNowPage, "Install your application now"],
+                [PostscanPage, "Postscanning..."],
+                [IdentifyAddedFilesPage, "Identifying added files..."],                
+                [DesktopChooserPage, "Choose the entrypoint"],
+                [ProfilerPage, "Profiling..."],
+                [DedupPage, "Deduplicating..."],
+                [SymlinkPage, "Symlinking..."],
+                #[AssistantKit.TextPage, "Fine-tune the AppDir"],
+                #[AssistantKit.RunnerPage, "Creating AppImage..."],
+                [AssistantKit.ResultPage, "Done"] 
+            ]
+
+    filefortime = "/usr/bin/ld"
+    then = datetime.datetime.fromtimestamp(os.path.getctime(filefortime))
+    now = datetime.datetime.now()
+    age = int((now - then).days)
+    print age
+    if age <= 180:
+        # print dir(pages)
+        pages.insert(1, [TooNewPage, "Warning"] ) # after page 0 which is the WelcomePage
+    print(pages[0])
+    a = AssistantKit.Assistant(pages, title=__appname__ + " " + __version__)
+
+    gtk.main()
+
+
+if __name__=='__main__':
+    main()
