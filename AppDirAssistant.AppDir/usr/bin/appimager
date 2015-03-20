@@ -2,8 +2,6 @@
 #coding:utf-8
 
 #
-# probono 7/14
-#
 # IMPORTANT:
 # My hypothesis is that using print statements
 # in treaded decorated areas causes random crashes
@@ -123,7 +121,7 @@ class IdentifyAddedFilesPage(AssistantKit.ProgressPage):
         os.unlink(prescan_file)
         os.unlink(postscan_file)
         self.a.addedfiles = open("/tmp/_addedfiles").readlines()
-	os.unlink("/tmp/_addedfiles")
+        os.unlink("/tmp/_addedfiles")
         self.a.set_page_complete(self.content, True)
         if len(self.a.addedfiles) > 0:
             self.a.go_to_next_page() 
