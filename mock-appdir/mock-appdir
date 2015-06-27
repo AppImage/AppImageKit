@@ -33,7 +33,6 @@
 # This should be overridable somehow.
 # F20 is old, no longer supported, but was for 1 year.
 # So this is probably a sane default.
-# (CentOS 7 would be better).
 if [ -z "${MOCK_TARGET}" ]
 then
 	MOCK_TARGET="fedora-20-x86_64"
