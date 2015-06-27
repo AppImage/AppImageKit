@@ -2,7 +2,7 @@
 
 # A version of "apt-appdir" that uses RPM, yum, and mock.
 # Intended to be ran on a Fedora system, or recent CentOS/RHEL.
-# Does not work with dnf yet! Should be an easy fix though.
+# Defaults to Fedora 20 chroot at the moment.
 
 # /**************************************************************************
 # 
@@ -51,9 +51,9 @@ rm -rf  "${APPDIR}"
 # Use mock to download package + all basic dependencies.
 echo "Downloading packages into mock chroot for " ${MOCK_TARGET}
 mock -r ${MOCK_TARGET} --scrub=all
-mock -r ${MOCK_TARGET} --yum-cmd install @buildsys-build
+mock -r ${MOCK_TARGET} --install @base-x --install kmod --install systemd
 mock -r ${MOCK_TARGET} --scrub=cache
-mock -r ${MOCK_TARGET} --yum-cmd install ${APP}
+mock -r ${MOCK_TARGET} --install ${APP}
 
 mkdir "${APPDIR}"
 cd "${APPDIR}"
@@ -62,7 +62,7 @@ cp -v /var/cache/mock/${MOCK_TARGET}/yum_cache/*/packages/*.rpm ./
 # Use rpm2cpio (...) to unbundle the rpms and then remove them.
 for f in *
 do
-	rpm2cpio $f |cpio -idm
+	rpm2cpio $f | cpio -idm
 done
 rm -v *.rpm
 
