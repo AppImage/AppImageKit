@@ -10,6 +10,7 @@ before_install:
  - sudo ./LibcWrapGenerator --target 2.7 --libdir /lib --output libcwrap.h
  - sudo cp ./libcwrap.h /usr/include/
  - cd -
+ - find /usr/include/ -name auxv.h
 
 script: 
  - export CC='gcc -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
