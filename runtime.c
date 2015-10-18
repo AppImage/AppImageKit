@@ -259,7 +259,9 @@ main (int argc, char *argv[])
 
     dir_fd = open (mount_dir, O_RDONLY);
     if (dir_fd == -1) {
-      perror ("open dir error: ");
+      // perror ("open dir error: ");
+      printf("Could not mount AppImage\n");
+      printf("Please see https://github.com/probonopd/AppImageKit/wiki/FUSE\n");
       exit (1);
     }
     
