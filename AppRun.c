@@ -44,7 +44,7 @@ THE SOFTWARE.
 #define NEW_PATH "PATH=./bin/:./sbin/:./games/:%s"
 #define NEW_PYTHONPATH "PYTHONPATH=./share/pyshared/:%s"
 #define NEW_XDG_DATA_DIRS "XDG_DATA_DIRS=./share/:%s"
-#define NEW_QT_PLUGIN_PATH "QT_PLUGIN_PATH=./lib/qt4/plugins/:%s"
+#define NEW_QT_PLUGIN_PATH "QT_PLUGIN_PATH=./lib/qt4/plugins/:./lib/qt5/plugins/:%s"
 #define NEW_PERLLIB "PERLLIB=./share/perl5/:./lib/perl5/:%s"
 
 // http://askubuntu.com/questions/251712/how-can-i-install-a-gsettings-schema-without-root-privileges
