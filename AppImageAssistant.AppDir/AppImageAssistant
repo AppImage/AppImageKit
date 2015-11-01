@@ -52,7 +52,7 @@ def usage():
     print "Usage:"
     print " ", colors.BOLD, "--pack, --package", colors.END, "<input AppDir>", "<output AppImage>"
     print " "*6, "Create an AppImage from an AppDir"
-    print " ", colors.BOLD, "--unpack, --extract", colors.END, "<input AppImage>", "<output AppDir>"
+    print " ", colors.BOLD, "--unpack, --extract", colors.END, "<input AppImage>", "<output AppDir>", "[<path inside AppImage>]"
     print " "*6, "Extract an AppImage to an AppDir"
     print " ", colors.BOLD, "-h, --help", colors.END
     print " "*6, "Show this help message"
@@ -82,7 +82,10 @@ for arg in sys.argv:
         elif os.path.exists(sys.argv[3]):
             print sys.argv[3], "already exists"
         else:
-            os.system(os.path.dirname(__file__) + "/extract '%s' '%s'" % (sys.argv[2], sys.argv[3]))
+            origin = "/"
+            if len(sys.argv) >= 5:
+                origin = sys.argv[4]
+            os.system(os.path.dirname(__file__) + "/extract '%s' '%s' '%s'" % (sys.argv[2], sys.argv[3], origin))
         exit(0)
     elif arg in ["-h", "--help"]:
         usage()

@@ -1,4 +1,6 @@
 #!/bin/bash
 cd $(dirname "${0}")
 NAME=$(basename "${1}")
-LD_LIBRARY_PATH="./usr/lib/:${LD_LIBRARY_PATH}" PATH="./usr/bin:${PATH}" xorriso -indev "${1}" -osirrox on -extract / $HOME/Desktop/"${NAME}.AppDir"
+DESTINATION="${2:-$HOME/Desktop/${NAME}.AppDir}"
+ORIGIN="${3:-/}"
+LD_LIBRARY_PATH="./usr/lib/:${LD_LIBRARY_PATH}" PATH="./usr/bin:${PATH}" xorriso -indev "${1}" -osirrox on -extract "$ORIGIN" "$DESTINATION"
