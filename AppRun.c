@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
 
     if (ret == -1)
     {
-        die( "Error executing '%s'\n", line+5 );
+        die( "Error executing '%s'; return code: %d\n", executable, ret );
     }
 
     free(new_env[0]);
