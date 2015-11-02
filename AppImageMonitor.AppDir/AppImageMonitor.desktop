@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=AppImageMonitor
+Exec=monitorAppImages.sh
+Icon=AppImageMonitor
+Terminal=True
+Type=Application
+Categories=System;
+StartupNotify=true

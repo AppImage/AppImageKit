@@ -19,3 +19,7 @@ mkdir -p "${PARENT}"/AppImageExtract.AppDir/usr/bin/ "${PARENT}"/AppImageExtract
 cp "${BINARYDIR}"/xorriso "${PARENT}"/AppImageExtract.AppDir/usr/bin/
 cp "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 "${PARENT}"/AppImageExtract.AppDir/usr/lib/
 
+mkdir -p "${PARENT}"/AppImageMonitor.AppDir/usr/bin/ "${PARENT}"/AppImageMonitor.AppDir/usr/lib/
+cp "${BINARYDIR}"/xorriso "${PARENT}"/AppImageMonitor.AppDir/usr/bin/
+cp "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 "${PARENT}"/AppImageMonitor.AppDir/usr/lib/
+

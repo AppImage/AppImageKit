@@ -28,6 +28,7 @@ deploy:
    - ./AppImageExtract
    - ./AppRun
    - ./AppImageAssistant
+   - ./AppImageMonitor
   on:
     tags: true
     all_branches: true

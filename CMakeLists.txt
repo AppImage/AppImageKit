@@ -91,5 +91,13 @@ ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   VERBATIM
 )
 
+ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppRun AppImageAssistant)
+ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
+  COMMAND cp AppRun ./AppImageMonitor.AppDir
+  COMMAND ./binary-dependencies/bundle
+  COMMAND ./AppImageAssistant.AppDir/package ./AppImageMonitor.AppDir ./AppImageMonitor
+  VERBATIM
+)
+
 SET_DIRECTORY_PROPERTIES(PROPERTIES   
- ADDITIONAL_MAKE_CLEAN_FILES "AppImageAssistant;AppImageExtract;./AppImageAssistant.AppDir/runtime;./AppImageAssistant.AppDir/usr/share/pyshared/vte.so;./AppImageAssistant.AppDir/usr/lib/;./AppImageExtract.AppDir/AppRun;./AppImageExtract.AppDir/usr/lib/;./AppImageAssistant.AppDir/usr/bin/xorriso;./AppImageExtract.AppDir/usr/bin/xorriso") 
+ ADDITIONAL_MAKE_CLEAN_FILES "AppImageAssistant;AppImageExtract;AppImageMonitor;./AppImageAssistant.AppDir/runtime;./AppImageAssistant.AppDir/usr/share/pyshared/vte.so;./AppImageAssistant.AppDir/usr/lib/;./AppImageExtract.AppDir/AppRun;./AppImageMonitor.AppDir/AppRun;./AppImageExtract.AppDir/usr/lib/;./AppImageMonitor.AppDir/usr/lib/;./AppImageAssistant.AppDir/usr/bin/xorriso;./AppImageExtract.AppDir/usr/bin/xorriso;./AppImageMonitor.AppDir/usr/bin/xorriso") 
