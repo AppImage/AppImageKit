@@ -103,45 +103,51 @@ del() {
 }
 
 
-renice -n 1 $$
+if [ "$1" == "--clean" ]; then
+	echo "Removing all the AppImage menu entries in ${DesktopFilesDirectory}/..."
+	xdg-desktop-menu uninstall "$DesktopFilesDirectory"/AppImage-*.desktop
+	echo "Done"
+else
+	renice -n 1 $$
 
-files=()
-dirs=()
-for arg in "$@"; do
-	[ -f "$arg" ] && files+=("$arg")
-	[ -d "$arg" ] && dirs+=("$arg")
-done
-
-if [ -n "$files" ]; then
-	for file in "${files[@]}"; do
-		add "$file" --noupdate
+	files=()
+	dirs=()
+	for arg in "$@"; do
+		[ -f "$arg" ] && files+=("$arg")
+		[ -d "$arg" ] && dirs+=("$arg")
 	done
-	update-desktop-database "$DesktopFilesDirectory"
-elif [ ! -n "$dirs" ]; then
-	if [ -d "$DefaultAppImageDirectory" ]; then
-		dirs=("$DefaultAppImageDirectory")
-	else
-		echo "Directory $DefaultAppImageDirectory doesn't exist"
-	fi
-fi
 
-if [ -n "$dirs" ]; then
-	echo "Watching ${dirs[@]}..."
-
-	export -f add
-	FindFilter="$(echo "$AppImageFilenameFilter" | sed -e"s/\([()|]\)/\\\\\1/g")"
-	find "${dirs[@]}" -iregex "$FindFilter" -exec bash -c 'add "$0" --noupdate' {} \;
-	update-desktop-database "$DesktopFilesDirectory"
-
-	inotifywait -m -r -e CREATE -e DELETE -e MOVED_FROM -e MOVED_TO --format '%e:%w%f' $dirs |
-		while read event; do
-			case "$event" in
-				CREATE:*|MOVED_TO:*)
-					add "${event#*:}"
-					;;
-				DELETE:*|MOVED_FROM:*)
-					del "${event#*:}"
-					;;
-			esac
+	if [ -n "$files" ]; then
+		for file in "${files[@]}"; do
+			add "$file" --noupdate
 		done
+		update-desktop-database "$DesktopFilesDirectory"
+	elif [ ! -n "$dirs" ]; then
+		if [ -d "$DefaultAppImageDirectory" ]; then
+			dirs=("$DefaultAppImageDirectory")
+		else
+			echo "Directory $DefaultAppImageDirectory doesn't exist"
+		fi
+	fi
+
+	if [ -n "$dirs" ]; then
+		echo "Watching ${dirs[@]}..."
+
+		export -f add
+		FindFilter="$(echo "$AppImageFilenameFilter" | sed -e"s/\([()|]\)/\\\\\1/g")"
+		find "${dirs[@]}" -iregex "$FindFilter" -exec bash -c 'add "$0" --noupdate' {} \;
+		update-desktop-database "$DesktopFilesDirectory"
+
+		inotifywait -m -r -e CREATE -e DELETE -e MOVED_FROM -e MOVED_TO --format '%e:%w%f' $dirs |
+			while read event; do
+				case "$event" in
+					CREATE:*|MOVED_TO:*)
+						add "${event#*:}"
+						;;
+					DELETE:*|MOVED_FROM:*)
+						del "${event#*:}"
+						;;
+				esac
+			done
+	fi
 fi
