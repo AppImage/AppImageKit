@@ -50,6 +50,12 @@ if [ -e /tmp/iso/LiveOS/squashfs.img ] ; then
     mount "$THEFS" /tmp/unionfs/root -o loop,ro || exit 1
 fi
 
+# In case of debian-like ISOs
+if [ -e /tmp/iso/live/filesystem.squashfs ] ; then
+  THEFS=/tmp/iso/live/filesystem.squashfs
+  mount "$THEFS" /tmp/unionfs/root -o loop,ro || exit 1
+fi
+
 trap atexit EXIT
 
 atexit()
