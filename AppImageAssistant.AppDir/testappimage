@@ -32,6 +32,11 @@ if [ ${1: -4} == ".iso" ] ; then
     mount -o loop,ro "$ISO" /tmp/iso
 fi
 
+echo ""
+echo "===================================================="
+echo ""
+echo $ISO
+
 # In case of Ubuntu-like ISOs
 if [ -e /tmp/iso/casper/filesystem.squashfs ] ; then
   THEFS=/tmp/iso/casper/filesystem.squashfs
@@ -79,7 +84,7 @@ if [ "x$MNT" == "x" ] ; then
 fi
 
 if [ -f "$2" ] ; then
-    mount "$2" /tmp/union/$MNT -o loop
+    mount "$2" /tmp/union/$MNT -o loop,ro
 elif [ -d "$2" ] ; then
     mount "$2" /tmp/union/$MNT -o bind
 fi
@@ -90,31 +95,22 @@ cat /etc/*release
 echo ""
 rm -rf /etc/pango
 mkdir -p /etc/pango
-pango-querymodules > '/etc/pango/pango.modules' # otherwise only squares instead of text
+pango-querymodules > '/etc/pango/pango.modules' 2>/dev/null # otherwise only squares instead of text
 [ -f /si-chroot ] && ln -s /lib/ld-lsb.so.3 /lib/ld-linux.so.2
-echo ""
-echo "===================================================="
-echo ""
 LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/lib/:$LD_LIBRARY_PATH ldd $MNT/usr/bin/*  $MNT/usr/lib/* 2>/dev/null | grep "not found" | sort | uniq
-echo ""
-echo "===================================================="
-echo ""
 export HOME="/root" 
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
-dbus-launch $MNT/AppRun || $MNT/AppRun
+#dbus-launch $MNT/AppRun || 
+$MNT/AppRun || echo "+++++++++ ERROR $ISO +++++++++"
 EOF
 chmod a+x /tmp/union/run.sh
 mount -t proc proc /tmp/union/proc
 mount --bind /var/lib/dbus /tmp/union/var/lib/dbus
 touch /tmp/union/etc/resolv.conf || echo ""
 mount --bind /etc/resolv.conf /tmp/union/etc/resolv.conf
-xhost local: # otherwise "cannot open display: :0.0"
-echo ""
-echo "===================================================="
+xhost local: >/dev/null 2>&1 # otherwise "cannot open display: :0.0"
 echo ""
 chroot /tmp/union/ /run.sh # $MNT/AppRun
-echo ""
-echo "===================================================="
 echo ""
 exit $?
