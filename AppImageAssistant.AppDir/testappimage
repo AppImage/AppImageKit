@@ -57,7 +57,7 @@ atexit()
     umount -l /tmp/union/var/lib/dbus 2>/dev/null
     umount -l /tmp/union/etc/resolv.conf 2>/dev/null
     umount -l /tmp/union/proc 2>/dev/null
-    umount -l /tmp/union/boot 2>/dev/null
+    umount -l /tmp/union/opt 2>/dev/null
 #    umount -l /tmp/union/automake 2>/dev/null # Puppy
     umount -l /tmp/union 2>/dev/null
     umount -l /tmp/unionfs/root 2>/dev/null
@@ -75,7 +75,7 @@ atexit()
 
 unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/unionfs/,max_files=32768 /rw=RW:/root=RO /tmp/union
 
-ls /tmp/union/boot >/dev/null && MNT=/boot
+ls /tmp/union/opt >/dev/null && MNT=/opt
 # ls /tmp/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
 
 if [ "x$MNT" == "x" ] ; then
