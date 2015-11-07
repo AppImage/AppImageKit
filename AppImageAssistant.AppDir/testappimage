@@ -109,8 +109,7 @@ export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
 #dbus-launch $MNT/AppRun || 
 $MNT/AppRun
-RESULT=$?
-if [ $RESULT == 0 ]; then
+if [ $? -eq 0 ] ; then
   echo "+++++++++ SUCCESS $ISO $2 +++++++++"
 else
   echo "+++++++++ ERROR $ISO $2 +++++++++"
