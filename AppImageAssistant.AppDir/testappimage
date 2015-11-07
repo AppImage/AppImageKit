@@ -110,7 +110,7 @@ export LANG="en_EN.UTF-8"
 #dbus-launch $MNT/AppRun || 
 $MNT/AppRun
 RESULT=$?
-if [ "$RESULT" == "0" ]; then
+if [ $RESULT == 0 ]; then
   echo "+++++++++ SUCCESS $ISO $2 +++++++++"
 else
   echo "+++++++++ ERROR $ISO $2 +++++++++"
