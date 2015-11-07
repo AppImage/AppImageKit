@@ -108,7 +108,13 @@ export HOME="/root"
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
 #dbus-launch $MNT/AppRun || 
-$MNT/AppRun || echo "+++++++++ ERROR $ISO +++++++++"
+$MNT/AppRun
+RESULT=$?
+if [ $RESULT -eq 0 ]; then
+  echo "+++++++++ SUCCESS $ISO $2 +++++++++"
+else
+  echo "+++++++++ ERROR $ISO $2 +++++++++"
+fi
 EOF
 chmod a+x /tmp/union/run.sh
 mount -t proc proc /tmp/union/proc
