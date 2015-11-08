@@ -75,32 +75,165 @@ ADD_EXECUTABLE(runtime runtime.c)
 TARGET_LINK_LIBRARIES(runtime fuseiso isofs ${LIBFUSE} ${LIBPTHREAD} ${LIBGLIB2} ${LIBZ})
 add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
 
-ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime)
+include(ExternalProject)
+set(binary-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/binary-dependencies/")
+set(third-party-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/third-party-dependencies/")
+
+ExternalProject_Add(inotify-tools
+  #GIT_REPOSITORY "git@github.com:rvoicilas/inotify-tools.git"
+  #GIT_TAG "v3.14"
+  URL "http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND test -f autogen.sh && ./autogen.sh || true && ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_IN_SOURCE 1
+)
+
+ExternalProject_Add(desktop-file-utils
+  #GIT_REPOSITORY "git://anongit.freedesktop.org/xdg/desktop-file-utils"
+  #GIT_TAG "0.22"
+  URL "http://www.freedesktop.org/software/desktop-file-utils/releases/desktop-file-utils-0.22.tar.xz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND test -f autogen.sh && ./autogen.sh || true && ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_IN_SOURCE 1
+)
+
+ExternalProject_Add(xdg-utils
+  URL "http://portland.freedesktop.org/download/xdg-utils-1.1.1.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_IN_SOURCE 1
+)
+
+ExternalProject_Add(libburn
+  #SVN_REPOSITORY "http://svn.libburnia-project.org/libburn/trunk"
+  URL "http://files.libburnia-project.org/releases/libburn-1.4.0.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND ./configure --disable-ldconfig-at-install --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_IN_SOURCE 1
+)
+
+ExternalProject_Add(libisofs
+  #HG_REPOSITORY "lp:~libburnia-team/libisofs/scdbackup"
+  URL "http://files.libburnia-project.org/releases/libisofs-1.4.0.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND ./configure --disable-ldconfig-at-install --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_IN_SOURCE 1
+)
+
+ExternalProject_Add(libacl
+  #GIT_REPOSITORY "git://git.savannah.nongnu.org/acl.git"
+  #GIT_TAG "v2.2.52"
+  URL "http://download.savannah.gnu.org/releases/acl/acl-2.2.52.src.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  #CONFIGURE_COMMAND test -f configure && ./configure --prefix=${third-party-dependencies_PREFIX}/install || true && libtoolize -c -f && cp include/install-sh . && aclocal -I m4 && autoconf && ./configure -prefix=${third-party-dependencies_PREFIX}/install && touch .census
+  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  INSTALL_COMMAND make install-lib
+  BUILD_IN_SOURCE 1
+)
+
+ExternalProject_Add(libisoburn
+  DEPENDS libisofs libburn libacl
+  #SVN_REPOSITORY "http://svn.libburnia-project.org/libisoburn/trunk"
+  URL "http://files.libburnia-project.org/releases/libisoburn-1.4.0.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
+                    LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
+                    ./configure --disable-ldconfig-at-install --disable-libacl --disable-xattr --disable-libjte --disable-libcdio --disable-libreadline --disable-libedit --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_IN_SOURCE 1
+)
+
+# xorriso provided by libburnia
+ADD_CUSTOM_TARGET(xorriso DEPENDS libisoburn)
+
+# xorriso provided by GNU xorriso
+#ExternalProject_Add(xorriso
+#  URL "https://www.gnu.org/software/xorriso/xorriso-1.4.0.tar.gz"
+#  PREFIX ${third-party-dependencies_PREFIX}
+#  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+#  BUILD_IN_SOURCE 1
+#)
+
+#ExternalProject_Add(libglade
+#  URL "http://ftp.acc.umu.se/pub/GNOME/sources/libglade/2.6/libglade-2.6.4.tar.bz2"
+#  PREFIX ${third-party-dependencies_PREFIX}
+#  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+#  BUILD_IN_SOURCE 1
+#)
+
+#ExternalProject_Add(libvte
+#  URL "http://ftp.gnome.org/pub/GNOME/sources/vte/0.43/vte-0.43.0.tar.xz"
+#  PREFIX ${third-party-dependencies_PREFIX}
+#  CONFIGURE_COMMAND ./configure --disable-static --enable-introspection --with-gtk=2.0 --disable-gnome-pty-helper --prefix=${third-party-dependencies_PREFIX}/install
+#  BUILD_IN_SOURCE 1
+#)
+
+set(third-party-dependencies_clean
+  "third-party-dependencies/src/;"
+  "third-party-dependencies/tmp/;"
+  "third-party-dependencies/install/;"
+)
+
+EXECUTE_PROCESS(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
+ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime xorriso)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
-  COMMAND cp runtime AppImageAssistant.AppDir/
-  COMMAND ./binary-dependencies/bundle
-  COMMAND rm ./AppImageAssistant || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageAssistant.AppDir ./AppImageAssistant
+  WORKING_DIRECTORY "AppImageAssistant.AppDir"
+  COMMAND install ../runtime .
+  COMMAND mkdir -p usr/bin/ usr/lib/ usr/share/pyshared/
+  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
+  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND install -t usr/lib/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/{libglade-2.0.so.0,libvte.so.9}
+  COMMAND install -t usr/share/pyshared/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/vte.so
+  COMMAND rm -vf ../AppImageAssistant
+  COMMAND ../AppImageAssistant.AppDir/package . ../AppImageAssistant
   VERBATIM
 )
+set(AppImageAssistant_clean
+  "AppImageAssistant;"
+  "AppImageAssistant.AppDir/runtime;"
+  "AppImageAssistant.AppDir/usr/bin/xorriso;"
+  "AppImageAssistant.AppDir/usr/lib/;"
+  "AppImageAssistant.AppDir/usr/share/pyshared/vte.so;"
+)
 
-ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun AppImageAssistant)
+
+ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppImageAssistant AppRun xorriso)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
-  COMMAND cp AppRun ./AppImageExtract.AppDir
-  COMMAND ./binary-dependencies/bundle
-  COMMAND rm ./AppImageExtract || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageExtract.AppDir ./AppImageExtract
+  WORKING_DIRECTORY "AppImageExtract.AppDir"
+  COMMAND install ../AppRun .
+  COMMAND mkdir -p usr/bin/ usr/lib/
+  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
+  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND rm -vf ../AppImageExtract
+  COMMAND ../AppImageAssistant.AppDir/package . ../AppImageExtract
   VERBATIM
 )
+set(AppImageExtract_clean
+  "AppImageExtract;"
+  "AppImageExtract.AppDir/AppRun;"
+  "AppImageExtract.AppDir/usr/bin/xorriso;"
+  "AppImageExtract.AppDir/usr/lib/;"
+)
 
-ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppRun AppImageAssistant)
+
+ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppImageAssistant AppRun xorriso inotify-tools desktop-file-utils)
 ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
-  COMMAND cp AppRun ./AppImageMonitor.AppDir
-  COMMAND ./binary-dependencies/bundle
-  COMMAND rm ./AppImageMonitor || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageMonitor.AppDir ./AppImageMonitor
+  WORKING_DIRECTORY "AppImageMonitor.AppDir"
+  COMMAND install ../AppRun .
+  COMMAND mkdir -p usr/bin/ usr/lib/
+  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/{xorriso,inotifywait,xdg-desktop-menu,update-desktop-database}
+  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND rm -vf ../AppImageMonitor
+  COMMAND ../AppImageAssistant.AppDir/package . ../AppImageMonitor
   VERBATIM
 )
+set(AppImageMonitor_clean
+  "AppImageMonitor;"
+  "AppImageMonitor.AppDir/AppRun;"
+  "AppImageMonitor.AppDir/usr/bin/xorriso;"
+  "AppImageMonitor.AppDir/usr/bin/inotifywait;"
+  "AppImageMonitor.AppDir/usr/bin/update-desktop-database;"
+  "AppImageMonitor.AppDir/usr/lib/;"
+)
 
-SET_DIRECTORY_PROPERTIES(PROPERTIES   
- ADDITIONAL_MAKE_CLEAN_FILES "AppImageAssistant;AppImageExtract;AppImageMonitor;./AppImageAssistant.AppDir/runtime;./AppImageAssistant.AppDir/usr/share/pyshared/vte.so;./AppImageAssistant.AppDir/usr/bin/unionfs-fuse;./AppImageAssistant.AppDir/usr/lib/;./AppImageExtract.AppDir/AppRun;./AppImageMonitor.AppDir/AppRun;./AppImageExtract.AppDir/usr/lib/;./AppImageMonitor.AppDir/usr/lib/;./AppImageAssistant.AppDir/usr/bin/xorriso;./AppImageExtract.AppDir/usr/bin/xorriso;./AppImageMonitor.AppDir/usr/bin/xorriso") 
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  ADDITIONAL_MAKE_CLEAN_FILES "${AppImageAssistant_clean}${AppImageExtract_clean}${AppImageMonitor_clean}${third-party-dependencies_clean}")
