@@ -32,6 +32,11 @@ if [ ${1: -4} == ".iso" ] ; then
     mount -o loop,ro "$ISO" /tmp/iso
 fi
 
+echo ""
+echo "===================================================="
+echo ""
+echo $ISO
+
 # In case of Ubuntu-like ISOs
 if [ -e /tmp/iso/casper/filesystem.squashfs ] ; then
   THEFS=/tmp/iso/casper/filesystem.squashfs
@@ -45,6 +50,12 @@ if [ -e /tmp/iso/LiveOS/squashfs.img ] ; then
     mount "$THEFS" /tmp/unionfs/root -o loop,ro || exit 1
 fi
 
+# In case of debian-like ISOs
+if [ -e /tmp/iso/live/filesystem.squashfs ] ; then
+  THEFS=/tmp/iso/live/filesystem.squashfs
+  mount "$THEFS" /tmp/unionfs/root -o loop,ro || exit 1
+fi
+
 trap atexit EXIT
 
 atexit()
@@ -52,14 +63,14 @@ atexit()
     umount -l /tmp/union/var/lib/dbus 2>/dev/null
     umount -l /tmp/union/etc/resolv.conf 2>/dev/null
     umount -l /tmp/union/proc 2>/dev/null
-    umount -l /tmp/union/boot 2>/dev/null
+    umount -l /tmp/union/opt 2>/dev/null
 #    umount -l /tmp/union/automake 2>/dev/null # Puppy
     umount -l /tmp/union 2>/dev/null
     umount -l /tmp/unionfs/root 2>/dev/null
     umount -l /tmp/iso 2>/dev/null
     umount -l /tmp/iso 2>/dev/null
     umount -l /tmp/iso 2>/dev/null
-    sudo killall unionfs-fuse
+    sudo killall unionfs-fuse 2>/dev/null
     rm -r /tmp/unionfs/root
     rm -r /tmp/unionfs/rw
     rm -r /tmp/unionfs
@@ -70,7 +81,7 @@ atexit()
 
 unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/unionfs/,max_files=32768 /rw=RW:/root=RO /tmp/union
 
-ls /tmp/union/boot >/dev/null && MNT=/boot
+ls /tmp/union/opt >/dev/null && MNT=/opt
 # ls /tmp/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
 
 if [ "x$MNT" == "x" ] ; then
@@ -79,7 +90,7 @@ if [ "x$MNT" == "x" ] ; then
 fi
 
 if [ -f "$2" ] ; then
-    mount "$2" /tmp/union/$MNT -o loop
+    mount "$2" /tmp/union/$MNT -o loop,ro
 elif [ -d "$2" ] ; then
     mount "$2" /tmp/union/$MNT -o bind
 fi
@@ -90,31 +101,22 @@ cat /etc/*release
 echo ""
 rm -rf /etc/pango
 mkdir -p /etc/pango
-pango-querymodules > '/etc/pango/pango.modules' # otherwise only squares instead of text
+pango-querymodules > '/etc/pango/pango.modules' 2>/dev/null # otherwise only squares instead of text
 [ -f /si-chroot ] && ln -s /lib/ld-lsb.so.3 /lib/ld-linux.so.2
-echo ""
-echo "===================================================="
-echo ""
 LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/lib/:$LD_LIBRARY_PATH ldd $MNT/usr/bin/*  $MNT/usr/lib/* 2>/dev/null | grep "not found" | sort | uniq
-echo ""
-echo "===================================================="
-echo ""
 export HOME="/root" 
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
-dbus-launch $MNT/AppRun || $MNT/AppRun
+#dbus-launch $MNT/AppRun || 
+$MNT/AppRun && echo "+++++++++ SUCCESS $ISO $2 +++++++++"
 EOF
 chmod a+x /tmp/union/run.sh
 mount -t proc proc /tmp/union/proc
 mount --bind /var/lib/dbus /tmp/union/var/lib/dbus
 touch /tmp/union/etc/resolv.conf || echo ""
 mount --bind /etc/resolv.conf /tmp/union/etc/resolv.conf
-xhost local: # otherwise "cannot open display: :0.0"
-echo ""
-echo "===================================================="
+xhost local: >/dev/null 2>&1 # otherwise "cannot open display: :0.0"
 echo ""
 chroot /tmp/union/ /run.sh # $MNT/AppRun
-echo ""
-echo "===================================================="
 echo ""
 exit $?
