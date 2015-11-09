@@ -65,6 +65,10 @@ mark_as_advanced(GLIB_INCLUDE_DIR GLIB_CONFIG_INCLUDE_DIR GLIB_INCLUDE_DIRS GLIB
 
 INCLUDE_DIRECTORIES(. ${GLIB_INCLUDE_DIRS})
 
+ADD_SUBDIRECTORY(LibcWrapGenerator)
+set(CMAKE_C_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/LibcWrapGenerator/cc")
+
+
 ADD_EXECUTABLE(AppRun AppRun.c)
 add_custom_command(TARGET AppRun POST_BUILD COMMAND ${CMAKE_STRIP} AppRun)
 
@@ -74,6 +78,7 @@ ADD_LIBRARY(isofs isofs.c)
 ADD_EXECUTABLE(runtime runtime.c)
 TARGET_LINK_LIBRARIES(runtime fuseiso isofs ${LIBFUSE} ${LIBPTHREAD} ${LIBGLIB2} ${LIBZ})
 add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
+
 
 include(ExternalProject)
 set(binary-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/binary-dependencies/")
