@@ -158,6 +158,13 @@ ADD_CUSTOM_TARGET(xorriso DEPENDS libisoburn)
 #  BUILD_IN_SOURCE 1
 #)
 
+#ExternalProject_Add(libglade
+#  URL "http://ftp.acc.umu.se/pub/GNOME/sources/libglade/2.6/libglade-2.6.4.tar.bz2"
+#  PREFIX ${third-party-dependencies_PREFIX}
+#  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+#  BUILD_IN_SOURCE 1
+#)
+
 #ExternalProject_Add(libvte
 #  URL "http://ftp.gnome.org/pub/GNOME/sources/vte/0.43/vte-0.43.0.tar.xz"
 #  PREFIX ${third-party-dependencies_PREFIX}
