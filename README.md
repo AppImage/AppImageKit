@@ -14,8 +14,8 @@ Building
 Use an old system for building (at least 2-3 years old) to ensure the binaries run on older systems too.
 
 ```bash
-sudo apt-get update ; sudo apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse # debian, Ubuntu
-yum install git cmake binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel libpng12 # Fedora, RHEL, CentOS
+sudo apt-get update ; sudo apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse valac # debian, Ubuntu
+yum install git cmake binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel libpng12 vala # Fedora, RHEL, CentOS
 git clone https://github.com/probonopd/AppImageKit.git
 cd AppImageKit
 cmake .
