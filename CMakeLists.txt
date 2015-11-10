@@ -79,6 +79,7 @@ ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
   COMMAND cp runtime AppImageAssistant.AppDir/
   COMMAND ./binary-dependencies/bundle
+  COMMAND rm -r ./AppImageAssistant
   COMMAND ./AppImageAssistant.AppDir/package ./AppImageAssistant.AppDir ./AppImageAssistant
   VERBATIM
 )
@@ -87,6 +88,7 @@ ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   COMMAND cp AppRun ./AppImageExtract.AppDir
   COMMAND ./binary-dependencies/bundle
+  COMMAND rm -r ./AppImageExtract
   COMMAND ./AppImageAssistant.AppDir/package ./AppImageExtract.AppDir ./AppImageExtract
   VERBATIM
 )
@@ -95,6 +97,7 @@ ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
   COMMAND cp AppRun ./AppImageMonitor.AppDir
   COMMAND ./binary-dependencies/bundle
+  COMMAND rm -r ./AppImageMonitor
   COMMAND ./AppImageAssistant.AppDir/package ./AppImageMonitor.AppDir ./AppImageMonitor
   VERBATIM
 )
