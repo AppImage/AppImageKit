@@ -71,13 +71,18 @@ set(CMAKE_C_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/LibcWrapGenerator/cc")
 
 ADD_EXECUTABLE(AppRun AppRun.c)
 add_custom_command(TARGET AppRun POST_BUILD COMMAND ${CMAKE_STRIP} AppRun)
+add_dependencies(AppRun libcwrap)
 
 ADD_LIBRARY(fuseiso fuseiso.c)
+add_dependencies(fuseiso libcwrap)
+
 ADD_LIBRARY(isofs isofs.c)
+add_dependencies(isofs libcwrap)
 
 ADD_EXECUTABLE(runtime runtime.c)
 TARGET_LINK_LIBRARIES(runtime fuseiso isofs ${LIBFUSE} ${LIBPTHREAD} ${LIBGLIB2} ${LIBZ})
 add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
+add_dependencies(runtime libcwrap)
 
 
 include(ExternalProject)
@@ -85,6 +90,7 @@ set(binary-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/binary-dependencies/
 set(third-party-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/third-party-dependencies/")
 
 ExternalProject_Add(inotify-tools
+  DEPENDS libcwrap
   #GIT_REPOSITORY "git@github.com:rvoicilas/inotify-tools.git"
   #GIT_TAG "v3.14"
   URL "http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz"
@@ -94,6 +100,7 @@ ExternalProject_Add(inotify-tools
 )
 
 ExternalProject_Add(desktop-file-utils
+  DEPENDS libcwrap
   #GIT_REPOSITORY "git://anongit.freedesktop.org/xdg/desktop-file-utils"
   #GIT_TAG "0.22"
   URL "http://www.freedesktop.org/software/desktop-file-utils/releases/desktop-file-utils-0.22.tar.xz"
@@ -110,6 +117,7 @@ ExternalProject_Add(xdg-utils
 )
 
 ExternalProject_Add(libburn
+  DEPENDS libcwrap
   #SVN_REPOSITORY "http://svn.libburnia-project.org/libburn/trunk"
   URL "http://files.libburnia-project.org/releases/libburn-1.4.0.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
@@ -118,6 +126,7 @@ ExternalProject_Add(libburn
 )
 
 ExternalProject_Add(libisofs
+  DEPENDS libcwrap
   #HG_REPOSITORY "lp:~libburnia-team/libisofs/scdbackup"
   URL "http://files.libburnia-project.org/releases/libisofs-1.4.0.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
@@ -126,6 +135,7 @@ ExternalProject_Add(libisofs
 )
 
 ExternalProject_Add(libacl
+  DEPENDS libcwrap
   #GIT_REPOSITORY "git://git.savannah.nongnu.org/acl.git"
   #GIT_TAG "v2.2.52"
   URL "http://download.savannah.gnu.org/releases/acl/acl-2.2.52.src.tar.gz"
@@ -137,7 +147,7 @@ ExternalProject_Add(libacl
 )
 
 ExternalProject_Add(libisoburn
-  DEPENDS libisofs libburn libacl
+  DEPENDS libcwrap libisofs libburn libacl
   #SVN_REPOSITORY "http://svn.libburnia-project.org/libisoburn/trunk"
   URL "http://files.libburnia-project.org/releases/libisoburn-1.4.0.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
@@ -152,6 +162,7 @@ ADD_CUSTOM_TARGET(xorriso DEPENDS libisoburn)
 
 # xorriso provided by GNU xorriso
 #ExternalProject_Add(xorriso
+#  DEPENDS libcwrap
 #  URL "https://www.gnu.org/software/xorriso/xorriso-1.4.0.tar.gz"
 #  PREFIX ${third-party-dependencies_PREFIX}
 #  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
@@ -159,6 +170,7 @@ ADD_CUSTOM_TARGET(xorriso DEPENDS libisoburn)
 #)
 
 #ExternalProject_Add(libglade
+#  DEPENDS libcwrap
 #  URL "http://ftp.acc.umu.se/pub/GNOME/sources/libglade/2.6/libglade-2.6.4.tar.bz2"
 #  PREFIX ${third-party-dependencies_PREFIX}
 #  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
@@ -166,6 +178,7 @@ ADD_CUSTOM_TARGET(xorriso DEPENDS libisoburn)
 #)
 
 #ExternalProject_Add(libvte
+#  DEPENDS libcwrap
 #  URL "http://ftp.gnome.org/pub/GNOME/sources/vte/0.43/vte-0.43.0.tar.xz"
 #  PREFIX ${third-party-dependencies_PREFIX}
 #  CONFIGURE_COMMAND ./configure --disable-static --enable-introspection --with-gtk=2.0 --disable-gnome-pty-helper --prefix=${third-party-dependencies_PREFIX}/install

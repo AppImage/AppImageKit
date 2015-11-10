@@ -1,7 +1,6 @@
 #!/bin/bash
 
 libcwrap="$(dirname "$0")/libcwrap.h"
-[ -f "$libcwrap" ] || { cd "$(dirname "$0")" && make libcwrap; }
 [ -f "$libcwrap" ] || { echo "$libcwrap doesn't exist" >&2; exit 1; }
 
 gcc -U_FORTIFY_SOURCE -include "$libcwrap" "$@"
