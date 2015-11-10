@@ -8,7 +8,7 @@ before_install:
 
  - wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc3-Linux-x86_64.tar.gz
  - tar -xf cmake-3.4.0-rc3-Linux-x86_64.tar.gz -C /tmp/
- - export PATH=$PATH:/tmp/cmake-3.4.0-rc3-Linux-x86_64/bin/
+ - export PATH=/tmp/cmake-3.4.0-rc3-Linux-x86_64/bin/:$PATH
 
 script: 
  - cmake . && make
