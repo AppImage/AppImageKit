@@ -140,6 +140,9 @@ ExternalProject_Add(libacl
   CONFIGURE_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
                     LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
                     ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
+                LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
+                make
   INSTALL_COMMAND make install-lib
   BUILD_IN_SOURCE 1
 )
