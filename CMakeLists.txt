@@ -206,10 +206,11 @@ ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime xorriso)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
   WORKING_DIRECTORY "AppImageAssistant.AppDir"
   COMMAND install ../runtime .
-  COMMAND install -D -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
-  COMMAND install -D -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
-  COMMAND install -D -t usr/lib/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/{libglade-2.0.so.0,libvte.so.9}
-  COMMAND install -D -t usr/share/pyshared/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/vte.so
+  COMMAND mkdir -p usr/bin/ usr/lib/ usr/share/pyshared/
+  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
+  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND install -t usr/lib/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/{libglade-2.0.so.0,libvte.so.9}
+  COMMAND install -t usr/share/pyshared/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/vte.so
   COMMAND rm -vf ../AppImageAssistant
   COMMAND ../AppImageAssistant.AppDir/package . ../AppImageAssistant
   VERBATIM
@@ -227,8 +228,9 @@ ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppImageAssistant AppRun xorriso)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   WORKING_DIRECTORY "AppImageExtract.AppDir"
   COMMAND install ../AppRun .
-  COMMAND install -D -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
-  COMMAND install -D -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND mkdir -p usr/bin/ usr/lib/
+  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
+  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
   COMMAND rm -vf ../AppImageExtract
   COMMAND ../AppImageAssistant.AppDir/package . ../AppImageExtract
   VERBATIM
@@ -245,8 +247,9 @@ ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppImageAssistant AppRun xorriso i
 ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
   WORKING_DIRECTORY "AppImageMonitor.AppDir"
   COMMAND install ../AppRun .
-  COMMAND install -D -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/{xorriso,inotifywait,xdg-desktop-menu,update-desktop-database}
-  COMMAND install -D -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND mkdir -p usr/bin/ usr/lib/
+  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/{xorriso,inotifywait,xdg-desktop-menu,update-desktop-database}
+  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
   COMMAND rm -vf ../AppImageMonitor
   COMMAND ../AppImageAssistant.AppDir/package . ../AppImageMonitor
   VERBATIM
