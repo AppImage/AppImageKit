@@ -1057,11 +1057,11 @@ static int isofs_parse_sa(isofs_inode *inode, char *sa, size_t sa_len) {
                             sue_version, sue_len, nm_flags);*/
                     } else {
                         if(sue_len - 5 + inode->nm_len > NAME_MAX - 1) {
-                            fprintf(stderr, 
-/*                                "parse_sa: too long NM entry: %d\n", 
-                                sue_len - 5 + inode->nm_len);
+/*                            fprintf(stderr, 
+                                "parse_sa: too long NM entry: %d\n", 
+                                sue_len - 5 + inode->nm_len);*/
                         } else if(inode->NM) {
-                            fprintf(stderr, 
+/*                            fprintf(stderr, 
                                 "parse_sa: NM entry already in effect, sue_len %d, sue_version %d\n",
                                 sue_len, sue_version);*/
                         } else {
