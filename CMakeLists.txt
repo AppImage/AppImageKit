@@ -140,7 +140,7 @@ ExternalProject_Add(libattr
   URL "http://download.savannah.gnu.org/releases/attr/attr-2.4.47.src.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
   CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
-  INSTALL_COMMAND make install-lib
+  INSTALL_COMMAND make install-lib install-dev
   BUILD_IN_SOURCE 1
 )
 
