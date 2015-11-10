@@ -125,17 +125,6 @@ ExternalProject_Add(libisofs
   BUILD_IN_SOURCE 1
 )
 
-ExternalProject_Add(libacl
-  #GIT_REPOSITORY "git://git.savannah.nongnu.org/acl.git"
-  #GIT_TAG "v2.2.52"
-  URL "http://download.savannah.gnu.org/releases/acl/acl-2.2.52.src.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  #CONFIGURE_COMMAND test -f configure && ./configure --prefix=${third-party-dependencies_PREFIX}/install || true && libtoolize -c -f && cp include/install-sh . && aclocal -I m4 && autoconf && ./configure -prefix=${third-party-dependencies_PREFIX}/install && touch .census
-  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
-  INSTALL_COMMAND make install-lib
-  BUILD_IN_SOURCE 1
-)
-
 ExternalProject_Add(libattr
   URL "http://download.savannah.gnu.org/releases/attr/attr-2.4.47.src.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
@@ -144,8 +133,19 @@ ExternalProject_Add(libattr
   BUILD_IN_SOURCE 1
 )
 
+ExternalProject_Add(libacl
+  DEPENDS libattr
+  URL "http://download.savannah.gnu.org/releases/acl/acl-2.2.52.src.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
+                    LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
+                    ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  INSTALL_COMMAND make install-lib
+  BUILD_IN_SOURCE 1
+)
+
 ExternalProject_Add(libisoburn
-  DEPENDS libisofs libburn libacl libattr
+  DEPENDS libisofs libburn libacl
   #SVN_REPOSITORY "http://svn.libburnia-project.org/libisoburn/trunk"
   URL "http://files.libburnia-project.org/releases/libisoburn-1.4.0.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
