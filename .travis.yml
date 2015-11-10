@@ -6,6 +6,10 @@ before_install:
  - sudo apt-get update -qq
  - sudo apt-get install -qq libfuse-dev libglib2.0-dev cmake libc6-dev binutils valac libgee-0.8-dev gcc-multilib g++-multilib libc6-dev-i386
 
+ - wget --no-check-certificate https://cmake.org/files/v3.4/cmake-3.4.0-rc3-Linux-x86_64.tar.gz
+ - tar -xf cmake-3.4.0-rc3-Linux-x86_64.tar.gz -C /tmp/
+ - export PATH=/tmp/cmake-3.4.0-rc3-Linux-x86_64/bin/:$PATH
+
 script: 
  - cmake . && make
  - find . -type f
