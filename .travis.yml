@@ -1,5 +1,6 @@
 language: c
 compiler: gcc
+dist: trusty
 
 before_install:
  - sudo apt-add-repository -y ppa:vala-team/ppa

@@ -134,14 +134,24 @@ ExternalProject_Add(libisofs
   BUILD_IN_SOURCE 1
 )
 
+ExternalProject_Add(libattr
+  URL "http://download.savannah.gnu.org/releases/attr/attr-2.4.47.src.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  INSTALL_COMMAND make install-lib install-dev
+  BUILD_IN_SOURCE 1
+)
+
 ExternalProject_Add(libacl
-  DEPENDS libcwrap
-  #GIT_REPOSITORY "git://git.savannah.nongnu.org/acl.git"
-  #GIT_TAG "v2.2.52"
+  DEPENDS libcwrap libattr
   URL "http://download.savannah.gnu.org/releases/acl/acl-2.2.52.src.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
-  #CONFIGURE_COMMAND test -f configure && ./configure --prefix=${third-party-dependencies_PREFIX}/install || true && libtoolize -c -f && cp include/install-sh . && aclocal -I m4 && autoconf && ./configure -prefix=${third-party-dependencies_PREFIX}/install && touch .census
-  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  CONFIGURE_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
+                    LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
+                    ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  BUILD_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
+                LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
+                make
   INSTALL_COMMAND make install-lib
   BUILD_IN_SOURCE 1
 )
