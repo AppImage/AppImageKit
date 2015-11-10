@@ -136,8 +136,16 @@ ExternalProject_Add(libacl
   BUILD_IN_SOURCE 1
 )
 
+ExternalProject_Add(libattr
+  URL "http://download.savannah.gnu.org/releases/attr/attr-2.4.47.src.tar.gz"
+  PREFIX ${third-party-dependencies_PREFIX}
+  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
+  INSTALL_COMMAND make install-lib
+  BUILD_IN_SOURCE 1
+)
+
 ExternalProject_Add(libisoburn
-  DEPENDS libisofs libburn libacl
+  DEPENDS libisofs libburn libacl libattr
   #SVN_REPOSITORY "http://svn.libburnia-project.org/libisoburn/trunk"
   URL "http://files.libburnia-project.org/releases/libisoburn-1.4.0.tar.gz"
   PREFIX ${third-party-dependencies_PREFIX}
