@@ -1062,8 +1062,8 @@ static int isofs_parse_sa(isofs_inode *inode, char *sa, size_t sa_len) {
                                 sue_len - 5 + inode->nm_len);
                         } else if(inode->NM) {
                             fprintf(stderr, 
-                                "parse_sa: NM entry already in effect, sue_len %d, sue_version %d\n", */
-                                sue_len, sue_version);
+                                "parse_sa: NM entry already in effect, sue_len %d, sue_version %d\n",
+                                sue_len, sue_version);*/
                         } else {
                             if(!inode->nm) {
                                 inode->nm = (char *) malloc(NAME_MAX);
