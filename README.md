@@ -2,15 +2,13 @@
 
 Copyright (c) 2004-15 Simon Peter <probono@puredarwin.org> and contributors.
 
-The AppImage format is a standardized format for packaging applications in a way that allows them to
-run on target systems without further modification. This document describes the AppImage format.
+The __AppImage__ format is a format for packaging applications in a way that allows them to
+run on a variety of different target systems (base operating systems, distributions) without further modification. 
 
-AppImageKit  contains  a  concrete  implementation  of  the  AppImage  format  and  provides  tools  for
+__AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and  provides  tools  for
 conveniently handling AppImages.
 
-This document is not a formal specification, since the AppImage format is not frozen yet but in the process
-of being specified more formally. However, this document is intended to describe the philosophy behing
-the AppImage format and the concrete implementation. Contributors are encouraged to comment on this document and propose formal format descriptions.
+This document describes the AppImage format and AppImageKit. It is intended to describe the philosophy behind the AppImage format and the concrete implementation. This document is not a formal specification, since the AppImage format is not frozen yet but in the process of being specified more formally. Contributors are encouraged to comment on this document and propose formal format descriptions.
 
 ## Motivation
 
@@ -18,9 +16,9 @@ Historically, UNIX and Linux systems have made it easy to procure source code, h
 
 Package mangers were introduced to mitigate the complexities of dealing with source code by providing libraries of precompiled packages from repositories maintained by distributors or third parties. However, the introduction of package mangers did not drastically reduce compexities or provide robustness - they merely stacked a management layer on top of an already complex system, effectively preventing the user from manipulating installed software directly.
 
-Other systems, most prominently Windows and the legacy Macintosh operating system, have made it relatively simple for independent software publishers (ISPs) to distribute software and for end-users to procure and install software from said ISPs, without any instances (such as distributors or AppStores) between the two parties.
+In contrast, other systems, most prominently Windows and the classic Macintosh operating system, have made it relatively simple for independent software publishers (ISPs) to distribute software and for end-users to procure and install software from said ISPs, without any instances (such as distributors or App Stores) between the two parties.
 
-With the introduction of Mac OS X, arguably the first UNIX-based operating system with widespread mass adoption to a non-technical user base, Apple blended traditional UNIX aspects (such as maintaining a traditional filesystem hierarchy, including /bin, /usr, /lib directories) with common "desktop" approaches (such as "installing" an application by dragging it to the hard disk). While Apple uses a package manager-like approach for managing the base operating system and its updates, it does not do so for the user applications.
+With the introduction of Mac OS X, arguably the first UNIX-based operating system with widespread mass adoption to a non-technical user base, Apple blended traditional UNIX aspects (such as maintaining a traditional filesystem hierarchy, including `/bin`, `/usr`, `/lib` directories) with common "desktop" approaches (such as "installing" an application by dragging it to the hard disk). While Apple _does_ use a package manager-like approach for managing the base operating system and its updates, it does _not_ do so for the user applications.
 
 Open Source operating systems, such as the most prominent Linux distributions, mostly use package mangers for everything. While this is perceived superior to Windows and the Mac by many Linux enthusiasts, it also creates a number of disadvantages:
 
