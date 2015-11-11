@@ -146,7 +146,7 @@ Once you have built AppImageKit, try making an AppImage, e.g., of Leafpad. The f
     
 (This is just a proof-of-concept, in reality you should use a proper "recipe" script or AppDirAssistant to create proper AppDirs - see an example at https://github.com/probonopd/AppImages/blob/master/recipes/subsurface.sh)
 
-### Creating AppImages
+## Creating AppImages
 
 The general workflow for creating an AppImage involves the following steps:
  1. __Gather suitable binaries__. If the application has already been compiled, you can use existing binaries (for example, contained in .tar.gz, deb, or rpm archives). Note that the binaries must not be compiled on newer distributions than the ones you are targeting. In other words, if you are targeting Ubuntu 9.10, you should not use binaries compiled on Ubuntu 10.04. For upstream projects, it might be advantageous to compile special builds for use in AppImages, although this is not required.
@@ -157,30 +157,7 @@ The general workflow for creating an AppImage involves the following steps:
 
 While it would theoretically be possible to do all these steps by hand, AppImageKit contains tools that greatly simplify the tasks.
 
-### Creating portable AppImages
-
-For an AppImage to run on most systems, the following conditions need to be met:
- 1. The AppImage needs to include all libraries and other dependencies that are not part of all of the base systems that the AppImage is intended to run on
- 2. The binaries contained in the AppImage need to be compiled on a system not newer than the oldest base system that the AppImage is intended to run on
- 3. The AppImage should actually be tested on the base systems that it is intended to run on
-
-### Binaries compiled on old enough base system
-
-The ingredients used in your AppImage should not be built on a more recent base system than the oldest base system your AppImage is intended to run on. Some core libaries, such as glibc, tend to break compatibility with older base systems quite frequently, which means that binaries will run on newer, but not on older base systems than the one the binaries were compiled on.
-
-If you run into errors like this
-
-    failed to initialize: /lib/tls/i686/cmov/libc.so.6: version `GLIBC_2.11' not found
-
-then the binary is compiled on a newer system than the one you are trying to run it on. You should use a binary that has been compiled on an older system. Unfortunately, the complication is that distributions usually compile the latest versions of applications only on the latest systems, which means that you will have a hard time finding binaries of bleeding-edge softwares that run on older systems. A way around this is to compile dependencies yourself on a not too recent base system, and/or to use LibcWrapGenerator.
-
-### Testing
-
-To ensure that the AppImage runs on the intended base systems, it should be thoroughly tested on each of them. The following testing procedure is both efficient and effective: Get the previous version of Ubuntu, Fedora, and openSUSE Live CDs and test your AppImage there. Using the three largest distributions increases the chances that your AppImage will run on other distributions as well. Using the previous (current minus one) version ensures that your end users who might not have upgraded to the latest version yet can still run your AppImage. Using Live CDs has the advantage that unlike installed systems, you always have a system that is in a factory-fresh condition that can be easily reproduced. Most developers just test their software on their main working systems, which tend to be heavily customized through the installation of additional packages. By testing on Live CDs, you can be sure that end users will get the best experience possible.
-
-I use ISOs of Live CDs, loop-mount them, chroot into them, and run the AppImage there. This way, I need approximately 700 MB per supported base system (distribution) and can easily upgrade to never versions by just exchanging one ISO file. The following script automates this for Ubuntu-like (Casper-based) and Fedora-like (Dract-based) Live ISOs:
-
-    sudo ./AppImageAssistant.AppDir/testappimage /path/to/elementary-0.2-20110926.iso ./AppImageAssistant.AppImage
+See the [Wiki](https://github.com/probonopd/AppImageKit/wiki) for details and for examples on how to bundle real-world software such as LibreOffice, Google Chrome, and others as AppImages.
 
 ## Support
 
