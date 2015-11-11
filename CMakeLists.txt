@@ -69,6 +69,11 @@ ADD_SUBDIRECTORY(LibcWrapGenerator)
 set(CMAKE_C_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/LibcWrapGenerator/cc")
 
 
+ADD_SUBDIRECTORY(third-party-dependencies)
+set(binary-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/binary-dependencies/")
+set(third-party-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/third-party-dependencies/")
+
+
 ADD_EXECUTABLE(AppRun AppRun.c)
 add_custom_command(TARGET AppRun POST_BUILD COMMAND ${CMAKE_STRIP} AppRun)
 add_dependencies(AppRun libcwrap)
@@ -85,119 +90,8 @@ add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
 add_dependencies(runtime libcwrap)
 
 
-include(ExternalProject)
-set(binary-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/binary-dependencies/")
-set(third-party-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/third-party-dependencies/")
-
-ExternalProject_Add(inotify-tools
-  DEPENDS libcwrap
-  #GIT_REPOSITORY "git@github.com:rvoicilas/inotify-tools.git"
-  #GIT_TAG "v3.14"
-  URL "http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND test -f autogen.sh && ./autogen.sh || true && ./configure --prefix=${third-party-dependencies_PREFIX}/install
-  BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add(desktop-file-utils
-  DEPENDS libcwrap
-  #GIT_REPOSITORY "git://anongit.freedesktop.org/xdg/desktop-file-utils"
-  #GIT_TAG "0.22"
-  URL "http://www.freedesktop.org/software/desktop-file-utils/releases/desktop-file-utils-0.22.tar.xz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND test -f autogen.sh && ./autogen.sh || true && ./configure --prefix=${third-party-dependencies_PREFIX}/install
-  BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add(xdg-utils
-  URL "http://portland.freedesktop.org/download/xdg-utils-1.1.1.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
-  BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add(libburn
-  DEPENDS libcwrap
-  #SVN_REPOSITORY "http://svn.libburnia-project.org/libburn/trunk"
-  URL "http://files.libburnia-project.org/releases/libburn-1.4.0.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND ./configure --disable-ldconfig-at-install --prefix=${third-party-dependencies_PREFIX}/install
-  BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add(libisofs
-  DEPENDS libcwrap
-  #HG_REPOSITORY "lp:~libburnia-team/libisofs/scdbackup"
-  URL "http://files.libburnia-project.org/releases/libisofs-1.4.0.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND ./configure --disable-ldconfig-at-install --prefix=${third-party-dependencies_PREFIX}/install
-  BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add(libattr
-  URL "http://download.savannah.gnu.org/releases/attr/attr-2.4.47.src.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
-  INSTALL_COMMAND make install-lib install-dev
-  BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add(libacl
-  DEPENDS libcwrap libattr
-  URL "http://download.savannah.gnu.org/releases/acl/acl-2.2.52.src.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
-                    LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
-                    ./configure --prefix=${third-party-dependencies_PREFIX}/install
-  BUILD_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
-                LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
-                make
-  INSTALL_COMMAND make install-lib
-  BUILD_IN_SOURCE 1
-)
-
-ExternalProject_Add(libisoburn
-  DEPENDS libcwrap libisofs libburn libacl
-  #SVN_REPOSITORY "http://svn.libburnia-project.org/libisoburn/trunk"
-  URL "http://files.libburnia-project.org/releases/libisoburn-1.4.0.tar.gz"
-  PREFIX ${third-party-dependencies_PREFIX}
-  CONFIGURE_COMMAND CPPFLAGS=-I${third-party-dependencies_PREFIX}/install/include
-                    LDFLAGS=-L${third-party-dependencies_PREFIX}/install/lib
-                    ./configure --disable-ldconfig-at-install --disable-libacl --disable-xattr --disable-libjte --disable-libcdio --disable-libreadline --disable-libedit --prefix=${third-party-dependencies_PREFIX}/install
-  BUILD_IN_SOURCE 1
-)
-
-# xorriso provided by libburnia
-ADD_CUSTOM_TARGET(xorriso DEPENDS libisoburn)
-
-# xorriso provided by GNU xorriso
-#ExternalProject_Add(xorriso
-#  DEPENDS libcwrap
-#  URL "https://www.gnu.org/software/xorriso/xorriso-1.4.0.tar.gz"
-#  PREFIX ${third-party-dependencies_PREFIX}
-#  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
-#  BUILD_IN_SOURCE 1
-#)
-
-#ExternalProject_Add(libglade
-#  DEPENDS libcwrap
-#  URL "http://ftp.acc.umu.se/pub/GNOME/sources/libglade/2.6/libglade-2.6.4.tar.bz2"
-#  PREFIX ${third-party-dependencies_PREFIX}
-#  CONFIGURE_COMMAND ./configure --prefix=${third-party-dependencies_PREFIX}/install
-#  BUILD_IN_SOURCE 1
-#)
-
-#ExternalProject_Add(libvte
-#  DEPENDS libcwrap
-#  URL "http://ftp.gnome.org/pub/GNOME/sources/vte/0.43/vte-0.43.0.tar.xz"
-#  PREFIX ${third-party-dependencies_PREFIX}
-#  CONFIGURE_COMMAND ./configure --disable-static --enable-introspection --with-gtk=2.0 --disable-gnome-pty-helper --prefix=${third-party-dependencies_PREFIX}/install
-#  BUILD_IN_SOURCE 1
-#)
-
 set(third-party-dependencies_clean
-  "third-party-dependencies/src/;"
-  "third-party-dependencies/tmp/;"
+  "third-party-dependencies/build/;"
   "third-party-dependencies/install/;"
 )
 
@@ -206,9 +100,8 @@ ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime xorriso)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
   WORKING_DIRECTORY "AppImageAssistant.AppDir"
   COMMAND install ../runtime .
-  COMMAND mkdir -p usr/bin/ usr/lib/ usr/share/pyshared/
-  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
-  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/xorriso ${third-party-dependencies_PREFIX}/install/lib/ .
+  COMMAND mkdir -p usr/lib/ usr/share/pyshared/
   COMMAND install -t usr/lib/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/{libglade-2.0.so.0,libvte.so.9}
   COMMAND install -t usr/share/pyshared/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/vte.so
   COMMAND rm -vf ../AppImageAssistant
@@ -228,9 +121,7 @@ ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppImageAssistant AppRun xorriso)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   WORKING_DIRECTORY "AppImageExtract.AppDir"
   COMMAND install ../AppRun .
-  COMMAND mkdir -p usr/bin/ usr/lib/
-  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xorriso
-  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/xorriso ${third-party-dependencies_PREFIX}/install/lib/ .
   COMMAND rm -vf ../AppImageExtract
   COMMAND ../AppImageAssistant.AppDir/package . ../AppImageExtract
   VERBATIM
@@ -247,9 +138,10 @@ ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppImageAssistant AppRun xorriso i
 ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
   WORKING_DIRECTORY "AppImageMonitor.AppDir"
   COMMAND install ../AppRun .
-  COMMAND mkdir -p usr/bin/ usr/lib/
-  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/{xorriso,inotifywait,xdg-desktop-menu,update-desktop-database}
-  COMMAND install -t usr/lib/ ${third-party-dependencies_PREFIX}/install/lib/{libisofs.so.6,libisoburn.so.1,libburn.so.4}
+  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xdg-desktop-menu
+  COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/xorriso ${third-party-dependencies_PREFIX}/install/lib/ .
+  COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/inotifywait ${third-party-dependencies_PREFIX}/install/lib/ .
+  COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/update-desktop-database ${third-party-dependencies_PREFIX}/install/lib/ .
   COMMAND rm -vf ../AppImageMonitor
   COMMAND ../AppImageAssistant.AppDir/package . ../AppImageMonitor
   VERBATIM
