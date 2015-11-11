@@ -1,0 +1,1406 @@
+#!/bin/sh
+#---------------------------------------------
+#   xdg-desktop-menu
+#
+#   Utility script to install menu items on a Linux desktop.
+#   Refer to the usage() function below for usage.
+#
+#   Copyright 2009-2010, Fathi Boudra <fabo@freedesktop.org>
+#   Copyright 2009-2010, Rex Dieter <rdieter@fedoraproject.org>
+#   Copyright 2006, Kevin Krammer <kevin.krammer@gmx.at>
+#   Copyright 2006, Jeremy White <jwhite@codeweavers.com>
+#
+#   LICENSE:
+#
+#   Permission is hereby granted, free of charge, to any person obtaining a
+#   copy of this software and associated documentation files (the "Software"),
+#   to deal in the Software without restriction, including without limitation
+#   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#   and/or sell copies of the Software, and to permit persons to whom the
+#   Software is furnished to do so, subject to the following conditions:
+#
+#   The above copyright notice and this permission notice shall be included
+#   in all copies or substantial portions of the Software.
+#
+#   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+#   OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+#   THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+#   OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+#   ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+#   OTHER DEALINGS IN THE SOFTWARE.
+#
+#---------------------------------------------
+
+manualpage()
+{
+cat << _MANUALPAGE
+Name
+
+   xdg-desktop-menu -- command line tool for (un)installing
+   desktop menu items
+
+Synopsis
+
+   xdg-desktop-menu install [--noupdate] [--novendor] [--mode
+   mode] directory-file(s) desktop-file(s)
+
+   xdg-desktop-menu uninstall [--noupdate] [--mode mode]
+   directory-file(s) desktop-file(s)
+
+   xdg-desktop-menu forceupdate [--mode mode]
+
+   xdg-desktop-menu { --help | --manual | --version }
+
+Description
+
+   The xdg-desktop-menu program can be used to install new menu
+   entries to the desktop's application menu.
+
+   The application menu works according to the XDG Desktop Menu
+   Specification at
+   http://www.freedesktop.org/wiki/Specifications/menu-spec
+
+Commands
+
+   install
+          Install one or more applications in a submenu of the
+          desktop menu system.
+
+          desktop-file: A desktop file represents a single menu
+          entry in the menu. Desktop files are defined by the
+          freedesktop.org Desktop Entry Specification. The most
+          important aspects of *.desktop files are summarized
+          below.
+
+          Menu entries can be added to the menu system in two
+          different ways. They can either be added to a predefined
+          submenu in the menu system based on one or more category
+          keywords, or they can be added to a new submenu.
+
+          To add a menu entry to a predefined submenu the desktop
+          file that represents the menu entry must have a
+          Categories= entry that lists one or more keywords. The
+          menu item will be included in an appropriate submenu
+          based on the included keywords.
+
+          To add menu items to a new submenu the desktop-files
+          must be preceded by a directory-file that describes the
+          submenu. If multiple desktop-files are specified, all
+          entries will be added to the same menu. If entries are
+          installed to a menu that has been created with a
+          previous call to xdg-desktop-menu the entries will be
+          installed in addition to any already existing entries.
+
+          directory-file: The *.directory file indicated by
+          directory-file represents a submenu. The directory file
+          provides the name and icon for a submenu. The name of
+          the directory file is used to identify the submenu.
+
+          If multiple directory files are provided each file will
+          represent a submenu within the menu that precedes it,
+          creating a nested menu hierarchy (sub-sub-menus). The
+          menu entries themselves will be added to the last
+          submenu.
+
+          Directory files follow the syntax defined by the
+          freedesktop.org Desktop Entry Specification.
+
+   uninstall
+          Remove applications or submenus from the desktop menu
+          system previously installed with xdg-desktop-menu
+          install.
+
+          A submenu and the associated directory file is only
+          removed when the submenu no longer contains any menu
+          entries.
+
+   forceupdate
+          Force an update of the menu system.
+
+          This command is only useful if the last call to
+          xdg-desktop-menu included the --noupdate option.
+
+Options
+
+   --noupdate
+          Postpone updating the menu system. If multiple updates
+          to the menu system are made in sequence this flag can be
+          used to indicate that additional changes will follow and
+          that it is not necessary to update the menu system right
+          away.
+
+   --novendor
+          Normally, xdg-desktop-menu checks to ensure that any
+          *.directory and *.desktop files to be installed has a
+          vendor prefix. This option can be used to disable that
+          check.
+
+          A vendor prefix consists of alpha characters ([a-zA-Z])
+          and is terminated with a dash ("-"). Companies and
+          organizations are encouraged to use a word or phrase,
+          preferably the organizations name, for which they hold a
+          trademark as their vendor prefix. The purpose of the
+          vendor prefix is to prevent name conflicts.
+
+   --mode mode
+          mode can be user or system. In user mode the file is
+          (un)installed for the current user only. In system mode
+          the file is (un)installed for all users on the system.
+          Usually only root is allowed to install in system mode.
+
+          The default is to use system mode when called by root
+          and to use user mode when called by a non-root user.
+
+   --help
+          Show command synopsis.
+
+   --manual
+          Show this manual page.
+
+   --version
+          Show the xdg-utils version information.
+
+Desktop Files
+
+   An application item in the application menu is represented by a
+   *.desktop file. A *.desktop file consists of a [Desktop Entry]
+   header followed by several Key=Value lines.
+
+   A *.desktop file can provide a name and description for an
+   application in several different languages. This is done by
+   adding a language code as used by LC_MESSAGES in square
+   brackets behind the Key. This way one can specify different
+   values for the same Key depending on the currently selected
+   language.
+
+   The following keys are often used:
+
+   Type=Application
+          This is a mandatory field that indicates that the
+          *.desktop file describes an application launcher.
+
+   Name=Application Name
+          The name of the application. For example Mozilla
+
+   GenericName=Generic Name
+          A generic description of the application. For example
+          Web Browser
+
+   Comment=Comment
+          Optional field to specify a tooltip for the application.
+          For example Visit websites on the Internet
+
+   Icon=Icon File
+          The icon to use for the application. This can either be
+          an absolute path to an image file or an icon-name. If an
+          icon-name is provided an image lookup by name is done in
+          the user's current icon theme. The xdg-icon-resource
+          command can be used to install image files into icon
+          themes. The advantage of using an icon-name instead of
+          an absolute path is that with an icon-name the
+          application icon can be provided in several different
+          sizes as well as in several differently themed styles.
+
+   Exec=Command Line
+          The command line to start the application. If the
+          application can open files the %f placeholder should be
+          specified. When a file is dropped on the application
+          launcher the %f is replaced with the file path of the
+          dropped file. If multiple files can be specified on the
+          command line the %F placeholder should be used instead
+          of %f. If the application is able to open URLs in
+          addition to local files then %u or %U can be used
+          instead of %f or %F.
+
+   Categories=Categories
+          A list of categories separated by semi-colons. A
+          category is a keyword that describes and classifies the
+          application. By default applications are organized in
+          the application menu based on category. When menu
+          entries are explicitly assigned to a new submenu it is
+          not necessary to list any categories.
+
+          When using categories it is recommended to include one
+          of the following categories: AudioVideo, Development,
+          Education, Game, Graphics, Network, Office, Settings,
+          System, Utility.
+
+          See Appendix A of the XDG Desktop Menu Specification for
+          information about additional categories:
+          http://standards.freedesktop.org/menu-spec/menu-spec-1.0
+          .html#category-registry
+
+   MimeType=Mimetypes
+          A list of mimetypes separated by semi-colons. This field
+          is used to indicate which file types the application is
+          able to open.
+
+   For a complete overview of the *.desktop file format please
+   visit
+   http://www.freedesktop.org/wiki/Specifications/desktop-entry-sp
+   ec
+
+Directory Files
+
+   The appearance of submenu in the application menu is provided
+   by a *.directory file. In particular it provides the title of
+   the submenu and a possible icon. A *.directory file consists of
+   a [Desktop Entry] header followed by several Key=Value lines.
+
+   A *.directory file can provide a title (name) for the submenu
+   in several different languages. This is done by adding a
+   language code as used by LC_MESSAGES in square brackets behind
+   the Key. This way one can specify different values for the same
+   Key depending on the currently selected language.
+
+   The following keys are relevant for submenus:
+
+   Type=Directory
+          This is a mandatory field that indicates that the
+          *.directory file describes a submenu.
+
+   Name=Menu Name
+          The title of submenu. For example Mozilla
+
+   Comment=Comment
+          Optional field to specify a tooltip for the submenu.
+
+   Icon=Icon File
+          The icon to use for the submenu. This can either be an
+          absolute path to an image file or an icon-name. If an
+          icon-name is provided an image lookup by name is done in
+          the user's current icon theme. The xdg-icon-resource
+          command can be used to install image files into icon
+          themes. The advantage of using an icon-name instead of
+          an absolute path is that with an icon-name the submenu
+          icon can be provided in several different sizes as well
+          as in several differently themed styles.
+
+Environment Variables
+
+   xdg-desktop-menu honours the following environment variables:
+
+   XDG_UTILS_DEBUG_LEVEL
+          Setting this environment variable to a non-zero
+          numerical value makes xdg-desktop-menu do more verbose
+          reporting on stderr. Setting a higher value increases
+          the verbosity.
+
+   XDG_UTILS_INSTALL_MODE
+          This environment variable can be used by the user or
+          administrator to override the installation mode. Valid
+          values are user and system.
+
+Exit Codes
+
+   An exit code of 0 indicates success while a non-zero exit code
+   indicates failure. The following failure codes can be returned:
+
+   1
+          Error in command line syntax.
+
+   2
+          One of the files passed on the command line did not
+          exist.
+
+   3
+          A required tool could not be found.
+
+   4
+          The action failed.
+
+   5
+          No permission to read one of the files passed on the
+          command line.
+
+See Also
+
+   xdg-desktop-icon(1), xdg-icon-resource(1), xdg-mime(1), Desktop
+   entry specification, Desktop menu specification
+
+Examples
+
+   The company ShinyThings Inc. has developed an application named
+   "WebMirror" and would like to add it to the application menu.
+   The company will use "shinythings" as its vendor id. In order
+   to add the application to the menu there needs to be a .desktop
+   file with a suitable Categories entry:
+shinythings-webmirror.desktop:
+
+  [Desktop Entry]
+  Encoding=UTF-8
+  Type=Application
+
+  Exec=webmirror
+  Icon=webmirror
+
+  Name=WebMirror
+  Name[nl]=WebSpiegel
+
+  Categories=Network;WebDevelopment;
+
+   Now the xdg-desktop-menu tool can be used to add the
+   shinythings-webmirror.desktop file to the desktop application
+   menu:
+xdg-desktop-menu install ./shinythings-webmirror.desktop
+
+   Note that for the purpose of this example the menu items are
+   available in two languages, English and Dutch. The language
+   code for Dutch is nl.
+
+   In the next example the company ShinyThings Inc. will add its
+   own submenu to the desktop application menu consisting of a
+   "WebMirror" menu item and a "WebMirror Admin Tool" menu item.
+
+   First the company needs to create two .desktop files that
+   describe the two menu items. Since the items are to be added to
+   a new submenu it is not necessary to include a Categories=
+   line:
+shinythings-webmirror.desktop:
+
+  [Desktop Entry]
+  Encoding=UTF-8
+  Type=Application
+
+  Exec=webmirror
+  Icon=shinythings-webmirror
+
+  Name=WebMirror
+  Name[nl]=WebSpiegel
+
+
+shinythings-webmirror-admin.desktop:
+
+  [Desktop Entry]
+  Encoding=UTF-8
+  Type=Application
+
+  Exec=webmirror-admintool
+  Icon=shinythings-webmirror-admintool
+
+  Name=WebMirror Admin Tool
+  Name[nl]=WebSpiegel Administratie Tool
+
+   In addition a .directory file needs to be created to provide a
+   title and icon for the sub-menu itself:
+shinythings-webmirror.directory:
+
+  [Desktop Entry]
+  Encoding=UTF-8
+
+  Icon=shinythings-webmirror-menu
+
+  Name=WebMirror
+  Name[nl]=WebSpiegel
+
+   These file can now be installed with:
+xdg-desktop-menu install ./shinythings-webmirror.directory \
+      ./shinythings-webmirror.desktop ./shinythings-webmirror-admin.desk
+top
+
+   The menu entries could also be installed one by one:
+xdg-desktop-menu install --noupdate ./shinythings-webmirror.directory \
+      ./shinythings-webmirror.desktop
+xdg-desktop-menu install --noupdate ./shinythings-webmirror.directory \
+      ./shinythings-webmirror-admin.desktop
+xdg-desktop-menu forceupdate
+
+   Although the result is the same it is slightly more efficient
+   to install all files at the same time.
+
+   The *.desktop and *.directory files reference icons with the
+   names webmirror, webmirror-admin and webmirror-menu which
+   should also be installed. In this example the icons are
+   installed in two different sizes, once with a size of 22x22
+   pixels and once with a size of 64x64 pixels:
+xdg-icon-resource install --size 22 ./wmicon-22.png shinythings-webmirro
+r
+xdg-icon-resource install --size 22 ./wmicon-menu-22.png shinythings-web
+mirror-menu
+xdg-icon-resource install --size 22 ./wmicon-admin-22.png shinythings-we
+bmirror-admin
+xdg-icon-resource install --size 64 ./wmicon-64.png shinythings-webmirro
+r
+xdg-icon-resource install --size 64 ./wmicon-menu-64.png shinythings-web
+mirror-menu
+xdg-icon-resource install --size 64 ./wmicon-admin-64.png shinythings-we
+bmirror-admin
+_MANUALPAGE
+}
+
+usage()
+{
+cat << _USAGE
+   xdg-desktop-menu -- command line tool for (un)installing
+   desktop menu items
+
+Synopsis
+
+   xdg-desktop-menu install [--noupdate] [--novendor] [--mode
+   mode] directory-file(s) desktop-file(s)
+
+   xdg-desktop-menu uninstall [--noupdate] [--mode mode]
+   directory-file(s) desktop-file(s)
+
+   xdg-desktop-menu forceupdate [--mode mode]
+
+   xdg-desktop-menu { --help | --manual | --version }
+
+_USAGE
+}
+
+#@xdg-utils-common@
+
+#----------------------------------------------------------------------------
+#   Common utility functions included in all XDG wrapper scripts
+#----------------------------------------------------------------------------
+
+DEBUG()
+{
+  [ -z "${XDG_UTILS_DEBUG_LEVEL}" ] && return 0;
+  [ ${XDG_UTILS_DEBUG_LEVEL} -lt $1 ] && return 0;
+  shift
+  echo "$@" >&2
+}
+
+# This handles backslashes but not quote marks.
+first_word()
+{
+    read first rest
+    echo "$first"
+}
+
+#-------------------------------------------------------------
+# map a binary to a .desktop file
+binary_to_desktop_file()
+{
+    search="${XDG_DATA_HOME:-$HOME/.local/share}:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+    binary="`which "$1"`"
+    binary="`readlink -f "$binary"`"
+    base="`basename "$binary"`"
+    IFS=:
+    for dir in $search; do
+        unset IFS
+        [ "$dir" ] || continue
+        [ -d "$dir/applications" ] || [ -d "$dir/applnk" ] || continue
+        for file in "$dir"/applications/*.desktop "$dir"/applications/*/*.desktop "$dir"/applnk/*.desktop "$dir"/applnk/*/*.desktop; do
+            [ -r "$file" ] || continue
+            # Check to make sure it's worth the processing.
+            grep -q "^Exec.*$base" "$file" || continue
+            # Make sure it's a visible desktop file (e.g. not "preferred-web-browser.desktop").
+            grep -Eq "^(NoDisplay|Hidden)=true" "$file" && continue
+            command="`grep -E "^Exec(\[[^]=]*])?=" "$file" | cut -d= -f 2- | first_word`"
+            command="`which "$command"`"
+            if [ x"`readlink -f "$command"`" = x"$binary" ]; then
+                # Fix any double slashes that got added path composition
+                echo "$file" | sed -e 's,//*,/,g'
+                return
+            fi
+        done
+    done
+}
+
+#-------------------------------------------------------------
+# map a .desktop file to a binary
+## FIXME: handle vendor dir case
+desktop_file_to_binary()
+{
+    search="${XDG_DATA_HOME:-$HOME/.local/share}:${XDG_DATA_DIRS:-/usr/local/share:/usr/share}"
+    desktop="`basename "$1"`"
+    IFS=:
+    for dir in $search; do
+        unset IFS
+        [ "$dir" ] && [ -d "$dir/applications" ] || continue
+        file="$dir/applications/$desktop"
+        [ -r "$file" ] || continue
+        # Remove any arguments (%F, %f, %U, %u, etc.).
+        command="`grep -E "^Exec(\[[^]=]*])?=" "$file" | cut -d= -f 2- | first_word`"
+        command="`which "$command"`"
+        readlink -f "$command"
+        return
+    done
+}
+
+#-------------------------------------------------------------
+# Exit script on successfully completing the desired operation
+
+exit_success()
+{
+    if [ $# -gt 0 ]; then
+        echo "$@"
+        echo
+    fi
+
+    exit 0
+}
+
+
+#-----------------------------------------
+# Exit script on malformed arguments, not enough arguments
+# or missing required option.
+# prints usage information
+
+exit_failure_syntax()
+{
+    if [ $# -gt 0 ]; then
+        echo "xdg-desktop-menu: $@" >&2
+        echo "Try 'xdg-desktop-menu --help' for more information." >&2
+    else
+        usage
+        echo "Use 'man xdg-desktop-menu' or 'xdg-desktop-menu --manual' for additional info."
+    fi
+
+    exit 1
+}
+
+#-------------------------------------------------------------
+# Exit script on missing file specified on command line
+
+exit_failure_file_missing()
+{
+    if [ $# -gt 0 ]; then
+        echo "xdg-desktop-menu: $@" >&2
+    fi
+
+    exit 2
+}
+
+#-------------------------------------------------------------
+# Exit script on failure to locate necessary tool applications
+
+exit_failure_operation_impossible()
+{
+    if [ $# -gt 0 ]; then
+        echo "xdg-desktop-menu: $@" >&2
+    fi
+
+    exit 3
+}
+
+#-------------------------------------------------------------
+# Exit script on failure returned by a tool application
+
+exit_failure_operation_failed()
+{
+    if [ $# -gt 0 ]; then
+        echo "xdg-desktop-menu: $@" >&2
+    fi
+
+    exit 4
+}
+
+#------------------------------------------------------------
+# Exit script on insufficient permission to read a specified file
+
+exit_failure_file_permission_read()
+{
+    if [ $# -gt 0 ]; then
+        echo "xdg-desktop-menu: $@" >&2
+    fi
+
+    exit 5
+}
+
+#------------------------------------------------------------
+# Exit script on insufficient permission to write a specified file
+
+exit_failure_file_permission_write()
+{
+    if [ $# -gt 0 ]; then
+        echo "xdg-desktop-menu: $@" >&2
+    fi
+
+    exit 6
+}
+
+check_input_file()
+{
+    if [ ! -e "$1" ]; then
+        exit_failure_file_missing "file '$1' does not exist"
+    fi
+    if [ ! -r "$1" ]; then
+        exit_failure_file_permission_read "no permission to read file '$1'"
+    fi
+}
+
+check_vendor_prefix()
+{
+    file_label="$2"
+    [ -n "$file_label" ] || file_label="filename"
+    file=`basename "$1"`
+    case "$file" in
+       [[:alpha:]]*-*)
+         return
+         ;;
+    esac
+
+    echo "xdg-desktop-menu: $file_label '$file' does not have a proper vendor prefix" >&2
+    echo 'A vendor prefix consists of alpha characters ([a-zA-Z]) and is terminated' >&2
+    echo 'with a dash ("-"). An example '"$file_label"' is '"'example-$file'" >&2
+    echo "Use --novendor to override or 'xdg-desktop-menu --manual' for additional info." >&2
+    exit 1
+}
+
+check_output_file()
+{
+    # if the file exists, check if it is writeable
+    # if it does not exists, check if we are allowed to write on the directory
+    if [ -e "$1" ]; then
+        if [ ! -w "$1" ]; then
+            exit_failure_file_permission_write "no permission to write to file '$1'"
+        fi
+    else
+        DIR=`dirname "$1"`
+        if [ ! -w "$DIR" ] || [ ! -x "$DIR" ]; then
+            exit_failure_file_permission_write "no permission to create file '$1'"
+        fi
+    fi
+}
+
+#----------------------------------------
+# Checks for shared commands, e.g. --help
+
+check_common_commands()
+{
+    while [ $# -gt 0 ] ; do
+        parm="$1"
+        shift
+
+        case "$parm" in
+            --help)
+            usage
+            echo "Use 'man xdg-desktop-menu' or 'xdg-desktop-menu --manual' for additional info."
+            exit_success
+            ;;
+
+            --manual)
+            manualpage
+            exit_success
+            ;;
+
+            --version)
+            echo "xdg-desktop-menu 1.1.0 rc3"
+            exit_success
+            ;;
+        esac
+    done
+}
+
+check_common_commands "$@"
+
+[ -z "${XDG_UTILS_DEBUG_LEVEL}" ] && unset XDG_UTILS_DEBUG_LEVEL;
+if [ ${XDG_UTILS_DEBUG_LEVEL-0} -lt 1 ]; then
+    # Be silent
+    xdg_redirect_output=" > /dev/null 2> /dev/null"
+else
+    # All output to stderr
+    xdg_redirect_output=" >&2"
+fi
+
+#--------------------------------------
+# Checks for known desktop environments
+# set variable DE to the desktop environments name, lowercase
+
+detectDE()
+{
+    # see https://bugs.freedesktop.org/show_bug.cgi?id=34164
+    unset GREP_OPTIONS
+
+    if [ -n "${XDG_CURRENT_DESKTOP}" ]; then
+      case "${XDG_CURRENT_DESKTOP}" in
+         # only recently added to menu-spec, pre-spec X- still in use
+         Cinnamon|X-Cinnamon)
+           DE=cinnamon;
+           ;;
+         ENLIGHTENMENT)
+           DE=enlightenment;
+           ;;
+         # GNOME, GNOME-Classic:GNOME, or GNOME-Flashback:GNOME
+         GNOME*)
+           DE=gnome;
+           ;;
+         KDE)
+           DE=kde;
+           ;;
+         LXDE)
+           DE=lxde;
+           ;;
+         MATE)
+           DE=mate;
+           ;;
+         XFCE)
+           DE=xfce
+           ;;
+         X-Generic)
+           DE=generic
+           ;;
+      esac
+    fi
+
+    if [ x"$DE" = x"" ]; then
+      # classic fallbacks
+      if [ x"$KDE_FULL_SESSION" != x"" ]; then DE=kde;
+      elif [ x"$GNOME_DESKTOP_SESSION_ID" != x"" ]; then DE=gnome;
+      elif [ x"$MATE_DESKTOP_SESSION_ID" != x"" ]; then DE=mate;
+      elif `dbus-send --print-reply --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.GetNameOwner string:org.gnome.SessionManager > /dev/null 2>&1` ; then DE=gnome;
+      elif xprop -root _DT_SAVE_MODE 2> /dev/null | grep ' = \"xfce4\"$' >/dev/null 2>&1; then DE=xfce;
+      elif xprop -root 2> /dev/null | grep -i '^xfce_desktop_window' >/dev/null 2>&1; then DE=xfce
+      elif echo $DESKTOP | grep -q '^Enlightenment'; then DE=enlightenment;
+      fi
+    fi
+
+    if [ x"$DE" = x"" ]; then
+      # fallback to checking $DESKTOP_SESSION
+      case "$DESKTOP_SESSION" in
+         gnome)
+           DE=gnome;
+           ;;
+         LXDE|Lubuntu)
+           DE=lxde; 
+           ;;
+         MATE)
+           DE=mate;
+           ;;
+         xfce|xfce4|'Xfce Session')
+           DE=xfce;
+           ;;
+      esac
+    fi
+
+    if [ x"$DE" = x"" ]; then
+      # fallback to uname output for other platforms
+      case "$(uname 2>/dev/null)" in 
+        CYGWIN*)
+          DE=cygwin;
+          ;;
+        Darwin)
+          DE=darwin;
+          ;;
+      esac
+    fi
+
+    if [ x"$DE" = x"gnome" ]; then
+      # gnome-default-applications-properties is only available in GNOME 2.x
+      # but not in GNOME 3.x
+      which gnome-default-applications-properties > /dev/null 2>&1  || DE="gnome3"
+    fi
+}
+
+#----------------------------------------------------------------------------
+# kfmclient exec/openURL can give bogus exit value in KDE <= 3.5.4
+# It also always returns 1 in KDE 3.4 and earlier
+# Simply return 0 in such case
+
+kfmclient_fix_exit_code()
+{
+    version=`LC_ALL=C.UTF-8 kde-config --version 2>/dev/null | grep '^KDE'`
+    major=`echo $version | sed 's/KDE.*: \([0-9]\).*/\1/'`
+    minor=`echo $version | sed 's/KDE.*: [0-9]*\.\([0-9]\).*/\1/'`
+    release=`echo $version | sed 's/KDE.*: [0-9]*\.[0-9]*\.\([0-9]\).*/\1/'`
+    test "$major" -gt 3 && return $1
+    test "$minor" -gt 5 && return $1
+    test "$release" -gt 4 && return $1
+    return 0
+}
+
+update_desktop_database()
+{
+#    echo Update desktop database: $mode
+    if [ "$mode" = "system" ] ; then
+        for x in `echo $PATH | sed 's/:/ /g'` /opt/gnome/bin; do
+           if [ -x $x/update-desktop-database ] ; then
+              DEBUG 1 "Running $x/update-desktop-database"
+              eval '$x/update-desktop-database'$xdg_redirect_output
+              return
+           fi
+        done
+    fi
+}
+
+# Make application $1/$2 the default for all the mimetypes it support,
+# iff such mimetype didn't had a default application already.
+# $1 Install dir for desktop file
+# $2 base name of desktop file
+make_lazy_default()
+{
+    local mimetypes
+    local xdg_user_dir
+    local xdg_default_dirs
+
+    DEBUG 1 "make_lazy_default $1/$2"
+    mimetypes=`awk '
+{
+    if (match($0,/MimeType=/)) {
+        split(substr($0,RSTART+9),mimetypes,";")
+        for (n in mimetypes)
+        {
+               if (mimetypes[n])
+                 print mimetypes[n]
+        }
+    }
+}' "$1/$2" 2> /dev/null`
+
+    for MIME in $mimetypes ; do
+        xdg_default_dirs="$XDG_DATA_DIRS"
+        [ -n "$xdg_default_dirs" ] || xdg_default_dirs=/usr/local/share/:/usr/share/
+        if [ x"$mode" = x"user" ] ; then
+            xdg_user_dir="$XDG_DATA_HOME"
+            [ -n "$xdg_user_dir" ] || xdg_user_dir="$HOME/.local/share"
+            xdg_default_dirs="$xdg_user_dir:$xdg_default_dirs"
+        fi
+        local default_app
+        for x in `echo "$xdg_default_dirs" | sed 's/:/ /g'`; do
+            DEBUG 2 "Checking $x/applications/defaults.list"
+            default_app=`grep "$MIME=" $x/applications/defaults.list 2> /dev/null | cut -d '=' -f 2`
+            if [ -n "$default_app" ] ; then
+                DEBUG 2 "Found default apps for $MIME: $default_app"
+                default_app="$default_app;"
+                break;
+            fi
+        done
+        DEBUG 2 "Current default apps for $MIME: $default_app"
+        if echo "$default_app" | grep "$2" > /dev/null 2> /dev/null; then
+            # App already listed as default
+            continue;
+        fi
+        default_file="$(readlink -f "$1/defaults.list")"
+        DEBUG 1 "Updating $default_file"
+        grep -v "$MIME=" $default_file > ${default_file}.new 2> /dev/null
+        if ! grep "[Default Applications]" ${default_file}.new > /dev/null; then
+            echo "[Default Applications]" >> ${default_file}.new
+        fi
+        echo $MIME="$default_app$2" >> ${default_file}.new
+        mv ${default_file}.new $default_file
+    done
+}
+
+update_submenu()
+{
+    DEBUG 1 "update_submenu $1"
+    menu_file="$1"
+
+    xdg_dir_name=menus
+    xdg_user_dir="$XDG_CONFIG_HOME"
+    [ -n "$xdg_user_dir" ] || xdg_user_dir="$HOME/.config"
+    xdg_user_dir="$xdg_user_dir/$xdg_dir_name"
+
+    xdg_system_dirs="$XDG_CONFIG_DIRS"
+    [ -n "$xdg_system_dirs" ] || xdg_system_dirs=/etc/xdg
+    xdg_global_dir=
+    for x in `echo $xdg_system_dirs | sed 's/:/ /g'` ; do
+        if [ -w $x/$xdg_dir_name ] ; then
+            xdg_global_dir="$x/$xdg_dir_name"
+            break
+        fi
+    done
+    xdg_user_dir="$xdg_user_dir/applications-merged"
+    xdg_global_dir="$xdg_global_dir/applications-merged"
+
+    DEBUG 3 "Install locations for *.menu file:"
+    DEBUG 3 "xdg_user_dir: $xdg_user_dir"
+    DEBUG 3 "xdg_global_dir: $xdg_global_dir"
+    DEBUG 3 "kde_user_dir: $kde_user_dir"
+    DEBUG 3 "kde_global_dir: $kde_global_dir"
+    DEBUG 3 "gnome_user_dir: $gnome_user_dir"
+    DEBUG 3 "gnome_global_dir: $gnome_global_dir"
+
+    if [ x"$mode" = x"user" ] ; then
+        xdg_dir="$xdg_user_dir"
+        kde_dir="$kde_user_dir"
+        gnome_dir="$gnome_user_dir"
+        my_umask=077
+        my_chmod=0600
+    else
+        xdg_dir="$xdg_global_dir"
+        kde_dir="$kde_global_dir"
+        gnome_dir="$gnome_global_dir"
+        my_umask=022
+        my_chmod=0644
+        if [ -z "${xdg_dir}${kde_dir}${gnome_dir}" ] ; then
+            exit_failure_operation_impossible "No writable system menu directory found."
+        fi
+    fi
+
+    if [ -z "$menu_file" ] ; then
+        # Work around for SUSE/gnome 2.12 to pick up new ~/.local/share/applications
+        save_umask=`umask`
+        umask $my_umask
+
+        mkdir -p $xdg_dir
+        touch $xdg_dir/xdg-desktop-menu-dummy.menu
+
+        umask $save_umask
+        return
+    fi
+
+    if [ $action = "install" ] && [ -f "/etc/xdg/menus/gnome-applications.menu" ] ; then
+        # Work around for Debian Gnome
+        gnome_xdg_dir=`echo "$xdg_dir" | sed -e 's^/applications-merged^/gnome-applications-merged^'`
+        if [ ! -e "$gnome_xdg_dir" ] ; then
+            DEBUG 1 "Debian Workaround: Link '$xdg_dir' to '$gnome_xdg_dir'"
+            mkdir -p `dirname "$gnome_xdg_dir"`
+            eval 'ln -s "applications-merged" "$gnome_xdg_dir"'$xdg_redirect_output
+        fi
+    fi
+    if [ $action = "install" ] && [ -f "/etc/mandrake-release" ] ; then
+        # Work around for Mandriva 2006
+        mandrake_xdg_dir=`echo "$xdg_dir" | sed -e 's^/applications-merged^/applications-mdk-merged^'`
+        if [ ! -e "$mandrake_xdg_dir" ] ; then
+            DEBUG 1 "Mandriva Workaround: Link '$xdg_dir' to '$mandrake_xdg_dir'"
+            mkdir -p `dirname "$mandrake_xdg_dir"`
+            eval 'ln -s "applications-merged" "$mandrake_xdg_dir"'$xdg_redirect_output
+        fi
+    fi
+    if [ $action = "install" -a x"$mode" = x"user" ] && [ -d "/etc/xdg/menus/kde-applications-merged" ] ; then
+        # Work around for Fedora Core 5 + patched KDE
+        kde_xdg_dir=`echo "$xdg_dir" | sed -e 's^/applications-merged^/kde-applications-merged^'`
+        if [ ! -e "$kde_xdg_dir" ] ; then
+            DEBUG 1 "Fedora Workaround: Link '$xdg_dir' to '$kde_xdg_dir'"
+            mkdir -p `dirname "$kde_xdg_dir"`
+            eval 'ln -s "applications-merged" "$kde_xdg_dir"'$xdg_redirect_output
+        fi
+    fi
+    if [ $action = "install" -a x"$mode" = x"system" ] && [ -d "/etc/xdg/menus/kde-applications-merged" ] && [ ! -d "/etc/xdg/menus/applications-merged" ] ; then
+        # Work around for Kubuntu 6.06
+        kde_xdg_dir=`echo "$xdg_dir" | sed -e 's^/applications-merged^/kde-applications-merged^'`
+        DEBUG 1 "Kubuntu Workaround: Link '$xdg_dir' to 'kde-applications-merged'"
+        eval 'ln -s "kde-applications-merged" "$xdg_dir"'$xdg_redirect_output
+    fi
+
+    orig_menu_file=$xdg_dir/$menu_file
+
+    DEBUG 1 "Updating $orig_menu_file ($action)"
+
+    test "${TMPDIR+set}" = set || TMPDIR=/tmp
+    tmpfile=`mktemp $TMPDIR/tmp.XXXXXXXXXX`
+    orig_desktop_files=
+    if [ -r "$orig_menu_file" ] ; then
+        awk '
+# List all files within <Filename> tags
+BEGIN {
+  RS="<"
+}
+/^Filename/ {
+  if (match($0,/>/)) {
+     print substr($0,RSTART+1)
+  }
+}' $orig_menu_file > $tmpfile
+    fi
+
+    orig_desktop_files=`cat $tmpfile`
+    new_desktop_files=
+    if [ $action = "install" ] ; then
+        for desktop_file in $desktop_files; do
+            basefile=`basename "$desktop_file"`
+            if ! grep '^'$basefile'$' $tmpfile > /dev/null 2> /dev/null ; then
+            	# Append
+            	echo "$basefile" >> $tmpfile
+            fi
+        done
+        new_desktop_files=`cat $tmpfile`
+    fi
+    if [ $action = "uninstall" ] ; then
+        echo > $tmpfile
+        for desktop_file in $desktop_files; do
+            echo "$desktop_file" >> $tmpfile
+        done
+        # Files to uninstall are listed in $tmpfile
+        # Existing files are in $orig_desktop_files
+        if [ ! -z "$orig_desktop_files" ]; then
+        for desktop_file in $orig_desktop_files; do
+            if ! grep '^'$desktop_file'$' $tmpfile > /dev/null 2> /dev/null; then
+            	# Keep this file, it's not in the uninstall list
+            	new_desktop_files="$new_desktop_files $desktop_file"
+            fi
+        done
+        fi
+    fi
+    rm -f "$tmpfile"
+
+    DEBUG 3 "Files to list in $menu_file: $new_desktop_files"
+
+    if [ -n "$new_desktop_files" ] ; then
+        # Install/update
+        test "${TMPDIR+set}" = set || TMPDIR=/tmp
+        tmpfile=`mktemp $TMPDIR/tmp.XXXXXXXXXX`
+        (
+            echo '<!DOCTYPE Menu PUBLIC "-//freedesktop//DTD Menu 1.0//EN"'
+            echo '    "http://www.freedesktop.org/standards/menu-spec/menu-1.0.dtd">'
+            echo '<!-- Do not edit manually - generated and managed by xdg-desktop-menu -->'
+            echo '<Menu>'
+            echo '    <Name>Applications</Name>'
+
+            for desktop_file in $directory_files; do
+                basefile=`basename "$desktop_file"`
+                basefilename=`echo "$basefile"|cut -d '.' -f 1`
+                echo "<Menu>"
+                echo "    <Name>$basefilename</Name>"
+                echo "    <Directory>$basefile</Directory>"
+            done
+
+            echo "    <Include>"
+            for desktop_file in $new_desktop_files; do
+                echo "        <Filename>$desktop_file</Filename>"
+            done
+            echo "    </Include>"
+
+            for desktop_file in $directory_files; do
+                echo "</Menu>"
+            done
+
+            echo '</Menu>'
+        ) > $tmpfile
+        chmod $my_chmod $tmpfile
+
+        save_umask=`umask`
+        umask $my_umask
+
+        mkdir -p $xdg_dir
+        eval 'cp $tmpfile $xdg_dir/$menu_file'$xdg_redirect_output
+
+        umask $save_umask
+	rm -f "$tmpfile"
+    else
+        # Uninstall
+        rm -f $xdg_dir/$menu_file
+    fi
+
+    # Uninstall .directory files only if no longer referenced
+    if [ $action = "uninstall" ] ; then
+        test "${TMPDIR+set}" = set || TMPDIR=/tmp
+        tmpfile=`mktemp $TMPDIR/tmp.XXXXXXXXXX`
+        for menu_file in $xdg_dir/*; do
+            if grep 'generated and managed by xdg-desktop-menu' "$menu_file" > /dev/null 2> /dev/null; then
+                awk '
+# List all files within <Directory> tags
+BEGIN {
+  RS="<"
+}
+/^Directory/ {
+  if (match($0,/>/)) {
+     print substr($0,RSTART+1)
+  }
+}' "$menu_file" >> $tmpfile
+            fi
+        done
+        orig_directory_files="$directory_files"
+        directory_files=
+        for desktop_file in $orig_directory_files; do
+            if ! grep '^'$desktop_file'$' $tmpfile > /dev/null 2> /dev/null; then
+                # No longer in use, safe to delete
+               directory_files="$directory_files $desktop_file"
+            fi
+        done
+        rm -f "$tmpfile"
+    fi
+}
+
+
+[ x"$1" != x"" ] || exit_failure_syntax
+
+mode=
+action=
+update=yes
+desktop_files=
+directory_files=
+
+case $1 in
+  install)
+    action=install
+    ;;
+
+  uninstall)
+    action=uninstall
+    ;;
+
+  forceupdate)
+    action=forceupdate
+    ;;
+
+  *)
+    exit_failure_syntax "unknown command '$1'"
+    ;;
+esac
+
+shift
+
+vendor=true
+while [ $# -gt 0 ] ; do
+    parm="$1"
+    shift
+
+    case "$parm" in
+      --noupdate)
+        update=no
+        ;;
+
+      --mode)
+        if [ -z "$1" ] ; then
+            exit_failure_syntax "mode argument missing for --mode"
+        fi
+        case "$1" in
+          user)
+            mode="user"
+            ;;
+
+          system)
+            mode="system"
+            ;;
+
+          *)
+            exit_failure_syntax "unknown mode '$1'"
+            ;;
+        esac
+        shift
+        ;;
+
+      --novendor)
+        vendor=false
+        ;;
+
+      -*)
+        exit_failure_syntax "unexpected option '$parm'"
+        ;;
+
+      *)
+        if [ "$action" = "install" ] ; then
+            check_input_file "$parm"
+        fi
+        case "$parm" in
+           *.directory)
+              if [ -n "$desktop_files" ] ; then
+                  exit_failure_syntax "'$parm' must preceed any *.desktop file"
+              fi
+              directory_files="$directory_files $parm"
+              ;;
+           *.desktop)
+              desktop_files="$desktop_files $parm"
+              ;;
+           *)
+              exit_failure_syntax "file to $action must be a *.directory or *.desktop file"
+              ;;
+        esac
+        ;;
+    esac
+done
+
+# Shouldn't happen
+if [ -z "$action" ] ; then
+    exit_failure_syntax "command argument missing"
+fi
+
+if [ -n "$XDG_UTILS_INSTALL_MODE" ] ; then
+    if [ "$XDG_UTILS_INSTALL_MODE" = "system" ] ; then
+        mode="system"
+    elif [ "$XDG_UTILS_INSTALL_MODE" = "user" ] ; then
+        mode="user"
+    fi
+fi
+
+if [ -z "$mode" ] ; then
+    if [ `whoami` = "root" ] ; then
+       mode="system"
+    else
+       mode="user"
+    fi
+fi
+
+if [ x"$action" = x"forceupdate" ] ; then
+    update_desktop_database
+    exit_success
+fi
+
+if [ -z "$desktop_files" ] ; then
+    exit_failure_syntax "desktop-file argument missing"
+fi
+
+menu_name=
+for desktop_file in $directory_files; do
+    if [ "$vendor" =  "true" -a "$action" = "install" ] ; then
+        check_vendor_prefix "$desktop_file"
+    fi
+
+    basefilename=`basename "$desktop_file" | cut -d '.' -f 1`
+    if [ -z "$menu_name" ] ; then
+        menu_name="$basefilename"
+    else
+        menu_name="$menu_name-$basefilename"
+    fi
+done
+
+if [ -n "$menu_name" ] ; then
+    if [ x"$mode" = x"user" ] ; then
+        update_submenu "user-$menu_name.menu"
+    else
+        update_submenu "$menu_name.menu"
+    fi
+else
+    # Work around for SUSE/gnome 2.12 to pick up new ~/.local/share/applications
+    if [ x"$mode" = x"user" ] ; then
+        update_submenu
+    fi
+fi
+
+# Install *.directory files
+
+xdg_dir_name=desktop-directories
+
+xdg_user_dir="$XDG_DATA_HOME"
+[ -n "$xdg_user_dir" ] || xdg_user_dir="$HOME/.local/share"
+xdg_user_dir="$xdg_user_dir/$xdg_dir_name"
+
+xdg_system_dirs="$XDG_DATA_DIRS"
+[ -n "$xdg_system_dirs" ] || xdg_system_dirs=/usr/local/share/:/usr/share/
+xdg_global_dir=
+for x in `echo $xdg_system_dirs | sed 's/:/ /g'` ; do
+    if [ -w $x/$xdg_dir_name ] ; then
+        xdg_global_dir="$x/$xdg_dir_name"
+        break
+    fi
+done
+
+DEBUG 3 "Install locations for *.directory files:"
+DEBUG 3 "xdg_user_dir: $xdg_user_dir"
+DEBUG 3 "xdg_global_dir: $xdg_global_dir"
+DEBUG 3 "kde_user_dir: $kde_user_dir"
+DEBUG 3 "kde_global_dir: $kde_global_dir"
+DEBUG 3 "gnome_user_dir: $gnome_user_dir"
+DEBUG 3 "gnome_global_dir: $gnome_global_dir"
+
+if [ x"$mode" = x"user" ] ; then
+    xdg_dir="$xdg_user_dir"
+    kde_dir="$kde_user_dir"
+    gnome_dir="$gnome_user_dir"
+    my_umask=077
+else
+    xdg_dir="$xdg_global_dir"
+    kde_dir="$kde_global_dir"
+    gnome_dir="$gnome_global_dir"
+    my_umask=022
+    if [ -z "${xdg_dir}${kde_dir}${gnome_dir}" ] ; then
+        exit_failure_operation_impossible "No writable system menu directory found."
+    fi
+fi
+
+for desktop_file in $directory_files; do
+    basefile=`basename "$desktop_file"`
+
+    DEBUG 1 "$action $desktop_file in $xdg_dir $kde_dir $gnome_dir"
+
+    case $action in
+        install)
+            save_umask=`umask`
+            umask $my_umask
+
+            for x in $xdg_dir $kde_dir $gnome_dir ; do
+                mkdir -p $x
+                eval 'cp $desktop_file $x/$basefile'$xdg_redirect_output
+            done
+
+            umask $save_umask
+            ;;
+
+        uninstall)
+            for x in $xdg_dir $kde_dir $gnome_dir ; do
+                rm -f $x/$basefile
+            done
+
+            ;;
+    esac
+done
+
+# Install *.desktop files
+xdg_dir_name=applications
+
+xdg_user_dir="$XDG_DATA_HOME"
+[ -n "$xdg_user_dir" ] || xdg_user_dir="$HOME/.local/share"
+xdg_user_dir="$xdg_user_dir/$xdg_dir_name"
+
+xdg_system_dirs="$XDG_DATA_DIRS"
+[ -n "$xdg_system_dirs" ] || xdg_system_dirs=/usr/local/share/:/usr/share/
+xdg_global_dir=
+for x in `echo $xdg_system_dirs | sed 's/:/ /g'` ; do
+    if [ -w $x/$xdg_dir_name ] ; then
+        xdg_global_dir="$x/$xdg_dir_name"
+        break
+    fi
+done
+
+kde_user_dir=`kde${KDE_SESSION_VERSION}-config --path apps 2> /dev/null | cut -d ':' -f 1`
+kde_global_dir=`kde${KDE_SESSION_VERSION}-config --path apps 2> /dev/null | cut -d ':' -f 2`
+[ -w $kde_global_dir ] || kde_global_dir=
+
+gnome_user_dir="$HOME/.gnome/apps"
+gnome_global_dir="/usr/share/gnome/apps"
+[ -w $gnome_global_dir ] || gnome_global_dir=
+
+DEBUG 3 "Install locations for *.desktop files:"
+DEBUG 3 "xdg_user_dir: $xdg_user_dir"
+DEBUG 3 "xdg_global_dir: $xdg_global_dir"
+DEBUG 3 "kde_user_dir: $kde_user_dir"
+DEBUG 3 "kde_global_dir: $kde_global_dir"
+DEBUG 3 "gnome_user_dir: $gnome_user_dir"
+DEBUG 3 "gnome_global_dir: $gnome_global_dir"
+
+if [ x"$mode" = x"user" ] ; then
+    xdg_dir="$xdg_user_dir"
+    kde_dir="$kde_user_dir"
+    gnome_dir="$gnome_user_dir"
+    my_umask=077
+else
+    xdg_dir="$xdg_global_dir"
+    kde_dir="$kde_global_dir"
+    gnome_dir="$gnome_global_dir"
+    my_umask=022
+    if [ -z "${xdg_dir}${kde_dir}${gnome_dir}" ] ; then
+        exit_failure_operation_impossible "No writable system menu directory found."
+    fi
+fi
+
+for desktop_file in $desktop_files; do
+    if [ "$vendor" =  "true" -a "$action" = "install" ] ; then
+        check_vendor_prefix "$desktop_file"
+    fi
+
+    basefile=`basename "$desktop_file"`
+
+    DEBUG 1 "$action $desktop_file in $xdg_dir $kde_dir $gnome_dir"
+
+    case $action in
+        install)
+            save_umask=`umask`
+            umask $my_umask
+
+            for x in $xdg_dir $kde_dir $gnome_dir ; do
+                mkdir -p $x
+                eval 'cp $desktop_file $x/$basefile'$xdg_redirect_output
+            done
+
+            if [ -f $kde_dir/$basefile ] ; then
+                echo "OnlyShowIn=Old;" >> $kde_dir/$basefile
+            fi
+
+            if [ -f $gnome_dir/$basefile ] ; then
+                echo "OnlyShowIn=Old;" >> $gnome_dir/$basefile
+            fi
+
+            make_lazy_default "$xdg_dir" "$basefile"
+
+            umask $save_umask
+            ;;
+
+        uninstall)
+            for x in $xdg_dir $kde_dir $gnome_dir ; do
+                rm -f $x/$basefile
+            done
+
+            ;;
+    esac
+done
+
+if [ x"$update" = x"yes" ] ; then
+    update_desktop_database
+fi
+
+exit_success

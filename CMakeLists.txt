@@ -135,11 +135,10 @@ set(AppImageExtract_clean
 )
 
 
-ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppImageAssistant AppRun xorriso inotify-tools desktop-file-utils xdg-utils)
+ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppImageAssistant AppRun xorriso inotify-tools desktop-file-utils)
 ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
   WORKING_DIRECTORY "AppImageMonitor.AppDir"
   COMMAND install ../AppRun .
-  COMMAND install -t usr/bin/ ${third-party-dependencies_PREFIX}/install/bin/xdg-desktop-menu
   COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/xorriso ${third-party-dependencies_PREFIX}/install/lib/ .
   COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/inotifywait ${third-party-dependencies_PREFIX}/install/lib/ .
   COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/update-desktop-database ${third-party-dependencies_PREFIX}/install/lib/ .
@@ -152,7 +151,6 @@ set(AppImageMonitor_clean
   "AppImageMonitor.AppDir/AppRun;"
   "AppImageMonitor.AppDir/usr/bin/xorriso;"
   "AppImageMonitor.AppDir/usr/bin/inotifywait;"
-  "AppImageMonitor.AppDir/usr/bin/xdg-desktop-menu;"
   "AppImageMonitor.AppDir/usr/bin/update-desktop-database;"
   "AppImageMonitor.AppDir/usr/lib/;"
 )
