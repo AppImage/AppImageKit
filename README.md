@@ -184,6 +184,17 @@ See the [Wiki](https://github.com/probonopd/AppImageKit/wiki) for details and fo
 
 I support open source projects that wish to distribute their software as an AppImage. For closed source applications, I offer AppImage packaging and testing as a service.
 
-## TODO
+## Contributing
 
-* Update http://www.portablelinuxapps.org/docs/1.0/ to remove all references to elficon; include changelog section
+You are invited to contribute to the AppImage format, the AppImageKit tools, and the PortableLinuxApps website (which is a showcase of AppImage).
+
+The preferred channel of communication is https://github.com/probonopd/AppImageKit - please file [Issues](https://github.com/probonopd/AppImageKit/issues) (also for wishlist items or discussion topics) or submit [Pull requests](https://github.com/probonopd/AppImageKit/pulls).
+
+## Acknowledgements
+
+This work stands on the shoulders of giants. The following persons and organizations should specifically be thanked (in no particular order), even though this list can never be exhaustive:
+ * Apple Inc. for popularizing the notion of application bundles (even tough others have used this concept before). AppImages would not be understood by people as easily if it wasn't for Apple's .app bundles and .dmg disk images.
+ * The contributors of the ROX project, which introduced the AppDir format that the AppImage format is conceptually based on. AppImages improve on ROX AppDirs in that they encapsulate the AppDirs in a compressed container file which adds robustness and ease of administration.
+ * The contributors of the klik project, which AppImageKit is conceptually based on (with the principal author of AppImageKit being the founder of the klik project). AppImages imporve on klik in that they need no runtime to be installed on the base operating system before they can be used.
+ * Alexander Larsson for his work on Glick, which AppImageKit is technically based on. AppImageKit improves on Glick in that it uses a compressed filesystem and in that it provides additional tools which simpify creating AppImages.
+ * The contributors of the Python project, which gives developers a powerful tool to turn ideas into reality rapidly. AppImageKit would have been much more cumbersome to create if Python would not exist.
