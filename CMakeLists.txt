@@ -102,7 +102,8 @@ ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
   COMMAND install ../runtime .
   COMMAND ../installBinary.sh ${third-party-dependencies_PREFIX}/install/bin/xorriso ${third-party-dependencies_PREFIX}/install/lib/ .
   COMMAND mkdir -p usr/lib/ usr/share/pyshared/
-  COMMAND install -t usr/lib/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/{libglade-2.0.so.0,libvte.so.9}
+  COMMAND install -t usr/lib/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/libglade-2.0.so.0
+  COMMAND install -t usr/lib/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/libvte.so.9
   COMMAND install -t usr/share/pyshared/ ${binary-dependencies_PREFIX}/${ARCHITECTURE}/vte.so
   COMMAND rm -vf ../AppImageAssistant
   COMMAND ../AppImageAssistant.AppDir/package . ../AppImageAssistant
