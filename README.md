@@ -12,6 +12,16 @@ This document describes the AppImage format and AppImageKit. It is intended to d
 
 ## Motivation
 
+### Use cases
+
+Here are some concrete use cases for the AppImage format and the AppImageKit tools to create AppImages:
+
+ * "As a user, I want to go to an upstream download page, download an application from the original author, and run it on my Linux desktop system just like I would do with a Windwos or Mac application."
+ * "As a tester, I want to be able to get the latest bleeding-edge version of an application from a continuous build server and test it on my system, without needing to compile and without having to worry that I might mess up my system"
+ * "As an application author or ISV, I want to provide packages for Linux desktop systems just as I do for Windows and OS X, without the need to get it 'into' a distribution and without having to build for gazilions of different distributions"
+
+### The problem space
+
 Historically, UNIX and Linux systems have made it easy to procure source code, however they have made it comparably difficult to use ready-made software in binary form. Especially the Free Software and GNU movements stress the fact that everyone should be free to get the source code. This mode of operation has worked well as long as the user base of these operating systems was largely comprised of technically advanced users. With the widespread adoption of easy-to-use desktop operating systems such as Ubuntu, the user base became less technically-minded and more application-centric.
 
 Package mangers were introduced to mitigate the complexities of dealing with source code by providing libraries of precompiled packages from repositories maintained by distributors or third parties. However, the introduction of package mangers did not drastically reduce compexities or provide robustness - they merely stacked a management layer on top of an already complex system, effectively preventing the user from manipulating installed software directly.
@@ -19,8 +29,6 @@ Package mangers were introduced to mitigate the complexities of dealing with sou
 In contrast, other systems, most prominently Windows and the classic Macintosh operating system, have made it relatively simple for independent software publishers (ISPs) to distribute software and for end-users to procure and install software from said ISPs, without any instances (such as distributors or App Stores) between the two parties.
 
 With the introduction of Mac OS X, arguably the first UNIX-based operating system with widespread mass adoption to a non-technical user base, Apple blended traditional UNIX aspects (such as maintaining a traditional filesystem hierarchy, including `/bin`, `/usr`, `/lib` directories) with common "desktop" approaches (such as "installing" an application by dragging it to the hard disk). While Apple _does_ use a package manager-like approach for managing the base operating system and its updates, it does _not_ do so for the user applications.
-
-### The problem space
 
 Open Source operating systems, such as the most prominent Linux distributions, mostly use package mangers for everything. While this is perceived superior to Windows and the Mac by many Linux enthusiasts, it also creates a number of disadvantages:
 
