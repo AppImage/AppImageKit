@@ -20,6 +20,8 @@ In contrast, other systems, most prominently Windows and the classic Macintosh o
 
 With the introduction of Mac OS X, arguably the first UNIX-based operating system with widespread mass adoption to a non-technical user base, Apple blended traditional UNIX aspects (such as maintaining a traditional filesystem hierarchy, including `/bin`, `/usr`, `/lib` directories) with common "desktop" approaches (such as "installing" an application by dragging it to the hard disk). While Apple _does_ use a package manager-like approach for managing the base operating system and its updates, it does _not_ do so for the user applications.
 
+### The problem space
+
 Open Source operating systems, such as the most prominent Linux distributions, mostly use package mangers for everything. While this is perceived superior to Windows and the Mac by many Linux enthusiasts, it also creates a number of disadvantages:
 
  1. __Centralization__ Some organization decides what is "in" a distribution and what is not. By definition, software "in" a distribution is easier to install and manage that software that is not.
@@ -33,6 +35,8 @@ While this leads to a number of advantages that have been frequently reiterated,
  1. __No recent apps on mature operating systems__. In most distributions, you get only the version that was recent at the time when the distribution was created. For example, if you use Ubuntu Gutsy then you are stuck forever with the software that was recent at the time when Ubuntu Gutsy was compiled. Even if Firefox might have progressed by several versions in the meantime, you cannot get more recent apps than what was available back when the distribution was put together. That is like if you'd get only software from 2001 when you use Windows XP. In the traditional model, the user has to decide: Either use a mature base operating system but be locked out of recent apps (e.g., using Ubuntu LTE), or be forced to update the base operating system to the latest bleeding edge version in order to get the recent apps (e.g., using Debian Sid). This situation is clearly not optimal, since the common desktop user would prefer to hardly touch the base operating system (maybe update it every other year or so) but always get the latest apps.
  2. __No simple way to use multiple versions in parallel__. Most package managers do not allow you to have more than one version of an app installed in parallel. Hence you have no way to simply try out the latest version of an app without running the risk that it might not be easy to switch back to the older version, especially if the older version is no longer available in your distribution (e.g, old versions get removed from Debian Sid as soon as a newer version appears). This is especially annoying if you would simply like to try out a few things before you decide whether to use the old or the new version.
  3. __Not easy to move an app from one machine to another__. If you've used an app on one machine and decide that you would like to use the same app either under a different base operating system (say, you want to use OpenOffice on Fedora after having used it on Ubuntu) or if you would simply take the app from one machine to another (say from the desktop computer to the netbook), you have to download and install the app again (if you did not keep around the installation files and if the two operating systems don't share the exact same package format - both of which is rather unlikely).
+
+### Objectives
 
 The AppImage format has been created with specific objectives in mind.
 
