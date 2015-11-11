@@ -2,6 +2,8 @@
 
 Copyright (c) 2004-15 Simon Peter <probono@puredarwin.org> and contributors.
 
+Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, debian and derivatives.
+
 The __AppImage__ format is a format for packaging applications in a way that allows them to
 run on a variety of different target systems (base operating systems, distributions) without further modification. 
 
@@ -189,6 +191,8 @@ I support open source projects that wish to distribute their software as an AppI
 You are invited to contribute to the AppImage format, the AppImageKit tools, and the PortableLinuxApps website (which is a showcase of AppImage).
 
 The preferred channel of communication is https://github.com/probonopd/AppImageKit - please file [Issues](https://github.com/probonopd/AppImageKit/issues) (also for wishlist items or discussion topics) or submit [Pull requests](https://github.com/probonopd/AppImageKit/pulls).
+
+Instead of an IRC channel we use [Gitter](https://gitter.im/probonopd/AppImageKit) which has the advantage that one does not have to be online all the time and one can communicate despite not being in the same timezone.
 
 ## Acknowledgements
 
