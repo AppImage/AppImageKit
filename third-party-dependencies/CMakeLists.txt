@@ -11,6 +11,7 @@ ExternalProject_Add(libattr
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   BUILD_IN_SOURCE 1
 )
+set_target_properties(libattr PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 ExternalProject_Add(libacl
   DEPENDS libcwrap libattr
@@ -25,6 +26,7 @@ ExternalProject_Add(libacl
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   BUILD_IN_SOURCE 1
 )
+set_target_properties(libacl PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 if (USE_GNU_XORRISO)
   # xorriso provided by GNU xorriso
@@ -82,6 +84,7 @@ endif (USE_GNU_XORRISO)
 #  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
 #  BUILD_IN_SOURCE 1
 #)
+#set_target_properties(libglade PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 #ExternalProject_Add(libvte
 #  DEPENDS libcwrap
@@ -90,6 +93,7 @@ endif (USE_GNU_XORRISO)
 #  PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
 #  BUILD_IN_SOURCE 1
 #)
+#set_target_properties(libvte PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 
 ExternalProject_Add(inotify-tools
@@ -99,6 +103,7 @@ ExternalProject_Add(inotify-tools
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   BUILD_IN_SOURCE 1
 )
+set_target_properties(inotify-tools PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 ExternalProject_Add(desktop-file-utils
   DEPENDS libcwrap
@@ -107,6 +112,7 @@ ExternalProject_Add(desktop-file-utils
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   BUILD_IN_SOURCE 1
 )
+set_target_properties(desktop-file-utils PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 ExternalProject_Add(xdg-utils
   URL "http://portland.freedesktop.org/download/xdg-utils-1.1.1.tar.gz"
@@ -114,4 +120,5 @@ ExternalProject_Add(xdg-utils
   PREFIX ${CMAKE_CURRENT_SOURCE_DIR}/build
   BUILD_IN_SOURCE 1
 )
+set_target_properties(xdg-utils PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
