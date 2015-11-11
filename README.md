@@ -142,7 +142,7 @@ make
 
 Once you have built AppImageKit, try making an AppImage, e.g., of Leafpad. The following has been tested on Ubuntu:
 
-    export APP=leafpad && ./apt-appdir/apt-appdir $APP && ./AppImageAssistant $APP.AppDir $APP.AppImage && ./$APP.AppImage
+    export APP=leafpad && ./apt-appdir/apt-appdir $APP && ./AppImageAssistant.AppDir/package $APP.AppDir $APP.AppImage && ./$APP.AppImage
     
 (This is just a proof-of-concept, in reality you should use a proper "recipe" script or AppDirAssistant to create proper AppDirs - see an example at https://github.com/probonopd/AppImages/blob/master/recipes/subsurface.sh)
 
