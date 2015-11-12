@@ -16,7 +16,7 @@ if [ "$1x" == "x" ] ; then
 fi
 
 if [ "$2x" == "x" ] ; then
-    echo "Please specify an AppDir or AppImage to be run"
+    echo "Please specify an AppDir or AppImage outside the ISO or command inside the ISO to be run"
     exit 1
 fi
 
@@ -93,6 +93,10 @@ if [ -f "$2" ] ; then
     mount "$2" /tmp/union/$MNT -o loop,ro
 elif [ -d "$2" ] ; then
     mount "$2" /tmp/union/$MNT -o bind
+else
+    shift
+    export RUN_COMMAND=$1
+    export RUN_INSIDE=$@
 fi
 
 cat > /tmp/union/run.sh <<EOF
@@ -108,7 +112,11 @@ export HOME="/root"
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
 #dbus-launch $MNT/AppRun || 
-$MNT/AppRun && echo "+++++++++ SUCCESS $ISO $2 +++++++++"
+if [ $(which $RUN_COMMAND) ] ; then
+    $RUN_INSIDE
+else
+    $MNT/AppRun && echo "+++++++++ SUCCESS $ISO $2 +++++++++"
+fi
 EOF
 chmod a+x /tmp/union/run.sh
 mount -t proc proc /tmp/union/proc
