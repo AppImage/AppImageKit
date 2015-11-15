@@ -79,7 +79,7 @@ atexit()
 }
 
 
-unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/unionfs/,max_files=32768 /rw=RW:/root=RO /tmp/union
+/usr/bin/unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/unionfs/,max_files=32768 /rw=RW:/root=RO /tmp/union
 
 ls /tmp/union/opt >/dev/null && MNT=/opt
 # ls /tmp/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
@@ -118,7 +118,7 @@ if [ -f $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so ] ; then
   export LD_LIBRARY_PATH=$MNT/usr/lib/:$LD_LIBRARY_PATH
   ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
 fi
-find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep not' \;
+find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep not' 2>/dev/null \;
 if [ $(which $RUN_COMMAND) ] ; then
     exec $RUN_INSIDE
 else
