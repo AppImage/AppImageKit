@@ -112,6 +112,7 @@ export HOME="/root"
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
 #dbus-launch $MNT/AppRun || 
+export LIBGL_DEBUG=verbose
 if [ $(which $RUN_COMMAND) ] ; then
     exec $RUN_INSIDE
 else
