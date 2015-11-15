@@ -90,7 +90,6 @@ if [ "x$MNT" == "x" ] ; then
     echo "Could not find free mountpoint"
     exit 1
 fi
-
 if [ -f "$2" ] ; then
     mount "$2" /tmp/$PREF/union/$MNT -o loop,ro
 elif [ -d "$2" ] ; then
@@ -121,7 +120,7 @@ if [ -f $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so ] ; then
   export LD_LIBRARY_PATH=$MNT/usr/lib/:$LD_LIBRARY_PATH
   ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
 fi
-find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep not' 2>/dev/null \;
+find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep "not found"'  2>/dev/null \;
 if [ $(which $RUN_COMMAND) ] ; then
     exec $RUN_INSIDE
 else
