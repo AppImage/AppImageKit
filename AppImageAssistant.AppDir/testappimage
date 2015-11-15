@@ -20,6 +20,14 @@ if [ "$2x" == "x" ] ; then
     exit 1
 fi
 
+# having any third command line argument means "don't delete the temporary
+# files in at_exit()"
+
+if [ "$3x" == "x" ] ; then
+    echo "deleting temporary files at the end"
+    DELETETEMP=1
+fi
+
 export PREF=$RANDOM
 
 mkdir -p /tmp/$PREF/unionfs/root
@@ -73,11 +81,13 @@ atexit()
     umount -l /tmp/$PREF/iso 2>/dev/null
     umount -l /tmp/$PREF/iso 2>/dev/null
     # dangerous # sudo killall unionfs-fuse 2>/dev/null
-    rm -r /tmp/$PREF/unionfs/root
-    rm -r /tmp/$PREF/unionfs/rw
-    rm -r /tmp/$PREF/unionfs
-    rm -r /tmp/$PREF/union
-    rm -r /tmp/$PREF/iso
+    if [ $DELETETEMP ] ; then
+	rm -r /tmp/$PREF/unionfs/root
+	rm -r /tmp/$PREF/unionfs/rw
+	rm -r /tmp/$PREF/unionfs
+	rm -r /tmp/$PREF/union
+	rm -r /tmp/$PREF/iso
+    fi
 }
 
 
