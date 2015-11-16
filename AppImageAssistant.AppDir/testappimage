@@ -58,6 +58,12 @@ if [ -e /tmp/$PREF/iso/live/filesystem.squashfs ] ; then
   mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
 fi
 
+# In case of openSUSE-like ISOs
+if [ -e /tmp/$PREF/iso/*-read-only.* ] ; then
+  THEFS=$(ls /tmp/$PREF/iso/*-read-only.* | head -n 1)
+  mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
+fi
+
 trap atexit EXIT
 
 atexit()
@@ -66,20 +72,18 @@ atexit()
     umount -l /tmp/$PREF/union/etc/resolv.conf 2>/dev/null
     umount -l /tmp/$PREF/union/proc 2>/dev/null
     umount -l /tmp/$PREF/union/opt 2>/dev/null
-#    umount -l /tmp/$PREF/union/automake 2>/dev/null # Puppy
     umount -l /tmp/$PREF/union 2>/dev/null
     umount -l /tmp/$PREF/unionfs/root 2>/dev/null
     umount -l /tmp/$PREF/iso 2>/dev/null
     umount -l /tmp/$PREF/iso 2>/dev/null
     umount -l /tmp/$PREF/iso 2>/dev/null
-    # dangerous # sudo killall unionfs-fuse 2>/dev/null
     rm -r /tmp/$PREF/unionfs/root
     rm -r /tmp/$PREF/unionfs/rw
     rm -r /tmp/$PREF/unionfs
     rm -r /tmp/$PREF/union
     rm -r /tmp/$PREF/iso
+    rm -r /tmp/$PREF/
 }
-
 
 /usr/bin/unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/root=RO /tmp/$PREF/union
 
