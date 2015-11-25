@@ -93,7 +93,7 @@ A minimal AppImage could potentially look like this:
 ---------------------------------------------------------
 ```
 
- * AppRun is the binary hat is executed when the AppImage is run
+ * AppRun is the binary that is executed when the AppImage is run
  * .DirIcon contains a 48x48 pixel PNG icon that is used for the AppImage
  * SomeAppFile could be some random file that the app reqires to run
 
