@@ -2,7 +2,7 @@
 
 Copyright (c) 2004-15 Simon Peter <probono@puredarwin.org> and contributors.
 
-Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, debian and derivatives.
+Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
 
 The __AppImage__ format is a format for packaging applications in a way that allows them to
 run on a variety of different target systems (base operating systems, distributions) without further modification. 
@@ -18,16 +18,16 @@ This document describes the AppImage format and AppImageKit. It is intended to d
 
 Here are some concrete use cases for the AppImage format and the AppImageKit tools to create AppImages:
 
- * "As a user, I want to go to an upstream download page, download an application from the original author, and run it on my Linux desktop system just like I would do with a Windwos or Mac application."
+ * "As a user, I want to go to an upstream download page, download an application from the original author, and run it on my Linux desktop system just like I would do with a Windows or Mac application."
  * "As a tester, I want to be able to get the latest bleeding-edge version of an application from a continuous build server and test it on my system, without needing to compile and without having to worry that I might mess up my system."
- * "As an application author or ISV, I want to provide packages for Linux desktop systems just as I do for Windows and OS X, without the need to get it 'into' a distribution and without having to build for gazilions of different distributions."
+ * "As an application author or ISV, I want to provide packages for Linux desktop systems just as I do for Windows and OS X, without the need to get it 'into' a distribution and without having to build for gazillions of different distributions."
 
 ### The problem space
 
 Historically, UNIX and Linux systems have made it easy to procure source code, however they have made it comparably difficult to use ready-made software in binary form. In contrast, other systems, most prominently Windows and the classic Macintosh operating system, have made it relatively simple for independent software publishers (ISPs) to distribute software and for end-users to procure and install software from said ISPs, without any instances (such as distributors or App Stores) between the two parties.
 
 
-Package mangers were introduced to mitigate the complexities of dealing with source code by providing libraries of precompiled packages from repositories maintained by distributors or third parties. However, the introduction of package mangers did not drastically reduce compexities or provide robustness - they merely stacked a management layer on top of an already complex system, effectively preventing the user from manipulating installed software directly.
+Package mangers were introduced to mitigate the complexities of dealing with source code by providing libraries of precompiled packages from repositories maintained by distributors or third parties. However, the introduction of package mangers did not drastically reduce complexities or provide robustness - they merely stacked a management layer on top of an already complex system, effectively preventing the user from manipulating installed software directly.
 
 With the introduction of Mac OS X, arguably the first UNIX-based operating system with widespread mass adoption to a non-technical user base, Apple blended traditional UNIX aspects (such as maintaining a traditional filesystem hierarchy, including `/bin`, `/usr`, `/lib` directories) with common "desktop" approaches (such as "installing" an application by dragging it to the hard disk). While Apple _does_ use a package manager-like approach for managing the base operating system and its updates, it does _not_ do so for the user applications.
 
@@ -64,13 +64,13 @@ The AppImage format has been created with specific objectives in mind.
  3. __Be distribution-agostic__. An AppImage should run on all base operating systems (distributions) that it was created for (and later versions). For example, you could target Ubuntu 9.10, openSUSE 11.2, and Fedora 13 (and later versions) at the same time, without having to create and maintain separate packages for each target system.
  4. __Remove the need for installation__. AppImages contain the app in a format that allows it to run directly from the archive, without having to be installed first. This is comparable to a Live CD. Before Live CDs, operating systems had to be installed first before they could be used.
  5. __Keep apps compressed all the time__. Since the application remains packaged all the time, it is never uncompressed on the hard disk. The computer uncompresses the application on-the-fly while accessing it. Since decompression is faster than reading from hard disk on most systems, this has a speed advantage in addition to saving space. Also, the time needed for installation is entirely removed.
- 6. __Allow to put apps anywhere__. AppImages are "relocateable", this allowing the user to store and exectute them from any location (including CD-ROMs, DVDs, removable disks, USB sticks).
+ 6. __Allow to put apps anywhere__. AppImages are "relocatable", thus allowing the user to store and execute them from any location (including CD-ROMs, DVDs, removable disks, USB sticks).
  7. __Make applications read-only__. Since AppImages are read-only by design, the user can be reasonably sure that an app does not modify itself during operation.
  8. __Do not require recompilation__. AppImages must be possible to create from already-existing binaries, without the need for recompilation. This greatly speeds up the AppImage creation process, since no compiler has to be involved. This also allows third parties to package closed-source applications as AppImages. (Nevertheless, it can be beneficial for upstream application developers to build from source speficially for the purpose of generating an AppImage.)
  9. __Keep base operating system untouched__. Since AppImages are intended to run on plain systems that have not been specially prepared by an administrator, AppImages may not require any unusual preparation of the base operating system. Hence, they cannot rely on special kernel patches, kernel modules, or any applications that do not come with the targeted distributions by default.
  10. __Do not require root__. Since AppImages are intended to be run by end users, they should not reqiure an administrative account (root) to be installed or used. They may, however, be installed by an administrator (e.g., in multi-user scenarios) if so desired.
 
-The key idea of the AppImage format is __one app = one file__. Every AppImage contains an app and all the files the app needs to run. In other words, each AppImage has no dependencies other what is included in the targeted base operating system(s). While it would theoretically be possible to create rpm or deb packages in the same way, it is hardly ever done. In contrast, doing so is strongly encouraged when dealing with AppImages and is the default use case of the AppImage format.
+The key idea of the AppImage format is __one app = one file__. Every AppImage contains an app and all the files the app needs to run. In other words, each AppImage has no dependencies other than what is included in the targeted base operating system(s). While it would theoretically be possible to create rpm or deb packages in the same way, it is hardly ever done. In contrast, doing so is strongly encouraged when dealing with AppImages and is the default use case of the AppImage format.
 
 In short: An AppImage is for an app what a Live CD is for an operating system.
 
@@ -95,7 +95,7 @@ A minimal AppImage could potentially look like this:
 
  * AppRun is the binary that is executed when the AppImage is run
  * .DirIcon contains a 48x48 pixel PNG icon that is used for the AppImage
- * SomeAppFile could be some random file that the app reqires to run
+ * SomeAppFile could be some random file that the app requires to run
 
 However, in order to allow for automated generation, processing, and richer metadata, the AppImage format follows a somewhat more elaborate convention:
 
@@ -128,7 +128,7 @@ Icon=iconname
 ```
 This desktop file would tell the `AppRun` executable to run the executable called `appname`, and would specify `AppName` as the name for the AppImage, and `iconname.png` as its icon.
 
-However, it does not hurt if the desktop file contains additional information. Should it be desired to provide additional metadata with an AppImage, the desktop file could be extended with `X-AppImage-...` fields as per the Desktop File Specification. Usually, desktop files provided in deb or rpm archives are suitable to be used in AppImages. However, abolute paths in the `Exec=` statement are not supported by the AppImage format.
+However, it does not hurt if the desktop file contains additional information. Should it be desired to provide additional metadata with an AppImage, the desktop file could be extended with `X-AppImage-...` fields as per the Desktop File Specification. Usually, desktop files provided in deb or rpm archives are suitable to be used in AppImages. However, absolute paths in the `Exec=` statement are not supported by the AppImage format.
 
 The AppImage contains the usual `usr/` hierarchy (following the File Hierarchy Standard). In the concrete example from the desktop file above, the AppRun executable would look for `usr/bin/appname` and would execute that. Also, AppImageKitAssistant (a tool used to create AppImages easily) would look for `usr/share/icons/*/48x48/iconname.png` and use that as the `.DirIcon` file, effectively making it the icon of the AppImage.
 
@@ -146,7 +146,7 @@ Currently the AppImageKit contains (among others):
  * __AppImageAssistant__, a CLI and GUI app that turns an AppDir into an AppImage.
  * __AppRun__, the executable that finds and executes the app contained in the AppImage.
  * __runtime__, the tiny ELF binary that is embedded into the header of each AppImage. AppImageKit automatically embeds the runtime into the AppImages it creates.
- * __apt-appdir__, a command line tool running on Ubuntu that turns packaged software into AppDirs. This tool can be used to semi-automatically prepare AppDirs that can be used as the input for AppImageAssistant. Note that while apt-appdir has been written for Ubuntu, it should also run on debian and could be ported to other distributions as well, then using the respective package managers insted of apt-get.
+ * __apt-appdir__, a command line tool running on Ubuntu that turns packaged software into AppDirs. This tool can be used to semi-automatically prepare AppDirs that can be used as the input for AppImageAssistant. Note that while apt-appdir has been written for Ubuntu, it should also run on Debian and could be ported to other distributions as well, then using the respective package managers insted of apt-get.
 
 AppImageKit also contains additional tools and helpers.
 
@@ -194,11 +194,11 @@ The preferred channel of communication is https://github.com/probonopd/AppImageK
 
 Instead of an IRC channel we use [Gitter](https://gitter.im/probonopd/AppImageKit) which has the advantage that one does not have to be online all the time and one can communicate despite not being in the same timezone.
 
-## Acknowledgements
+## Acknowledgments
 
 This work stands on the shoulders of giants. The following persons and organizations should specifically be thanked (in no particular order), even though this list can never be exhaustive:
  * Apple Inc. for popularizing the notion of application bundles (even tough others have used this concept before). AppImages would not be understood by people as easily if it wasn't for Apple's .app bundles and .dmg disk images.
  * The contributors of the ROX project, which introduced the AppDir format that the AppImage format is conceptually based on. AppImages improve on ROX AppDirs in that they encapsulate the AppDirs in a compressed container file which adds robustness and ease of administration.
- * The contributors of the klik project, which AppImageKit is conceptually based on (with the principal author of AppImageKit being the founder of the klik project). AppImages imporve on klik in that they need no runtime to be installed on the base operating system before they can be used.
- * Alexander Larsson for his work on Glick, which AppImageKit is technically based on. AppImageKit improves on Glick in that it uses a compressed filesystem and in that it provides additional tools which simpify creating AppImages.
+ * The contributors of the klik project, which AppImageKit is conceptually based on (with the principal author of AppImageKit being the founder of the klik project). AppImages improve on klik in that they need no runtime to be installed on the base operating system before they can be used.
+ * Alexander Larsson for his work on Glick, which AppImageKit is technically based on. AppImageKit improves on Glick in that it uses a compressed filesystem and in that it provides additional tools which simplify creating AppImages.
  * The contributors of the Python project, which gives developers a powerful tool to turn ideas into reality rapidly. AppImageKit would have been much more cumbersome to create if Python would not exist.
