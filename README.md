@@ -94,7 +94,7 @@ A minimal AppImage could potentially look like this:
 ```
 
  * AppRun is the binary that is executed when the AppImage is run
- * .DirIcon contains a 48x48 pixel PNG icon that is used for the AppImage
+ * .DirIcon contains a svg icon that is used for the AppImage
  * SomeAppFile could be some random file that the app requires to run
 
 However, in order to allow for automated generation, processing, and richer metadata, the AppImage format follows a somewhat more elaborate convention:
@@ -107,7 +107,7 @@ However, in order to allow for automated generation, processing, and richer meta
 | in ISO9660 | appname.desktop                           |
 | header     | usr/bin/appname                           |
 |            | usr/lib/libname.so.0                      |
-|            | usr/share/icons/*/48x48/apps/iconname.png |
+|            | usr/share/icons/.../iconname.svg |
 |            | usr/share/appname/somehelperfile          |
 |            | .DirIcon                                  |
 |            |                                           |
@@ -130,7 +130,7 @@ This desktop file would tell the `AppRun` executable to run the executable calle
 
 However, it does not hurt if the desktop file contains additional information. Should it be desired to provide additional metadata with an AppImage, the desktop file could be extended with `X-AppImage-...` fields as per the Desktop File Specification. Usually, desktop files provided in deb or rpm archives are suitable to be used in AppImages. However, absolute paths in the `Exec=` statement are not supported by the AppImage format.
 
-The AppImage contains the usual `usr/` hierarchy (following the File Hierarchy Standard). In the concrete example from the desktop file above, the AppRun executable would look for `usr/bin/appname` and would execute that. Also, AppImageKitAssistant (a tool used to create AppImages easily) would look for `usr/share/icons/*/48x48/iconname.png` and use that as the `.DirIcon` file, effectively making it the icon of the AppImage.
+The AppImage contains the usual `usr/` hierarchy (following the File Hierarchy Standard). In the concrete example from the desktop file above, the AppRun executable would look for `usr/bin/appname` and would execute that. Also, AppImageKitAssistant (a tool used to create AppImages easily) would look for an icon and use that as the `.DirIcon` file, effectively making it the icon of the AppImage.
 
 The app must be programmed in a way that allows for relocation. In other words, the app must not have hardcoded paths such as `/usr/bin`, `/usr/share`, `/etc` inside the binary. Instead, it must use relative paths, such as `./bin`. 
 
