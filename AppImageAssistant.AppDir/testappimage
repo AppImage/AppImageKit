@@ -42,6 +42,13 @@ if [ ${1: -4} == ".iso" ] ; then
     fi
 fi
 
+# If sfs was provided, then assume it contains a rootfs use just that
+THEFS="$1"
+if [ ${1: -4} == ".sfs" ] ; then
+    ISO="$1"
+    mount -o loop,ro "$ISO" /tmp/$PREF/unionfs/root
+fi
+
 echo ""
 echo "===================================================="
 echo ""
@@ -79,7 +86,8 @@ atexit()
     umount -l /tmp/$PREF/union/var/lib/dbus 2>/dev/null
     umount -l /tmp/$PREF/union/etc/resolv.conf 2>/dev/null
     umount -l /tmp/$PREF/union/proc 2>/dev/null
-    umount -l /tmp/$PREF/union/opt 2>/dev/null
+    umount -l /tmp/$PREF/union/dev 2>/dev/null
+    umount -l /tmp/$PREF/union/mnt 2>/dev/null
     umount -l /tmp/$PREF/union 2>/dev/null
     umount -l /tmp/$PREF/unionfs/ro 2>/dev/null
     umount -l /tmp/$PREF/unionfs/root 2>/dev/null
@@ -97,7 +105,7 @@ atexit()
 
 /usr/bin/unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/$PREF/union
 
-ls /tmp/$PREF/union/opt >/dev/null && MNT=/opt
+ls /tmp/$PREF/union/mnt >/dev/null && MNT=/mnt
 # ls /tmp/$PREF/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
 
 if [ "x$MNT" == "x" ] ; then
@@ -143,6 +151,8 @@ fi
 EOF
 chmod a+x /tmp/$PREF/union/run.sh
 mount -t proc proc /tmp/$PREF/union/proc
+mkdir -p /tmp/$PREF/union/var/lib/dbus
+mount --bind /dev /tmp/$PREF/union/dev
 mount --bind /var/lib/dbus /tmp/$PREF/union/var/lib/dbus
 touch /tmp/$PREF/union/etc/resolv.conf || echo ""
 mount --bind /etc/resolv.conf /tmp/$PREF/union/etc/resolv.conf
