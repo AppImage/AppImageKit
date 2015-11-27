@@ -2,7 +2,7 @@
 
 # /**************************************************************************
 # 
-# Copyright (c) 2005-13 Simon Peter
+# Copyright (c) 2005-15 Simon Peter
 # 
 # All Rights Reserved.
 # 
@@ -29,21 +29,27 @@
 DIRNAME=$(dirname $(readlink -f "${0}"))
 
 APP="${1}"
-APPDIR="./${APP}.AppDir"
+APPDIR=$(realpath "./${APP}.AppDir")
 
 set -e
 
 rm -rf  "${APPDIR}"
-sudo apt-get clean
-
-sudo apt-get --no-upgrade \
-    -y --force-yes install "${APP}" --download-only
-# -o Dir::State::status="${DIRNAME}/status"
 
 mkdir "${APPDIR}"
 cd "${APPDIR}"
 
-find /var/cache/apt/archives/*.deb -exec dpkg-deb -x {} . \;
+if [ -x /usr/bin/dnf ] ; then
+  dnf download --resolv --destdir="${APPDIR}" "${APP}"
+  # Unpack rpm
+  UNP=$(find *.rpm 2>/dev/null) && for UN in $UNP; do rpm2cpio < $UN | cpio -i -d --verbose ; done
+  rm "${APPDIR}"/*rpm
+elif [ -x /usr/bin/apt-get ] ; then
+  sudo apt-get clean
+  sudo apt-get --no-upgrade -y --force-yes install "${APP}" --download-only # -o Dir::State::status="${DIRNAME}/status"
+  # Unpack deb
+  find /var/cache/apt/archives/*.deb -exec dpkg-deb -x {} . \;
+  sudo apt-get clean
+fi
 
 find . -type f -exec sed -i -e 's|/usr|././|g' {} \;
 find . -type f -exec sed -i -e 's|././/bin/env|/usr/bin/env|g' {} \;
@@ -51,8 +57,6 @@ find . -type f -exec sed -i -e 's|././/bin/python|/usr/bin/python|g' {} \;
 ### TODO: need proper IntelliPatch here ###
 
 cp "${DIRNAME}/../AppRun" . 
-
-sudo apt-get clean
 
 find ./usr/share/py* > /dev/null 2>&1 && echo "Python code has been detected." && \
 echo "Probably you want to insert portability.py into the Python code to" && \
@@ -70,5 +74,5 @@ cd -
 
 echo ""
 echo "./${APP}.AppDir created. Now run:"
-echo "./AppImageAssistant ./${APP}.AppDir ./${APP}"
+echo "./AppImageAssistant --package ./${APP}.AppDir ./${APP}"
 echo ""
