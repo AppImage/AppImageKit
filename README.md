@@ -107,7 +107,7 @@ However, in order to allow for automated generation, processing, and richer meta
 | in ISO9660 | appname.desktop                           |
 | header     | usr/bin/appname                           |
 |            | usr/lib/libname.so.0                      |
-|            | usr/share/icons/.../iconname.svg |
+|            | usr/share/icons/.../iconname.svg          |
 |            | usr/share/appname/somehelperfile          |
 |            | .DirIcon                                  |
 |            |                                           |
