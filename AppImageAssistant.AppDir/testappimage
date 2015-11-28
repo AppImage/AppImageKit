@@ -103,7 +103,7 @@ atexit()
     rm -r /tmp/$PREF/
 }
 
-/usr/bin/unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/$PREF/union
+unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/$PREF/union
 
 ls /tmp/$PREF/union/mnt >/dev/null && MNT=/mnt
 # ls /tmp/$PREF/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
