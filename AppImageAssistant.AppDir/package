@@ -2,7 +2,7 @@
 
 # /**************************************************************************
 # 
-# Copyright (c) 2005-12 Simon Peter
+# Copyright (c) 2005-15 Simon Peter
 # 
 # All Rights Reserved.
 # 
@@ -75,7 +75,7 @@ if should_compress == True:
         exit(1)
     # As great as xorriso is, as cryptic its usage is :-(
     command = ["xorriso", "-dev",
-    destinationfile, "-padding", "0", "-map",
+    destinationfile, "-joliet", "on", "-volid", "AppImage", "-padding", "0", "-map",
     sourcedir, "/", "--", "-map", iconfile, "/.DirIcon",
     "-zisofs", "level=9:block_size=128k", "-chown_r", "0",
     "/", "--", "set_filter_r", "--zisofs", "/" ]
