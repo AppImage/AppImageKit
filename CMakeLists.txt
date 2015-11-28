@@ -103,4 +103,4 @@ ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
 )
 
 SET_DIRECTORY_PROPERTIES(PROPERTIES   
- ADDITIONAL_MAKE_CLEAN_FILES "AppImageAssistant;AppImageExtract;AppImageMonitor;./AppImageAssistant.AppDir/runtime;./AppImageAssistant.AppDir/usr/share/pyshared/vte.so;./AppImageAssistant.AppDir/usr/lib/;./AppImageExtract.AppDir/AppRun;./AppImageMonitor.AppDir/AppRun;./AppImageExtract.AppDir/usr/lib/;./AppImageMonitor.AppDir/usr/lib/;./AppImageAssistant.AppDir/usr/bin/xorriso;./AppImageExtract.AppDir/usr/bin/xorriso;./AppImageMonitor.AppDir/usr/bin/xorriso") 
+ ADDITIONAL_MAKE_CLEAN_FILES "AppImageAssistant;AppImageExtract;AppImageMonitor;./AppImageAssistant.AppDir/runtime;./AppImageAssistant.AppDir/usr/share/pyshared/vte.so;./AppImageAssistant.AppDir/usr/bin/unionfs-fuse;./AppImageAssistant.AppDir/usr/lib/;./AppImageExtract.AppDir/AppRun;./AppImageMonitor.AppDir/AppRun;./AppImageExtract.AppDir/usr/lib/;./AppImageMonitor.AppDir/usr/lib/;./AppImageAssistant.AppDir/usr/bin/xorriso;./AppImageExtract.AppDir/usr/bin/xorriso;./AppImageMonitor.AppDir/usr/bin/xorriso") 

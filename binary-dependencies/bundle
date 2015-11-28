@@ -14,6 +14,7 @@ cp "${BINARYDIR}"/libglade-2.0.so.0 "${BINARYDIR}"/libvte.so.9 "${BINARYDIR}"/li
 cp "${BINARYDIR}"/libjte* "${PARENT}"/AppImageAssistant.AppDir/usr/lib/ # Raspbian
 mkdir -p "${PARENT}"/AppImageAssistant.AppDir/usr/share/pyshared/
 cp "${BINARYDIR}"/vte.so "${PARENT}"/AppImageAssistant.AppDir/usr/share/pyshared/
+cp "${BINARYDIR}"/unionfs-fuse "${PARENT}"/AppImageAssistant.AppDir/usr/bin/
 
 mkdir -p "${PARENT}"/AppImageExtract.AppDir/usr/bin/ "${PARENT}"/AppImageExtract.AppDir/usr/lib/
 cp "${BINARYDIR}"/xorriso "${PARENT}"/AppImageExtract.AppDir/usr/bin/

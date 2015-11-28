@@ -74,8 +74,8 @@ if should_compress == True:
         print (_("Destination path already exists, exiting")) # xorriso would append another session to a pre-existing image
         exit(1)
     # As great as xorriso is, as cryptic its usage is :-(
-    command = ["xorriso", "-dev",
-    destinationfile, "-joliet", "on", "-volid", "AppImage", "-padding", "0", "-map",
+    command = ["xorriso", "-joliet", "on", "-volid", "AppImage", "-dev",
+    destinationfile, "-padding", "0", "-map",
     sourcedir, "/", "--", "-map", iconfile, "/.DirIcon",
     "-zisofs", "level=9:block_size=128k", "-chown_r", "0",
     "/", "--", "set_filter_r", "--zisofs", "/" ]
