@@ -130,7 +130,7 @@ rm -rf /etc/pango
 mkdir -p /etc/pango
 pango-querymodules > '/etc/pango/pango.modules' 2>/dev/null # otherwise only squares instead of text
 [ -f /si-chroot ] && ln -s /lib/ld-lsb.so.3 /lib/ld-linux.so.2
-LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/lib/:$LD_LIBRARY_PATH ldd $MNT/usr/bin/*  $MNT/usr/lib/* 2>/dev/null | grep "not found" | sort | uniq
+LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/usr/lib32:$MNT/usr/lib64:$MNT/lib/:$LD_LIBRARY_PATH ldd $MNT/usr/bin/*  $MNT/usr/lib/* 2>/dev/null | grep "not found" | sort | uniq
 export HOME="/root"
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
