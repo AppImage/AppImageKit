@@ -66,7 +66,9 @@ mark_as_advanced(GLIB_INCLUDE_DIR GLIB_CONFIG_INCLUDE_DIR GLIB_INCLUDE_DIRS GLIB
 INCLUDE_DIRECTORIES(. ${GLIB_INCLUDE_DIRS})
 
 ADD_SUBDIRECTORY(LibcWrapGenerator)
-set(CMAKE_C_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/LibcWrapGenerator/cc")
+if (USE_LIBC_WRAP_GENERATOR)
+  set(CMAKE_C_COMPILER "${CMAKE_CURRENT_SOURCE_DIR}/LibcWrapGenerator/cc")
+endif (USE_LIBC_WRAP_GENERATOR)
 
 
 ADD_SUBDIRECTORY(third-party-dependencies)
@@ -76,18 +78,27 @@ set(third-party-dependencies_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/third-party-dep
 
 ADD_EXECUTABLE(AppRun AppRun.c)
 add_custom_command(TARGET AppRun POST_BUILD COMMAND ${CMAKE_STRIP} AppRun)
-add_dependencies(AppRun libcwrap)
+if (USE_LIBC_WRAP_GENERATOR)
+  add_dependencies(AppRun libcwrap)
+endif (USE_LIBC_WRAP_GENERATOR)
+
 
 ADD_LIBRARY(fuseiso fuseiso.c)
-add_dependencies(fuseiso libcwrap)
+if (USE_LIBC_WRAP_GENERATOR)
+  add_dependencies(fuseiso libcwrap)
+endif (USE_LIBC_WRAP_GENERATOR)
 
 ADD_LIBRARY(isofs isofs.c)
-add_dependencies(isofs libcwrap)
+if (USE_LIBC_WRAP_GENERATOR)
+  add_dependencies(isofs libcwrap)
+endif (USE_LIBC_WRAP_GENERATOR)
 
 ADD_EXECUTABLE(runtime runtime.c)
 TARGET_LINK_LIBRARIES(runtime fuseiso isofs ${LIBFUSE} ${LIBPTHREAD} ${LIBGLIB2} ${LIBZ})
 add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
-add_dependencies(runtime libcwrap)
+if (USE_LIBC_WRAP_GENERATOR)
+  add_dependencies(runtime libcwrap)
+endif (USE_LIBC_WRAP_GENERATOR)
 
 
 set(third-party-dependencies_clean
