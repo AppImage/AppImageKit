@@ -95,7 +95,7 @@ print("ok")
 
 print("Making %s executable..." % (destinationfile))
 
-os.chmod(destinationfile, 0o755)
+os.chmod(destinationfile, 0755)
 
 print("ok")
 
