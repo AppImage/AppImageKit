@@ -18,6 +18,8 @@ if [ -e /usr/bin/yum ] ; then
 
 fi
 
+cd "${HERE}"
 cmake .
 make clean
 make
+cd -
