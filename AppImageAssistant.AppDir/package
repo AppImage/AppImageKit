@@ -77,7 +77,7 @@ if should_compress == True:
     command = ["xorriso", "-joliet", "on", "-volid", "AppImage", "-dev",
     destinationfile, "-padding", "0", "-map",
     sourcedir, "/", "--", "-map", iconfile, "/.DirIcon",
-    "-zisofs", "level=9:block_size=128k", "-chown_r", "0",
+    "-zisofs", "level=9:block_size=128k:by_magic=off", "-chown_r", "0",
     "/", "--", "set_filter_r", "--zisofs", "/" ]
 
     subprocess.Popen(command).communicate()
