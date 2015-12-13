@@ -46,7 +46,7 @@ import xdgappdir
 import commands
 import threading
 import glob
-
+import subprocess
 
 def usage():
     print "Usage:"
@@ -56,10 +56,13 @@ def usage():
     print "     ", "Overwrite target if already existing"
     print " ", "-h, --help"
     print "     ", "Show this help message"
+    print " ", "-t, --testappimage <ISO> <AppDir|AppImage>"
+    print "     ", "Test running AppDir|AppImage on ISO base system"
+    print " ", "-t, --testappimage <ISO> <command>"
+    print "     ", "Test run command inside ISO base system"
     print " ", "<no arguments>"
     print "     ", "Start AppImage creation wizard"
     exit(0)
-
 
 if len(sys.argv) == 2:
     usage()
@@ -68,8 +71,16 @@ for arg in sys.argv:
     if arg in ["-h", "--help"]:
         usage()
 
+if (sys.argv[1] in ["-t", "--testappimage"]):
+    command = [os.path.dirname(__file__) + "/testappimage"] + sys.argv[2:]
+    print(command)
+    subprocess.call(command)
+    exit(0)
+
 if len(sys.argv) == (3):
-    os.system(os.path.dirname(__file__) + "/package %s %s" % (sys.argv[1], sys.argv[2]))
+    command = [os.path.dirname(__file__) + "/package"] + sys.argv[1:]
+    print(command)
+    subprocess.call(command)
     exit(0)
 
 import  gtk, vte
