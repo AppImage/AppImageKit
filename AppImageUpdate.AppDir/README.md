@@ -59,6 +59,42 @@ AppImageUpdate has been created with specific objectives in mind.
 
  1. __Be Simple__. Like using AppImages, updating them should be really easy. Also updates should be easy to understand, create, and manage.
  2. __Be decentral__. Do not rely on central repositories or distributions. While you _can_ use repositories like Bintray with AppImageUpdate, this is purely optional. As long as your webserver supports range requests, you can host your updates entirely yourself.
- 3. __Be Fast__. Increase velocity by making software updates really fast.
+ 3. __Be Fast__. Increase velocity by making software updates really fast. This means using delta updates, and allow leveraging existing content delivery networks (CDNs).
  4. __Be extensible__. Allow for other transport and distribution mechanisms (like peer-to-peer) in the future.
  5. __Inherit the intensions of the AppImage format__.
+
+## Update information overview
+
+In order for AppImageUpdate to do its magic, __Update information__ must be embedded inside the AppImage, such as:
+ * How can I find out the latest version (e.g., the URL that tells me the latest version)?
+ * How can I find out the delta (the portions of the applications that have changed) between my local version and the latest version?
+ * How can I download the delta between my local version and the latest version (e.g., the URL of the download server)?
+
+While all of this information could simply be put inside the AppImage, this could be a bit inconvenient since that would mean changing the download server location would require the AppImage to be re-created. Hence, this information is not put into the file system inside the AppImage, but rather embedded into the AppImage in a way that makes it very easy to change this information should it be required, e.g., if you put the files onto a different download server. As you will probably know, an AppImage is both an ISO 9660 file (that you can mount and examine) and an ELF executable (that you can execute). We are using the ISO 9660 Volume Descriptor #1 field "Application Used" to store this information.
+
+You can read this information from an existing AppImage like using `./AppImageUpdate ./Some.AppImage read`. For example:
+
+```
+./AppImageUpdate-20151218-x86_64.AppImage ./Subsurface-4.5.1.449-x86_64.AppImage read
+bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
+```
+
+Currently two transport mechanisms are implemented:
+ * zsync
+ * bintray-zsync
+ 
+### zsync
+
+The __zsync__ transport requires only a HTTP server that can handle HTTP range requests. Its update information is in the form
+
+```
+zsync|http://server.domain/path/Application-0.0.1-x86_64.AppImage.zsync
+```
+
+### bintray-zsync
+
+The __bintray-zsync__ transport extends the zsync transport in that it uses version information from Bintray. Its update information is in the form
+
+```
+bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
+```
