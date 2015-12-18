@@ -1,0 +1,94 @@
+#!/bin/bash
+
+set -e
+
+# A simple dependency check
+which zsync_curl >/dev/null
+which curl >/dev/null
+which dd >/dev/null
+
+if [ -e "${1}" ] ; then
+  ISO="${1}"
+else
+  "${1} does not exist"
+fi
+
+# Check if this is an ISO
+# Read ISO 9660 Volume Descriptor #1 header
+HEADER=$(dd if="${ISO}" bs=1 skip=32769 count=5 2>/dev/null)
+if [ "${HEADER}" != "CD001" ] ; then
+  echo "Cannot recognize this type of file"
+  exit 1
+fi
+
+# Read ISO 9660 Volume Descriptor #1 field "Application Used" (contents not defined by ISO 9660)
+APPLICATION_USED=$(dd if="${ISO}" bs=1 skip=33651 count=512 2>/dev/null)
+TYPE=$(echo "${APPLICATION_USED}" | cut -d "|" -f 1)
+
+if [ "${2}" == "read" ] ; then
+  if [ "${APPLICATION_USED}" == "" ] ; then
+    exit 1
+  else
+    echo "${APPLICATION_USED}"
+    exit 0
+  fi
+fi
+
+# Clear ISO 9660 Volume Descriptor #1 field "Application Used"
+if [ "${2}" == "clear" ] ; then
+  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  echo "Removed ${APPLICATION_USED}"
+  exit 0
+fi
+
+# Write ISO 9660 Volume Descriptor #1 field "Application Used"
+# Examples:
+# bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
+# zsync|http://server.foo/Subsurface-latest-x86_64.AppImage.zsync
+if [ "${2}" == "set" ] ; then
+  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  echo "${3}" | dd of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  echo "Changed ${APPLICATION_USED}"
+  echo "to ${3}"
+  exit 0
+fi
+
+if [ "$TYPE" == "zsync" ] ; then
+  ZSYNC_URL=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2) # Get the URL of the zsync file
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" # Get the file with zsync using $1 as an input file
+  NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
+  chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+elif [ "$TYPE" == "bintray-zsync" ] ; then
+  # Actually, instead of copying another zsync file to a fixed URL (which is cumbersome)
+  # let us use Bintray to figure out what the latest version is.
+  # https://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync 
+  # ("dummy URL") does not work but luckily we can fill in _latestVersion by using the follwoing URL
+  # https://bintray.com/probono/AppImages/Subsurface/_latestVersion ("redirector URL") and 
+  # parsing the version information from where it redirects to
+  # This could be done in C using libcurl
+  echo "Getting version information from Bintray"
+  USERNAME=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2)
+  REPO=$(echo "${APPLICATION_USED}" | cut -d "|" -f 3)
+  PACKAGE=$(echo "${APPLICATION_USED}" | cut -d "|" -f 4)
+  ZSYNCDUMMYNAME=$(echo "${APPLICATION_USED}" | cut -d "|" -f 5)
+  REDIRECTOR_URL="https://bintray.com/$USERNAME/$REPO/$PACKAGE/_latestVersion"
+  DUMMY_URL="https://bintray.com/artifact/download/$USERNAME/$REPO/$ZSYNCDUMMYNAME"
+  VERSION=$(curl -k -r 0-0 -Ls -o /dev/null -w %{url_effective} "${REDIRECTOR_URL}" | cut -d "/" -f 7)
+  if [ "$VERSION" == "_latestVersion" ] ; then
+    echo "Could not get the latest version"
+    exit 1
+  else
+    echo "$VERSION"
+  fi
+  ZSYNC_URL=$(echo "${DUMMY_URL}" | sed -e "s|_latestVersion|$VERSION|g" )
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" # Get the file with zsync using $1 as an input file
+  NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
+  chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+elif [ "$TYPE" == "" ] ; then
+  echo "Cannot update this file."
+  echo "This file has no update information embedded"
+  echo "or you need to update the updater."
+else
+  echo "I do not know how to handle this file."
+  echo "You need to update to an updater that can handle $TYPE."
+fi
