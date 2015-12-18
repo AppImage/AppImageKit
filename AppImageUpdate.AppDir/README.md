@@ -88,13 +88,26 @@ Currently two transport mechanisms are implemented:
 The __zsync__ transport requires only a HTTP server that can handle HTTP range requests. Its update information is in the form
 
 ```
-zsync|http://server.domain/path/Application-0.0.1-x86_64.AppImage.zsync
+zsync|http://server.domain/path/Application-latest-x86_64.AppImage.zsync
 ```
+
+For an overview about zsync and how to create `.zsync` files, see [http://zsync.moria.org.uk/](http://zsync.moria.org.uk/).
+As you can see, you just need to point to a fixed URL that has the `latest` zsync file. 
 
 ### bintray-zsync
 
-The __bintray-zsync__ transport extends the zsync transport in that it uses version information from Bintray. Its update information is in the form
+The __bintray-zsync__ transport extends the zsync transport in that it uses version information from [Bintray](https://bintray.com/). Its update information is in the form
 
 ```
 bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
 ```
+
+Bintray gives developers a CDN-based, reliable, download center with REST automation and support for generic software such as AppImages. Read ["What Is Bintray?"](https://bintray.com/docs/usermanual/whatisbintray/whatisbintray_whatisbintray.html) for more information.
+
+Since Bintray knows metadata about the AppImages we upload (such as the version), we can use Bintray to figure out what the latest version is. `https://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync` ("dummy URL") does not work but luckily we can fill in `_latestVersion` by using the URL `https://bintray.com/probono/AppImages/Subsurface/_latestVersion` ("redirector URL") and parsing the version information from where it redirects to.
+
+## TODO
+
+ * Implement gpg signature checking
+ * Implement a GUI
+ * Implement more transport mechanisms, e.g. peer-to-peer
