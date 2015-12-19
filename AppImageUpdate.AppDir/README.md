@@ -102,7 +102,7 @@ The __bintray-zsync__ transport extends the zsync transport in that it uses vers
 bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
 ```
 
-Bintray gives developers a CDN-based, reliable, download center with REST automation and support for generic software such as AppImages. Read ["What Is Bintray?"](http://bintray.com/docs/usermanual/whatisbintray/whatisbintray_whatisbintray.html) for more information.
+Bintray gives developers a CDN-based, reliable, download center with REST automation and support for generic software such as AppImages. According to [this](https://www.jfrog.com/support-service/whitepapers/four-reasons-to-move-distribution-of-docker-images-from-hub-to-bintray/) page, Bintray serves over 200 million downloads per month of 200 thousand packages that reside in 50 thousand repositories. Read ["What Is Bintray?"](http://bintray.com/docs/usermanual/whatisbintray/whatisbintray_whatisbintray.html) for more information.
 
 Since Bintray knows metadata about the AppImages we upload (such as the version), we can use Bintray to figure out what the latest version is. `http://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync` ("dummy URL") does not work but luckily we can fill in `_latestVersion` by using the URL `http://bintray.com/probono/AppImages/Subsurface/_latestVersion` ("redirector URL") and parsing the version information from where it redirects to.
 
