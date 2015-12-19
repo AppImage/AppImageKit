@@ -25,6 +25,17 @@ update_myself()
   fi
 }
 
+gpg_check()
+{
+  if [ "$(which gpg)" != "" ] ; then
+    echo "GPG is installed; hence attempting signature verification"
+    ASC_URL=$( echo "${ZSYNC_URL}" | sed -e 's|.zsync|.asc|g' )
+    curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}")
+  else
+    echo "GPG is not installed; hence skipping signature verification"
+  fi
+}
+
 USAGE="Usage: 
 $1 /path/to/AppImage 
   Updates the AppImage using the update information embedded in the AppImage
@@ -83,9 +94,10 @@ fi
 
 if [ "$TYPE" == "zsync" ] ; then
   ZSYNC_URL=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2) # Get the URL of the zsync file
-  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" # Get the file with zsync using $1 as an input file
+  zsync_curl -# -I -i "${ISO}" "${ZSYNC_URL}" # Get the file with zsync using $1 as an input file
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
   chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+  gpg_check
 elif [ "$TYPE" == "bintray-zsync" ] ; then
   # Actually, instead of copying another zsync file to a fixed URL (which is cumbersome)
   # let us use Bintray to figure out what the latest version is.
@@ -112,6 +124,8 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" # Get the file with zsync using $1 as an input file
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
   chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+  gpg_check
+
 elif [ "$TYPE" == "" ] ; then
   echo "Cannot update this file."
   echo "This file has no update information embedded"
