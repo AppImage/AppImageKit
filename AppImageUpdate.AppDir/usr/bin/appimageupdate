@@ -15,7 +15,8 @@ update_myself()
     read -r -p "Do you want to update the updater? [y/N] " response
     case $response in 
       [yY][eE][sS]|[yY]) 
-        echo "${MYSELF}" "${APPIMAGE}"
+        "${MYSELF}" "${APPIMAGE}"
+        chmod a+x "${APPIMAGE}"
         ;;
       *)
         true
