@@ -92,7 +92,7 @@ zsync|http://server.domain/path/Application-latest-x86_64.AppImage.zsync
 ```
 
 For an overview about zsync and how to create `.zsync` files, see [http://zsync.moria.org.uk/](http://zsync.moria.org.uk/).
-As you can see, you just need to point to a fixed URL that has the `latest` zsync file. 
+As you can see, you just need to point to a fixed URL that has the `latest` zsync file. zsync can work with most servers that support returning partial content from files, as is also used for video streaming. See [http://zsync.moria.orc.uk/server-issues](http://zsync.moria.orc.uk/server-issues) for more information.
 
 ### bintray-zsync
 
