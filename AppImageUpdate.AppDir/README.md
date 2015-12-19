@@ -92,7 +92,7 @@ zsync|http://server.domain/path/Application-latest-x86_64.AppImage.zsync
 ```
 
 For an overview about zsync and how to create `.zsync` files, see [http://zsync.moria.org.uk/](http://zsync.moria.org.uk/).
-As you can see, you just need to point to a fixed URL that has the `latest` zsync file. 
+As you can see, you just need to point to a fixed URL that has the `latest` zsync file. zsync can work with most servers that support returning partial content from files, as is also used for video streaming. See [http://zsync.moria.orc.uk/server-issues](http://zsync.moria.orc.uk/server-issues) for more information.
 
 ### bintray-zsync
 
@@ -102,9 +102,18 @@ The __bintray-zsync__ transport extends the zsync transport in that it uses vers
 bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
 ```
 
-Bintray gives developers a CDN-based, reliable, download center with REST automation and support for generic software such as AppImages. Read ["What Is Bintray?"](http://bintray.com/docs/usermanual/whatisbintray/whatisbintray_whatisbintray.html) for more information.
+Bintray gives developers a CDN-based, reliable, download center with REST automation and support for generic software such as AppImages. According to [this](https://www.jfrog.com/support-service/whitepapers/four-reasons-to-move-distribution-of-docker-images-from-hub-to-bintray/) page, Bintray serves over 200 million downloads per month of 200 thousand packages that reside in 50 thousand repositories. Read ["What Is Bintray?"](http://bintray.com/docs/usermanual/whatisbintray/whatisbintray_whatisbintray.html) for more information.
 
 Since Bintray knows metadata about the AppImages we upload (such as the version), we can use Bintray to figure out what the latest version is. `http://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync` ("dummy URL") does not work but luckily we can fill in `_latestVersion` by using the URL `http://bintray.com/probono/AppImages/Subsurface/_latestVersion` ("redirector URL") and parsing the version information from where it redirects to.
+
+## Providing update-able AppImages
+
+If you would like to provide update-able AppImages, you basically have to:
+ 1. Embed the update information (see above) inside your AppImage
+ 2. Create a `.zsync` file using `zsyncmake`
+ 3. Host both your AppImage and the `.zsync` file on a server that supports range requests
+
+You can see this in action as part of an automated build process [here](https://github.com/probonopd/AppImages/blob/1249ce96f1a2bac1cb7a397bde1f74a87e86edf2/bintray.sh#L138-L151).
 
 ## TODO
 
