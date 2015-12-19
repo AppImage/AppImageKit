@@ -106,6 +106,15 @@ Bintray gives developers a CDN-based, reliable, download center with REST automa
 
 Since Bintray knows metadata about the AppImages we upload (such as the version), we can use Bintray to figure out what the latest version is. `http://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync` ("dummy URL") does not work but luckily we can fill in `_latestVersion` by using the URL `http://bintray.com/probono/AppImages/Subsurface/_latestVersion` ("redirector URL") and parsing the version information from where it redirects to.
 
+## Providing update-able AppImages
+
+If you would like to provide update-able AppImages, you basically have to:
+ 1. Embed the update information (see above) inside your AppImage
+ 2. Create a `.zsync` file using 
+ 3. Host both your AppImage and the `.zsync` file on a server that supports range requests
+
+You can see this in action as part of an automated build process [here](https://github.com/probonopd/AppImages/blob/1249ce96f1a2bac1cb7a397bde1f74a87e86edf2/bintray.sh#L138-L151).
+
 ## TODO
 
  * Implement gpg signature checking
