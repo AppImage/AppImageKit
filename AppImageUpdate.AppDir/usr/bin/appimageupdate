@@ -36,12 +36,25 @@ gpg_check()
   fi
 }
 
-USAGE="Usage: 
-$1 /path/to/AppImage 
+USAGE="Usage:
+$0 /path/to/AppImage -
   Updates the AppImage using the update information embedded in the AppImage
 "
+MSG="This updater has no GUI yet. \n
+Run it from the command line and supply 
+the AppImage to be updated as an argument. \n
+Create a pull request on 
+https://github.com/probonopd/AppImageKit 
+to contribute a proper GUI."
 
 if [ $# -lt 1 ] ; then
+  if [ -x /usr/bin/zenity ] ; then
+    zenity --error --text "${MSG}" 2>/dev/null
+  elif [ -x /usr/bin/kdialog ] ; then
+    kdialog --msgbox "${MSG}" 2>/dev/null
+  elif [ -x /usr/bin/Xdialog ] ; then
+    Xdialog --msgbox "${MSG}" 2>/dev/null
+  fi
   echo $USAGE
   exit 1
 fi
