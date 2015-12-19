@@ -12,14 +12,14 @@ AppImageUpdate lets you update AppImages in a decentral way using information em
 which curl
 
 # Get Subsurface 449
-wget https://bintray.com/artifact/download/probono/AppImages/Subsurface-4.5.1.449-x86_64.AppImage
+wget http://bintray.com/artifact/download/probono/AppImages/Subsurface-4.5.1.449-x86_64.AppImage
 chmod a+x Subsurface-4.5.1.449-x86_64.AppImage
 
 # Run it
 ./Subsurface-4.5.1.449-x86_64.AppImage
 
 # Get the updater
-wget https://bintray.com/artifact/download/probono/AppImages/AppImageUpdate-20151218-x86_64.AppImage
+wget http://bintray.com/artifact/download/probono/AppImages/AppImageUpdate-20151218-x86_64.AppImage
 chmod a+x AppImageUpdate-20151218-x86_64.AppImage
 
 # Update Subsurface to the latest version
@@ -96,15 +96,15 @@ As you can see, you just need to point to a fixed URL that has the `latest` zsyn
 
 ### bintray-zsync
 
-The __bintray-zsync__ transport extends the zsync transport in that it uses version information from [Bintray](https://bintray.com/). Its update information is in the form
+The __bintray-zsync__ transport extends the zsync transport in that it uses version information from [Bintray](http://bintray.com/). Its update information is in the form
 
 ```
 bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
 ```
 
-Bintray gives developers a CDN-based, reliable, download center with REST automation and support for generic software such as AppImages. Read ["What Is Bintray?"](https://bintray.com/docs/usermanual/whatisbintray/whatisbintray_whatisbintray.html) for more information.
+Bintray gives developers a CDN-based, reliable, download center with REST automation and support for generic software such as AppImages. Read ["What Is Bintray?"](http://bintray.com/docs/usermanual/whatisbintray/whatisbintray_whatisbintray.html) for more information.
 
-Since Bintray knows metadata about the AppImages we upload (such as the version), we can use Bintray to figure out what the latest version is. `https://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync` ("dummy URL") does not work but luckily we can fill in `_latestVersion` by using the URL `https://bintray.com/probono/AppImages/Subsurface/_latestVersion` ("redirector URL") and parsing the version information from where it redirects to.
+Since Bintray knows metadata about the AppImages we upload (such as the version), we can use Bintray to figure out what the latest version is. `http://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync` ("dummy URL") does not work but luckily we can fill in `_latestVersion` by using the URL `http://bintray.com/probono/AppImages/Subsurface/_latestVersion` ("redirector URL") and parsing the version information from where it redirects to.
 
 ## TODO
 
