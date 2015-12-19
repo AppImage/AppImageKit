@@ -38,7 +38,7 @@ Notice how quick the update was. Combined with fully automated continuous or nig
 
 Here are some concrete use cases for AppImageUpdate:
 
- * "As a user, I want to get updates for my AppImages easily, without the need to add repositories to my system like EPEL or ppa. I want to be sure nothing is touched on my system apart from the one application I want to update. And I want to keep the old version until I know for sure that the new version works for me.
+ * "As a user, I want to get updates for my AppImages easily, without the need to add repositories to my system like EPEL or ppa. I want to be sure nothing is touched on my system apart from the one application I want to update. And I want to keep the old version until I know for sure that the new version works for me. Of course, I want to check with GPG signatures where the update is coming from.
  * As an application developer, I want to push out nightly or continuous builds to testers easily without having to go though compicated repository setups for multiple distributions. Since I want to support as many distributions as possible, I am looking for something simple and distribution independent.
  * As a server operator, I want to reduce my download traffic by having delta updates. So that users don't have to download the same Qt libs over and over again with each application release, even though they are bundled with the application.
 
@@ -117,6 +117,5 @@ You can see this in action as part of an automated build process [here](https://
 
 ## TODO
 
- * Implement gpg signature checking
  * Implement a GUI
  * Implement more transport mechanisms, e.g. peer-to-peer
