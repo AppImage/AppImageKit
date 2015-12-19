@@ -71,11 +71,12 @@ for arg in sys.argv:
     if arg in ["-h", "--help"]:
         usage()
 
-if (sys.argv[1] in ["-t", "--testappimage"]):
-    command = [os.path.dirname(__file__) + "/testappimage"] + sys.argv[2:]
-    print(command)
-    subprocess.call(command)
-    exit(0)
+if len(sys.argv) >= 2:
+    if (sys.argv[1] in ["-t", "--testappimage"]):
+        command = [os.path.dirname(__file__) + "/testappimage"] + sys.argv[2:]
+        print(command)
+        subprocess.call(command)
+        exit(0)
 
 if len(sys.argv) == (3):
     command = [os.path.dirname(__file__) + "/package"] + sys.argv[1:]
