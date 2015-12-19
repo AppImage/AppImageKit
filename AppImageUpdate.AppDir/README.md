@@ -110,7 +110,7 @@ Since Bintray knows metadata about the AppImages we upload (such as the version)
 
 If you would like to provide update-able AppImages, you basically have to:
  1. Embed the update information (see above) inside your AppImage
- 2. Create a `.zsync` file using 
+ 2. Create a `.zsync` file using `zsyncmake`
  3. Host both your AppImage and the `.zsync` file on a server that supports range requests
 
 You can see this in action as part of an automated build process [here](https://github.com/probonopd/AppImages/blob/1249ce96f1a2bac1cb7a397bde1f74a87e86edf2/bintray.sh#L138-L151).
