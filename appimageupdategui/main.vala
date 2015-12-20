@@ -20,7 +20,7 @@ static void on_open_clicked() {
     var file_chooser = new FileChooserDialog ("Open File", window_main,
                                       FileChooserAction.OPEN,
                                       "gtk-cancel", ResponseType.CANCEL,
-                                      "gtk-ok", ResponseType.ACCEPT);
+                                      "gtk-open", ResponseType.ACCEPT);
         FileFilter filter = new FileFilter ();
 	file_chooser.set_filter (filter);                                    
 	filter.add_pattern("*.AppImage");
