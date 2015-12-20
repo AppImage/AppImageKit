@@ -130,7 +130,7 @@ public class ProgressWindow : Window {
 		    channel.read_line (out line, null, null);
 		    stdout.printf(line); // Be verbose
                     file_counts = 12; // TODO: Get from command line output
-                    action_label.label = "Updating: " + line.substring(0, line.length - 1);
+                    action_label.label = line.substring(0, line.length - 1);
                     counter++;
                     progress.set_fraction( 1.0f * counter / file_counts);
                     

@@ -6,10 +6,24 @@ set -e
 # or though the appimageupdate GUI. The GUI is purely optional.
 # It displays stdout and stderr, as well as a progress indicator.
 
+error()
+{
+  if [ -x /usr/bin/zenity ] ; then
+    zenity --error --text "${1}" 2>/dev/null
+  elif [ -x /usr/bin/kdialog ] ; then
+    kdialog --msgbox "${1}" 2>/dev/null
+  elif [ -x /usr/bin/Xdialog ] ; then
+    Xdialog --msgbox "${1}" 2>/dev/null
+  else
+    echo "${1}"
+  fi
+  exit 1
+}
+
 # A simple dependency check
-which zsync_curl >/dev/null
-which curl >/dev/null
-which dd >/dev/null
+which zsync_curl >/dev/null || error "zsync_curl is missing"
+which curl >/dev/null || error "curl is missing"
+which dd >/dev/null || error "dd is missing"
 
 MYSELF="${0}"
 
@@ -31,13 +45,15 @@ update_myself()
 
 gpg_check()
 {
+  set +e
   if [ "$(which gpg)" != "" ] ; then
     echo "GPG is installed; hence attempting signature verification"
     ASC_URL=$( echo "${ZSYNC_URL}" | sed -e 's|.zsync|.asc|g' )
-    curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}")
+    curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}") && echo "Signature verified"
   else
     echo "GPG is not installed; hence skipping signature verification" >&2
   fi
+  set -e
 }
 
 USAGE="Usage:
@@ -53,14 +69,9 @@ if [ $# -lt 1 ] ; then
   RESULT=$?
   set -e
   if [ $RESULT != 0 ] ; then
-    if [ -x /usr/bin/zenity ] ; then
-      zenity --error --text "${MSG}" 2>/dev/null
-    elif [ -x /usr/bin/kdialog ] ; then
-      kdialog --msgbox "${MSG}" 2>/dev/null
-    elif [ -x /usr/bin/Xdialog ] ; then
-      Xdialog --msgbox "${MSG}" 2>/dev/null
-    fi
+    error "${MSG}"
   fi
+  exit $RESULT
 fi
 
 if [ -e "${1}" ] ; then
@@ -156,10 +167,14 @@ elif [ "$TYPE" == "" ] ; then
   echo "Cannot update this file"
   echo "This file contains no update information or you need to update the updater" >&2
   update_myself
+  exit 1
 else
   echo "Cannot update this file"
   echo "You need to an updater that can handle $TYPE" >&2
   update_myself
+  exit 1
 fi
 
 rm *.zs-old 2>/dev/null || true
+
+echo "Successfully updated to version ${VERSION}"
