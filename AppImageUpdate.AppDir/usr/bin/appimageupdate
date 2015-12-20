@@ -2,6 +2,10 @@
 
 set -e
 
+# This script is supposed to be run either on the command line
+# or though the appimageupdate GUI. The GUI is purely optional.
+# It displays stdout and stderr, as well as a progress indicator.
+
 # A simple dependency check
 which zsync_curl >/dev/null
 which curl >/dev/null
@@ -32,7 +36,7 @@ gpg_check()
     ASC_URL=$( echo "${ZSYNC_URL}" | sed -e 's|.zsync|.asc|g' )
     curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}")
   else
-    echo "GPG is not installed; hence skipping signature verification"
+    echo "GPG is not installed; hence skipping signature verification" >&2
   fi
 }
 
@@ -40,23 +44,23 @@ USAGE="Usage:
 $0 /path/to/AppImage -
   Updates the AppImage using the update information embedded in the AppImage
 "
-MSG="This updater has no GUI yet. \n
-Run it from the command line and supply 
-the AppImage to be updated as an argument. \n
-Create a pull request on 
-https://github.com/probonopd/AppImageKit 
-to contribute a proper GUI."
+
+MSG="GUI not installed or not working on this system, please use this tool from the command line instead"
 
 if [ $# -lt 1 ] ; then
-  if [ -x /usr/bin/zenity ] ; then
-    zenity --error --text "${MSG}" 2>/dev/null
-  elif [ -x /usr/bin/kdialog ] ; then
-    kdialog --msgbox "${MSG}" 2>/dev/null
-  elif [ -x /usr/bin/Xdialog ] ; then
-    Xdialog --msgbox "${MSG}" 2>/dev/null
+  set +e
+  appimageupdategui "${1}"
+  RESULT=$?
+  set -e
+  if [ $RESULT != 0 ] ; then
+    if [ -x /usr/bin/zenity ] ; then
+      zenity --error --text "${MSG}" 2>/dev/null
+    elif [ -x /usr/bin/kdialog ] ; then
+      kdialog --msgbox "${MSG}" 2>/dev/null
+    elif [ -x /usr/bin/Xdialog ] ; then
+      Xdialog --msgbox "${MSG}" 2>/dev/null
+    fi
   fi
-  echo $USAGE
-  exit 1
 fi
 
 if [ -e "${1}" ] ; then
@@ -100,8 +104,7 @@ fi
 if [ "${2}" == "set" ] ; then
   dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
   echo "${3}" | dd of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
-  echo "Changed ${APPLICATION_USED}"
-  echo "to ${3}"
+  echo "Changed ${APPLICATION_USED} to ${3}"
   exit 0
 fi
 
@@ -137,10 +140,11 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   DUMMY_URL="https://bintray.com/artifact/download/$USERNAME/$REPO/$ZSYNCDUMMYNAME"
   VERSION=$(curl -k -r 0-0 -Ls -o /dev/null -w %{url_effective} "${REDIRECTOR_URL}" | cut -d "/" -f 7)
   if [ "$VERSION" == "_latestVersion" ] ; then
-    echo "Could not get the latest version"
+    echo "Error"
+    echo "Could not get the latest version from Bintray" >&2
     exit 1
   else
-    echo "$VERSION"
+    echo "Latest version: ${VERSION}"
   fi
   ZSYNC_URL=$(echo "${DUMMY_URL}" | sed -e "s|_latestVersion|$VERSION|g" )
   zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" # Get the file with zsync using $1 as an input file
@@ -149,13 +153,12 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   gpg_check
 
 elif [ "$TYPE" == "" ] ; then
-  echo "Cannot update this file."
-  echo "This file has no update information embedded"
-  echo "or you need to update the updater."
+  echo "Cannot update this file"
+  echo "This file contains no update information or you need to update the updater" >&2
   update_myself
 else
-  echo "I do not know how to handle this file."
-  echo "You need to update to an updater that can handle $TYPE."
+  echo "Cannot update this file"
+  echo "You need to an updater that can handle $TYPE" >&2
   update_myself
 fi
 
