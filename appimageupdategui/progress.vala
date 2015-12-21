@@ -9,7 +9,7 @@ public class ProgressWindow : Window {
     private string file_name;
     private string[] files_to_be_updated;   
     private int counter;    
-    private int file_counts;         
+    private int total_steps;         
     
     private ProgressBar progress;
 
@@ -17,13 +17,18 @@ public class ProgressWindow : Window {
     private Label message_label;
     
     private Image icon_image;
+    private Spinner spinner;
+
+    private Revealer revealer1;
+    private Revealer revealer2;
 
     private Button btn_cancel;
     private Button btn_show_files;
     private Button btn_quit;
             
     private Pid child_pid;
-    
+
+    private string result_file_name;
     
     public ProgressWindow(string file_name, string[] files_to_be_updated) {
             var builder = new Builder();
@@ -55,8 +60,18 @@ public class ProgressWindow : Window {
 
             icon_image = builder.get_object("icon_image") as Image;
 
+            spinner = builder.get_object("spinner") as Spinner;
+
+            revealer1 = builder.get_object("revealer1") as Revealer;
+            revealer1.set_reveal_child (true);
+            revealer2 = builder.get_object("revealer2") as Revealer;
+            revealer2.set_reveal_child (false);
+
+            spinner.set_vexpand(true);
+            spinner.set_hexpand(true);
+
             btn_cancel = builder.get_object("btn_cancel") as Button;       
-            btn_cancel.clicked.connect(cancel);
+            btn_cancel.clicked.connect(main_quit);
                  
             btn_quit = builder.get_object("btn_quit") as Button;
             btn_quit.clicked.connect(Gtk.main_quit);     
@@ -115,9 +130,7 @@ public class ProgressWindow : Window {
             ChildWatch.add (child_pid, (pid, status) => {
 			    // Triggered when the child indicated by child_pid exits			
 			    Process.close_pid (pid);
-			    btn_cancel.set_label("Close");
-        	            btn_quit.set_visible(true);
-        	            btn_show_files.set_visible(true);
+
 	    });
 
         } catch (SpawnError e) {
@@ -137,14 +150,27 @@ public class ProgressWindow : Window {
 		    string line;
 		    channel.read_line (out line, null, null);
 		    stdout.printf(line); // Be verbose
-                    file_counts = 30; // TODO: Get from command line output
+                    total_steps = 30; // TODO: Get from command line output
                     action_label.label = line.substring(0, line.length - 1);
                     counter++;
-                    progress.set_fraction( 1.0f * counter / file_counts);
-                    if(line.contains("checksum matches OK")) {
-		        icon_image.icon_name="emblem-ok-symbolic";
+                    progress.set_fraction( 1.0f * counter / total_steps);
+                    if(progress.get_fraction() == 1) spinner.stop();
+                    if(line.contains("Target 100.0% complete")) {
+			result_file_name=line.replace("Read ","").replace(". Target 100.0% complete.","");
+			result_file_name=result_file_name.substring(0, result_file_name.length - 1).strip();
+			result_file_name=Path.build_path (Path.DIR_SEPARATOR_S, Path.get_dirname(this.file_name), Path.get_basename(result_file_name));
                     }
+                    if(line.contains("checksum matches OK")) {
+			revealer1.set_reveal_child (false);
+			revealer2.set_reveal_child (true);
+		        icon_image.icon_name="emblem-ok-symbolic";
+                        Posix.system("chmod 0755 " + result_file_name); // Because the CLI does not reliably do it (FIXME)
+			btn_show_files.set_visible(true);
+                    }
+
                     if(line.contains("Cannot")) {
+			revealer1.set_reveal_child (false);
+			revealer2.set_reveal_child (true);
 		        icon_image.icon_name="dialog-error-symbolic";
                     }
 	    } catch (IOChannelError e) {
@@ -181,13 +207,19 @@ public class ProgressWindow : Window {
     }
     
     private void show_files() {
-	    // To be implemented
-            this.close();
+	    print(result_file_name);
+            try {
+	        Posix.system(result_file_name + " &");
+		        		
+            } catch (SpawnError e) {
+	            stdout.printf("Error launching file: " + e.message);
+            }
+            main_quit();
     }
     
     private void cancel() {
         Posix.kill(child_pid, Posix.SIGTERM);
-        this.close();    
+        main_quit();    
     }
 
 }

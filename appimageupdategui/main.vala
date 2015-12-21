@@ -100,7 +100,7 @@ static void main (string[] args) {
 
 	window_main.add (vbox_main);
 
-	window_main.show_all();
+	// window_main.show_all(); // Currently we are not showing the Main screen at all (TODO)
 
 	on_open_clicked();
 
