@@ -16,6 +16,8 @@ public class ProgressWindow : Window {
     private Label action_label;
     private Label message_label;
     
+    private Image icon_image;
+
     private Button btn_cancel;
     private Button btn_show_files;
     private Button btn_quit;
@@ -50,6 +52,8 @@ public class ProgressWindow : Window {
             
             var vbox = builder.get_object("main_box") as Box;
             add(vbox);
+
+            icon_image = builder.get_object("icon_image") as Image;
 
             btn_cancel = builder.get_object("btn_cancel") as Button;       
             btn_cancel.clicked.connect(cancel);
@@ -137,7 +141,12 @@ public class ProgressWindow : Window {
                     action_label.label = line.substring(0, line.length - 1);
                     counter++;
                     progress.set_fraction( 1.0f * counter / file_counts);
-                    
+                    if(line.contains("checksum matches OK")) {
+		        icon_image.icon_name="emblem-ok-symbolic";
+                    }
+                    if(line.contains("Cannot")) {
+		        icon_image.icon_name="dialog-error-symbolic";
+                    }
 	    } catch (IOChannelError e) {
 		    stdout.printf ("%s: IOChannelError: %s\n", stream_name, e.message);
 		    return false;
