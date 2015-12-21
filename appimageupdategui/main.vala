@@ -28,7 +28,11 @@ static void on_open_clicked() {
         if (file_chooser.run () == ResponseType.ACCEPT) {
             open_file(file_chooser.get_filename ());
         }
-        file_chooser.destroy ();
+
+        print("FOOOOOOOOO");
+   	window_main.destroy();
+        file_chooser.destroy();
+        Posix.exit(0); 
 }
 
 /* Handle about click event */

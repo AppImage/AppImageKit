@@ -155,10 +155,10 @@ public class ProgressWindow : Window {
                     counter++;
                     progress.set_fraction( 1.0f * counter / total_steps);
                     if(progress.get_fraction() == 1) spinner.stop();
-                    if(line.contains("Target 100.0% complete")) {
-			result_file_name=line.replace("Read ","").replace(". Target 100.0% complete.","");
-			result_file_name=result_file_name.substring(0, result_file_name.length - 1).strip();
-			result_file_name=Path.build_path (Path.DIR_SEPARATOR_S, Path.get_dirname(this.file_name), Path.get_basename(result_file_name));
+                    if(line.index_of ("Target ") == 0) {
+			result_file_name=line.replace("Target ","");
+			result_file_name=result_file_name.strip();
+			result_file_name=Path.build_path (Path.DIR_SEPARATOR_S, Path.get_dirname(this.file_name), result_file_name);
                     }
                     if(line.contains("checksum matches OK")) {
 			revealer1.set_reveal_child (false);
