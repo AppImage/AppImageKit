@@ -26,7 +26,7 @@ chmod a+x AppImageUpdate-20151218-x86_64.AppImage
 ./AppImageUpdate-20151218-x86_64.AppImage ./Subsurface-4.5.1.449-x86_64.AppImage
 
 # Look there is a newer version! Run it
-NEW=$(ls Subsurface-* | sort -V | tail -n 1)
+NEW=$(ls Subsurface-*.AppImage | sort -V | tail -n 1)
 ./$NEW
 ```
 
