@@ -1,5 +1,9 @@
 using Gtk;
 
+// http://stackoverflow.com/questions/20846511/read-write-file-pipes-in-vala-glib
+// http://www.valadoc.org/#!api=glib-2.0/GLib.IOChannel.IOChannel.unix_new
+// http://www.valadoc.org/#!api=glib-2.0/GLib.IOChannel
+
 public class ProgressWindow : Window {
 
     private string file_name;
@@ -129,7 +133,7 @@ public class ProgressWindow : Window {
 		    string line;
 		    channel.read_line (out line, null, null);
 		    stdout.printf(line); // Be verbose
-                    file_counts = 12; // TODO: Get from command line output
+                    file_counts = 30; // TODO: Get from command line output
                     action_label.label = line.substring(0, line.length - 1);
                     counter++;
                     progress.set_fraction( 1.0f * counter / file_counts);
