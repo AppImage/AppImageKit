@@ -168,16 +168,16 @@ public class ProgressWindow : Window {
 			btn_show_files.set_visible(true);
                     }
 
-                    if(line.contains("Cannot")) {
-			revealer1.set_reveal_child (false);
-			revealer2.set_reveal_child (true);
-		        icon_image.icon_name="dialog-error-symbolic";
+                    if(line.contains("Cannot") || line.contains("Error")) {
+			display_error();
                     }
 	    } catch (IOChannelError e) {
 		    stdout.printf ("%s: IOChannelError: %s\n", stream_name, e.message);
+		    display_error();
 		    return false;
 	    } catch (ConvertError e) {
 		    stdout.printf ("%s: ConvertError: %s\n", stream_name, e.message);
+		    display_error();
 		    return false;
 	    }
 
@@ -194,16 +194,28 @@ public class ProgressWindow : Window {
 		    channel.read_line (out line, null, null);
 		    stdout.printf(line); // Be verbose
                     message_label.label = line.substring(0, line.length - 1);
+                    if(line.contains("Cannot") || line.contains("Error")) {
+			display_error();
+                    }
                     
 	    } catch (IOChannelError e) {
 		    stdout.printf ("%s: IOChannelError: %s\n", stream_name, e.message);
+		    display_error();
 		    return false;
 	    } catch (ConvertError e) {
 		    stdout.printf ("%s: ConvertError: %s\n", stream_name, e.message);
+		    display_error();
 		    return false;
 	    }
 	
             return true;
+    }
+
+    private void display_error() {
+        revealer1.set_reveal_child (false);
+	revealer2.set_reveal_child (true);
+	progress.set_fraction(0.0);
+	icon_image.icon_name="dialog-error-symbolic";   
     }
     
     private void show_files() {
