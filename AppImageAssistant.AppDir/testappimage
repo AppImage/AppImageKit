@@ -137,7 +137,7 @@ export LANG="en_EN.UTF-8"
 #dbus-launch $MNT/AppRun || 
 export LIBGL_DEBUG=verbose
 export QT_DEBUG_PLUGINS=1
-dbus-uuidgen > /var/lib/dbus/machine-id 2>/dev/null # Needed for CentOS 6.7 to launch graphical apps
+dbus-uuidgen --ensure # Needed for CentOS 6.7 to launch graphical apps
 if [ -f $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so ] ; then
   export LD_LIBRARY_PATH=$MNT/usr/lib/:$LD_LIBRARY_PATH
   ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
