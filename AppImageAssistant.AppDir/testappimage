@@ -2,6 +2,7 @@
 
 #
 # Test an AppDir or AppImage on a given ISO or squashfs base system
+# TODO: Check https://github.com/FGrose/livecd-tools/blob/liveimage-mount/tools/liveimage-mount
 #
 
 set -e
