@@ -56,33 +56,47 @@ add() {
 		chmod +x "$app"
 	fi
 	
-	XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
+
+	# We extract the .desktop file inside the AppImage
+
+	local innerDesktopFilePath=$(iso_ls "$app" "/*.desktop" | head -n1)
+	[ -n "$innerDesktopFilePath" ] || { echo "Desktop file not found" >&2; return 1; }
 	local name="$(basename "$app")"
+	local appImage_desktopFile="/tmp/AppImage-${name}-tmp.desktop"
+	appImage_desktopFile=${appImage_desktopFile// /_}
+	#echo "  $innerDesktopFilePath --> $appImage_desktopFile"
+	iso_extract "$app" "$innerDesktopFilePath" "$appImage_desktopFile" || { echo "Failed to extract '$innerDesktopFilePath' file" >&2; return 1; }
+
+
+	XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
 	local appImage_icon="$XDG_DATA_HOME/icons/application-x-appimage-${name}.png"
 	if [ ! -f "$appImage_icon" ]; then
-		# In order to find out the icon filename, we must extract the .desktop file inside the AppImage
-
-		local innerDesktopFilePath=$(iso_ls "$app" "/*.desktop" | head -n1)
-		[ -n "$innerDesktopFilePath" ] || { echo "Desktop file not found" >&2; return 1; }
-		local appImage_desktopFile="/tmp/AppImage-${name}-tmp.desktop"
-		appImage_desktopFile=${appImage_desktopFile// /_}
-		#echo "  $innerDesktopFilePath --> $appImage_desktopFile"
-		iso_extract "$app" "$innerDesktopFilePath" "$appImage_desktopFile" || { echo "Failed to extract '$innerDesktopFilePath' file" >&2; return 1; }
+		# We actually extract the icon
 
 		local innerIconPath=$(desktopFile_getParameter "$appImage_desktopFile" Icon)
-		rm "$appImage_desktopFile"
-
-		# Then, we can actually extract the icon
-
 		[ -n "$innerIconPath" ] || { echo "Icon file not found" >&2; return 1; }
 		appImage_icon=${appImage_icon// /_}
 		#echo "  $innerIconPath --> $appImage_icon"
 		iso_extract "$app" "$innerIconPath" "$appImage_icon" || { echo "Failed to extract icon" >&2; return 1; }
 	fi
 
+	mimeType=$(desktopFile_getParameter "$appImage_desktopFile" MimeType)
+
+	rm "$appImage_desktopFile"
+
+
+	# At last, we generate and register the .desktop file
+
 	local desktopFile="/tmp/AppImage-${name}.desktop"
 	desktopFile=${desktopFile// /_} # xdg-desktop-menu hates spaces
-	echo -e "[Desktop Entry]\nType=Application\nName=$name\nExec=\"$(readlink -f "$app")\"\nIcon=$appImage_icon" > "$desktopFile"
+	echo -e "[Desktop Entry]\nType=Application\nName=$name" > "$desktopFile"
+	echo "Exec=\"$(readlink -f "$app")\" %U" >> "$desktopFile"
+	echo "Icon=$appImage_icon" >> "$desktopFile"
+
+	if [ -n "$mimeType" ]; then
+		echo "MimeType=$mimeType" >> "$desktopFile"
+	fi
+
 	xdg-desktop-menu install "$desktopFile" "$@"
 	rm "$desktopFile"
 }
