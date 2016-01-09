@@ -1,6 +1,6 @@
 /***************************************************************************
  *   Copyright (c) 2005, 2006 by Dmitry Morozhnikov <dmiceman@mail.ru >    *
- *   Copyright (c) 2005-10 Simon Peter                                     *
+ *   Copyright (c) 2004-16 Simon Peter                                     *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *

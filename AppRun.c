@@ -1,7 +1,7 @@
 /**************************************************************************
 
 Copyright (c) 2010 RazZziel
-Copyright (c) 2005-15 Simon Peter
+Copyright (c) 2004-16 Simon Peter
 
 All Rights Reserved.
 

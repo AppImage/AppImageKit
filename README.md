@@ -1,6 +1,6 @@
 # AppImageKit [![Build Status](https://travis-ci.org/probonopd/AppImageKit.svg?branch=master)](https://travis-ci.org/probonopd/AppImageKit) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
-Copyright (c) 2004-15 Simon Peter <probono@puredarwin.org> and contributors.
+Copyright (c) 2004-16 Simon Peter <probono@puredarwin.org> and contributors.
 
 Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
 

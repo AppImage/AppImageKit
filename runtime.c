@@ -1,6 +1,6 @@
 /**************************************************************************
 
-Copyright (c) 2005-13 Simon Peter
+Copyright (c) 2004-16 Simon Peter
 Copyright (c) 2007 Alexander Larsson
 
 All Rights Reserved.
