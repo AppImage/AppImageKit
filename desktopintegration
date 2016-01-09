@@ -5,17 +5,33 @@
 # If you want to use it, then place this in usr/bin/$APPNAME.wrapper
 # and set it as the Exec= line of the .desktop file in the AppImage.
 
-# TODO: 
+# TODO:
 # Handle icons for mime types as well using xdg-icon-resource
 # Handle multiple versions of the same AppImage?
 # Handle removed AppImages? Currently we are just setting TryExec=
 # See http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#DELETE
 # Possibly move this to the C runtime that is part of every AppImage?
 
+# Exit on errors
+set -e
+
+# Be verbose if $DEBUG=1 is set
+if [ ! -z "$DEBUG" ] ; then
+  env
+  set -x
+fi
+
 # Please do not change $VENDORPREFIX as it will allow for desktop files
 # belonging to AppImages to be recognized by future AppImageKit components
 # such as desktop integration daemons
 VENDORPREFIX=appimagekit
+
+trap atexit EXIT
+
+atexit()
+{
+  exec $BIN "$@"
+}
 
 error()
 {
@@ -104,7 +120,7 @@ if [ ! -f "$ICONFILE" ] ; then
 fi
 
 # $XDG_DATA_DIRS contains the default paths /usr/local/share:/usr/share
-# desktop file has to be installed in an applications subdirectory 
+# desktop file has to be installed in an applications subdirectory
 # of one of the $XDG_DATA_DIRS components
 if [ -z "$XDG_DATA_DIRS" ] ; then
   echo "\$XDG_DATA_DIRS is missing. Please run $0 from within an AppImage."
@@ -125,7 +141,7 @@ fi
 # and if so, whether it points to the same AppImage
 if [ -e "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME" ] ; then
   # echo "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME already there"
-  EXEC=$(grep "Exec=" "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME" | head -n 1)
+  EXEC=$(grep "^Exec=" "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME" | head -n 1)
   # echo $EXEC
   if [ "Exec=$APPIMAGE" == "$EXEC" ] ; then
     SKIP=1
@@ -141,8 +157,8 @@ fi
 if [ -z "$SKIP" ] ; then
   find ./share/mime/ -type f -name *xml -exec xdg-mime install $SYSTEM_WIDE --novendor {} \;
   # desktop-file-install is supposed to install
-  # .desktop files to the user's 
-  # applications directory when run as a non-root user, 
+  # .desktop files to the user's
+  # applications directory when run as a non-root user,
   # and to /usr/share/applications if run as root
   # but that does not really work for me...
   echo desktop-file-install --rebuild-mime-info-cache \
@@ -158,6 +174,3 @@ if [ -z "$SKIP" ] ; then
 fi
 
 xdg-desktop-menu forceupdate
-
-exec $BIN "$@"
-exit $?
