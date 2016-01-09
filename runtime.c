@@ -357,8 +357,8 @@ main (int argc, char *argv[])
     /* ======================================================== End icon extraction */   
 
     /* Setting some environment variables that the app "inside" might use */
-    setenv( "APPIMAGE", fullpath, 0 );
-    setenv( "APPDIR", mount_dir, 0 );
+    setenv( "APPIMAGE", fullpath, 1 );
+    setenv( "APPDIR", mount_dir, 1 );
     execv (filename, real_argv);
     /* Error if we continue here */
     perror ("execv error: ");
