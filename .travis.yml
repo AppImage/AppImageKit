@@ -10,7 +10,8 @@ before_install:
  - tar -xf cmake-3.4.0-rc3-Linux-x86_64.tar.gz -C /tmp/
  - export PATH=/tmp/cmake-3.4.0-rc3-Linux-x86_64/bin/:$PATH
 
-script: 
+script:
+ - apt-cache show libc6 | grep Version
  - cmake . && make
  - find . -type f
 

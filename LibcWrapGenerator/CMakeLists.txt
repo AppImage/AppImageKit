@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-option(USE_LIBC_WRAP_GENERATOR "Use LibcWrapGenerator" OFF)
+option(USE_LIBC_WRAP_GENERATOR "Use LibcWrapGenerator" ON)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT LibcWrapGenerator
