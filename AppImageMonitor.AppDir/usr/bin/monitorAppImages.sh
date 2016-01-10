@@ -91,6 +91,7 @@ add() {
 	desktopFile=${desktopFile// /_} # xdg-desktop-menu hates spaces
 	echo -e "[Desktop Entry]\nType=Application\nName=$name" > "$desktopFile"
 	echo "Exec=\"$(readlink -f "$app")\" %U" >> "$desktopFile"
+	echo "TryExec=$(readlink -f "$app")" >> "$desktopFile"
 	echo "Icon=$appImage_icon" >> "$desktopFile"
 
 	if [ -n "$mimeType" ]; then
