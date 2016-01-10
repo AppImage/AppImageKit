@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-option(USE_LIBC_WRAP_GENERATOR "Use LibcWrapGenerator" OFF)
+option(USE_LIBC_WRAP_GENERATOR "Use LibcWrapGenerator" ON)
 
 ADD_CUSTOM_COMMAND(
   OUTPUT LibcWrapGenerator
@@ -9,7 +9,7 @@ ADD_CUSTOM_COMMAND(
 ADD_CUSTOM_COMMAND(
   OUTPUT libcwrap.h
   DEPENDS LibcWrapGenerator
-  COMMAND ./LibcWrapGenerator --target 2.7 --libdir /lib --output libcwrap.h
+  COMMAND ./LibcWrapGenerator --target 2.14 --libdir /lib --output libcwrap.h
 )
 
 ADD_CUSTOM_TARGET(libcwrap DEPENDS libcwrap.h)
