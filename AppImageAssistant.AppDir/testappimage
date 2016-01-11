@@ -11,6 +11,13 @@ set -e
 HERE=$(dirname $(readlink -f "${0}"))
 export PATH=$HERE:$HERE/usr/bin:$PATH
 
+if [ "$1" == "-i" ] ; then
+    echo "Interactive mode ON."
+    mode_i="true"
+    set +e
+    shift
+fi
+
 if [ "$1x" == "x" ] ; then
     echo "Please specify a ISO or squashfs base system to run the AppImage on"
     exit 1
@@ -113,15 +120,39 @@ if [ "x$MNT" == "x" ] ; then
     echo "Could not find free mountpoint"
     exit 1
 fi
-if [ -f "$2" ] ; then
-    mount "$2" /tmp/$PREF/union/$MNT -o loop,ro
-elif [ -d "$2" ] ; then
-    mount "$2" /tmp/$PREF/union/$MNT -o bind
-else
-    shift
-    export RUN_COMMAND=$1
-    export RUN_INSIDE=$@
-fi
+
+mount -t proc proc /tmp/$PREF/union/proc
+mkdir -p /tmp/$PREF/union/var/lib/dbus
+mount --bind /dev /tmp/$PREF/union/dev
+mount --bind /var/lib/dbus /tmp/$PREF/union/var/lib/dbus
+touch /tmp/$PREF/union/etc/resolv.conf || echo ""
+mount --bind /etc/resolv.conf /tmp/$PREF/union/etc/resolv.conf
+xhost local: >/dev/null 2>&1 # otherwise "cannot open display: :0.0"
+
+# Store the AppImage/AppDir/command that was passed in and any arguments
+cmd=$2
+shift 2
+args=$@
+
+while [ true ]; do
+  echo "Command to run: $cmd ${args[@]}"
+  if [ "$mode_i" == true ]; then
+    read -p "Press ENTER to run it, or type new command: " -a array
+    if [ ${#array[@]} != 0 ]; then
+      cmd="${array[0]}"
+      args=("${array[@]:1}") # shift array
+    fi
+    echo "Using: $cmd ${args[@]}"
+  fi
+  
+  if [ -f "$cmd" ] || [ -d "$cmd" ] ; then
+      cmd_inside=$MNT/AppRun
+      opts=loop,ro
+      [ -d "$cmd" ] && opts=bind
+      mount "$cmd" /tmp/$PREF/union/$MNT -o $opts
+  else
+      cmd_inside=$cmd
+  fi
 
 cat > /tmp/$PREF/union/run.sh <<EOF
 #!/bin/sh
@@ -134,7 +165,7 @@ pango-querymodules > '/etc/pango/pango.modules' 2>/dev/null # otherwise only squ
 LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/usr/lib32:$MNT/usr/lib64:$MNT/lib/:$LD_LIBRARY_PATH ldd $MNT/usr/bin/*  $MNT/usr/lib/* 2>/dev/null | grep "not found" | sort | uniq
 export HOME="/root"
 export LANG="en_EN.UTF-8"
-# export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
+# export QT_PLUGIN_PATH=./lib/qt5/plugins ###################### !!!
 #dbus-launch $MNT/AppRun || 
 export LIBGL_DEBUG=verbose
 export QT_DEBUG_PLUGINS=1
@@ -144,21 +175,16 @@ if [ -f $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so ] ; then
   ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
 fi
 find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep "not found"'  2>/dev/null \;
-if [ $(which $RUN_COMMAND) ] ; then
-    exec $RUN_INSIDE
-else
-    $MNT/AppRun && echo "+++++++++ SUCCESS $ISO $2 +++++++++"
-fi
+${cmd_inside} ${args[@]} && echo "+++++++++ SUCCESS $ISO $cmd +++++++++"
 EOF
-chmod a+x /tmp/$PREF/union/run.sh
-mount -t proc proc /tmp/$PREF/union/proc
-mkdir -p /tmp/$PREF/union/var/lib/dbus
-mount --bind /dev /tmp/$PREF/union/dev
-mount --bind /var/lib/dbus /tmp/$PREF/union/var/lib/dbus
-touch /tmp/$PREF/union/etc/resolv.conf || echo ""
-mount --bind /etc/resolv.conf /tmp/$PREF/union/etc/resolv.conf
-xhost local: >/dev/null 2>&1 # otherwise "cannot open display: :0.0"
-echo ""
-chroot /tmp/$PREF/union/ /run.sh # $MNT/AppRun
-echo ""
-exit $?
+  chmod a+x /tmp/$PREF/union/run.sh
+  echo ""
+  chroot /tmp/$PREF/union/ /run.sh # $MNT/AppRun
+  status=$?
+  echo ""
+  [ "$mode_i" == true ] || break
+  read -p "Run another command [Y/n]? " answer
+  [ "$answer" == "N" ] || [ "$answer" == "n" ] && break
+done
+
+exit $status
