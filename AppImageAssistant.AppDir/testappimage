@@ -11,20 +11,49 @@ set -e
 HERE=$(dirname $(readlink -f "${0}"))
 export PATH=$HERE:$HERE/usr/bin:$PATH
 
-if [ "$1" == "-i" ] ; then
-    echo "Interactive mode ON."
-    mode_i="true"
-    set +e
-    shift
-fi
+# Dummy redirects to bypass -e and -q modes
+exec 3>&1 4>&2
+redirects="" # -e and -q redirect inside ISO too
+
+# Get argument parameters for testappimage
+while [ "${1:0:1}" == "-" ]; do # passed in like: -i -e
+  params="${1:1}"
+  while [ "$params" ]; do # passed in like: -ie
+    case "${params:0:1}" in
+      i )
+        mode_i="true"
+        set +e
+        ;;
+      e )
+        mode_e="true"
+        redirects="1>&2"
+        exec 1>&2
+        ;;
+      q ) # Quiet mode
+        mode_q="true"
+        q="#" # Comments out some lines in run.sh that are not needed in quiet mode.
+        ;;
+      * )
+        echo "Error: unrecognised option '-${params:0:1}'" >&4
+        exit 1
+        ;;
+    esac 
+    params="${params:1}"
+  done
+  shift
+done
+
+[ "$mode_q" ] && redirects="1>/dev/null 2>/dev/null" && exec 1>/dev/null 2>/dev/null # overrides mode_e
+[ "$mode_i" ] && echo "Interactive mode ON." >&4 # show even in mode_q
+[ "$mode_e" ] && echo "ErrorStream Printing mode ON. (STDOUT reserved for your app/command in the ISO)"
 
 if [ "$1x" == "x" ] ; then
-    echo "Please specify a ISO or squashfs base system to run the AppImage on"
+    echo "Please specify a ISO or squashfs base system to run the AppImage on" >&4 # show even in mode_q
     exit 1
 fi
 
 if [ "$2x" == "x" ] ; then
-    echo "Please specify an AppDir or AppImage outside the ISO or command inside the ISO to be run"
+    echo "Please specify an AppDir or AppImage outside the ISO or command inside the ISO to be run" >&4
     exit 1
 fi
 
@@ -135,14 +164,14 @@ shift 2
 args=$@
 
 while [ true ]; do
-  echo "Command to run: $cmd ${args[@]}"
   if [ "$mode_i" == true ]; then
-    read -p "Press ENTER to run it, or type new command: " -a array
+    echo "Command to run: $cmd ${args[@]}" >&4
+    read -p "Press ENTER to run it, or type new command: " -a array 2>&4 # read prints on STDERR
     if [ ${#array[@]} != 0 ]; then
       cmd="${array[0]}"
       args=("${array[@]:1}") # shift array
     fi
-    echo "Using: $cmd ${args[@]}"
+    echo "Using: $cmd ${args[@]}" >&4
   fi
   
   if [ -f "$cmd" ] || [ -d "$cmd" ] ; then
@@ -156,8 +185,9 @@ while [ true ]; do
 
 cat > /tmp/$PREF/union/run.sh <<EOF
 #!/bin/sh
-cat /etc/*release
-echo ""
+exec 3>&1 4>&2 $redirects
+${q}cat /etc/*release
+${q}echo ""
 rm -rf /etc/pango
 mkdir -p /etc/pango
 pango-querymodules > '/etc/pango/pango.modules' 2>/dev/null # otherwise only squares instead of text
@@ -172,18 +202,18 @@ export QT_DEBUG_PLUGINS=1
 dbus-uuidgen --ensure ; dbus-launch # Needed for CentOS 6.7 to launch apps that talk to dbus
 if [ -f $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so ] ; then
   export LD_LIBRARY_PATH=$MNT/usr/lib/:$LD_LIBRARY_PATH
-  ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
+  ${q}ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
 fi
-find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep "not found"'  2>/dev/null \;
-${cmd_inside} ${args[@]} && echo "+++++++++ SUCCESS $ISO $cmd +++++++++"
+${q}find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep "not found"'  2>/dev/null \;
+${cmd_inside} ${args[@]} 1>&3 2>&4 ${q}&& echo "+++++++++ SUCCESS $ISO $cmd +++++++++"
 EOF
   chmod a+x /tmp/$PREF/union/run.sh
   echo ""
-  chroot /tmp/$PREF/union/ /run.sh # $MNT/AppRun
+  chroot /tmp/$PREF/union/ /run.sh 1>&3 2>&4 # $MNT/AppRun # Preserve STDOUT and STDERR even in mode_q and mode_e
   status=$?
   echo ""
   [ "$mode_i" == true ] || break
-  read -p "Run another command [Y/n]? " answer
+  read -p "Run with another command or AppImage [Y/n]? " answer 2>&4 # read prints on STDERR
   [ "$answer" == "N" ] || [ "$answer" == "n" ] && break
 done
 
