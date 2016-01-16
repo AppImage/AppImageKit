@@ -15,30 +15,104 @@ export PATH=$HERE:$HERE/usr/bin:$PATH
 exec 3>&1 4>&2
 redirects="" # -e and -q redirect inside ISO too
 
+function showHelp() {
+cat >&3 <<EOF
+                              ~~~ testappimage ~~~
+
+testappimage is a tool for testing AppImages inside an ISO or squashfs system.
+
+USAGE:    testappimage  [OPTIONS]  <ISO>  <COMMAND>
+
+  * ISO must be a valid path to an ISO/squashfs base system.
+  * COMMAND can be either:
+    - a valid path to an AppImage or AppDir on your system
+    - or, a command that is internal to the ISO (e.g. 'uname -a').
+  * Enclose in quotes any arguments for COMMAND that include special characters
+    that would otherwise be interpreted by your shell. E.g. '&&', '|', '>', '$'.
+
+OPTIONS:
+  -h,-?,--help               Shows this help
+  -i                         Interactive mode (allows multiple commands)
+  -p <PREF> <(u)mount|run>   Prefix mode (multiple commands non-interactively)
+  -e                         ErrorStream Printing (STDOUT reserved for COMMAND)
+  -q                         Quiet mode (STDOUT and STDERR both reserved)
+
+EXAMPLES:
+
+ 1) Testing MyProgram.AppImage in Ubuntu 12.04:
+
+    $  testappimage  ubuntu-12.04*.iso  MyProgram.AppImage
+
+ 2) Saving the output of MyProgram.AppImage to a log file:
+
+    $  testappimage  -e  ubuntu-12.04*.iso  MyProgram.AppImage  >  log.txt
+
+    (The redirection is not quoted because it must occur outside the ISO.)
+
+ 3) Saving STDOUT and STDERR to a log file *inside* the ISO: (Don't ask why!)
+
+    $  testappimage  -q  ubuntu-12.04*.iso  MyProgram.AppImage '&>' log.txt
+
+ 4) Repeated testing of the same AppDir without unmounting the ISO until done:
+
+    $  testappimage  -i  ubuntu-12.04*.iso  MyProgram.AppImage # follow prompts
+
+  Or alternatively:
+
+    $  PREF=\$RANDOM
+    $  testappimage  -p  \$PREF  mount  ubuntu-12.04*.iso
+    $  testappimage  -p  \$PREF  run    MyProgram.AppDir
+       # Errors. Make changes to MyProgram. Try again...
+    $  testappimage  -p  \$PREF  run    MyProgram.AppDir
+       # Success! Now unmount the ISO...
+    $  testappimage  -p  \$PREF  umount
+
+                              ~~~ testappimage ~~~
+EOF
+exit 0
+}
+
 # Get argument parameters for testappimage
 while [ "${1:0:1}" == "-" ]; do # passed in like: -i -e
+  [ "$1" == "--help" ] && showHelp >&4
   params="${1:1}"
   while [ "$params" ]; do # passed in like: -ie
     case "${params:0:1}" in
-      i )
+      h|\? )
+        showHelp
+        ;;
+      i ) # Interactive mode (allows multiple commands in the ISO)
         mode_i="true"
         set +e
         ;;
-      e )
+      e ) # ErrorStream mode (print of STDERR)
         mode_e="true"
         redirects="1>&2"
         exec 1>&2
         ;;
-      q ) # Quiet mode
+      q ) # Quiet mode (only output is from user command run inside ISO)
         mode_q="true"
         q="#" # Comments out some lines in run.sh that are not needed in quiet mode.
         ;;
+      p ) # Prefix mode (allows multiple commands non-interactively)
+        if [ "${params:1:2}" ] || [ "x$2" == "x" ] || [ "x$3" == "x" ]; then
+          echo "Prefix mode needs arguments:  -p <PREF> <mount|run|umount>" >&4
+          exit 1
+        fi
+        if [ "$3" != "mount" ] && [ "$3" != "run" ] && [ "$3" != "umount" ]; then
+          echo "2nd argument to '-p' must be one of 'mount', 'run' or 'umount'." >&4
+          exit 1
+        fi
+        pref="$2"
+        mode_p_action="$3"
+        shift 2
+        ;;
       * )
-        echo "Error: unrecognised option '-${params:0:1}'" >&4
+        echo "Error: unrecognised option '-${params:0:1}'. Try '-h' or '-?' for help" >&4
         exit 1
         ;;
-    esac 
-    params="${params:1}"
+    esac
+    params="${params:1}" # pop first character
   done
   shift
 done
@@ -46,123 +120,143 @@ done
 [ "$mode_q" ] && redirects="1>/dev/null 2>/dev/null" && exec 1>/dev/null 2>/dev/null # overrides mode_e
 [ "$mode_i" ] && echo "Interactive mode ON." >&4 # show even in mode_q
 [ "$mode_e" ] && echo "ErrorStream Printing mode ON. (STDOUT reserved for your app/command in the ISO)"
+[ "$mode_p_action" ] && echo "Prefix mode: PREF='$pref', action='$mode_p_action'."
 
-if [ "$1x" == "x" ] ; then
-    echo "Please specify a ISO or squashfs base system to run the AppImage on" >&4 # show even in mode_q
-    exit 1
-fi
-
-if [ "$2x" == "x" ] ; then
-    echo "Please specify an AppDir or AppImage outside the ISO or command inside the ISO to be run" >&4
-    exit 1
-fi
-
-export PREF=$RANDOM
-
-mkdir -p /tmp/$PREF/unionfs/ro
-mkdir -p /tmp/$PREF/unionfs/root
-mkdir -p /tmp/$PREF/unionfs/rw
-mkdir -p /tmp/$PREF/union
-mkdir -p /tmp/$PREF/iso
-
-# If ISO was specified, then mount it and find contained filesystem
-THEFS="$1"
-if [ ${1: -4} == ".iso" ] ; then
-    ISO="$1"
-    mount -o loop,ro "$ISO" /tmp/$PREF/iso
-    # If there is a squashfs file named $ISO.buildsquash then we overlay-
-    # mount this as well. This can significantly speed up subsequent builds
-    # because dependencies can be installed there. The squashfs file can be
-    # generated by squashing the unionfs/rw directory.
-    if [ -e $ISO.buildsquash ] ; then
-        mount -o loop,ro "$ISO.buildsquash" /tmp/$PREF/unionfs/ro
+# Arguments needed in all modes except `-p umount`
+if [ "$mode_p_action" != "umount" ]; then
+  # ISO needed except in `-p run`
+  if [ "$mode_p_action" != "run" ]; then
+    if [ "$1x" == "x" ]; then
+      echo "Please specify a ISO or squashfs base system to run the AppImage on" >&4
+      exit 1
+    else
+      iso="$1"
+      shift
     fi
+  fi
+  # AppImage/command needed except in `-p mount`
+  if [ "$mode_p_action" != "mount" ]; then
+    if [ "$1x" == "x" ]; then
+      echo "Please specify an AppDir or AppImage outside the ISO or command inside the ISO to be run" >&4
+      exit 1
+    else
+      cmd="$1"
+      shift
+      args="$@"
+    fi
+  fi
 fi
 
-# If sfs was provided, then assume it contains a rootfs use just that
-THEFS="$1"
-if [ ${1: -4} == ".sfs" ] ; then
-    ISO="$1"
-    mount -o loop,ro "$ISO" /tmp/$PREF/unionfs/root
+[ "$mode_p_action" ] && export PREF="$pref" || export PREF=$RANDOM
+
+if [ "$iso" ]; then
+  mkdir -p /tmp/"$PREF"/unionfs/ro
+  mkdir -p /tmp/"$PREF"/unionfs/root
+  mkdir -p /tmp/"$PREF"/unionfs/rw
+  mkdir -p /tmp/"$PREF"/union
+  mkdir -p /tmp/"$PREF"/iso
+
+  # If ISO was specified, then mount it and find contained filesystem
+  THEFS="$iso"
+  if [ ${iso: -4} == ".iso" ] ; then
+      ISO="$iso"
+      mount -o loop,ro "$ISO" /tmp/"$PREF"/iso
+      # If there is a squashfs file named $ISO.buildsquash then we overlay-
+      # mount this as well. This can significantly speed up subsequent builds
+      # because dependencies can be installed there. The squashfs file can be
+      # generated by squashing the unionfs/rw directory.
+      if [ -e $ISO.buildsquash ] ; then
+          mount -o loop,ro "$ISO.buildsquash" /tmp/"$PREF"/unionfs/ro
+      fi
+  fi
+
+  # If sfs was provided, then assume it contains a rootfs use just that
+  THEFS="$iso"
+  if [ ${iso: -4} == ".sfs" ] ; then
+      ISO="$iso"
+      mount -o loop,ro "$ISO" /tmp/"$PREF"/unionfs/root
+  fi
+
+  echo ""
+  echo "===================================================="
+  echo ""
+  echo $ISO
+
+  # In case of Ubuntu-like ISOs
+  if [ -e /tmp/"$PREF"/iso/casper/filesystem.squashfs ] ; then
+    THEFS=/tmp/"$PREF"/iso/casper/filesystem.squashfs
+    mount "$THEFS" /tmp/"$PREF"/unionfs/root -o loop,ro || exit 1
+  fi
+
+  # In case of Fedora-like ISOs
+  if [ -e /tmp/"$PREF"/iso/LiveOS/squashfs.img ] ; then
+      mount -o loop,ro /tmp/"$PREF"/iso/LiveOS/squashfs.img /tmp/"$PREF"/iso/
+      THEFS=/tmp/"$PREF"/iso/LiveOS/ext3fs.img || exit 1
+      mount "$THEFS" /tmp/"$PREF"/unionfs/root -o loop,ro || exit 1
+  fi
+
+  # In case of debian-like ISOs
+  if [ -e /tmp/"$PREF"/iso/live/filesystem.squashfs ] ; then
+    THEFS=/tmp/"$PREF"/iso/live/filesystem.squashfs
+    mount "$THEFS" /tmp/"$PREF"/unionfs/root -o loop,ro || exit 1
+  fi
+
+  # In case of openSUSE-like ISOs
+  if [ -e /tmp/"$PREF"/iso/*-read-only.* ] ; then
+    THEFS=$(ls /tmp/"$PREF"/iso/*-read-only.* | head -n 1)
+    mount "$THEFS" /tmp/"$PREF"/unionfs/root -o loop,ro || exit 1
+  fi
 fi
 
-echo ""
-echo "===================================================="
-echo ""
-echo $ISO
-
-# In case of Ubuntu-like ISOs
-if [ -e /tmp/$PREF/iso/casper/filesystem.squashfs ] ; then
-  THEFS=/tmp/$PREF/iso/casper/filesystem.squashfs
-  mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
-fi
-
-# In case of Fedora-like ISOs
-if [ -e /tmp/$PREF/iso/LiveOS/squashfs.img ] ; then
-    mount -o loop,ro /tmp/$PREF/iso/LiveOS/squashfs.img /tmp/$PREF/iso/
-    THEFS=/tmp/$PREF/iso/LiveOS/ext3fs.img || exit 1
-    mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
-fi
-
-# In case of debian-like ISOs
-if [ -e /tmp/$PREF/iso/live/filesystem.squashfs ] ; then
-  THEFS=/tmp/$PREF/iso/live/filesystem.squashfs
-  mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
-fi
-
-# In case of openSUSE-like ISOs
-if [ -e /tmp/$PREF/iso/*-read-only.* ] ; then
-  THEFS=$(ls /tmp/$PREF/iso/*-read-only.* | head -n 1)
-  mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
-fi
-
-trap atexit EXIT
+[ ! "$mode_p_action" ] || [ "$mode_p_action" == "umount" ] && trap atexit EXIT
 
 atexit()
 {    set +e
-    umount -l /tmp/$PREF/union/var/lib/dbus 2>/dev/null
-    umount -l /tmp/$PREF/union/etc/resolv.conf 2>/dev/null
-    umount -l /tmp/$PREF/union/proc 2>/dev/null
-    umount -l /tmp/$PREF/union/dev 2>/dev/null
-    umount -l /tmp/$PREF/union/mnt 2>/dev/null
-    umount -l /tmp/$PREF/union 2>/dev/null
-    umount -l /tmp/$PREF/unionfs/ro 2>/dev/null
-    umount -l /tmp/$PREF/unionfs/root 2>/dev/null
-    umount -l /tmp/$PREF/iso 2>/dev/null
-    umount -l /tmp/$PREF/iso 2>/dev/null
-    umount -l /tmp/$PREF/iso 2>/dev/null
-    rm -r /tmp/$PREF/unionfs/root
-    rm -r /tmp/$PREF/unionfs/rw
-    rm -r /tmp/$PREF/unionfs/ro
-    rm -r /tmp/$PREF/unionfs
-    rm -r /tmp/$PREF/union
-    rm -r /tmp/$PREF/iso
-    rm -r /tmp/$PREF/
+    umount -l /tmp/"$PREF"/union/var/lib/dbus 2>/dev/null
+    umount -l /tmp/"$PREF"/union/etc/resolv.conf 2>/dev/null
+    umount -l /tmp/"$PREF"/union/proc 2>/dev/null
+    umount -l /tmp/"$PREF"/union/dev 2>/dev/null
+    umount -l /tmp/"$PREF"/union/mnt 2>/dev/null
+    umount -l /tmp/"$PREF"/union 2>/dev/null
+    umount -l /tmp/"$PREF"/unionfs/ro 2>/dev/null
+    umount -l /tmp/"$PREF"/unionfs/root 2>/dev/null
+    umount -l /tmp/"$PREF"/iso 2>/dev/null
+    umount -l /tmp/"$PREF"/iso 2>/dev/null
+    umount -l /tmp/"$PREF"/iso 2>/dev/null
+    rm -r /tmp/"$PREF"/unionfs/root
+    rm -r /tmp/"$PREF"/unionfs/rw
+    rm -r /tmp/"$PREF"/unionfs/ro
+    rm -r /tmp/"$PREF"/unionfs
+    rm -r /tmp/"$PREF"/union
+    rm -r /tmp/"$PREF"/iso
+    rm -r /tmp/"$PREF"/
 }
 
-unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/$PREF/union
+[ "$mode_p_action" == "umount" ] && echo "Unmounting..." && exit 0
 
-ls /tmp/$PREF/union/mnt >/dev/null && MNT=/mnt
-# ls /tmp/$PREF/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
+MNT=/mnt
 
-if [ "x$MNT" == "x" ] ; then
-    echo "Could not find free mountpoint"
-    exit 1
+if [ ! "$mode_p_action" ] || [ "$mode_p_action" == "mount" ]; then
+  unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/"$PREF"/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/"$PREF"/union
+
+  ls "/tmp/$PREF/union$MNT" >/dev/null && success=true
+  # ls /tmp/"$PREF"/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
+
+  if [ "x$success" == "x" ] ; then
+      echo "Could not find free mountpoint" >&4
+      exit 1
+  fi
+
+  mount -t proc proc /tmp/"$PREF"/union/proc
+  mkdir -p /tmp/"$PREF"/union/var/lib/dbus
+  mount --bind /dev /tmp/"$PREF"/union/dev
+  mount --bind /var/lib/dbus /tmp/"$PREF"/union/var/lib/dbus
+  touch /tmp/"$PREF"/union/etc/resolv.conf || echo ""
+  mount --bind /etc/resolv.conf /tmp/"$PREF"/union/etc/resolv.conf
+  xhost local: >/dev/null 2>&1 # otherwise "cannot open display: :0.0"
 fi
 
-mount -t proc proc /tmp/$PREF/union/proc
-mkdir -p /tmp/$PREF/union/var/lib/dbus
-mount --bind /dev /tmp/$PREF/union/dev
-mount --bind /var/lib/dbus /tmp/$PREF/union/var/lib/dbus
-touch /tmp/$PREF/union/etc/resolv.conf || echo ""
-mount --bind /etc/resolv.conf /tmp/$PREF/union/etc/resolv.conf
-xhost local: >/dev/null 2>&1 # otherwise "cannot open display: :0.0"
-
-# Store the AppImage/AppDir/command that was passed in and any arguments
-cmd=$2
-shift 2
-args=$@
-
+# Loop to allow multiple commands in interactive mode (all other modes exit after 1st iteration)
 while [ true ]; do
   if [ "$mode_i" == true ]; then
     echo "Command to run: $cmd ${args[@]}" >&4
@@ -173,17 +267,17 @@ while [ true ]; do
     fi
     echo "Using: $cmd ${args[@]}" >&4
   fi
-  
+
   if [ -f "$cmd" ] || [ -d "$cmd" ] ; then
       cmd_inside=$MNT/AppRun
       opts=loop,ro
       [ -d "$cmd" ] && opts=bind
-      mount "$cmd" /tmp/$PREF/union/$MNT -o $opts
+      mount "$cmd" "/tmp/$PREF/union$MNT" -o $opts
   else
       cmd_inside=$cmd
   fi
 
-cat > /tmp/$PREF/union/run.sh <<EOF
+cat > /tmp/"$PREF"/union/run.sh <<EOF
 #!/bin/sh
 exec 3>&1 4>&2 $redirects
 ${q}cat /etc/*release
@@ -196,7 +290,7 @@ LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/usr/lib32:$MNT/usr/lib64:$MNT/lib/:$LD_LIBRARY
 export HOME="/root"
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt5/plugins ###################### !!!
-#dbus-launch $MNT/AppRun || 
+#dbus-launch $MNT/AppRun ||
 export LIBGL_DEBUG=verbose
 export QT_DEBUG_PLUGINS=1
 dbus-uuidgen --ensure ; dbus-launch # Needed for CentOS 6.7 to launch apps that talk to dbus
@@ -207,14 +301,15 @@ fi
 ${q}find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep "not found"'  2>/dev/null \;
 ${cmd_inside} ${args[@]} 1>&3 2>&4 ${q}&& echo "+++++++++ SUCCESS $ISO $cmd +++++++++"
 EOF
-  chmod a+x /tmp/$PREF/union/run.sh
+  chmod a+x /tmp/"$PREF"/union/run.sh
   echo ""
-  chroot /tmp/$PREF/union/ /run.sh 1>&3 2>&4 # $MNT/AppRun # Preserve STDOUT and STDERR even in mode_q and mode_e
+  chroot /tmp/"$PREF"/union/ /run.sh 1>&3 2>&4 # $MNT/AppRun # Preserve STDOUT and STDERR even in mode_q and mode_e
   status=$?
   echo ""
   [ "$mode_i" == true ] || break
-  read -p "Run with another command or AppImage [Y/n]? " answer 2>&4 # read prints on STDERR
-  [ "$answer" == "N" ] || [ "$answer" == "n" ] && break
+  read -n1 -sp "Run with another command or AppImage [Y/n]?" answer 2>&4 # read prints on STDERR
+  [ "$answer" == "N" ] || [ "$answer" == "n" ] && echo " N" >&4 && break
+  echo " Y" >&4
 done
 
-exit $status
+
