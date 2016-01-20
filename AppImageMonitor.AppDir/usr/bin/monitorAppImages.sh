@@ -11,158 +11,188 @@
 #
 # Specific AppImage files may also be passed as argument,
 # in order to add them to the menu.
-#
-# Usage:
-#         ./monitorAppImages.sh [AppImages or directories containing AppImages...]
 
 
-DefaultAppImageDirectory="$HOME/Applications/"
 AppImageFilenameFilter='.*\.(run|AppImage)'
-
-DesktopFilesDirectory="/$HOME/.local/share/applications"
-
-add() {
-	iso_extract() {
-		AppImage="$1"
-		shift
-		LD_LIBRARY_PATH="./usr/lib/:${LD_LIBRARY_PATH}" PATH="./usr/bin:${PATH}" \
-			xorriso -indev "$AppImage" -osirrox on -extract $@ 2>/dev/null
-	}
-
-	iso_ls() {
-		AppImage="$1"
-		shift
-		LD_LIBRARY_PATH="./usr/lib/:${LD_LIBRARY_PATH}" PATH="./usr/bin:${PATH}" \
-			xorriso -indev "$AppImage" -osirrox on -ls $@ 2>/dev/null \
-			| sed -e "s/^'\(.*\)'$/\1/"
-	}
-
-	trimp() { sed -e 's/^[ \t]*//g' -e 's/[ \t]*$//g'; }
-	desktopFile_getParameter() { file=$1; parameter=$2; grep "^${parameter}=" "$file" | cut -d= -f2- | cut -d\" -f2 | trimp; }
-
-
-	local app="$1"
-	shift
-	[ -n "$app" ] || return 1;
-	[ -f "$app" ] || return 1;
-
-	file -kib "$app" | grep -q "application/x-executable" || return 1;
-	file -kib "$app" | grep -q "application/x-iso9660-image" || return 1;
-
-	echo "Adding ${app}..."
-
-	if [ ! -x "$app" ]; then
-		echo "Marking the AppImage executable"
-		chmod +x "$app"
-	fi
-	
-
-	# We extract the .desktop file inside the AppImage
-
-	local innerDesktopFilePath=$(iso_ls "$app" "/*.desktop" | head -n1)
-	[ -n "$innerDesktopFilePath" ] || { echo "Desktop file not found" >&2; return 1; }
-	local name="$(basename "$app")"
-	local appImage_desktopFile="/tmp/AppImage-${name}-tmp.desktop"
-	appImage_desktopFile=${appImage_desktopFile// /_}
-	#echo "  $innerDesktopFilePath --> $appImage_desktopFile"
-	iso_extract "$app" "$innerDesktopFilePath" "$appImage_desktopFile" || { echo "Failed to extract '$innerDesktopFilePath' file" >&2; return 1; }
-
-
-	XDG_DATA_HOME=${XDG_DATA_HOME:-$HOME/.local/share}
-	local appImage_icon="$XDG_DATA_HOME/icons/application-x-appimage-${name}.png"
-	if [ ! -f "$appImage_icon" ]; then
-		# We actually extract the icon
-
-		local innerIconPath=$(desktopFile_getParameter "$appImage_desktopFile" Icon)
-		[ -n "$innerIconPath" ] || { echo "Icon file not found" >&2; return 1; }
-		appImage_icon=${appImage_icon// /_}
-		#echo "  $innerIconPath --> $appImage_icon"
-		iso_extract "$app" "$innerIconPath" "$appImage_icon" || { echo "Failed to extract icon" >&2; return 1; }
-	fi
-
-	mimeType=$(desktopFile_getParameter "$appImage_desktopFile" MimeType)
-
-	rm "$appImage_desktopFile"
-
-
-	# At last, we generate and register the .desktop file
-
-	local desktopFile="/tmp/AppImage-${name}.desktop"
-	desktopFile=${desktopFile// /_} # xdg-desktop-menu hates spaces
-	echo -e "[Desktop Entry]\nType=Application\nName=$name" > "$desktopFile"
-	echo "Exec=\"$(readlink -f "$app")\" %U" >> "$desktopFile"
-	echo "TryExec=$(readlink -f "$app")" >> "$desktopFile"
-	echo "Icon=$appImage_icon" >> "$desktopFile"
-
-	if [ -n "$mimeType" ]; then
-		echo "MimeType=$mimeType" >> "$desktopFile"
-	fi
-
-	xdg-desktop-menu install "$desktopFile" "$@"
-	rm "$desktopFile"
-}
-
-del() {
-	local app="$1"
-	shift
-	[ ! -n "$app" ] && return 1;
-
-	echo "Removing ${app}..."
-
-	local name="$(basename "$app")"
-	local desktopFile="$DesktopFilesDirectory/AppImage-${name}.desktop"
-	desktopFile=${desktopFile// /_} # xdg-desktop-menu hates spaces
-	if [ -f "$desktopFile" ]; then
-		xdg-desktop-menu uninstall "$desktopFile" "$@"
-	fi
-}
-
-
-if [ "$1" == "--clean" ]; then
-	echo "Removing all the AppImage menu entries in ${DesktopFilesDirectory}/..."
-	xdg-desktop-menu uninstall "$DesktopFilesDirectory"/AppImage-*.desktop
-	echo "Done"
-else
-	renice -n 1 $$
-
-	files=()
-	dirs=()
-	for arg in "$@"; do
-		[ -f "$arg" ] && files+=("$arg")
-		[ -d "$arg" ] && dirs+=("$arg")
+if [[ $EUID -eq 0 ]]; then
+	DefaultAppImageDirectories=("/Applications/")
+	for dir in /home/*/Applications; do
+		[ -d "$dir" ] && DefaultAppImageDirectories+=("$dir")
 	done
+else
+	DefaultAppImageDirectories=("$HOME/Applications/")
+fi
 
-	if [ -n "$files" ]; then
-		for file in "${files[@]}"; do
-			add "$file" --noupdate
-		done
-		update-desktop-database "$DesktopFilesDirectory"
-	elif [ ! -n "$dirs" ]; then
-		if [ -d "$DefaultAppImageDirectory" ]; then
-			dirs=("$DefaultAppImageDirectory")
+src="$(dirname "$(readlink -f "$0")")"
+source "$src/util.sh"
+
+
+for arg in "$@"; do
+	case "$arg" in
+		"--clean") export flag_clean=1; shift ;;
+		"--enable-notifications") export flag_enableNotifications=1; shift ;;
+		"--help") export flag_help=1; shift ;;
+	esac
+done
+
+showUsage() {
+	local self="$1"
+	local b=$(echo -e "\e[1m")
+	local n=$(echo -e "\e[0m")
+
+	echo "${b}${self}${n} will watch the given AppImage directories for added or removed AppImages,"
+	echo "in order to register or unregister their menu entries, thumbnails, MIME types, etc."
+	echo
+	echo "  It can be run:"
+	echo "    ${b}As regular user${n}: it will only watch AppImages for that user, and register ${b}user-specific${n} menu entries"
+	echo "    ${b}As root${n}: it'll watch AppImages for all users, and register menu entries either:"
+	echo "      ${b}user-spcific${n} menu entries, for AppImages located inside a user's home directory (i.e. \$HOME/Applications/)"
+	echo "      ${b}system-wide${n} menu entries, for AppImages located outside any user's home directory (i.e. /Applications)"
+	echo
+	echo "${b}Usage:${n}"
+	echo "  ${self} [AppImage directories...] [AppImages...] [Options...]"
+	echo
+	echo "    ${b}AppImage directories${n}:  List of directories to be watched"
+	echo "    ${b}AppImages${n}:             If one or more AppImages are specified, they will be registered and ${self} will quit"
+	echo "    ${b}Options:${n}"
+	echo "      --clean:                     Remove all AppImage menu entries in the desktop directories associated to the given AppImage directories"
+	echo "      --help:                      Print this help message"
+	echo "      --enable-notifications:      Enable desktop notifications every time an AppImage is registered or unregistered"
+
+}
+
+deleteOrphanedDesktopFiles() {
+
+	# Remove orphan menu entries inside the directory corresponding to the given path.
+	# If the given path is inside a user's home, that user's desktop directories will
+	# be scanned; otherwise the system's desktop directories will be scanned.
+
+	local path="$1"
+	local desktopFilesDirectory="$(getDesktopFilesDirectory "$path")"
+
+	echo "Checking $desktopFilesDirectory for orphaned files..."
+
+	for desktopFile in "$desktopFilesDirectory"/${desktopFileVendor}-*.desktop; do
+		[ -f "$desktopFile" ] || continue
+
+		local TryExec=$(desktopFile_getParameter "$desktopFile" TryExec)
+		[ -n "$TryExec" ] || continue # desktop file doesn't have any TryExec
+		[ -f "$TryExec" ] && continue # AppImage still exists
+
+		"$src/unregisterAppImage.sh" "$TryExec"
+	done
+}
+
+registerAllAppImages() {
+
+	# Register all AppImages contained in the given path, including its subdirectories.
+
+	local path="$1"
+
+	if [ -d "$path" ]; then
+		echo "Registering all AppImages in ${path}..."
+
+		local findFilter="$(echo "$AppImageFilenameFilter" | sed -e"s/\([()|]\)/\\\\\1/g")"
+		find "$path" -iregex "$findFilter" -exec "$src/registerAppImage.sh" {} \;
+	fi
+}
+
+unregisterAllAppImages() {
+
+	# Unregister all AppImages contained in the given path.
+
+	local path="$1"
+	local desktopFilesDirectory=$(getDesktopFilesDirectory "$path")
+
+	if [ -d "$desktopFilesDirectory" ]; then
+		echo "Unregistering all AppImage menu entries in ${desktopFilesDirectory}..."
+
+		rm -vf "$desktopFilesDirectory"/${desktopFileVendor}-*.desktop
+	fi
+}
+
+
+watchAppImages() {
+
+	# Watch the given path for AppImages added or removed
+
+	local path="$1"
+
+	echo "Watching AppImages in ${dir}..."
+
+	if [ ! -d "$path" ]; then
+		if [ $flag_createAppImageDirectories ]; then
+			mkdir -p "$path" || { echo "Could not create $path"; return 1; }
 		else
-			echo "Directory $DefaultAppImageDirectory doesn't exist"
+			echo "AppImage directory '$path' doesn't exist yet, waiting for it to be created"
+			sleep 1m
+			watchAppImages "$path"
+			return
 		fi
 	fi
 
-	if [ -n "$dirs" ]; then
-		echo "Watching ${dirs[@]}..."
+	inotifywait -m -r -e CREATE -e DELETE -e MOVED_FROM -e MOVED_TO --format '%e:%w%f' "$path" |
+		while read event; do
+			case "$event" in
+				CREATE:*|MOVED_TO:*)
+					"$src/registerAppImage.sh" "${event#*:}"
+					;;
+				DELETE:*|MOVED_FROM:*)
+					"$src/unregisterAppImage.sh" "${event#*:}"
+					;;
+			esac
+		done
+}
 
-		export -f add
-		FindFilter="$(echo "$AppImageFilenameFilter" | sed -e"s/\([()|]\)/\\\\\1/g")"
-		find "${dirs[@]}" -iregex "$FindFilter" -exec bash -c 'add "$0" --noupdate' {} \;
-		update-desktop-database "$DesktopFilesDirectory"
 
-		inotifywait -m -r -e CREATE -e DELETE -e MOVED_FROM -e MOVED_TO --format '%e:%w%f' $dirs |
-			while read event; do
-				case "$event" in
-					CREATE:*|MOVED_TO:*)
-						add "${event#*:}"
-						;;
-					DELETE:*|MOVED_FROM:*)
-						del "${event#*:}"
-						;;
-				esac
-			done
+if [ $flag_help ]; then
+	[ -n "$APPIMAGE" ] && self="$(basename "$APPIMAGE")" || self="$(basename "$0")"
+	showUsage "$self"
+	exit 0
+fi
+
+
+files=()
+dirs=()
+for arg in "$@"; do
+	[ -f "$arg" ] && files+=("$arg")
+	[ -d "$arg" ] && dirs+=("$arg")
+done
+
+if [ ! -n "$dirs" ]; then
+	for dir in "${DefaultAppImageDirectories[@]}"; do
+		dirs+=("$dir")
+	done
+fi
+
+if [ -n "$files" ]; then
+	for file in "${files[@]}"; do
+		"$src/registerAppImage.sh" "$file"
+		update-desktop-database "$(getDesktopFilesDirectory "$file")"
+	done
+	exit 0
+fi
+
+if [ -n "$dirs" ]; then
+	if [ $flag_clean ]; then
+		for dir in ${dirs[@]}; do
+			unregisterAllAppImages "$dir"
+		done
+		exit 0
 	fi
+
+	# Drop priority in order to be more background-friendly
+	renice -n 1 $$
+
+	for dir in ${dirs[@]}; do
+		deleteOrphanedDesktopFiles "$dir"
+		registerAllAppImages "$dir"
+		update-desktop-database "$(getDesktopFilesDirectory "$dir")"
+	done
+
+	for dir in ${dirs[@]}; do
+		watchAppImages "$dir" &
+	done
+
+	wait
 fi
