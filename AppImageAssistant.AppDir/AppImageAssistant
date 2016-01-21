@@ -2,7 +2,7 @@
 
 # /**************************************************************************
 # 
-# Copyright (c) 2005-13 Simon Peter
+# Copyright (c) 2004-16 Simon Peter
 # 
 # All Rights Reserved.
 # 
@@ -46,51 +46,43 @@ import xdgappdir
 import commands
 import threading
 import glob
-import colors
+import subprocess
 
 def usage():
     print "Usage:"
-    print " ", colors.BOLD, "--pack, --package", colors.END, "<input AppDir>", "<output AppImage>"
-    print " "*6, "Create an AppImage from an AppDir"
-    print " ", colors.BOLD, "--unpack, --extract", colors.END, "<input AppImage>", "<output AppDir>", "[<path inside AppImage>]"
-    print " "*6, "Extract an AppImage to an AppDir"
-    print " ", colors.BOLD, "-h, --help", colors.END
-    print " "*6, "Show this help message"
-    print " ", colors.BOLD, "<no arguments>", colors.END
-    print " "*6, "Start AppImage creation wizard"
+    print " ", "<input AppDir>", "<output AppImage>"
+    print "     ", "Create an AppImage from an AppDir"
+    print " ", "-f, --force"
+    print "     ", "Overwrite target if already existing"
+    print " ", "-h, --help"
+    print "     ", "Show this help message"
+    print " ", "-t, --testappimage <ISO> <AppDir|AppImage>"
+    print "     ", "Test running AppDir|AppImage on ISO base system"
+    print " ", "-t, --testappimage <ISO> <command>"
+    print "     ", "Test run command inside ISO base system"
+    print " ", "<no arguments>"
+    print "     ", "Start AppImage creation wizard"
+    exit(0)
+
+if len(sys.argv) == 2:
+    usage()
 
 for arg in sys.argv:
-    if arg in ["--pack", "--package"]:
-        if len(sys.argv) < 4:
-            usage()
-        elif not os.path.exists(sys.argv[2]):
-            print sys.argv[2], "doesn't exist"
-        elif not os.path.isdir(sys.argv[2]):
-            print sys.argv[2], "is not a directory"
-        elif os.path.exists(sys.argv[3]):
-            print sys.argv[3], "already exists"
-        else:
-            os.system(os.path.dirname(__file__) + "/package '%s' '%s'" % (sys.argv[2], sys.argv[3]))
-        exit(0)
-    elif arg in ["--unpack", "--extract"]:
-        if len(sys.argv) < 4:
-            usage()
-        elif not os.path.exists(sys.argv[2]):
-            print sys.argv[2], "doesn't exist"
-        elif not os.path.isfile(sys.argv[2]):
-            print sys.argv[2], "is not a file"
-        elif os.path.exists(sys.argv[3]):
-            print sys.argv[3], "already exists"
-        else:
-            origin = "/"
-            if len(sys.argv) >= 5:
-                origin = sys.argv[4]
-            os.system(os.path.dirname(__file__) + "/extract '%s' '%s' '%s'" % (sys.argv[2], sys.argv[3], origin))
-        exit(0)
-    elif arg in ["-h", "--help"]:
+    if arg in ["-h", "--help"]:
         usage()
+
+if len(sys.argv) >= 2:
+    if (sys.argv[1] in ["-t", "--testappimage"]):
+        command = [os.path.dirname(__file__) + "/testappimage"] + sys.argv[2:]
+        print(command)
+        subprocess.call(command)
         exit(0)
 
+if len(sys.argv) == (3):
+    command = [os.path.dirname(__file__) + "/package"] + sys.argv[1:]
+    print(command)
+    subprocess.call(command)
+    exit(0)
 
 import  gtk, vte
 import xdgappdir # bundled with this app
@@ -163,8 +155,6 @@ class Assistant(gtk.Assistant):
         self.set_icon_from_file(application_icon)
         self.set_size_request(640, 480)
         self.init_intro_page()
-
-
 
     def text_page(self, header, text):
         label = gtk.Label(text)
@@ -303,7 +293,6 @@ class RunBox(vte.Terminal):
         vte.Terminal.__init__(self)
         self.connect('child-exited', self.run_command_done_callback)
         self.assistant = assistant # the assistant is passed in here so that we can e.g., disable forward buttons
-
 
     def run_command(self, command_list):
         self.assistant.set_page_complete(self.assistant.get_nth_page(self.assistant.get_current_page()), False)

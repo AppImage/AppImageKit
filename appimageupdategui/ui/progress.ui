@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.19.0 -->
+<interface>
+  <requires lib="gtk+" version="3.10"/>
+  <object class="GtkBox" id="main_box">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="margin_left">16</property>
+    <property name="margin_right">16</property>
+    <property name="margin_top">16</property>
+    <property name="margin_bottom">16</property>
+    <property name="orientation">vertical</property>
+    <property name="spacing">8</property>
+    <child>
+      <object class="GtkRevealer" id="revealer1">
+        <property name="height_request">64</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="transition_type">crossfade</property>
+        <property name="reveal_child">True</property>
+        <child>
+          <object class="GtkSpinner" id="spinner">
+            <property name="width_request">128</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="active">True</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="action_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="ellipsize">end</property>
+        <property name="single_line_mode">True</property>
+        <property name="lines">1</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="box1">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">5</property>
+        <property name="margin_right">5</property>
+        <property name="spacing">10</property>
+        <child>
+          <object class="GtkButton" id="btn_show_files">
+            <property name="label" translatable="yes">Launch now</property>
+            <property name="visible">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkButton" id="btn_quit">
+            <property name="label" translatable="yes">Quit</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="pack_type">end</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkProgressBar" id="progress_progressbar">
+        <property name="width_request">350</property>
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="pulse_step">0.029999999999999999</property>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="message_label">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="ellipsize">end</property>
+        <property name="xalign">0</property>
+        <attributes>
+          <attribute name="size" value="9000"/>
+        </attributes>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkRevealer" id="revealer2">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="transition_type">crossfade</property>
+        <property name="reveal_child">True</property>
+        <child>
+          <object class="GtkImage" id="icon_image">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="yalign">0</property>
+            <property name="ypad">16</property>
+            <property name="pixel_size">64</property>
+            <property name="icon_name">emblem-synchronizing-symbolic</property>
+            <property name="icon_size">6</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">5</property>
+      </packing>
+    </child>
+  </object>
+</interface>

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=AppImageUpdate
+Exec=appimageupdate
+Icon=appimageupdate
+Comment=Update AppImages from their upstream location
+Categories=System;

@@ -1,0 +1,192 @@
+#!/bin/bash
+
+set -e
+
+# This script is supposed to be run either on the command line
+# or though the appimageupdate GUI. The GUI is purely optional.
+# It displays stdout and stderr, as well as a progress indicator.
+# Communication between this script and the GUI happen through
+# file descriptors (&1 = stdout, &2 = stderr, $3 ... up to &9)
+# http://stackoverflow.com/questions/2342826/how-to-pipe-stderr-and-not-stdout
+#
+# echo "######" | tee >(sed -e 's/#/#\n/g' >&1)
+
+error()
+{
+  if [ -x /usr/bin/zenity ] ; then
+    zenity --error --text "${1}" 2>/dev/null
+  elif [ -x /usr/bin/kdialog ] ; then
+    kdialog --msgbox "${1}" 2>/dev/null
+  elif [ -x /usr/bin/Xdialog ] ; then
+    Xdialog --msgbox "${1}" 2>/dev/null
+  else
+    echo "${1}"
+  fi
+  exit 1
+}
+
+finished()
+{
+  echo "#########################" | tee >(sed -e 's/#/#\n/g')
+}
+
+# A simple dependency check
+which zsync_curl >/dev/null || error "zsync_curl is missing"
+which curl >/dev/null || error "curl is missing"
+which dd >/dev/null || error "dd is missing"
+
+MYSELF="${0}"
+
+update_myself()
+{
+  if [ -x "${APPIMAGE}" ] ; then
+    read -r -p "Do you want to update the updater? [y/N] " response
+    case $response in 
+      [yY][eE][sS]|[yY]) 
+        "${MYSELF}" "${APPIMAGE}"
+        chmod a+x "${APPIMAGE}"
+        ;;
+      *)
+        true
+        ;;
+    esac
+  fi
+}
+
+gpg_check()
+{
+  set +e
+  if [ "$(which gpg)" != "" ] ; then
+    echo "GPG is installed; hence attempting signature verification"
+    ASC_URL=$( echo "${ZSYNC_URL}" | sed -e 's|.zsync|.asc|g' )
+    curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}") && echo "Signature verified"
+  else
+    echo "GPG is not installed; hence skipping signature verification" >&2
+  fi
+  set -e
+}
+
+USAGE="Usage:
+$0 /path/to/AppImage -
+  Updates the AppImage using the update information embedded in the AppImage
+"
+
+MSG="GUI not installed or not working on this system, please use this tool from the command line instead"
+
+if [ $# -lt 1 ] ; then
+  set +e
+  appimageupdategui "${1}"
+  RESULT=$?
+  set -e
+  if [ $RESULT != 0 ] ; then
+    error "${MSG}"
+  fi
+  exit $RESULT
+fi
+
+if [ -e "${1}" ] ; then
+  ISO="${1}"
+else
+  echo "${1} does not exist"
+fi
+
+# Check if this is an ISO
+# Read ISO 9660 Volume Descriptor #1 header
+HEADER=$(dd if="${ISO}" bs=1 skip=32769 count=5 2>/dev/null)
+if [ "${HEADER}" != "CD001" ] ; then
+  echo "Cannot recognize this type of file"
+  exit 1
+fi
+
+# Read ISO 9660 Volume Descriptor #1 field "Application Used" (contents not defined by ISO 9660)
+APPLICATION_USED=$(dd if="${ISO}" bs=1 skip=33651 count=512 2>/dev/null)
+TYPE=$(echo "${APPLICATION_USED}" | cut -d "|" -f 1)
+
+if [ "${2}" == "read" ] ; then
+  if [ "${APPLICATION_USED}" == "" ] ; then
+    exit 1
+  else
+    echo "${APPLICATION_USED}"
+    exit 0
+  fi
+fi
+
+# Clear ISO 9660 Volume Descriptor #1 field "Application Used"
+if [ "${2}" == "clear" ] ; then
+  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  echo "Removed ${APPLICATION_USED}"
+  exit 0
+fi
+
+# Write ISO 9660 Volume Descriptor #1 field "Application Used"
+# Examples:
+# bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
+# zsync|http://server.foo/Subsurface-latest-x86_64.AppImage.zsync
+if [ "${2}" == "set" ] ; then
+  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  echo "${3}" | dd of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  echo "Changed ${APPLICATION_USED} to ${3}"
+  exit 0
+fi
+
+if [ "$TYPE" == "zsync" ] ; then
+  cd $(dirname "${ISO}")
+  # zsync downloads to your current directory. 
+  # It looks for any file in the directory of the same name as the file to download.
+  # If it finds one, it assumes that this is an earlier or incomplete version of
+  # the new file to download, and scans this file for any blocks that it can use
+  # to build the target file. (It also looks for a file of the same name with
+  # .part appended, so it will automatically find previously interrupted zsync
+  # downloads and reuse the data already downloaded.
+  ZSYNC_URL=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2) # Get the URL of the zsync file
+  # Get the file with zsync using $1 as an input file
+  zsync_curl -# -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished 
+  NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
+  chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+  gpg_check
+elif [ "$TYPE" == "bintray-zsync" ] ; then
+  cd $(dirname "${ISO}") 
+  # Actually, instead of copying another zsync file to a fixed URL (which is cumbersome)
+  # let us use Bintray to figure out what the latest version is.
+  # https://bintray.com/artifact/download/probono/AppImages/Subsurface-_latestVersion-x86_64.AppImage.zsync 
+  # ("dummy URL") does not work but luckily we can fill in _latestVersion by using the follwoing URL
+  # https://bintray.com/probono/AppImages/Subsurface/_latestVersion ("redirector URL") and 
+  # parsing the version information from where it redirects to
+  # This could be done in C using libcurl
+  echo "Getting version information from Bintray"
+  USERNAME=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2)
+  REPO=$(echo "${APPLICATION_USED}" | cut -d "|" -f 3)
+  PACKAGE=$(echo "${APPLICATION_USED}" | cut -d "|" -f 4)
+  ZSYNCDUMMYNAME=$(echo "${APPLICATION_USED}" | cut -d "|" -f 5)
+  REDIRECTOR_URL="https://bintray.com/$USERNAME/$REPO/$PACKAGE/_latestVersion"
+  DUMMY_URL="https://bintray.com/artifact/download/$USERNAME/$REPO/$ZSYNCDUMMYNAME"
+  VERSION=$(curl -k -r 0-0 -Ls -o /dev/null -w %{url_effective} "${REDIRECTOR_URL}" | cut -d "/" -f 7)
+  if [ "$VERSION" == "_latestVersion" ] ; then
+    echo "Error"
+    echo "Could not get the latest version from Bintray" >&2
+    exit 1
+  else
+    echo "Latest version: ${VERSION}"
+  fi
+  ZSYNC_URL=$(echo "${DUMMY_URL}" | sed -e "s|_latestVersion|$VERSION|g" )
+  # Get the file with zsync using $1 as an input file
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished
+  NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
+  chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+  gpg_check
+
+elif [ "$TYPE" == "" ] ; then
+  echo "Cannot update this file"
+  echo "This file contains no update information or you need to update the updater" >&2
+  update_myself
+  exit 1
+else
+  echo "Cannot update this file"
+  echo "You need to an updater that can handle $TYPE" >&2
+  update_myself
+  exit 1
+fi
+
+rm *.zs-old 2>/dev/null || true
+
+echo "Successfully updated to version ${VERSION}"

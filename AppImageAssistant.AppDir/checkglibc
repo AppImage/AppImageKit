@@ -1,0 +1,4 @@
+#!/bin/bash
+
+GLIBC_VERSION=$(find "${1}" -type f -executable -exec strings {} \; | grep ^GLIBC_2 | sed s/GLIBC_//g | sort --version-sort | uniq | tail -n 1)
+echo $GLIBC_VERSION

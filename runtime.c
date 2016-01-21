@@ -1,6 +1,6 @@
 /**************************************************************************
 
-Copyright (c) 2005-13 Simon Peter
+Copyright (c) 2004-16 Simon Peter
 Copyright (c) 2007 Alexander Larsson
 
 All Rights Reserved.
@@ -357,8 +357,8 @@ main (int argc, char *argv[])
     /* ======================================================== End icon extraction */   
 
     /* Setting some environment variables that the app "inside" might use */
-    setenv( "APPIMAGE", fullpath, 0 );
-    setenv( "APPDIR", mount_dir, 0 );
+    setenv( "APPIMAGE", fullpath, 1 );
+    setenv( "APPDIR", mount_dir, 1 );
     execv (filename, real_argv);
     /* Error if we continue here */
     perror ("execv error: ");

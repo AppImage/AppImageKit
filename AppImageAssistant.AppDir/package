@@ -2,7 +2,7 @@
 
 # /**************************************************************************
 # 
-# Copyright (c) 2005-12 Simon Peter
+# Copyright (c) 2004-16 Simon Peter
 # 
 # All Rights Reserved.
 # 
@@ -74,10 +74,10 @@ if should_compress == True:
         print (_("Destination path already exists, exiting")) # xorriso would append another session to a pre-existing image
         exit(1)
     # As great as xorriso is, as cryptic its usage is :-(
-    command = ["xorriso", "-dev",
+    command = ["xorriso", "-joliet", "on", "-volid", "AppImage", "-dev",
     destinationfile, "-padding", "0", "-map",
     sourcedir, "/", "--", "-map", iconfile, "/.DirIcon",
-    "-zisofs", "level=9:block_size=128k", "-chown_r", "0",
+    "-zisofs", "level=9:block_size=128k:by_magic=off", "-chown_r", "0",
     "/", "--", "set_filter_r", "--zisofs", "/" ]
 
     subprocess.Popen(command).communicate()
@@ -95,7 +95,7 @@ print("ok")
 
 print("Making %s executable..." % (destinationfile))
 
-os.chmod(destinationfile, 0o755)
+os.chmod(destinationfile, 0755)
 
 print("ok")
 
