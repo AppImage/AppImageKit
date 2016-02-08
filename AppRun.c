@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     }
 
     /* Build environment */
-    char *env, *new_env[2];
+    char *env, *new_env[7];
 
     env = getenv("LD_LIBRARY_PATH") ?: "";
     new_env[0] = malloc( strlen(NEW_LD_LIBRARY_PATH) + strlen(env) );
@@ -188,8 +188,13 @@ int main(int argc, char *argv[])
         die( "Error executing '%s'; return code: %d\n", executable, ret );
     }
 
-    free(new_env[0]);
+    free(new_env[6]);
+    free(new_env[5]);
+    free(new_env[4]);
+    free(new_env[3]);
+    free(new_env[2]);
     free(new_env[1]);
+    free(new_env[0]);
     free(line);
     return 0;
 }
