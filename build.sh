@@ -23,6 +23,37 @@ if [ -e /usr/bin/yum ] ; then
   $SUDO yum -y install git cmake binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel libpng12
 fi
 
+# Install dependencies for Arch Linux
+if [ -e /usr/bin/pacman ] ; then
+  echo "Checking for existence of build dependencies."
+
+  builddeps=('git' 'cmake' 'binutils' 'fuse' 'glibc' 'glib2' 'gcc' 'zlib')
+  for i in "${builddeps[@]}" ; do
+    pacman -Q "$i"
+    if [ $? != 0 ] ; then
+      sudo pacman -S "$i"
+    else
+      echo "$i is already installed."
+    fi
+  done
+  
+  echo "Checking for existence of dependencies from AUR."
+
+  declare -a builddepsaur=('libpng12' 'ncurses5-compat-libs')
+  for i in "${builddepsaur[@]}" ; do
+    pacman -Q "$i"
+    if [ $? != 0 ] ; then
+      echo "Fetching $i from Arch Linux User Repo"
+      git clone https://aur.archlinux.org/"$i".git && cd "$i" && \
+      makepkg -si --skippgpcheck && \
+      echo "Removing build directory." && \
+      cd .. && rm -rf $i
+    else
+      echo "$i is already installed."
+    fi
+  done
+fi
+
 cd "${HERE}"
 cmake .
 make clean
