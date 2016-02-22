@@ -152,6 +152,10 @@ AppImageKit also contains additional tools and helpers.
 
 ## Building AppImageKit
 
+Latest prebuilt packages can be downloaded from [here.](https://github.com/probonopd/AppImageKit/releases)
+
+**Building From Source:**
+
 Use an old system for building (at least 2-3 years old) to ensure the binaries run on older systems too. (Or use LibcWrapGenerator to ensure the build products run on older glibc versions; but to get started it might be the easiest to use a not too recent build system.)
 
 ```bash
