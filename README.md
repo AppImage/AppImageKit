@@ -186,6 +186,12 @@ While it would theoretically be possible to do all these steps by hand, AppImage
 
 See the [Wiki](https://github.com/probonopd/AppImageKit/wiki) for details and for examples on how to bundle real-world software such as LibreOffice, Google Chrome, and others as AppImages.
 
+## Updates
+
+AppImages can be updated using [AppImageUpdate](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/README.md). AppImageUpdate lets you update AppImages in a decentral way using information embedded in the AppImage itself. No central repository is involved. This enables upstream application projects to release AppImages that can be updated easily. Since AppImageKit uses delta updates, the downloads are very small and efficient.
+
+For the full story, read [this](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/README.md).
+
 ## Support
 
 I support open source projects that wish to distribute their software as an AppImage. For closed source applications, I offer AppImage packaging and testing as a service.
