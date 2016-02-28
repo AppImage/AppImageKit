@@ -41,11 +41,13 @@ if [[ ! -f $BIN ]] ; then
   exit 0
 fi
 
+ARGS=$@
+
 trap atexit EXIT
 
 atexit()
 {
-  exec $BIN "$@"
+  exec $BIN $ARGS
 }
 
 error()
