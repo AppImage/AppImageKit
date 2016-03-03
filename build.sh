@@ -31,7 +31,7 @@ if [ -e /usr/bin/pacman ] ; then
   for i in "${builddeps[@]}" ; do
     pacman -Q "$i"
     if [ $? != 0 ] ; then
-      sudo pacman -S "$i"
+      $SUDO pacman -S "$i"
     else
       echo "$i is already installed."
     fi
@@ -58,4 +58,18 @@ cd "${HERE}"
 cmake .
 make clean
 make
+
+version="$(git describe --tags)"
+outdir="$PWD/out"
+
+mkdir -p "$outdir"
+
+for i in AppRun; do
+	[ -f "$i" ] && mv -v "$i" "${outdir}/${i} ${version}-$(uname -m)"
+done
+
+for i in AppImageAssistant AppImageExtract AppImageMonitor AppImageUpdate; do
+	[ -f "$i" ] && mv -v "$i" "${outdir}/${i} ${version}-$(uname -m).AppImage"
+done
+
 cd -

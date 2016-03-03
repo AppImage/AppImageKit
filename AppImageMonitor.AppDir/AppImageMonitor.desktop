@@ -5,4 +5,5 @@ Icon=AppImageMonitor
 Terminal=True
 Type=Application
 Categories=System;
+Comment=AppImage desktop integration daemon
 StartupNotify=true
