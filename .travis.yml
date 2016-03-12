@@ -10,7 +10,8 @@ script:
  - docker run -i -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "/AppImageKit/build.sh"
  - file out/*
  - sudo chown -R travis:travis out
- - for i in out/*; do ./bintray.sh "$i"; done
+ - wget https://raw.githubusercontent.com/RazZziel/AppImages/feature/bintray_for_AppImageKit/bintray.sh
+ - for i in out/*; do bash bintray.sh "$i"; done
 
 before_deploy:
   git fetch --tags
