@@ -29,7 +29,7 @@
 DIRNAME=$(dirname $(readlink -f "${0}"))
 
 APP="${1}"
-APPDIR=$(realpath "./${APP}.AppDir")
+APPDIR=$(readlink -f "./${APP}.AppDir")
 
 set -e
 

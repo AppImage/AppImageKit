@@ -152,6 +152,10 @@ AppImageKit also contains additional tools and helpers.
 
 ## Building AppImageKit
 
+Latest prebuilt packages can be downloaded from [here.](https://github.com/probonopd/AppImageKit/releases)
+
+**Building From Source:**
+
 Use an old system for building (at least 2-3 years old) to ensure the binaries run on older systems too. (Or use LibcWrapGenerator to ensure the build products run on older glibc versions; but to get started it might be the easiest to use a not too recent build system.)
 
 ```bash
@@ -181,6 +185,12 @@ The general workflow for creating an AppImage involves the following steps:
 While it would theoretically be possible to do all these steps by hand, AppImageKit contains tools that greatly simplify the tasks.
 
 See the [Wiki](https://github.com/probonopd/AppImageKit/wiki) for details and for examples on how to bundle real-world software such as LibreOffice, Google Chrome, and others as AppImages.
+
+## Updates
+
+AppImages can be updated using [AppImageUpdate](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/README.md). AppImageUpdate lets you update AppImages in a decentral way using information embedded in the AppImage itself. No central repository is involved. This enables upstream application projects to release AppImages that can be updated easily. Since AppImageKit uses delta updates, the downloads are very small and efficient.
+
+For the full story, read [this](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/README.md).
 
 ## Support
 
