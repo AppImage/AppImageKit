@@ -11,6 +11,8 @@ __AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and
 conveniently handling AppImages.
 
 This document describes the AppImage format and AppImageKit. It is intended to describe the philosophy behind the AppImage format and the concrete implementation. This document is not a formal specification, since the AppImage format is not frozen yet but in the process of being specified more formally. Contributors are encouraged to comment on this document and propose formal format descriptions.
+sudo apt-get update ; sudo apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse valac # debian, Ubuntu
+sudo yum install git cmake binutils fuse glibc-devel glib2-devel fuse-devel gcc zlib-devel libpng12 vala libgee-devel # Fedora, RHEL, CentOS
 
 ## Motivation
 
