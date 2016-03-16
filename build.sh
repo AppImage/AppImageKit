@@ -15,7 +15,7 @@ fi
 
 if [ -e /usr/bin/apt-get ] ; then
   $SUDO apt-get update
-  $SUDO apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse
+  $SUDO apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse python
 
 fi
 
@@ -52,6 +52,11 @@ if [ -e /usr/bin/pacman ] ; then
       echo "$i is already installed."
     fi
   done
+fi
+
+if [ "$1" == "--fetch-dependencies-only" ] ; then
+  echo "Fetched dependencies.  Exiting now."
+  exit 0
 fi
 
 cd "${HERE}"
