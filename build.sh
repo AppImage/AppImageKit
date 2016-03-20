@@ -70,11 +70,11 @@ outdir="$PWD/out"
 mkdir -p "$outdir"
 
 for i in AppRun; do
-	[ -f "$i" ] && mv -v "$i" "${outdir}/${i} ${version}-$(uname -m)"
+	[ -f "$i" ] && mv -v "$i" "${outdir}/${i}_${version}-$(uname -m)"
 done
 
 for i in AppImageAssistant AppImageExtract AppImageMonitor AppImageUpdate; do
-	[ -f "$i" ] && mv -v "$i" "${outdir}/${i} ${version}-$(uname -m).AppImage"
+	[ -f "$i" ] && mv -v "$i" "${outdir}/${i}_${version}-$(uname -m).AppImage"
 done
 
 cd -
