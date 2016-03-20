@@ -1,20 +1,17 @@
 language: c
 compiler: gcc
 
-before_install:
- - sudo apt-add-repository -y ppa:vala-team/ppa
- - sudo apt-get update -qq
- - sudo apt-get install -qq libfuse-dev libglib2.0-dev cmake libc6-dev binutils valac libgee-0.8-dev gcc-multilib g++-multilib libc6-dev-i386
- - cd ./LibcWrapGenerator
- - valac --pkg gee-0.8 --pkg posix --pkg glib-2.0 --pkg gio-2.0 ./LibcWrapGenerator.vala
- - sudo ./LibcWrapGenerator --target 2.14 --libdir /lib --output libcwrap.h
- - sudo cp ./libcwrap.h /usr/include/
- - cd -
-
-script: 
- - export CC='gcc -U_FORTIFY_SOURCE -include /usr/include/libcwrap.h'
- - cmake . && make
- - find . -type f
+services:
+ - docker
+env:
+ - DOCKER_IMAGE=toopher/centos-i386:centos6
+ - DOCKER_IMAGE=library/centos:6
+script:
+ - docker run -i -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "/AppImageKit/build.sh"
+ - file out/*
+ - sudo chown -R travis:travis out
+ - wget https://raw.githubusercontent.com/probonopd/AppImages/master/bintray.sh
+ - for i in out/*; do bash bintray.sh "$i"; done
 
 before_deploy:
   git fetch --tags
@@ -24,11 +21,7 @@ deploy:
     secure: Rtz7d+BKUnBT8D5FoE4XXCvVhRSQVdGK/c5VpI6IYuGhwmtx4RIvK78cICFPZq8k1xJm8yOuCOChX6EyElhUkYh5iPzDI/J7IiqBl+z+/V3aXx6W2PKyYLohZW3z9iomQbX2LQ6vHcZsNqQsjKZ2dW7Ja5Q9cZTFKiokMXsAERo=
   skip_cleanup: true
   file_glob: true
-  file: 
-   - ./AppImageExtract
-   - ./AppRun
-   - ./AppImageAssistant
-   - ./AppImageMonitor
+  file: out/*
   on:
     tags: true
     all_branches: true

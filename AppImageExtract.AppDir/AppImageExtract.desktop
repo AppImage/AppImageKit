@@ -5,4 +5,5 @@ Icon=AppImageExtract
 Terminal=True
 Type=Application
 Categories=Development;
+Comment=Extract AppImage contents, part of AppImageKit
 StartupNotify=true
