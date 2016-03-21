@@ -15,7 +15,7 @@ fi
 
 if [ -e /usr/bin/apt-get ] ; then
   $SUDO apt-get update
-  $SUDO apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse
+  $SUDO apt-get -y install libfuse-dev libglib2.0-dev cmake git libc6-dev binutils fuse python
 
 fi
 
@@ -31,7 +31,7 @@ if [ -e /usr/bin/pacman ] ; then
   for i in "${builddeps[@]}" ; do
     pacman -Q "$i"
     if [ $? != 0 ] ; then
-      sudo pacman -S "$i"
+      $SUDO pacman -S "$i"
     else
       echo "$i is already installed."
     fi
@@ -54,8 +54,27 @@ if [ -e /usr/bin/pacman ] ; then
   done
 fi
 
+if [ "$1" == "--fetch-dependencies-only" ] ; then
+  echo "Fetched dependencies.  Exiting now."
+  exit 0
+fi
+
 cd "${HERE}"
 cmake .
 make clean
 make
+
+version="$(git describe --tags)"
+outdir="$PWD/out"
+
+mkdir -p "$outdir"
+
+for i in AppRun; do
+	[ -f "$i" ] && mv -v "$i" "${outdir}/${i}_${version}-$(uname -m)"
+done
+
+for i in AppImageAssistant AppImageExtract AppImageMonitor AppImageUpdate; do
+	[ -f "$i" ] && mv -v "$i" "${outdir}/${i}_${version}-$(uname -m).AppImage"
+done
+
 cd -
