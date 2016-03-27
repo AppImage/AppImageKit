@@ -114,7 +114,7 @@ if [ ! $kernel_major -ge 4 ] ; then
     unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/$PREF/union
 else
     echo "Using OverlayFS because kernel is 4.x or newer"
-    sudo mount -t overlay -o lowerdir=/tmp/$PREF/unionfs/ro:/tmp/$PREF/unionfs/root, upperdir=/tmp/$PREF/unionfs/rw, workdir=/tmp/$PREF/workdir none /tmp/$PREF/union
+    sudo mount -t overlay -o lowerdir=/tmp/$PREF/unionfs/ro:/tmp/$PREF/unionfs/root,upperdir=/tmp/$PREF/unionfs/rw,workdir=/tmp/$PREF/workdir none /tmp/$PREF/union
 fi
 
 ls /tmp/$PREF/union/mnt >/dev/null && MNT=/mnt
