@@ -28,6 +28,7 @@ mkdir -p /tmp/$PREF/unionfs/root
 mkdir -p /tmp/$PREF/unionfs/rw
 mkdir -p /tmp/$PREF/union
 mkdir -p /tmp/$PREF/iso
+mkdir -p /tmp/$PREF/workdir
 
 # If ISO was specified, then mount it and find contained filesystem
 THEFS="$1"
@@ -95,6 +96,7 @@ atexit()
     umount -l /tmp/$PREF/iso 2>/dev/null
     umount -l /tmp/$PREF/iso 2>/dev/null
     umount -l /tmp/$PREF/iso 2>/dev/null
+    rm -r /tmp/$PREF/workdir
     rm -r /tmp/$PREF/unionfs/root
     rm -r /tmp/$PREF/unionfs/rw
     rm -r /tmp/$PREF/unionfs/ro
@@ -104,7 +106,16 @@ atexit()
     rm -r /tmp/$PREF/
 }
 
-unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/$PREF/union
+# Kernel 4.0 or newer required
+kernel_major=$(uname -r | cut -d . -f 1)
+if [ ! $kernel_major -ge 4 ] ; then
+    echo "Falling back to unionfs-fuse because kernel is not 4.x or newer"
+    echo "This can potentially be unreliable"
+    unionfs-fuse -o allow_other,use_ino,suid,dev,nonempty -ocow,chroot=/tmp/$PREF/unionfs/,max_files=32768 /rw=RW:/ro=RO:/root=RO /tmp/$PREF/union
+else
+    echo "Using OverlayFS because kernel is 4.x or newer"
+    sudo mount -t overlay -o lowerdir=/tmp/$PREF/unionfs/ro:/tmp/$PREF/unionfs/root,upperdir=/tmp/$PREF/unionfs/rw,workdir=/tmp/$PREF/workdir none /tmp/$PREF/union
+fi
 
 ls /tmp/$PREF/union/mnt >/dev/null && MNT=/mnt
 # ls /tmp/$PREF/union/automake >/dev/null && MNT=/automake || echo "" # Puppy
