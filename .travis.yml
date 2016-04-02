@@ -11,8 +11,9 @@ script:
  - docker run -i -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "/AppImageKit/build.sh"
  - file out/*
  - sudo chown -R travis:travis out
- - wget https://raw.githubusercontent.com/probonopd/AppImages/master/bintray.sh
- - for i in out/*; do bash bintray.sh "$i"; done
+ - wget https://raw.githubusercontent.com/probonopd/AppImages/master/bintray{,-tidy}.sh
+ - chmod +x bintray{,-tidy}.sh
+ - for i in out/*; do ./bintray.sh "$i"; done
 
 before_deploy:
   git fetch --tags
