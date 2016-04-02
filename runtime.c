@@ -35,6 +35,7 @@ THE SOFTWARE.
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
+#include <glib.h>
 
 
 /* ======================================================== Start helper functions for icon extraction */  
