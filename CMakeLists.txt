@@ -106,6 +106,16 @@ set(third-party-dependencies_clean
   "third-party-dependencies/install/;"
 )
 
+ADD_CUSTOM_TARGET(AppImageAssistant-minimal ALL DEPENDS runtime)
+ADD_CUSTOM_COMMAND(TARGET AppImageAssistant-minimal
+  WORKING_DIRECTORY "AppImageAssistant.AppDir"
+  COMMAND install ../runtime .
+  VERBATIM
+)
+set(AppImageAssistant-minimal_clean
+  "AppImageAssistant.AppDir/runtime;"
+)
+
 EXECUTE_PROCESS(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
 ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime xorriso)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
