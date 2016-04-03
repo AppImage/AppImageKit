@@ -50,7 +50,7 @@ import subprocess
 
 def usage():
     print "Usage:"
-    print " ", "<input AppDir>", "<output AppImage>"
+    print " ", "[-p, --package] <input AppDir> <output AppImage>"
     print "     ", "Create an AppImage from an AppDir"
     print " ", "-f, --force"
     print "     ", "Overwrite target if already existing"
