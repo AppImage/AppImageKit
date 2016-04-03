@@ -12,7 +12,9 @@ for container in docker/*; do
 
 	echo "* Building  image $tag"
 
+	cp -v build.sh "$container"
 	docker build -t "$tag" "$container"
+	rm -v "$container/build.sh"
 done
 
 for container in docker/*; do

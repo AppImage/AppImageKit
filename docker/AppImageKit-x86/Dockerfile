@@ -1,3 +1,3 @@
 FROM toopher/centos-i386:centos6
-RUN curl -O https://raw.githubusercontent.com/probonopd/AppImageKit/master/build.sh
-RUN bash build.sh --fetch-dependencies-only
+ADD build.sh ./build.sh
+RUN ./build.sh --fetch-dependencies-only
