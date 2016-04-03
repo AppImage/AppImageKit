@@ -106,7 +106,7 @@ set(third-party-dependencies_clean
   "third-party-dependencies/install/;"
 )
 
-ADD_CUSTOM_TARGET(AppImageAssistant-minimal ALL DEPENDS runtime)
+ADD_CUSTOM_TARGET(AppImageAssistant-minimal ALL DEPENDS runtime AppRun)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant-minimal
   WORKING_DIRECTORY "AppImageAssistant.AppDir"
   COMMAND install ../runtime .
