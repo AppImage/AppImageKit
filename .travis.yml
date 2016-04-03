@@ -3,14 +3,10 @@ compiler: gcc
 
 services:
  - docker
-env:
- - DOCKER_IMAGE=toopher/centos-i386:centos6
- - DOCKER_IMAGE=library/centos:6
 script:
- - docker run -i -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "/AppImageKit/build.sh"
- - file out/*
+ - ./build-multiarch.sh
  - sudo chown -R travis:travis out
- - wget https://raw.githubusercontent.com/probonopd/AppImages/master/bintray.sh
+ - wget https://raw.githubusercontent.com/probonopd/AppImages/26541d6542b7bdcca9cbd1804590862c1a935e27/bintray.sh
  - for i in out/*; do bash bintray.sh "$i"; done
 
 before_deploy:

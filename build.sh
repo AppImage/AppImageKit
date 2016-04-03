@@ -62,14 +62,14 @@ fi
 cd "${HERE}"
 cmake .
 make clean
-make
+make "$@"
 
 version="$(git describe --tags)"
 outdir="$PWD/out"
 
 mkdir -p "$outdir"
 
-for i in AppRun; do
+for i in runtime AppRun; do
 	[ -f "$i" ] && cp -v "$i" "${outdir}/${i}_${version}-$(uname -m)"
 done
 
