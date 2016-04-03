@@ -102,10 +102,10 @@ if should_compress == True:
 
     print("ok")
 
-if args.arch is None:
-    elf = os.path.realpath(os.path.dirname(__file__)) + "/runtime"
-else:
+if 'arch' in args and args.arch is not None:
     elf = os.path.realpath(os.path.dirname(__file__)) + "/arch/" + args.arch + "/runtime"
+else:
+    elf = os.path.realpath(os.path.dirname(__file__)) + "/runtime"
 
 print("Embedding runtime %s..." % elf)
 s = open(elf, 'rb')
