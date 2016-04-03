@@ -31,6 +31,7 @@ import os, sys
 import subprocess 
 import xdgappdir 
 from locale import gettext as _
+import argparse
 
 
 # Also search for dependency binaries and libraries next to myself
@@ -41,20 +42,37 @@ lddp = os.getenv('LD_LIBRARY_PATH')
 if lddp == None: lddp = ""
 os.environ['LD_LIBRARY_PATH'] =  dependenciesdir + "/lib:" + lddp
 
-if len(sys.argv) == 2:
+archs = []
+if os.path.isdir(os.path.dirname(__file__) + "/arch/"):
+    archs = next(os.walk(os.path.dirname(__file__) + "/arch/"))[1]
+
+description = """
+Modes of operation:
+  args = <Source AppDir> <Destination AppImage>     Create an AppImage from an AppDir
+  args = <AppImage>                                 Inject the runtime into an AppImage
+"""
+parser = argparse.ArgumentParser(description=description, formatter_class=argparse.RawDescriptionHelpFormatter)
+parser.add_argument("args", metavar="args", nargs="+")
+if len(archs) > 0:
+    parser.add_argument("--arch", help="Target architecture", choices=archs)
+args = parser.parse_args()
+
+args.args.insert(0, args.args[0])
+
+if len(args.args) == 2:
     print("Assuming I should inject a new runtime")
-    destinationfile = os.path.realpath(sys.argv[1])
+    destinationfile = os.path.realpath(args.args[1])
     should_compress = False
-elif len(sys.argv) < 3:
+elif len(args.args) < 3:
     print("")
     print("This packs a direcory")
     print("")
-    print("Usage: %s sourcedir destinationfile" % (os.path.basename(sys.argv[0])))
+    print("Usage: %s sourcedir destinationfile" % (os.path.basename(args.args[0])))
     print("")
     exit(1)
 else:
-    sourcedir = os.path.realpath(sys.argv[1])
-    destinationfile = os.path.realpath(sys.argv[2])
+    sourcedir = os.path.realpath(args.args[1])
+    destinationfile = os.path.realpath(args.args[2])
     should_compress = True
 
 if should_compress == True:
@@ -84,8 +102,12 @@ if should_compress == True:
 
     print("ok")
 
-print("Embedding runtime...")
-elf = os.path.realpath(os.path.dirname(__file__)) + "/runtime"
+if args.arch is None:
+    elf = os.path.realpath(os.path.dirname(__file__)) + "/runtime"
+else:
+    elf = os.path.realpath(os.path.dirname(__file__)) + "/arch/" + args.arch + "/runtime"
+
+print("Embedding runtime %s..." % elf)
 s = open(elf, 'rb')
 f = open(destinationfile, 'rb+')
 f.write(bytes(s.read()))
