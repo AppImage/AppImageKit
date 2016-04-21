@@ -87,7 +87,7 @@ if should_compress == True:
         print("Icon could not be found based on information in desktop file, aborting")
         exit(1)
 
-    print("Creating %s..." % (destinationfile))
+    print("Creating %s ..." % (destinationfile))
     if os.path.exists(destinationfile):
         print (_("Destination path already exists, exiting")) # xorriso would append another session to a pre-existing image
         exit(1)
