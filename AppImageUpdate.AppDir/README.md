@@ -115,6 +115,29 @@ If you would like to provide update-able AppImages, you basically have to:
 
 You can see this in action as part of an automated build process [here](https://github.com/probonopd/AppImages/blob/1249ce96f1a2bac1cb7a397bde1f74a87e86edf2/bintray.sh#L138-L151).
 
+## Example how to make your app self-updateable
+
+
+> Do you have more documentation, or maybe an example, on how to add the update information this way?
+
+First, you would have to inject the update information into the AppImage, second you would have to upload the AppImage and the AppImage.zsync to an URL that matches the URL specified in the update information.
+
+**Step 1: Inject the update information into the AppImage**
+
+Assuming you have a file `Etcher-linux-x64.AppImage` in your current working directory, then the following command would tell the updater to look for `Etcher-linux-x64.AppImage.zsync` at the URL `https://resin-production-downloads.s3.amazonaws.com/etcher/latest/Etcher-linux-x64.AppImage.zsync`:
+
+```
+echo "zsync|https://resin-production-downloads.s3.amazonaws.com/etcher/latest/Etcher-linux-x64.AppImage.zsync" | dd of="Etcher-linux-x64.AppImage" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+```
+
+**Step 2: Upload the AppImage and the AppImage.zsync to an URL that matches the URL specified in the update information**
+
+You would have to copy both `Etcher-linux-x64.AppImage.zsync` and `Etcher-linux-x64.AppImage.zsync` to `https://resin-production-downloads.s3.amazonaws.com/etcher/latest/` for this to work.
+
+When you have a new version, simply put the updated  `Etcher-linux-x64.AppImage.zsync` and `Etcher-linux-x64.AppImage.zsync` at the *same* location.
+
+At this point, AppImageUpdate should work. AppImageUpdate is really just an example GUI around the (work-in-progress but useable) [appimageupdate](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/usr/bin/appimageupdate) bash script. You could put `appimageupdate` (and its dependency [zsync_curl](https://github.com/probonopd/zsync-curl)) inside `usr/bin` of the AppImage, and call `appimageupdate` from within your app and even have a little GUI around it; or reimplement it in the language of your app.
+
 ## TODO
 
  * Implement a GUI
