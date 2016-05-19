@@ -10,6 +10,8 @@ run on a variety of different target systems (base operating systems, distributi
 __AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and  provides  tools  for
 conveniently handling AppImages.
 
+https://en.wikipedia.org/wiki/AppImage
+
 This document describes the AppImage format and AppImageKit. It is intended to describe the philosophy behind the AppImage format and the concrete implementation. This document is not a formal specification, since the AppImage format is not frozen yet but in the process of being specified more formally. Contributors are encouraged to comment on this document and propose formal format descriptions.
 
 Significant upstream projects have started providing AppImages of releases and/or nightly/continuous builds, see this [list of upstream-provided AppImages](https://github.com/probonopd/AppImageKit/wiki/AppImages#upstream-appimages).
