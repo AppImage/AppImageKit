@@ -280,7 +280,7 @@ class Assistant(gtk.Assistant):
             return
 
     def init_intro_page(self):
-        self.text_page("AppImageAssistant " + __version__, "This assistant helps you to package an AppDir for distribution as an AppImage. It is part of AppImageKit. \n\nPlease see http://portablelinuxapps.org/forum for more information.")
+        self.text_page("AppImageAssistant " + __version__, "This assistant helps you to package an AppDir for distribution as an AppImage. It is part of AppImageKit. \n\nPlease see http://appimage.org for more information.")
         self.chooser_page("Please select the AppDir")
         self.runner_page(self.run1_func)
 
