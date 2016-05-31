@@ -78,3 +78,8 @@ for i in AppImageAssistant AppImageExtract AppImageMonitor AppImageUpdate; do
 done
 
 cd -
+
+# Note: This does not build AppDirAssistant by default since AppDirAssistant
+# is no longer the recommended way to generate AppImages. If you still want to build it:
+# cp AppRun AppDirAssistant.AppDir/
+# ./AppImageAssistant AppDirAssistant.AppDir/ AppDirAssistant.AppImage
