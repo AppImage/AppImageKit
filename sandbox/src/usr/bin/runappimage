@@ -24,7 +24,7 @@ echo "${MOUNT}"
 if [ -x "${APPIMAGE}" ] ; then
   "${APPIMAGE}" "$@"
 else
-  sudo mount -o loop,ro "${APPIMAGE}" "${MOUNT}"
+  loopmounter "${APPIMAGE}" "${MOUNT}"
   if [ -x /usr/bin/bwrap ] ; then
     # http://www.galago-project.org/specs/notification/0.9/index.html
     notify-send "Runninng sandboxed" "${APPIMAGE}"
@@ -35,5 +35,5 @@ else
   else
     exec "${MOUNT}"/AppRun "$@"
   fi
-  sudo umount "${MOUNT}"
+  loopmounter "${MOUNT}"
 fi
