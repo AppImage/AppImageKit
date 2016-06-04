@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+   <mime-type type="application/x-iso9660-appimage">
+      <sub-class-of type="application/x-executable" />
+      <sub-class-of type="application/x-iso9660-image" />
+      <comment>AppImage</comment>
+      <magic priority="50">
+         <match value="ELF" type="string" offset="1" />
+         <match value="CD001" type="string" offset="32769" />
+         <match value="AppImage" type="string" offset="32809" />
+      </magic>
+      <magic priority="40">
+         <match value="ELF" type="string" offset="1" />
+         <match value="CD001" type="string" offset="32769" />
+         <match value="APPIMAGE" type="string" offset="32809" />
+      </magic>
+      <glob pattern="*.appimage" />
+      <glob pattern="*.AppImage" />
+   </mime-type>
+</mime-info>
