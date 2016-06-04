@@ -1,4 +1,9 @@
 /*
+
+Code review of this file is wanted.
+Please open an issue if you find something insecure.
+This file is intentionally kept short to allow for effective code review.
+
 sudo chown root:root ./a.out
 sudo chmod u+s ./a.out
 ./a.out
@@ -32,7 +37,7 @@ int main(int argc, char* argv[]) {
   }
 
   // As root, mount if we get 2 arguments
-  // TODO:Replace the call to "mount" with mount(2)
+  // TODO: Replace the call to "mount" with mount(2)
   // But it doesn't seem to do loop-mounting so this might get complex
   if(argc == 3)
   {
