@@ -29,6 +29,14 @@ sudo dpkg -i appimage-sandbox_0.1_amd64.deb
 ```
 Note that these packages are done quick-and-dirty as long as the sandbox is not yet properly packaged by distributions.
 
+** For now this only works if the user has `sudo` rights without needing to enter a password, like this: **
+
+```
+me  ALL=(ALL) NOPASSWD: ALL
+```
+
+This is very insecure! See TODO below.
+
 ## TODO
 
-* Have a suid binary safely loop-mount the AppImage so that the user using this does not have to have `sudo` rights (FIXME)
+* Have a suid binary safely loop-mount the AppImage in a secure way so that the user using this does not have to have `sudo` rights. Please help me to do this.
