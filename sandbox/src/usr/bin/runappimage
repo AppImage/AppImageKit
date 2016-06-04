@@ -29,7 +29,8 @@ else
     # http://www.galago-project.org/specs/notification/0.9/index.html
     notify-send "Runninng sandboxed" "${APPIMAGE}"
     # TODO: More elaborate sandboxing
-    # See https://github.com/flatpak/flatpak/wiki/Sandbox
+    # See https://github.com/flatpak/flatpak/wiki/Sandbox and
+    # https://github.com/projectatomic/bubblewrap/blob/master/demos/xdg-app-run.sh
     /usr/bin/bwrap --ro-bind / / --dev /dev --proc /proc "${MOUNT}"/AppRun "$@"
   else
     exec "${MOUNT}"/AppRun "$@"
