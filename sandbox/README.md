@@ -1,4 +1,4 @@
-# AppImage Sandbox
+# AppImage sandbox
 
 The files in this directory are __purely optional__.
 
@@ -8,7 +8,7 @@ They integrate AppImage into Linux desktops so that when an AppImage is double-c
 
 In order to run "untrusted" AppImages, the sandbox part cannot come inside the AppImage (because the AppImage cannot be trusted). Hence, for an effective sandboxing mechanism to work, we need to install the infrastructure for it into the base system. This violates the AppImage principle that AppImages must be able to run without any support from the base system, hence the whole sandbox part is purely optional.
 
-While we are at it, we assume that who can install the sandbox part into the base system has root rights, which opens new possibilities.
+You need to install a deb or rpm into your system to enable the  AppImage sandbox. While we are at it, we assume that who can install the sandbox part into the base system has root rights, which opens new possibilities.
 
 ## Implementation
 
