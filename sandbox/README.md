@@ -1,4 +1,4 @@
-# Sandbox
+# AppImage Sandbox
 
 The files in this directory are __purely optional__.
 
