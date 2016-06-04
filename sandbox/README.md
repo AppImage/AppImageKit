@@ -14,6 +14,21 @@ While we are at it, we assume that who can install the sandbox part into the bas
 
 Right now this is using https://github.com/projectatomic/bubblewrap
 
+## Building
+
+To build .deb and .rpm packages:
+
+```
+sudo apt-get install git
+git clone https://github.com/probonopd/AppImageKit.git
+cd AppImageKit/sandbox/
+bash package.sh 
+
+# Install with
+sudo dpkg -i appimage-sandbox_0.1_amd64.deb 
+```
+Note that these packages are done quick-and-dirty as long as the sandbox is not yet properly packaged by distributions.
+
 ## TODO
 
 * Have a suid binary safely loop-mount the AppImage
