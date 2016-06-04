@@ -4,13 +4,16 @@ sudo apt-get -y install alien
 
 PROGRAMNAME=appimage-sandbox
 VERSION=0.1
-ARCH=all
+ARCH=amd64
 OUTPUT_FILENAME="${PROGRAMNAME}_${VERSION}_${ARCH}.deb"
 
 echo "creating deb for '${PROGRAMNAME}'; output '${OUTPUT_FILENAME}'"
 
 mkdir -v -p debian/DEBIAN
 cp -rf ./src/* ./debian/
+
+# Quick and dirty hack until bubblewrap is packaged in distros
+wget -c "https://github.com/probonopd/bubblewrap/releases/download/binary/bwrap" -O ./debian/usr/bin/bwrap
 
 cat "" > "${DOCSDIR}/copyright"
 
@@ -46,3 +49,4 @@ find debian/
 lintian "${OUTPUT_FILENAME}"
 
 sudo alien --to-rpm  *.deb
+rm -rf ./debian/
