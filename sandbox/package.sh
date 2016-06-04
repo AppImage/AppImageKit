@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# set -e
+sudo apt-get -y install alien
 
 PROGRAMNAME=appimage-sandbox
 VERSION=0.1
@@ -43,3 +43,5 @@ fakeroot dpkg-deb --build debian
 mv -v debian.deb "${OUTPUT_FILENAME}"
 find debian/
 lintian "${OUTPUT_FILENAME}"
+
+sudo alien --to-rpm  *.deb
