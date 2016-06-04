@@ -28,12 +28,16 @@ bash package.sh
 sudo dpkg -i appimage-sandbox_0.1_amd64.deb 
 ```
 Note that these packages are done quick-and-dirty as long as the sandbox is not yet properly packaged by distributions.
+The rpm needs some rework because the `alien` command appears to have a bug, see https://ask.fedoraproject.org/en/question/37185/file-conflict-for-installing-a-package-with-filesystem/
 
 **For now this only works if the user has `sudo` rights without needing to enter a password, like this:**
 
 ```
 me  ALL=(ALL) NOPASSWD: ALL
 ```
+
+You must be able to run `sudo mount` without needing to enter a password for this to work (FIXME, se below).
+
 
 This is very insecure! See TODO below.
 
