@@ -12,38 +12,35 @@ but not execlp(3) or execvp(3).
 */
 
 #include <stdio.h>
-#include <sys/types.h>
 #include <unistd.h>
-#include <stddef.h>
 #include <stdlib.h>
-#include <sys/wait.h>
 #include <sys/mount.h>
 
 int main(int argc, char* argv[]) {
-    int i;
-	  printf("argc: %d\n", argc);
-    for(i=0; i < argc; i++) {
-      printf("argv[%d]: %s\n", i, argv[i]);
-	  }
-    setuid(0);
 
-    // As root, we loop-mount or unmount
-    int status;
-    pid_t pid;
+  // Become root
+  setuid(0);
 
-    pid = fork ();
-    if (pid == 0)
-      {
-        /* This is the child process. */
-        if(argc == 2) execl ("/bin/umount", "/bin/umount", argv[1], NULL);
-        if(argc == 3) execl ("/bin/mount", "/bin/mount", "-o", "loop,ro", argv[1], argv[2], NULL);
-        _exit (EXIT_FAILURE);
-      }
-    else if (pid < 0)
-      /* The fork failed.  Report failure.  */
-      status = -1;
-    else
-      /* This is the parent process.  Wait for the child to complete.  */
-      if (waitpid (pid, &status, 0) != pid)
-        status = -1;
+  // As root, unmount if we get 1 argument
+  if(argc == 2)
+  {
+    if (0 == umount2(argv[1], MNT_DETACH | UMOUNT_NOFOLLOW)) {
+      return EXIT_SUCCESS;
+    } else {
+      return EXIT_FAILURE;
+    }
+  }
+
+  // As root, mount if we get 2 arguments
+  // TODO:Replace the call to "mount" with mount(2)
+  // But it doesn't seem to do loop-mounting so this might get complex
+  if(argc == 3)
+  {
+    if( access( "/bin/mount", F_OK ) != -1 ) {
+      execl ("/bin/mount", "/bin/mount", "-o", "loop,ro", argv[1], argv[2], NULL);
+    } else if( access( "/mount", F_OK ) != -1 ) {
+      execl ("/usr/bin/mount", "/usr/bin/mount", "-o", "loop,ro", argv[1], argv[2], NULL);
+    }
+  }
+
 }
