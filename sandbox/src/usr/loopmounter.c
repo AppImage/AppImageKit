@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
   {
     if( access( "/bin/mount", F_OK ) != -1 ) {
       execl ("/bin/mount", "/bin/mount", "-o", "loop,ro", argv[1], argv[2], NULL);
-    } else if( access( "/mount", F_OK ) != -1 ) {
+    } else if( access( "/usr/bin/mount", F_OK ) != -1 ) {
       execl ("/usr/bin/mount", "/usr/bin/mount", "-o", "loop,ro", argv[1], argv[2], NULL);
     }
   }
