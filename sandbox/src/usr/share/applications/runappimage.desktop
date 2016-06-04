@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=runappimage
+Exec=runappimage %f
+X-Icon=utilities-terminal
+Terminal=false
+Type=Application
+Categories=Application;
+MimeType=application/x-iso9660-appimage;
+NoDisplay=true
+StartupNotify=false
