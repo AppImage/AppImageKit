@@ -12,7 +12,7 @@ While we are at it, we assume that who can install the sandbox part into the bas
 
 ## Implementation
 
-Right now this is using https://github.com/projectatomic/bubblewrap
+Right now this is basically just a [trivial, tiny shell script](https://github.com/probonopd/AppImageKit/blob/master/sandbox/src/usr/bin/runappimage) around https://github.com/projectatomic/bubblewrap
 
 ## Building
 
@@ -31,4 +31,4 @@ Note that these packages are done quick-and-dirty as long as the sandbox is not 
 
 ## TODO
 
-* Have a suid binary safely loop-mount the AppImage
+* Have a suid binary safely loop-mount the AppImage so that the user using this does not have to have `sudo` rights (FIXME)
