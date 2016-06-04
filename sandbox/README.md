@@ -12,7 +12,7 @@ You need to install a deb or rpm into your system to enable the  AppImage sandbo
 
 Here is a very alpha [appimage-sandbox_0.1_amd64.deb](https://github.com/probonopd/AppImageKit/releases/download/5/appimage-sandbox_0.1_amd64.deb)
 
-Right now this is basically just a [trivial, tiny shell script](https://github.com/probonopd/AppImageKit/blob/master/sandbox/src/usr/bin/runappimage) around https://github.com/projectatomic/bubblewrap
+Right now this is basically just a [trivial, tiny shell script](https://github.com/probonopd/AppImageKit/blob/master/sandbox/src/usr/bin/runappimage) around https://github.com/projectatomic/bubblewrap and a tiny setuid helper written in C called "loopmounter".
 
 ## Building
 
