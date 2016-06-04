@@ -1,8 +1,6 @@
 # AppImage sandbox
 
-The files in this directory are __purely optional__.
-
-They integrate AppImage into Linux desktops so that when an AppImage is double-clicked without the executable bit set, it is executed in a sandbox. When the executable bit is set on the AppImage, then it is ran outside of the sandbox. (This behavior might change in the future depending on user feedback).
+The AppImage sandbox is __purely optional__. It integrates AppImage into Linux desktops so that when an AppImage is double-clicked without the executable bit set, it is executed in a sandbox. When the executable bit is set on the AppImage, then it is ran outside of the sandbox. (This behavior might change in the future depending on user feedback).
 
 ## Philosophy
 
@@ -11,6 +9,8 @@ In order to run "untrusted" AppImages, the sandbox part cannot come inside the A
 You need to install a deb or rpm into your system to enable the  AppImage sandbox. While we are at it, we assume that who can install the sandbox part into the base system has root rights, which opens new possibilities.
 
 ## Implementation
+
+Here is a very alpha [appimage-sandbox_0.1_amd64.deb](https://github.com/probonopd/AppImageKit/releases/download/5/appimage-sandbox_0.1_amd64.deb)
 
 Right now this is basically just a [trivial, tiny shell script](https://github.com/probonopd/AppImageKit/blob/master/sandbox/src/usr/bin/runappimage) around https://github.com/projectatomic/bubblewrap
 
