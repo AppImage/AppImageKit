@@ -12,7 +12,7 @@ echo "creating deb for '${PROGRAMNAME}'; output '${OUTPUT_FILENAME}'"
 mkdir -v -p debian/DEBIAN
 cp -rf ./src/* ./debian/
 
-cat "License to be determined" > "${DOCSDIR}/copyright"
+cat "" > "${DOCSDIR}/copyright"
 
 mkdir -p debian/usr/share/doc/${PROGRAMNAME}/
 
@@ -31,9 +31,10 @@ Architecture: ${ARCH}
 Depends: bash (>=4.0)
 Installed-Size: ${INSTALLED_SIZE}
 Maintainer: Simon Peter <probono@puredarwin.org>
-Description: AppImage Sandbox 
- Registers AppImage file format with a helper that runs
- them inside a sandbox with read-only filesystem access." > debian/DEBIAN/control
+Description: Run AppImages inside a read-only sandbox 
+ Registers the AppImage file format with a helper that runs
+ them inside a sandbox with read-only filesystem access
+ if the executable bit is not set." > debian/DEBIAN/control
 
 find ./debian/ -type d | xargs chmod 755
 find ./debian/ -type f -exec chmod 0644 {} \;
