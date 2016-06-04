@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo apt-get -y install alien
+sudo apt-get -y install alien gcc
 
 PROGRAMNAME=appimage-sandbox
 VERSION=0.1
@@ -11,6 +11,9 @@ echo "creating deb for '${PROGRAMNAME}'; output '${OUTPUT_FILENAME}'"
 
 mkdir -v -p debian/DEBIAN
 cp -rf ./src/* ./debian/
+
+gcc loopmounter.c -o debian/usr/bin/loopmounter
+strip debian/usr/bin/loopmounter
 
 # Quick and dirty hack until bubblewrap is packaged in distros
 wget -c "https://github.com/probonopd/bubblewrap/releases/download/binary/bwrap" -O ./debian/usr/bin/bwrap
@@ -42,6 +45,9 @@ Description: Run AppImages inside a read-only sandbox
 find ./debian/ -type d | xargs chmod 755
 find ./debian/ -type f -exec chmod 0644 {} \;
 chmod 755 debian/usr/bin/*
+
+sudo chown root:root debian/usr/bin/loopmounter
+sudo chmod 4755 debian/usr/bin/loopmounter
 
 fakeroot dpkg-deb --build debian
 mv -v debian.deb "${OUTPUT_FILENAME}"
