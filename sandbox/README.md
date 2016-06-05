@@ -1,5 +1,7 @@
 # AppImage sandbox
 
+Demo video here: https://www.youtube.com/watch?v=7C9thHXPZd8
+
 The AppImage sandbox is __purely optional__. It integrates AppImage into Linux desktops so that when an AppImage is double-clicked without the executable bit set, it is executed in a sandbox. When the executable bit is set on the AppImage, then it is ran outside of the sandbox. (This behavior might change in the future depending on user feedback).
 
 ## Philosophy
