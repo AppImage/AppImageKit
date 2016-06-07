@@ -4,9 +4,23 @@
 # into the host system without special help from the host system.
 # If you want to use it, then place this in usr/bin/$APPNAME.wrapper
 # and set it as the Exec= line of the .desktop file in the AppImage.
-
+# 
+# For example, to install the appropriate icons for Scribus,
+# put them into the AppDir at the following locations:
+# 
+# ./usr/share/icons/default/128x128/apps/scribus.png
+# ./usr/share/icons/default/128x128/mimetypes/application-vnd.scribus.png
+#
+# Note that the filename application-vnd.scribus.png is derived from
+# and must be match MimeType=application/vnd.scribus; in scribus.desktop
+# (with "/" characters replaced by "-").
+#
+# Then, change Exec=scribus to Exec=scribus.wrapper and place the script
+# below in usr/bin/scribus.wrapper and make it executable.
+# When you run AppRun, then AppRun runs the wrapper script below
+# which in turn will run the main application.
+# 
 # TODO:
-# Handle icons for mime types as well using xdg-icon-resource
 # Handle multiple versions of the same AppImage?
 # Handle removed AppImages? Currently we are just setting TryExec=
 # See http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#DELETE
@@ -19,35 +33,62 @@ set -e
 if [ ! -z "$DEBUG" ] ; then
   env
   set -x
-fi
+fi 
+
+THIS="$0"
+ARGS="$@"
+NUMBER_OF_ARGS="$#"
 
 # Please do not change $VENDORPREFIX as it will allow for desktop files
 # belonging to AppImages to be recognized by future AppImageKit components
 # such as desktop integration daemons
 VENDORPREFIX=appimagekit
 
-FILENAME=$(readlink -f "${0}")
+find-up () {
+  path="$(dirname "$(readlink -f "${THIS}")")"
+  while [[ "$path" != "" && ! -e "$path/$1" ]]; do
+    path=${path%/*}
+  done
+  echo "$path"
+}
 
-echo $FILENAME
+if [ -z $APPDIR ] ; then
+  # Find the AppDir. It is the directory that contains AppRun.
+  # This assumes that this script resides inside the AppDir or a subdirectory.
+  # If this script is run inside an AppImage, then the AppImage runtime
+  # likely has already set $APPDIR
+  APPDIR=$(find-up "AppRun")
+fi
+
+echo "$APPDIR"
+
+FILENAME="$(readlink -f "${THIS}")"
+
+echo "$FILENAME"
 
 if [[ "$FILENAME" != *.wrapper ]] ; then
-  echo "$0 is not named correctly. It should be named \$Exec.wrapper"
+  echo "${THIS} is not named correctly. It should be named \$Exec.wrapper"
   exit 0
 fi
 
 BIN=$(echo "$FILENAME" | sed -e 's|.wrapper||g')
-if [[ ! -f $BIN ]] ; then
+if [[ ! -f "$BIN" ]] ; then
   echo "$BIN not found"
   exit 0
 fi
 
-ARGS=$@
-
 trap atexit EXIT
 
+# Note that the following handles 0 or 1 arguments (file paths) which can include blanks
+# but it doesn't handle more than 1 argument (i.e., multiple files) correctly.
+# Pull requests welcome to fix this.
 atexit()
 {
-  exec $BIN $ARGS
+if [ $NUMBER_OF_ARGS -eq 0 ] ; then
+  exec "${BIN}"
+else
+  exec "${BIN}" "${ARGS}"
+fi
 }
 
 error()
@@ -75,7 +116,7 @@ yesno()
   elif [ -x /usr/bin/Xdialog ] ; then
     LD_LIBRARY_PATH="" Xdialog --title "$TITLE" --clear --yesno "$TEXT" 10 80 || exit 0
   else
-    echo "zenity, kdialog, Xdialog missing. Skipping $0."
+    echo "zenity, kdialog, Xdialog missing. Skipping ${THIS}."
     exit 0
   fi
 }
@@ -106,7 +147,7 @@ check_dep()
 {
   DEP=$1
   if [ -z $(which $DEP) ] ; then
-    echo "$DEP is missing. Skipping $0."
+    echo "$DEP is missing. Skipping ${THIS}."
     exit 0
   fi
 }
@@ -118,18 +159,22 @@ DIRNAME=$(dirname $FILENAME)
 check_dep desktop-file-validate
 check_dep update-desktop-database
 check_dep desktop-file-install
+check_dep xdg-icon-resource 
+check_dep xdg-mime 
+check_dep xdg-desktop-menu
 
-DESKTOPFILE=$(find ../ -name "*.desktop" | head -n 1)
+DESKTOPFILE=$(find "$APPDIR" -maxdepth 1 -name "*.desktop" | head -n 1)
+echo "$DESKTOPFILE"
 DESKTOPFILE_NAME=$(basename $DESKTOPFILE)
 
 if [ ! -f "$DESKTOPFILE" ] ; then
-  echo "Desktop file is missing. Please run $0 from within an AppImage."
+  echo "Desktop file is missing. Please run ${THIS} from within an AppImage."
   exit 0
 fi
 
 if [ -z "$APPIMAGE" ] ; then
-  echo "\$APPIMAGE is missing. Please run $0 from within an AppImage."
-  exit 0
+  APPIMAGE="$APPDIR/AppRun"
+  # Not running from within an AppImage; hence using the AppRun for Exec=
 fi
 
 # Construct path to the icon according to
@@ -139,15 +184,16 @@ ICONURL="file://$ABS_APPIMAGE"
 MD5=$(echo -n $ICONURL | md5sum | cut -c -32)
 ICONFILE="$HOME/.cache/thumbnails/normal/$MD5.png"
 if [ ! -f "$ICONFILE" ] ; then
-  echo "$ICONFILE is missing. Please run $0 from within an AppImage."
-  exit 0
+  echo "$ICONFILE is missing. Probably not running ${THIS} from within an AppImage."
+  echo "Hence falling back to using .DirIcon"
+  ICONFILE="$APPDIR/.DirIcon"
 fi
 
 # $XDG_DATA_DIRS contains the default paths /usr/local/share:/usr/share
 # desktop file has to be installed in an applications subdirectory
 # of one of the $XDG_DATA_DIRS components
 if [ -z "$XDG_DATA_DIRS" ] ; then
-  echo "\$XDG_DATA_DIRS is missing. Please run $0 from within an AppImage."
+  echo "\$XDG_DATA_DIRS is missing. Please run ${THIS} from within an AppImage."
   exit 0
 fi
 
@@ -165,7 +211,7 @@ fi
 # and if so, whether it points to the same AppImage
 if [ -e "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME" ] ; then
   # echo "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME already there"
-  EXEC=$(grep "^Exec=" "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME" | head -n 1)
+  EXEC=$(grep "^Exec=" "$DESTINATION_DIR_DESKTOP/$VENDORPREFIX-$DESKTOPFILE_NAME" | head -n 1 | cut -d " " -f 1)
   # echo $EXEC
   if [ "Exec=$APPIMAGE" == "$EXEC" ] ; then
     exit 0
@@ -177,25 +223,40 @@ if [ -z "$SKIP" ] ; then
   yesno "Install" "Should a desktop file for $APPIMAGE be installed?"
 fi
 
+APP=$(echo "$DESKTOPFILE_NAME" | sed -e 's/.desktop//g')
+
 # If the user has agreed, rewrite and install the desktop file, and the MIME information
 if [ -z "$SKIP" ] ; then
-  if [ -e ./share/mime/ ] ; then
-    find ./share/mime/ -type f -name *xml -exec xdg-mime install $SYSTEM_WIDE --novendor {} \;
-  fi
-  # desktop-file-install is supposed to install
-  # .desktop files to the user's
+  # desktop-file-install is supposed to install .desktop files to the user's
   # applications directory when run as a non-root user,
   # and to /usr/share/applications if run as root
   # but that does not really work for me...
-  echo desktop-file-install --rebuild-mime-info-cache \
-    --vendor=$VENDORPREFIX --set-key=Exec --set-value=$APPIMAGE \
-    --set-key=X-AppImage-Comment --set-value="Generated by $0" \
-    --set-icon=$ICONFILE --set-key=TryExec --set-value=$APPIMAGE $DESKTOPFILE \
-    --dir "$DESTINATION_DIR_DESKTOP"
   desktop-file-install --rebuild-mime-info-cache \
-    --vendor=$VENDORPREFIX --set-key=Exec --set-value=$APPIMAGE \
-    --set-key=X-AppImage-Comment --set-value="Generated by $0" \
-    --set-icon=$ICONFILE --set-key=TryExec --set-value=$APPIMAGE $DESKTOPFILE \
+    --vendor=$VENDORPREFIX --set-key=Exec --set-value="${APPIMAGE} %U" \
+    --set-key=X-AppImage-Comment --set-value="Generated by ${THIS}" \
+    --set-icon=$VENDORPREFIX-$APP --set-key=TryExec --set-value=$APPIMAGE $DESKTOPFILE \
     --dir "$DESTINATION_DIR_DESKTOP"
+  chmod a+x "$DESTINATION_DIR_DESKTOP/"*
+  RESOURCE_NAME=$(echo "$VENDORPREFIX-$DESKTOPFILE_NAME" | sed -e 's/.desktop//g')
+  echo $RESOURCE_NAME
+
+  # Install the icon files for the application; TODO: scalable
+  ICONS=$(find "${APPDIR}/usr/share/icons/" -wholename "*/apps/${APP}.png" || true)
+  for ICON in $ICONS ; do
+    ICON_SIZE=$(echo "${ICON}" | rev | cut -d "/" -f 3 | rev | cut -d "x" -f 1)
+    xdg-icon-resource install --context apps --size ${ICON_SIZE} "${ICON}" "${RESOURCE_NAME}"
+  done
+
+  # Install mime type
+  find "${APPDIR}/usr/share/mime/" -type f -name *xml -exec xdg-mime install $SYSTEM_WIDE --novendor {} \; || true
+
+  # Install the icon files for the mime type; TODO: scalable
+  ICONS=$(find "${APPDIR}/usr/share/icons/" -wholename "*/mimetypes/*.png" || true)
+  for ICON in $ICONS ; do
+    ICON_SIZE=$(echo "${ICON}" | rev | cut -d "/" -f 3 | rev | cut -d "x" -f 1)
+    xdg-icon-resource install --context mimetypes --size ${ICON_SIZE} "${ICON}" $(basename $ICON | sed -e 's/.png//g')
+  done
+
   xdg-desktop-menu forceupdate
+  gtk-update-icon-cache # for MIME
 fi
