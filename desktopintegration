@@ -36,7 +36,7 @@ if [ ! -z "$DEBUG" ] ; then
 fi 
 
 THIS="$0"
-ARGS="$@"
+args=("$@") # http://stackoverflow.com/questions/3190818/
 NUMBER_OF_ARGS="$#"
 
 # Please do not change $VENDORPREFIX as it will allow for desktop files
@@ -79,15 +79,16 @@ fi
 
 trap atexit EXIT
 
-# Note that the following handles 0 or 1 arguments (file paths) which can include blanks
-# but it doesn't handle more than 1 argument (i.e., multiple files) correctly.
-# Pull requests welcome to fix this.
+# Note that the following handles 0, 1 or more arguments (file paths)
+# which can include blanks but uses a bashism; can the same be achieved
+# in POSIX-shell? (FIXME)
+# http://stackoverflow.com/questions/3190818
 atexit()
 {
 if [ $NUMBER_OF_ARGS -eq 0 ] ; then
   exec "${BIN}"
 else
-  exec "${BIN}" "${ARGS}"
+  exec "${BIN}" "${args[@]}"
 fi
 }
 
