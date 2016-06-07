@@ -37,7 +37,7 @@ With the introduction of Mac OS X, arguably the first UNIX-based operating syste
 
 Open Source operating systems, such as the most prominent Linux distributions, mostly use package managers for everything. While this is perceived superior to Windows and the Mac by many Linux enthusiasts, it also creates a number of disadvantages:
 
- 1. __Centralization__ Some organization decides what is "in" a distribution and what is not. By definition, software "in" a distribution is easier to install and manage that software that is not.
+ 1. __Centralization__ Some organization decides what is "in" a distribution and what is not. By definition, software "in" a distribution is easier to install and manage than software that is not.
  2. __Duplication of effort__ In traditional systems, each application is compiled specifically for each target operating system. This means that one piece of software has to be compiled many, many times on many, many systems using much, much power and time
  3. __Need to be online__ Most package managers are created with connected computers in the mind, making it really cumbersome to "just fetch an app" on an online system, and copy it over to another system that is not connected to the Internet.
  
