@@ -4,6 +4,10 @@ Demo video here: https://www.youtube.com/watch?v=7C9thHXPZd8
 
 The AppImage sandbox is __purely optional__. It integrates AppImage into Linux desktops so that when an AppImage is double-clicked without the executable bit set, it is executed in a sandbox. When the executable bit is set on the AppImage, then it is ran outside of the sandbox. (This behavior might change in the future depending on user feedback).
 
+## Alternative
+
+Also check out [firejail](https://github.com/netblue30/firejail/), another sandbox, now with native AppImage support. (TODO: Explain differences.)
+
 ## Philosophy
 
 In order to run "untrusted" AppImages, the sandbox part cannot come inside the AppImage (because the AppImage cannot be trusted). Hence, for an effective sandboxing mechanism to work, we need to install the infrastructure for it into the base system. This violates the AppImage principle that AppImages must be able to run without any support from the base system, hence the whole sandbox part is purely optional.
