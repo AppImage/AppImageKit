@@ -212,7 +212,7 @@ or with some basic X11 and network sandboxing:
 $ firejail --appimage --net=none --x11 Krita-3.0-x86_64.AppImage
 ```
 
-For more information and more options, read [this](https://github.com/probonopd/AppImageKit/blob/master/sandbox/README.md).
+It is also possible to use the [Bubblewrap](https://github.com/probonopd/AppImageKit/blob/master/sandbox/README.md) sandbox to run AppImages.
 
 ## Support
 
