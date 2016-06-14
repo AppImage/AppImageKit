@@ -6,7 +6,7 @@ The AppImage sandbox is __purely optional__. It integrates AppImage into Linux d
 
 ## Alternative
 
-Also check out [firejail](https://github.com/netblue30/firejail/), another sandbox, now with native AppImage support. (TODO: Explain differences.)
+Also check out [Firejail](https://github.com/netblue30/firejail/), another sandbox, now with native AppImage support. (TODO: Explain differences.)
 
 ## Philosophy
 
