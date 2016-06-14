@@ -196,6 +196,24 @@ AppImages can be updated using [AppImageUpdate](https://github.com/probonopd/App
 
 For the full story, read [this](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/README.md).
 
+## Sandboxing
+
+[Firejail](https://github.com/netblue30/firejail/) is a low-overhead sandbox that provides native support for the AppImage format. Written in C with virtually no dependencies, Firejail runs on any Linux computer with a 3.x kernel version or newer. 
+
+To run an AppImage inside a Firejail sandbox, run it like this:
+
+```
+$ firejail --appimage Krita-3.0-x86_64.AppImage
+```
+
+or with some basic X11 and network sandboxing:
+
+```
+$ firejail --appimage --net=none --x11 Krita-3.0-x86_64.AppImage
+```
+
+For more information and more options, read [this](https://github.com/probonopd/AppImageKit/blob/master/sandbox/README.md).
+
 ## Support
 
 I support open source projects that wish to distribute their software as an AppImage. For closed source applications, I offer AppImage packaging and testing as a service.
