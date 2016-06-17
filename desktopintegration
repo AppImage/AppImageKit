@@ -180,7 +180,7 @@ fi
 
 # Construct path to the icon according to
 # http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html
-ABS_APPIMAGE=$(readlink -e $APPIMAGE)
+ABS_APPIMAGE=$(readlink -e "$APPIMAGE")
 ICONURL="file://$ABS_APPIMAGE"
 MD5=$(echo -n $ICONURL | md5sum | cut -c -32)
 ICONFILE="$HOME/.cache/thumbnails/normal/$MD5.png"
