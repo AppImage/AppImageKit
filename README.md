@@ -1,4 +1,4 @@
-# AppImageKit [![Build Status](https://travis-ci.org/probonopd/AppImageKit.svg?branch=master)](https://travis-ci.org/probonopd/AppImageKit) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# AppImageKit [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 
 Copyright (c) 2004-16 Simon Peter <probono@puredarwin.org> and contributors.
 
