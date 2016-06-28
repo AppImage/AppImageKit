@@ -27,7 +27,7 @@ else
   loopmounter "${APPIMAGE}" "${MOUNT}"
   if [ -x /usr/bin/bwrap ] ; then
     # http://www.galago-project.org/specs/notification/0.9/index.html
-    notify-send "Runninng sandboxed" "${APPIMAGE}"
+    notify-send "Running sandboxed" "${APPIMAGE}"
     # TODO: More elaborate sandboxing
     # See https://github.com/flatpak/flatpak/wiki/Sandbox and
     # https://github.com/projectatomic/bubblewrap/blob/master/demos/xdg-app-run.sh
