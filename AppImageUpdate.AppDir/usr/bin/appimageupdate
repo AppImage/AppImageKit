@@ -142,7 +142,7 @@ if [ "$TYPE" == "zsync" ] ; then
   # Get the file with zsync using $1 as an input file
   zsync_curl -# -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished 
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
-  chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+  chmod --reference="${ISO}.zs-old" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
 elif [ "$TYPE" == "bintray-zsync" ] ; then
   cd $(dirname "${ISO}") 
@@ -172,7 +172,7 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   # Get the file with zsync using $1 as an input file
   zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
-  chmod --reference="${ISO}" "${NEWFILE}"* # Set the same permissions as for the original file
+  chmod --reference="${ISO}.zs-old" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
 
 elif [ "$TYPE" == "" ] ; then
