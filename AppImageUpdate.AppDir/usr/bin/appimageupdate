@@ -187,6 +187,6 @@ else
   exit 1
 fi
 
-rm *.zs-old 2>/dev/null || true
+rm "${ISO}.zs-old" "${ISO}.asc" 2>/dev/null || true
 
 echo "Successfully updated to version ${VERSION}"
