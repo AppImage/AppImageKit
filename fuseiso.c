@@ -105,6 +105,39 @@ static int isofs_flush(const char *UNUSED(path), struct fuse_file_info *UNUSED(f
     return 0;
 };
 
+static pid_t fuse_pid;
+static int keepalive_pipe[2];
+
+static void *
+write_pipe_thread (void *arg)
+{
+  char c[32];
+  int res;
+//  sprintf(stderr, "Called write_pipe_thread");
+  memset (c, 'x', sizeof (c));
+  while (1) {
+    /* Write until we block, on broken pipe, exit */
+    res = write (keepalive_pipe[1], c, sizeof (c));
+    if (res == -1) {
+      kill (fuse_pid, SIGHUP);
+      break;
+    }
+  }
+  return NULL;
+}
+
+void
+run_when_fuse_fs_mounted (void)
+{
+
+//    sprintf(stderr, "Called run_when_fuse_fs_mounted");
+    pthread_t thread;
+    int res;
+
+    fuse_pid = getpid();
+    res = pthread_create(&thread, NULL, write_pipe_thread, keepalive_pipe);
+}
+
 static void* isofs_init() {
     int rc;
     run_when_fuse_fs_mounted();
