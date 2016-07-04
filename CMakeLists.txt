@@ -68,8 +68,11 @@ INCLUDE_DIRECTORIES(. ${GLIB_INCLUDE_DIRS})
 ADD_EXECUTABLE(AppRun AppRun.c)
 add_custom_command(TARGET AppRun POST_BUILD COMMAND ${CMAKE_STRIP} AppRun)
 
-ADD_LIBRARY(fuseiso fuseiso.c)
-ADD_LIBRARY(isofs isofs.c)
+ADD_LIBRARY(isofs isofs.c isofs.h)
+TARGET_LINK_LIBRARIES(isofs ${LIBPTHREAD} ${LIBGLIB2} ${LIBZ}）
+
+ADD_LIBRARY(fuseiso fuseiso.c isofs.h)
+TARGET_LINK_LIBRARIES(fuseiso isofs ${LIBFUSE} ${LIBPTHREAD} ${LIBGLIB2}）
 
 ADD_EXECUTABLE(runtime runtime.c)
 TARGET_LINK_LIBRARIES(runtime fuseiso isofs ${LIBFUSE} ${LIBPTHREAD} ${LIBGLIB2} ${LIBZ})
