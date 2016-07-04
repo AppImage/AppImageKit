@@ -80,7 +80,7 @@ add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
 
 ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
-  COMMAND cp runtime AppImageAssistant.AppDir/
+  COMMAND cp runtime ./AppImageAssistant.AppDir
   COMMAND ./binary-dependencies/bundle
   COMMAND rm ./AppImageAssistant || continue
   COMMAND ./AppImageAssistant.AppDir/package ./AppImageAssistant.AppDir ./AppImageAssistant
