@@ -31,6 +31,8 @@
 #include <mntent.h>
 #include <sys/param.h>
 #include <linux/iso_fs.h>
+#include <unistd.h>
+#include <pthread.h>
 
 #define FUSE_USE_VERSION 22
 #include <fuse.h>
