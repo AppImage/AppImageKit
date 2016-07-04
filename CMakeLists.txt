@@ -78,30 +78,33 @@ ADD_EXECUTABLE(runtime runtime.c)
 TARGET_LINK_LIBRARIES(runtime fuseiso isofs ${LIBFUSE} ${LIBPTHREAD} ${LIBGLIB2} ${LIBZ})
 add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
 
+SET(BUNDLE "${CMAKE_CURRENT_SOURCE_DIR}/binary-dependencies/bundle")
+SET(PACKAGE "${CMAKE_CURRENT_SOURCE_DIR}/AppImageAssistant.AppDir/package")
+
 ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
   COMMAND cp runtime ./AppImageAssistant.AppDir
-  COMMAND ./binary-dependencies/bundle
+  COMMAND ${BUNDLE}
   COMMAND rm ./AppImageAssistant || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageAssistant.AppDir ./AppImageAssistant
+  COMMAND ${PACKAGE} ./AppImageAssistant.AppDir ./AppImageAssistant
   VERBATIM
 )
 
 ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
   COMMAND cp AppRun ./AppImageExtract.AppDir
-  COMMAND ./binary-dependencies/bundle
+  COMMAND ${BUNDLE}
   COMMAND rm ./AppImageExtract || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageExtract.AppDir ./AppImageExtract
+  COMMAND ${PACKAGE} ./AppImageExtract.AppDir ./AppImageExtract
   VERBATIM
 )
 
 ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
   COMMAND cp AppRun ./AppImageMonitor.AppDir
-  COMMAND ./binary-dependencies/bundle
+  COMMAND ${BUNDLE}
   COMMAND rm ./AppImageMonitor || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageMonitor.AppDir ./AppImageMonitor
+  COMMAND ${PACKAGE} ./AppImageMonitor.AppDir ./AppImageMonitor
   VERBATIM
 )
 
