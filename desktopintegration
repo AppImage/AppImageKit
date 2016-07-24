@@ -166,7 +166,7 @@ check_dep xdg-desktop-menu
 
 DESKTOPFILE=$(find "$APPDIR" -maxdepth 1 -name "*.desktop" | head -n 1)
 echo "$DESKTOPFILE"
-DESKTOPFILE_NAME=$(basename "${DESKTOP_FILE}")
+DESKTOPFILE_NAME=$(basename "${DESKTOPFILE}")
 
 if [ ! -f "$DESKTOPFILE" ] ; then
   echo "Desktop file is missing. Please run ${THIS} from within an AppImage."
