@@ -13,7 +13,7 @@ Volunteers wanted for the following topics. Feel free to send a PR that adds you
 
 * Follow up with upstream projects and/or send PRs
 * file-roller
-* ark
+* ark (DONE)
 
 ## Upgrading appimage via right click
 
