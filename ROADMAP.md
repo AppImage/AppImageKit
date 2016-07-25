@@ -27,3 +27,6 @@ Volunteers wanted for the following topics. Feel free to send a PR that adds you
 * Resurrect appimaged (probonopd; contact me if you want to take this over)
 * Sandbox using firejail (see the sandbox GUI integration experiments in this repository)
 * Test/use GNOME portals
+
+## IDE/build tool integration
+* Someone familiar with Qt (= not me, probono) We should have a deep look at http://code.qt.io/cgit/qt/qttools.git/tree/src/macdeployqt/ and see if the same can be done to generate an AppImage
