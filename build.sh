@@ -69,7 +69,7 @@ outdir="$PWD/out"
 
 mkdir -p "$outdir"
 
-for i in AppRun; do
+for i in AppRun runtime; do
 	[ -f "$i" ] && cp -v "$i" "${outdir}/${i}_${version}-$(uname -m)"
 done
 
