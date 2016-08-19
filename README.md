@@ -212,6 +212,14 @@ or with some basic X11 and network sandboxing:
 $ firejail --appimage --net=none --x11 Krita-3.0-x86_64.AppImage
 ```
 
+These are the main features of AppImage/Firejail combination ([source](https://firejail.wordpress.com/documentation-2/appimage-support/)):
+* State of the art software packaging and sandboxing technology
+* The only requirement to run the sandboxed application is a Linux kernel version 3 or newer – there are no dependencies, no 200MB runtimes to download and install
+* Network and X11 sandboxing available today!
+* Graphical user interface and auditing capabilities
+* Low runtime overhead – we do not increase the attack surface of the software environment by running daemons in the background
+* It can be used in parallel with other security frameworks such as Grsecurity, AppArmor, SELinux
+
 It is also possible to use the [Bubblewrap](https://github.com/probonopd/AppImageKit/blob/master/sandbox/README.md) sandbox to run AppImages.
 
 ## Support
