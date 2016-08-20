@@ -426,7 +426,7 @@ vertical-align: middle;
 }
 
 .navbar-header {
-	padding: 10px 0; 
+	padding: 10px 0;
 }
 
 .navbar {
@@ -611,7 +611,7 @@ vertical-align: middle;
   display: inline-block;
 }
 .btn-social.btn-simple {
-  padding: 20px 5px;
+  padding: 10px 2px;
   font-size: 16px;
 }
 .btn-social.btn-simple .fa {
@@ -630,7 +630,7 @@ vertical-align: middle;
   width: 100%;
   position: relative;
   height: 100%;
- 
+
 }
 
 
@@ -765,7 +765,7 @@ vertical-align: middle;
     overflow: hidden;
     border-radius: 50%;
     border: 0px solid #333333;
-    width: 50px; 
+    width: 50px;
     float: left;
 }
 
@@ -789,7 +789,7 @@ vertical-align: middle;
 
 .landing-page .container, .landing-page-2 .container, .landing-page-3 .container{
   max-width: 970px;
-} 
+}
 
  .header-text{
       text-transform: uppercase;
@@ -873,6 +873,7 @@ vertical-align: middle;
   z-index: 1;
   width: 100%;
   height: 100%;
+  opacity: 0.9;
 }
 .landing-page .parallax .parallax-background img{
   width: 100%;
@@ -963,7 +964,7 @@ vertical-align: middle;
     width: 100%;
     text-align: center;
    }
- 
+
    .landing-page .full-background .info{
     position: relative;
     z-index: 20;
@@ -978,7 +979,7 @@ vertical-align: middle;
    .landing-page .full-background .info  a{
     position: relative;
     z-index: 10;
-    
+
     }
 
    .landing-page .full-background .info .btn-lg{
@@ -1027,7 +1028,7 @@ vertical-align: middle;
         margin-top: 20px;
    }#E01724
 
-    .landing-page .section-features .card.card-blue{ 
+    .landing-page .section-features .card.card-blue{
       border-color: #CCE7F5;
     }
     .landing-page .section-features .card.card-blue .icon i{
@@ -1039,13 +1040,13 @@ vertical-align: middle;
     .landing-page .section-features .card.card-green .icon i{
       color:#3ABE41;
     }
-    .landing-page .section-features .card.card-orange{ 
+    .landing-page .section-features .card.card-orange{
       border-color: #FAD9CD;
     }
     .landing-page .section-features .card.card-orange .icon i{
       color:#ff967f;
     }
-     .landing-page .section-features .card.card-red{ 
+     .landing-page .section-features .card.card-red{
       border-color: #FFBFC3;
     }
     .landing-page .section-features .card.card-red .icon i{
@@ -1071,7 +1072,7 @@ vertical-align: middle;
   }
   .landing-page .section-testimonial .carousel{
     margin-top: 50px;
-    
+
   }
     .landing-page .section-testimonial .carousel-inner .item .mask{
       width: 200px;
@@ -1361,7 +1362,7 @@ vertical-align: middle;
         -o-transition: all 300ms cubic-bezier(0.34, 1.61, 0.7, 1);
         -ms-transition: all 300ms cubic-bezier(0.34, 1.61, 0.7, 1);
         transition: all 300ms cubic-bezier(0.34, 1.61, 0.7, 1);
-    
+
     }
     .navbar-nav > li.open > .dropdown-menu, .open .dropdown-menu{
         -webkit-transform-origin: 29px -50px;
@@ -1404,7 +1405,7 @@ vertical-align: middle;
         margin-left: -60%;
         top: -10px;
     }
-    
+
 }
 
 @media (max-width: 520px)
