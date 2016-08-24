@@ -132,9 +132,9 @@ echo "zsync|https://resin-production-downloads.s3.amazonaws.com/etcher/latest/Et
 
 **Step 2: Upload the AppImage and the AppImage.zsync to an URL that matches the URL specified in the update information**
 
-You would have to copy both `Etcher-linux-x64.AppImage.zsync` and `Etcher-linux-x64.AppImage.zsync` to `https://resin-production-downloads.s3.amazonaws.com/etcher/latest/` for this to work.
+You would have to copy both `Etcher-linux-x64.AppImage` and `Etcher-linux-x64.AppImage.zsync` to `https://resin-production-downloads.s3.amazonaws.com/etcher/latest/` for this to work.
 
-When you have a new version, simply put the updated  `Etcher-linux-x64.AppImage.zsync` and `Etcher-linux-x64.AppImage.zsync` at the *same* location.
+When you have a new version, simply put the updated  `Etcher-linux-x64.AppImage` and `Etcher-linux-x64.AppImage.zsync` at the *same* location.
 
 At this point, AppImageUpdate should work. AppImageUpdate is really just an example GUI around the (work-in-progress but useable) [appimageupdate](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/usr/bin/appimageupdate) bash script. You could put `appimageupdate` (and its dependency [zsync_curl](https://github.com/probonopd/zsync-curl)) inside `usr/bin` of the AppImage, and call `appimageupdate` from within your app and even have a little GUI around it; or reimplement it in the language of your app.
 
