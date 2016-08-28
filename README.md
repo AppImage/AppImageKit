@@ -1,4 +1,4 @@
-# AppImageKit [![Build Status](https://travis-ci.org/probonopd/AppImageKit.svg?branch=master)](https://travis-ci.org/probonopd/AppImageKit) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+# AppImageKit [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage)
 
 Copyright (c) 2004-16 Simon Peter <probono@puredarwin.org> and contributors.
 
@@ -12,7 +12,7 @@ conveniently handling AppImages.
 
 https://en.wikipedia.org/wiki/AppImage
 
-This document describes the AppImage format and AppImageKit. It is intended to describe the philosophy behind the AppImage format and the concrete implementation. This document is not a formal specification, since the AppImage format is not frozen yet but in the process of being specified more formally. Contributors are encouraged to comment on this document and propose formal format descriptions.
+This document describes the AppImage format and AppImageKit. It is intended to describe the philosophy behind the AppImage format and the concrete implementation. This document is not a formal specification, since the AppImage format is not frozen yet but in the process of being specified more formally at https://github.com/AppImage/AppImageSpec. Contributors are encouraged to comment.
 
 Significant upstream projects have started providing AppImages of releases and/or nightly/continuous builds, see this [list of upstream-provided AppImages](https://github.com/probonopd/AppImageKit/wiki/AppImages#upstream-appimages).
 
@@ -37,7 +37,7 @@ With the introduction of Mac OS X, arguably the first UNIX-based operating syste
 
 Open Source operating systems, such as the most prominent Linux distributions, mostly use package managers for everything. While this is perceived superior to Windows and the Mac by many Linux enthusiasts, it also creates a number of disadvantages:
 
- 1. __Centralization__ Some organization decides what is "in" a distribution and what is not. By definition, software "in" a distribution is easier to install and manage that software that is not.
+ 1. __Centralization__ Some organization decides what is "in" a distribution and what is not. By definition, software "in" a distribution is easier to install and manage than software that is not.
  2. __Duplication of effort__ In traditional systems, each application is compiled specifically for each target operating system. This means that one piece of software has to be compiled many, many times on many, many systems using much, much power and time
  3. __Need to be online__ Most package managers are created with connected computers in the mind, making it really cumbersome to "just fetch an app" on an online system, and copy it over to another system that is not connected to the Internet.
  
@@ -65,7 +65,7 @@ The AppImage format has been created with specific objectives in mind.
 
  1. __Be Simple__. AppImage is intended to be a very simple format that is easy to understand, create, and manage.
  2. __Maintain binary compatibility__. AppImage is a format for binary software distribution. Software packaged as AppImage is intended to be as binary-compatible as possible with as many systems as possible. The need for (re-)compilation of software should be greatly reduced.
- 3. __Be distribution-agostic__. An AppImage should run on all base operating systems (distributions) that it was created for (and later versions). For example, you could target Ubuntu 9.10, openSUSE 11.2, and Fedora 13 (and later versions) at the same time, without having to create and maintain separate packages for each target system.
+ 3. __Be distribution-agnostic__. An AppImage should run on all base operating systems (distributions) that it was created for (and later versions). For example, you could target Ubuntu 9.10, openSUSE 11.2, and Fedora 13 (and later versions) at the same time, without having to create and maintain separate packages for each target system.
  4. __Remove the need for installation__. AppImages contain the app in a format that allows it to run directly from the archive, without having to be installed first. This is comparable to a Live CD. Before Live CDs, operating systems had to be installed first before they could be used.
  5. __Keep apps compressed all the time__. Since the application remains packaged all the time, it is never uncompressed on the hard disk. The computer uncompresses the application on-the-fly while accessing it. Since decompression is faster than reading from hard disk on most systems, this has a speed advantage in addition to saving space. Also, the time needed for installation is entirely removed.
  6. __Allow to put apps anywhere__. AppImages are "relocatable", thus allowing the user to store and execute them from any location (including CD-ROMs, DVDs, removable disks, USB sticks).
@@ -195,6 +195,32 @@ See the [Wiki](https://github.com/probonopd/AppImageKit/wiki) for details and fo
 AppImages can be updated using [AppImageUpdate](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/README.md). AppImageUpdate lets you update AppImages in a decentral way using information embedded in the AppImage itself. No central repository is involved. This enables upstream application projects to release AppImages that can be updated easily. Since AppImageKit uses delta updates, the downloads are very small and efficient.
 
 For the full story, read [this](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/README.md).
+
+## Sandboxing
+
+[Firejail](https://github.com/netblue30/firejail/) is a low-overhead sandbox that provides native support for the AppImage format. Written in C with virtually no dependencies, Firejail runs on any Linux computer with a 3.x kernel version or newer. 
+
+To run an AppImage inside a Firejail sandbox, run it like this:
+
+```
+$ firejail --appimage Krita-3.0-x86_64.AppImage
+```
+
+or with some basic X11 and network sandboxing:
+
+```
+$ firejail --appimage --net=none --x11 Krita-3.0-x86_64.AppImage
+```
+
+These are the main features of AppImage/Firejail combination ([source](https://firejail.wordpress.com/documentation-2/appimage-support/)):
+* State of the art software packaging and sandboxing technology
+* The only requirement to run the sandboxed application is a Linux kernel version 3 or newer – there are no dependencies, no 200MB runtimes to download and install
+* Network and X11 sandboxing available today!
+* Graphical user interface and auditing capabilities
+* Low runtime overhead – we do not increase the attack surface of the software environment by running daemons in the background
+* It can be used in parallel with other security frameworks such as Grsecurity, AppArmor, SELinux
+
+It is also possible to use the [Bubblewrap](https://github.com/probonopd/AppImageKit/blob/master/sandbox/README.md) sandbox to run AppImages.
 
 ## Support
 

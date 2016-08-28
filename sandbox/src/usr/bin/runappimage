@@ -1,0 +1,39 @@
+#!/bin/bash
+
+export APPIMAGE="$1"
+shift
+
+if [ -z "$APPIMAGE" ] ; then
+  echo Usage: $0 some.AppImage
+  exit 1
+fi
+
+function cleanup {
+  if [ -d "${MOUNT}" ] ; then
+    rm  -rf "${MOUNT}" "${MOUNT}.root"
+  fi
+}
+trap cleanup EXIT
+
+MOUNT=$(mktemp -d "/tmp/.mountXXXX")
+mkdir -p "${MOUNT}.root"
+export APPDIR="${MOUNT}"
+
+echo "${MOUNT}"
+
+if [ -x "${APPIMAGE}" ] ; then
+  "${APPIMAGE}" "$@"
+else
+  loopmounter "${APPIMAGE}" "${MOUNT}"
+  if [ -x /usr/bin/bwrap ] ; then
+    # http://www.galago-project.org/specs/notification/0.9/index.html
+    notify-send "Running sandboxed" "${APPIMAGE}"
+    # TODO: More elaborate sandboxing
+    # See https://github.com/flatpak/flatpak/wiki/Sandbox and
+    # https://github.com/projectatomic/bubblewrap/blob/master/demos/xdg-app-run.sh
+    /usr/bin/bwrap --ro-bind / / --dev /dev --proc /proc "${MOUNT}"/AppRun "$@"
+  else
+    exec "${MOUNT}"/AppRun "$@"
+  fi
+  loopmounter "${MOUNT}"
+fi

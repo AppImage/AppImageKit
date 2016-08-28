@@ -360,6 +360,13 @@ main (int argc, char *argv[])
     /* Setting some environment variables that the app "inside" might use */
     setenv( "APPIMAGE", fullpath, 1 );
     setenv( "APPDIR", mount_dir, 1 );
+
+    /* Original working directory */
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd)) != NULL) {
+      setenv( "OWD", cwd, 1 );
+    }
+
     execv (filename, real_argv);
     /* Error if we continue here */
     perror ("execv error: ");
