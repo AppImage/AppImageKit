@@ -132,11 +132,42 @@ echo "zsync|https://resin-production-downloads.s3.amazonaws.com/etcher/latest/Et
 
 **Step 2: Upload the AppImage and the AppImage.zsync to an URL that matches the URL specified in the update information**
 
-You would have to copy both `Etcher-linux-x64.AppImage.zsync` and `Etcher-linux-x64.AppImage.zsync` to `https://resin-production-downloads.s3.amazonaws.com/etcher/latest/` for this to work.
+You would have to copy both `Etcher-linux-x64.AppImage` and `Etcher-linux-x64.AppImage.zsync` to `https://resin-production-downloads.s3.amazonaws.com/etcher/latest/` for this to work.
 
-When you have a new version, simply put the updated  `Etcher-linux-x64.AppImage.zsync` and `Etcher-linux-x64.AppImage.zsync` at the *same* location.
+When you have a new version, simply put the updated  `Etcher-linux-x64.AppImage` and `Etcher-linux-x64.AppImage.zsync` at the *same* location.
 
 At this point, AppImageUpdate should work. AppImageUpdate is really just an example GUI around the (work-in-progress but useable) [appimageupdate](https://github.com/probonopd/AppImageKit/blob/master/AppImageUpdate.AppDir/usr/bin/appimageupdate) bash script. You could put `appimageupdate` (and its dependency [zsync_curl](https://github.com/probonopd/zsync-curl)) inside `usr/bin` of the AppImage, and call `appimageupdate` from within your app and even have a little GUI around it; or reimplement it in the language of your app.
+
+## Other example
+
+```
+# Let's use ".AppImage" as the standard suffix
+mv krita-3.0-x86_64.appimage Krita-3.0-x86_64.AppImage
+
+# Note that there is no "3" in the URL and no "3.0"
+# as this URL must always point to the latest/current zsync file
+URL="zsync|http://files.kde.org/krita/linux/Krita-latest-x86_64.AppImage.zsync"
+
+wget https://github.com/probonopd/AppImageKit/raw/master/AppImageUpdate.AppDir/usr/bin/appimageupdate
+wget https://github.com/probonopd/zsync-curl/releases/download/_binaries/zsync_curl
+chmod a+x zsync_curl
+PATH=.:$PATH bash appimageupdate Krita-3.0-x86_64.AppImage set $URL
+
+# Should say:
+# "Changed to zsync|http://files.kde.org/krita/linux/Krita-latest-x86_64.AppImage.zsync"
+
+sudo apt install zsync
+zsyncmake Krita-3.0-x86_64.AppImage
+mv Krita-3.0-x86_64.AppImage.zsync Krita-latest-x86_64.AppImage.zsync
+
+# Now upload Krita-3.0-x86_64.AppImage and Krita-latest-x86_64.AppImage.zsync to
+# http://files.kde.org/krita/linux/
+
+# Check whether appimageupdate finds the stuff on the server by running on the client:
+PATH=.:$PATH bash appimageupdate ./Krita-3.0-x86_64.AppImage
+
+# Assuming that 3.0.1 comes out, repeat the steps with 3.0.1
+```
 
 ## TODO
 

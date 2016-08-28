@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-# probono 11-2010
+# probono 11-2010, 04-2013, 07-2016
 
 
 import os, sys, subprocess, hashlib, urllib, tempfile, shutil
@@ -40,9 +40,9 @@ class AppImage:
         self.path = os.path.normpath(os.path.abspath(path))
         self.path_md5 = hashlib.md5('file://' + urllib.quote(self.path)).hexdigest()
         self.is_appimage = False
-        self.iconfile_path = os.path.expanduser('~/.thumbnails/normal/') + self.path_md5 + '.png'
-        desktopfiles_location = xxdg.BaseDirectory.xdg_data_home + "/applications/appimage/"
-        self.desktopfile_path = desktopfiles_location + self.path_md5 + ".desktop" # TODO: factor out
+        self.iconfile_path = os.path.expanduser('~/.cache/thumbnails/normal/') + self.path_md5 + '.png'
+        desktopfiles_location = xxdg.BaseDirectory.xdg_data_home + "/applications/" # Subdirectory does not work on GNOME 3
+        self.desktopfile_path = desktopfiles_location + "appimage-" + self.path_md5 + ".desktop" # TODO: factor out
         
     def check_whether_is_appimage(self):
         "Checks whether the file is an AppImage. TODO: Speed up by not using file"
@@ -91,10 +91,14 @@ class AppImage:
             print "* Installing %s" % (self.desktopfile_path)
             #f = open(desktopfile_path, "w")
             f = tempfile.NamedTemporaryFile(delete=False)
-            f.write(self.get_file(self.get_desktop_filename()))
+            string = self.get_file(self.get_desktop_filename()).replace("X-GNOME-FullName", "X-AppImage-Original-GNOME-FullName").replace("Name[", "X-AppImage-Original-Name[") # Don't use localized names, since we want the filename as the name
+            print string
+            f.write(string)
             f.close()
             desktop = xxdg.DesktopEntry.DesktopEntry()
             desktop.parse(f.name)
+            desktop.set("X-AppImage-Original-Name", desktop.get("Name")) 
+            desktop.set("Name", os.path.basename(self.path)) 
             desktop.set("X-AppImage-Original-Exec", desktop.get("Exec")) 
             desktop.set("X-AppImage-Original-Icon", desktop.get("Icon"))
             try: 
@@ -112,8 +116,9 @@ class AppImage:
             os.chmod(f.name, 0755)
             print self.desktopfile_path
             shutil.move(f.name, self.desktopfile_path) # os.rename fails when tmpfs is mounted at /tmp
-            if os.env("KDE_SESSION_VERSION") == "4":
-	        timesavers.run_shell_command("kbuildsycoca4") # Otherwise KDE4 ignores the menu
+            if "KDE_SESSION_VERSION" in os.environ:
+                if os.environ["KDE_SESSION_VERSION"] == "4":
+	            timesavers.run_shell_command("kbuildsycoca4") # Otherwise KDE4 ignores the menu
 
     def uninstall_desktop_integration(self):
         if os.path.isfile(self.desktopfile_path):

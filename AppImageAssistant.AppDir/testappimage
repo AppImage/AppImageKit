@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #
-# Test an AppDir or AppImage on a given ISO or squashfs base system
+# Test an AppDir or AppImage on a given ISO or squashfs or ext3 base system
 # TODO: Check https://github.com/FGrose/livecd-tools/blob/liveimage-mount/tools/liveimage-mount
 #
 
@@ -51,6 +51,13 @@ if [ ${1: -4} == ".sfs" ] ; then
     mount -o loop,ro "$ISO" /tmp/$PREF/unionfs/root
 fi
 
+# If ext3 was provided, then assume it contains a rootfs use just that
+THEFS="$1"
+if [ ${1: -4} == "ext3" ] ; then
+    ISO="$1"
+    mount -o loop,ro "$ISO" /tmp/$PREF/unionfs/root
+fi
+
 echo ""
 echo "===================================================="
 echo ""
@@ -78,6 +85,12 @@ fi
 # In case of openSUSE-like ISOs
 if [ -e /tmp/$PREF/iso/*-read-only.* ] ; then
   THEFS=$(ls /tmp/$PREF/iso/*-read-only.* | head -n 1)
+  mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
+fi
+
+# In case of puppy-like ISOs
+if [ -e /tmp/$PREF/iso/puppy_*.sfs ] ; then
+  THEFS=$(ls /tmp/$PREF/iso/puppy_*.sfs | head -n 1)
   mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
 fi
 
@@ -142,7 +155,7 @@ rm -rf /etc/pango
 mkdir -p /etc/pango
 pango-querymodules > '/etc/pango/pango.modules' 2>/dev/null # otherwise only squares instead of text
 [ -f /si-chroot ] && ln -s /lib/ld-lsb.so.3 /lib/ld-linux.so.2
-LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/usr/lib32:$MNT/usr/lib64:$MNT/lib/:$LD_LIBRARY_PATH ldd $MNT/usr/bin/*  $MNT/usr/lib/* 2>/dev/null | grep "not found" | sort | uniq
+# LD_LIBRARY_PATH=$MNT/usr/lib:$MNT/usr/lib32:$MNT/usr/lib64:$MNT/lib/:$LD_LIBRARY_PATH ldd $MNT/usr/bin/*  $MNT/usr/lib/* 2>/dev/null | grep "not found" | sort | uniq
 export HOME="/root"
 export LANG="en_EN.UTF-8"
 # export QT_PLUGIN_PATH=./lib/qt4/plugins ###################### !!!
@@ -152,9 +165,9 @@ export QT_DEBUG_PLUGINS=1
 dbus-uuidgen --ensure ; dbus-launch # Needed for CentOS 6.7 to launch apps that talk to dbus
 if [ -f $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so ] ; then
   export LD_LIBRARY_PATH=$MNT/usr/lib/:$LD_LIBRARY_PATH
-  ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
+  ##ldd $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so | grep not
 fi
-find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep "not found"'  2>/dev/null \;
+##find $MNT/usr/lib -type f -exec sh -c 'ldd {} | grep "not found"'  2>/dev/null \;
 if [ $(which $RUN_COMMAND) ] ; then
     exec $RUN_INSIDE
 else
