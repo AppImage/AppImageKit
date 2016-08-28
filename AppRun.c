@@ -38,11 +38,11 @@ THE SOFTWARE.
         exit( 1 );                              \
     } while (0);
 
-#define NEW_LD_LIBRARY_PATH "LD_LIBRARY_PATH=./lib/:./lib/i386-linux-gnu/:./lib/x86_64-linux-gnu/:./lib32/:./lib64/%s"
-#define NEW_PATH "PATH=./bin/:./sbin/:./games/:%s"
+#define NEW_LD_LIBRARY_PATH "LD_LIBRARY_PATH=./lib/:./lib/i386-linux-gnu/:./lib/x86_64-linux-gnu/:./lib32/:./lib64/:../lib/:../lib/i386-linux-gnu/:../lib/x86_64-linux-gnu/:../lib32/:../lib64/:%s"
+#define NEW_PATH "PATH=./bin/:./sbin/:./games/:../bin/:../sbin/:%s"
 #define NEW_PYTHONPATH "PYTHONPATH=./share/pyshared/:%s"
 #define NEW_XDG_DATA_DIRS "XDG_DATA_DIRS=./share/:%s"
-#define NEW_QT_PLUGIN_PATH "QT_PLUGIN_PATH=./lib/qt4/plugins/:./lib/qt5/plugins/:%s"
+#define NEW_QT_PLUGIN_PATH "QT_PLUGIN_PATH=./lib/qt4/plugins/:./lib/i386-linux-gnu/qt4/plugins/:./lib/x86_64-linux-gnu/qt4/plugins/:./lib32/qt4/plugins/:./lib64/qt4/plugins/:./lib/qt5/plugins/:./lib/i386-linux-gnu/qt5/plugins/:./lib/x86_64-linux-gnu/qt5/plugins/:./lib32/qt5/plugins/:./lib64/qt5/plugins/:%s"
 #define NEW_PERLLIB "PERLLIB=./share/perl5/:./lib/perl5/:%s"
 
 // http://askubuntu.com/questions/251712/how-can-i-install-a-gsettings-schema-without-root-privileges
