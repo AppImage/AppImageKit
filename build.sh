@@ -54,10 +54,33 @@ if [ -e /usr/bin/pacman ] ; then
   done
 fi
 
+# Minimum required CMake is 3.1, which implements .tar.xz support
+min_cmake_version=3.1
+version_gt() { test "$(echo "$@" | tr " " "\n" | sort -V | head -n 1)" != "$1"; }
+cmake_version=$(cmake --version | head -n1 | cut -d" " -f3)
+if ! version_gt $cmake_versiaon $min_cmake_version; then
+	new_cmake_version=3.4
+	echo "Manually updating CMake from ${cmake_version} to ${new_cmake_version}..."
+	case "$(uname -m)" in
+		x86_64) cmake_arch="x86_64" ;;
+		i?86) cmake_arch="i386" ;;
+	esac
+	if [ -n "$cmake_arch" ]; then
+		pkgname="cmake-$new_cmake_version.0-Linux-${cmake_arch}.tar.gz"
+		#wget --no-check-certificate "https://cmake.org/files/v$new_cmake_version/$pkgname"
+		curl -O --insecure "https://cmake.org/files/v$new_cmake_version/$pkgname"
+		tar -xf "$pkgname" -C /tmp/
+		export PATH="/tmp/$(basename "$pkgname" .tar.gz)/bin/:$PATH"
+	else
+		echo "!! Could not find official CMake binaries for architecture $(uname -m)" >&2
+	fi
+fi
+
 if [ "$1" == "--fetch-dependencies-only" ] ; then
   echo "Fetched dependencies.  Exiting now."
   exit 0
 fi
+
 
 cd "${HERE}"
 cmake .
