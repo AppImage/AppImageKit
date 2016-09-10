@@ -8,8 +8,7 @@ set -e
 # Communication between this script and the GUI happen through
 # file descriptors (&1 = stdout, &2 = stderr, $3 ... up to &9)
 # http://stackoverflow.com/questions/2342826/how-to-pipe-stderr-and-not-stdout
-#
-# echo "######" | tee >(sed -e 's/#/#\n/g' >&1)
+
 
 error()
 {
@@ -27,12 +26,11 @@ error()
 
 finished()
 {
-  echo "#########################" | tee >(sed -e 's/#/#\n/g')
+  echo "#########################"
 }
 
 # A simple dependency check
 which zsync_curl >/dev/null || error "zsync_curl is missing"
-which curl >/dev/null || error "curl is missing"
 which dd >/dev/null || error "dd is missing"
 
 MYSELF="${0}"
@@ -56,10 +54,10 @@ update_myself()
 gpg_check()
 {
   set +e
-  if [ "$(which gpg)" != "" ] ; then
+  if [ "$(which gpg_currently_disabled)" != "" ] ; then
     echo "GPG is installed; hence attempting signature verification"
     ASC_URL=$( echo "${ZSYNC_URL}" | sed -e 's|.zsync|.asc|g' )
-    curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}") && echo "Signature verified"
+    # curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}") && echo "Signature verified"
   else
     echo "GPG is not installed; hence skipping signature verification" >&2
   fi
@@ -140,7 +138,7 @@ if [ "$TYPE" == "zsync" ] ; then
   # downloads and reuse the data already downloaded.
   ZSYNC_URL=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2) # Get the URL of the zsync file
   # Get the file with zsync using $1 as an input file
-  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 && finished
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
   chmod --reference="${ISO}.zs-old" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
@@ -160,7 +158,7 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   ZSYNCDUMMYNAME=$(echo "${APPLICATION_USED}" | cut -d "|" -f 5)
   REDIRECTOR_URL="https://bintray.com/$USERNAME/$REPO/$PACKAGE/_latestVersion"
   DUMMY_URL="https://bintray.com/artifact/download/$USERNAME/$REPO/$ZSYNCDUMMYNAME"
-  VERSION=$(curl -k -r 0-0 -Ls -o /dev/null -w %{url_effective} "${REDIRECTOR_URL}" | cut -d "/" -f 7)
+  VERSION=$(zsync_curl -r "${REDIRECTOR_URL}" | cut -d "/" -f 7)
   if [ "$VERSION" == "_latestVersion" ] ; then
     echo "Error"
     echo "Could not get the latest version from Bintray" >&2
@@ -170,7 +168,7 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   fi
   ZSYNC_URL=$(echo "${DUMMY_URL}" | sed -e "s|_latestVersion|$VERSION|g" )
   # Get the file with zsync using $1 as an input file
-  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 && finished
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
   chmod --reference="${ISO}" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
