@@ -1,8 +1,10 @@
 /*-
  * Based on
  * https://github.com/libarchive/libarchive/blob/master/examples/minitar/minitar.c
+ * sudo apt-get install libz-dev libarchive-dev
+ * gcc main.c -larchive -o appimagetool
  * Can be statically linked so that libarchive is not needed on the target system
- * Compile with gcc main.c -larchive -o appimagetool && strip appimagetool
+ * gcc main.c -static -larchive -Wl,-Bdynamic -lz -o appimagetool
  */
 
 
