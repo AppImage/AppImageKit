@@ -194,6 +194,15 @@ create(const char *filename, int compress, const char **argv)
     }
     archive_write_close(a);
     archive_write_free(a);
+
+    // Write AppImage magic bytes
+    FILE *fp = fopen(filename, "r+");
+    fseek(fp, 8, SEEK_SET );
+    putc(0x41, fp);
+    putc(0x49, fp);
+    putc(0x01, fp);
+    fclose(fp);
+
 }
 
 
