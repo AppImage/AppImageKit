@@ -4,7 +4,7 @@
  * sudo apt-get install libz-dev libarchive-dev
  * gcc main.c -larchive -o appimagetool
  * Can be statically linked so that libarchive is not needed on the target system
- * gcc main.c -static -larchive -Wl,-Bdynamic -lz -o appimagetool
+ * gcc main.c -Wl,-Bstatic -larchive -Wl,-Bdynamic -lz -o appimagetool
  */
 
 
