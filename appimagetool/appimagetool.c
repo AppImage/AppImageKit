@@ -5,6 +5,21 @@
  * gcc main.c -larchive -o appimagetool
  * Can be statically linked so that libarchive is not needed on the target system
  * gcc main.c -Wl,-Bstatic -larchive -Wl,-Bdynamic -lz -o appimagetool
+ *
+ * Issues:
+ * Crashes when archiving large (QtCreator) archives
+ * When extracting, we DO get hardlinks (TBD: check symlinks)
+    - Symlinks have a file type `AE_IFLNK` and require a target to be set with `archive_entry_set_symlink()`
+    - Hardlinks require a target to be set with `archive_entry_set_hardlink()`; if this is set, the regular filetype is ignored. If the entry describing a hardlink has a size, you must be prepared to write data to the linked files. If you don't want to overwrite the file, leave the size unset.
+ * Look at tar/ (bsdtar) source example for this
+ * When writing, permissions do not seem to be written correctly
+ *
+ * TODO:
+ * Before writing, check if .DirIcon and desktop file are there (DONE)
+ * When writing, set file ownership to root (DONE)
+ * When written, inject runtime and chmod a+x (DONE)
+ * Make it possible to dump the contents of one file to stdout
+ *
  */
 
 
@@ -19,15 +34,17 @@
 #include <string.h>
 #include <unistd.h>
 
-
 static void	create(const char *filename, int compress, const char **argv);
 static void	errmsg(const char *);
 static void	extract(const char *filename, int do_extract, int flags);
 static int	copy_data(struct archive *, struct archive *);
 static void	msg(const char *);
-static void	usage(void);
+static void usage(void);
 
 static int verbose = 0;
+
+size_t used;
+size_t buffsize = 36 * 2048;
 
 int
 main(int argc, const char **argv)
@@ -104,7 +121,32 @@ create(const char *filename, int compress, const char **argv)
     ssize_t len;
     int fd;
 
+    // Check whether we can find the AppImage runtime file and exit otherwiser
+    char runtimepath[256] ;
+    snprintf(runtimepath, sizeof(runtimepath), "%s/../  runtime", argv[0]);
+    if( !access(runtimepath, F_OK ) == 0 ) {
+        printf("AppImage runtime file cannot be found, aborting\n");
+        exit(1);
+    }
+
+    // Check whether there is an AppRun file in the source AppDir
+    char apprunpath[256] ;
+    snprintf(apprunpath, sizeof(apprunpath), "%s/AppRun", *argv);
+    if( !access(apprunpath, F_OK ) == 0 ) {
+        printf("AppRun file is missing in the source AppDir, aborting\n");
+        exit(1);
+    }
+
+    // Check whether there is a .DirIcon file in the source AppDir
+    char diriconpath[256] ;
+    snprintf(diriconpath, sizeof(diriconpath), "%s/.DirIcon", *argv);
+    if( !access(diriconpath, F_OK ) == 0 ) {
+        printf(".DirIconfile is missing in the source AppDir, aborting\n");
+        exit(1);
+    }
+
     a = archive_write_new();
+
     switch (compress) {
     default:
         archive_write_add_filter_none(a);
@@ -113,17 +155,20 @@ create(const char *filename, int compress, const char **argv)
     archive_write_set_format_iso9660(a);
     archive_write_set_options(a, "rockridge");
     archive_write_set_options(a, "iso9660:zisofs");
-    archive_write_set_options(a, "compression-level:9");
     archive_write_set_options(a, "joliet");
+
+    // FIXME: The following lead to:
+    // invoked with archive structure in state 'header', should be in state 'new'
+    // archive_write_open_memory(a, buff, buffsize, &used); // Needed? Does what? Remove it?
+    // archive_write_set_option(a, NULL, "pad", NULL);
 
     if (filename != NULL && strcmp(filename, "-") == 0)
         filename = NULL;
     archive_write_open_filename(a, filename);
 
     disk = archive_read_disk_new();
-#ifndef NO_LOOKUP
     archive_read_disk_set_standard_lookup(disk);
-#endif
+
     while (*argv != NULL) {
         struct archive *disk = archive_read_disk_new();
         int r;
@@ -135,11 +180,17 @@ create(const char *filename, int compress, const char **argv)
             exit(1);
         }
 
+        entry = archive_entry_new();
         for (;;) {
             int needcr = 0;
-
-            entry = archive_entry_new();
             r = archive_read_next_header2(disk, entry);
+
+            // Make everything owned by root
+            archive_entry_set_uid(entry, 0);
+            archive_entry_set_uname(entry, "root");
+            archive_entry_set_gid(entry, 0);
+            archive_entry_set_gname(entry, "root");
+
             if (r == ARCHIVE_EOF)
                 break;
             if (r != ARCHIVE_OK) {
@@ -154,6 +205,7 @@ create(const char *filename, int compress, const char **argv)
                 needcr = 1;
             }
             r = archive_write_header(a, entry);
+
             if (r < ARCHIVE_OK) {
                 errmsg(": ");
                 errmsg(archive_error_string(a));
@@ -162,17 +214,6 @@ create(const char *filename, int compress, const char **argv)
             if (r == ARCHIVE_FATAL)
                 exit(1);
             if (r > ARCHIVE_FAILED) {
-#if 0
-                /* Ideally, we would be able to use
-                 * the same code to copy a body from
-                 * an archive_read_disk to an
-                 * archive_write that we use for
-                 * copying data from an archive_read
-                 * to an archive_write_disk.
-                 * Unfortunately, this doesn't quite
-                 * work yet. */
-                copy_data(disk, a);
-#else
                 /* For now, we use a simpler loop to copy data
                  * into the target archive. */
                 fd = open(archive_entry_sourcepath(entry), O_RDONLY);
@@ -182,9 +223,8 @@ create(const char *filename, int compress, const char **argv)
                     len = read(fd, buff, sizeof(buff));
                 }
                 close(fd);
-#endif
             }
-            archive_entry_free(entry);
+            archive_entry_clear(entry);
             if (needcr)
                 msg("\n");
         }
@@ -195,13 +235,49 @@ create(const char *filename, int compress, const char **argv)
     archive_write_close(a);
     archive_write_free(a);
 
-    // Write AppImage magic bytes
-    FILE *fp = fopen(filename, "r+");
-    fseek(fp, 8, SEEK_SET );
-    putc(0x41, fp);
-    putc(0x49, fp);
-    putc(0x01, fp);
-    fclose(fp);
+    // Embed AppImage runtime file into the header of the ISO9660 file
+    // and then inject the AppImage magic bytes
+    fprintf (stderr, "Embedding AppImage runtime...\n");
+
+    FILE *source = fopen("runtime", "rb");
+    if (source == NULL) {
+       puts("Not able to open the file 'runtime' for reading, aborting\n");
+       exit(1);
+    }
+    FILE *dest = fopen(filename, "r+");
+    if (dest == NULL) {
+       puts("Not able to open the destination file for writing, aborting\n");
+       exit(1);
+    }
+
+    char byte;
+
+    while (!feof(source))
+    {
+        fread(&byte, sizeof(char), 1, source);
+        fwrite(&byte, sizeof(char), 1, dest);
+    }
+
+    fclose(source);
+    fclose(dest);
+
+     // Write AppImage magic bytes
+     fprintf (stderr, "Writing AppImage magic bytes...\n");
+     fseek(dest, 8, SEEK_SET );
+     putc(0x41, dest);
+     putc(0x49, dest);
+     putc(0x01, dest);
+
+     fcloseall();
+
+     fprintf (stderr, "Marking the AppImage as executable...\n");
+     if (chmod (filename, 0755) < 0) {
+         printf("Could not set executable bit, aborting\n");
+         exit(1);
+     }
+
+     fprintf (stderr, "Success\n");
+
 
 }
 
@@ -218,10 +294,7 @@ extract(const char *filename, int do_extract, int flags)
     ext = archive_write_disk_new();
     archive_write_disk_set_options(ext, flags);
     archive_read_support_format_iso9660(a);
-
-#ifndef NO_LOOKUP
     archive_write_disk_set_standard_lookup(ext);
-#endif
     if (filename != NULL && strcmp(filename, "-") == 0)
         filename = NULL;
     if ((r = archive_read_open_filename(a, filename, 10240))) {
@@ -308,11 +381,6 @@ errmsg(const char *m)
 static void
 usage(void)
 {
-/* Many program options depend on compile options. */
-    const char *m = "Usage: minitar [-"
-        "c"
-        "tvx"
-        "] [-f file] [file]\n";
-    errmsg(m);
+    fprintf (stderr, "Usage: appimagetool [-ctvx] [-f file] [file]\n");
     exit(1);
 }
