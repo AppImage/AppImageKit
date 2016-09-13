@@ -71,6 +71,7 @@ if [ ! -f "$appImage_icon" ]; then
 	[ -n "$innerIconPath" ] || { echo "Icon file not found" >&2; exit 1; }
 	echo "  Extracting icon to ${appImage_icon}..."
 	mkdir -p "$(dirname "$appImage_icon")"
+        [[ $(echo ${innerIconPath} | grep '.png') == '' ]] && innerIconPath+='.png'
 	iso_extract "$appImage" "$innerIconPath" "$appImage_icon" || { echo "Failed to extract icon to '$appImage_icon'" >&2; exit 1; }
 fi
 

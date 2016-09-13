@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 #coding:utf-8
 
 # Don't forget to patch /etc to ./et, do the symlinking, patch /usr to ././
