@@ -2,22 +2,20 @@
  * Based on
  * https://github.com/libarchive/libarchive/blob/master/examples/minitar/minitar.c
  * sudo apt-get install libz-dev libarchive-dev
- * gcc main.c -larchive -o appimagetool
+ * gcc -DENABLE_BINRELOC binreloc.c appimagetool.c -larchive -o appimagetool -lpthread
  * Can be statically linked so that libarchive is not needed on the target system
- * gcc main.c -Wl,-Bstatic -larchive -Wl,-Bdynamic -lz -o appimagetool
+ * gcc -DENABLE_BINRELOC binreloc.c appimagetool.c -Wl,-Bstatic -larchive -Wl,-Bdynamic -lz -lpthread -o appimagetool
  *
  * Issues:
- * Crashes when archiving large (QtCreator) archives
+ * Corrupts data when zisofs is turned on (see below)
+ * Crashes when archiving large (QtCreator) archives - message once got message along the line of "can't add itself to the archive"
  * When extracting, we DO get hardlinks (TBD: check symlinks)
-    - Symlinks have a file type `AE_IFLNK` and require a target to be set with `archive_entry_set_symlink()`
-    - Hardlinks require a target to be set with `archive_entry_set_hardlink()`; if this is set, the regular filetype is ignored. If the entry describing a hardlink has a size, you must be prepared to write data to the linked files. If you don't want to overwrite the file, leave the size unset.
+    Symlinks have a file type `AE_IFLNK` and require a target to be set with `archive_entry_set_symlink()`
+    Hardlinks require a target to be set with `archive_entry_set_hardlink()`; if this is set, the regular filetype is ignored. If the entry describing a hardlink has a size, you must be prepared to write data to the linked files. If you don't want to overwrite the file, leave the size unset.
  * Look at tar/ (bsdtar) source example for this
  * When writing, permissions do not seem to be written correctly
  *
  * TODO:
- * Before writing, check if .DirIcon and desktop file are there (DONE)
- * When writing, set file ownership to root (DONE)
- * When written, inject runtime and chmod a+x (DONE)
  * Make it possible to dump the contents of one file to stdout
  *
  */
@@ -34,29 +32,54 @@
 #include <string.h>
 #include <unistd.h>
 
-static void	create(const char *filename, int compress, const char **argv);
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+
+#include "binreloc.h"
+#ifndef NULL
+    #define NULL ((void *) 0)
+#endif
+
+#include <stdbool.h>
+
+int PATH_MAX;
+
+static void	create(const char *filename, const char **argv);
 static void	errmsg(const char *);
 static void	extract(const char *filename, int do_extract, int flags);
 static int	copy_data(struct archive *, struct archive *);
 static void	msg(const char *);
-static void usage(void);
+static void     usage(void);
 
 static int verbose = 0;
 
 size_t used;
 size_t buffsize = 36 * 2048;
 
-int
-main(int argc, const char **argv)
+const char *argv0;
+
+int main(int argc, const char **argv)
 {
+    argv0 = argv[0];
     const char *filename = NULL;
-    int compress, flags, mode, opt;
+    int flags, mode, opt;
 
     (void)argc;
     mode = 'x';
     verbose = 0;
-    compress = '\0';
     flags = ARCHIVE_EXTRACT_TIME;
+
+    BrInitError error;
+
+    if (br_init (&error) == 0) {
+        printf ("Warning: binreloc failed to initialize (error code %d)\n", error);
+    }
+
+    printf ("The location of this application is: %s\n", br_find_exe_dir(NULL));
+
+    // TODO: Check whether the icon specified in Icon= exists
+    // TODO: Check whether the executable specified in Exec= exists
 
     /* Among other sins, getopt(3) pulls in printf(3). */
     while (*++argv != NULL && **argv == '-') {
@@ -96,7 +119,7 @@ main(int argc, const char **argv)
 
     switch (mode) {
     case 'c':
-        create(filename, compress, argv);
+        create(filename, argv);
         break;
     case 't':
         extract(filename, 0, flags);
@@ -113,7 +136,7 @@ main(int argc, const char **argv)
 static char buff[16384];
 
 static void
-create(const char *filename, int compress, const char **argv)
+create(const char *filename, const char **argv)
 {
     struct archive *a;
     struct archive *disk;
@@ -121,46 +144,28 @@ create(const char *filename, int compress, const char **argv)
     ssize_t len;
     int fd;
 
-    // Check whether we can find the AppImage runtime file and exit otherwiser
-    char runtimepath[256] ;
-    snprintf(runtimepath, sizeof(runtimepath), "%s/../  runtime", argv[0]);
-    if( !access(runtimepath, F_OK ) == 0 ) {
+    int ret;
+
+    char *runtimefile;
+    runtimefile = br_strcat (br_find_exe_dir(NULL), "/runtime");
+    if(!file_exists(runtimefile)) {
         printf("AppImage runtime file cannot be found, aborting\n");
         exit(1);
-    }
-
-    // Check whether there is an AppRun file in the source AppDir
-    char apprunpath[256] ;
-    snprintf(apprunpath, sizeof(apprunpath), "%s/AppRun", *argv);
-    if( !access(apprunpath, F_OK ) == 0 ) {
-        printf("AppRun file is missing in the source AppDir, aborting\n");
-        exit(1);
-    }
-
-    // Check whether there is a .DirIcon file in the source AppDir
-    char diriconpath[256] ;
-    snprintf(diriconpath, sizeof(diriconpath), "%s/.DirIcon", *argv);
-    if( !access(diriconpath, F_OK ) == 0 ) {
-        printf(".DirIconfile is missing in the source AppDir, aborting\n");
-        exit(1);
+    } else {
+        printf ("Using runtime: %s\n" ,runtimefile);
     }
 
     a = archive_write_new();
 
-    switch (compress) {
-    default:
-        archive_write_add_filter_none(a);
-        break;
-    }
     archive_write_set_format_iso9660(a);
+    // archive_write_set_options(a, "iso9660:zisofs"); // FIXME: Enabling this destroys data; XChat then segfaults
     archive_write_set_options(a, "rockridge");
-    archive_write_set_options(a, "iso9660:zisofs");
-    archive_write_set_options(a, "joliet");
+    // archive_write_set_options(a, "joliet");
 
-    // FIXME: The following lead to:
-    // invoked with archive structure in state 'header', should be in state 'new'
-    // archive_write_open_memory(a, buff, buffsize, &used); // Needed? Does what? Remove it?
-    // archive_write_set_option(a, NULL, "pad", NULL);
+    archive_write_set_option(a, NULL, "pad", NULL); // Works
+    archive_write_set_option(a, NULL, "volume-id", "APPIMAGE"); // Works
+    // archive_write_set_option(a, NULL, "zisofs", true); // FIXME: Immediately segfaults
+    // archive_write_set_option(a, NULL, "compression-level", 9); // FIXME: Immediately segfaults
 
     if (filename != NULL && strcmp(filename, "-") == 0)
         filename = NULL;
@@ -237,9 +242,10 @@ create(const char *filename, int compress, const char **argv)
 
     // Embed AppImage runtime file into the header of the ISO9660 file
     // and then inject the AppImage magic bytes
+
     fprintf (stderr, "Embedding AppImage runtime...\n");
 
-    FILE *source = fopen("runtime", "rb");
+    FILE *source = fopen(runtimefile, "rb");
     if (source == NULL) {
        puts("Not able to open the file 'runtime' for reading, aborting\n");
        exit(1);
@@ -258,17 +264,17 @@ create(const char *filename, int compress, const char **argv)
         fwrite(&byte, sizeof(char), 1, dest);
     }
 
-    fclose(source);
-    fclose(dest);
-
      // Write AppImage magic bytes
      fprintf (stderr, "Writing AppImage magic bytes...\n");
+
      fseek(dest, 8, SEEK_SET );
      putc(0x41, dest);
      putc(0x49, dest);
      putc(0x01, dest);
 
-     fcloseall();
+     fclose(source);
+     fclose(dest);
+
 
      fprintf (stderr, "Marking the AppImage as executable...\n");
      if (chmod (filename, 0755) < 0) {
@@ -277,8 +283,6 @@ create(const char *filename, int compress, const char **argv)
      }
 
      fprintf (stderr, "Success\n");
-
-
 }
 
 
@@ -383,4 +387,10 @@ usage(void)
 {
     fprintf (stderr, "Usage: appimagetool [-ctvx] [-f file] [file]\n");
     exit(1);
+}
+
+int file_exists(char *filename)
+{
+  struct stat   buffer;
+  return (stat (filename, &buffer) == 0);
 }
