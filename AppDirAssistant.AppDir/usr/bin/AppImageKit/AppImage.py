@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python2
 
 
 # probono 11-2010, 04-2013, 07-2016

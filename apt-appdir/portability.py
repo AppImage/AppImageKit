@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python22
 
 import os, sys, fnmatch
 

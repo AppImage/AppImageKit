@@ -10,10 +10,9 @@ BINARYDIR="${HERE}/${ARCH}"
 
 mkdir -p "${PARENT}"/AppImageAssistant.AppDir/usr/bin/ AppImageAssistant.AppDir/usr/lib/
 cp "${BINARYDIR}"/xorriso "${PARENT}"/AppImageAssistant.AppDir/usr/bin/
-cp "${BINARYDIR}"/libglade-2.0.so.0 "${BINARYDIR}"/libvte.so.9 "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 "${PARENT}"/AppImageAssistant.AppDir/usr/lib/
+cp "${BINARYDIR}"/libglade-2.0.so.0 "${BINARYDIR}"/libisofs.so.6 "${BINARYDIR}"/libisoburn.so.1 "${BINARYDIR}"/libburn.so.4 "${PARENT}"/AppImageAssistant.AppDir/usr/lib/
 cp "${BINARYDIR}"/libjte* "${PARENT}"/AppImageAssistant.AppDir/usr/lib/ # Raspbian
 mkdir -p "${PARENT}"/AppImageAssistant.AppDir/usr/share/pyshared/
-cp "${BINARYDIR}"/vte.so "${PARENT}"/AppImageAssistant.AppDir/usr/share/pyshared/
 cp "${BINARYDIR}"/unionfs-fuse "${PARENT}"/AppImageAssistant.AppDir/usr/bin/
 
 mkdir -p "${PARENT}"/AppImageExtract.AppDir/usr/bin/ "${PARENT}"/AppImageExtract.AppDir/usr/lib/
