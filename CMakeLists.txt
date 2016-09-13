@@ -77,28 +77,31 @@ add_custom_command(TARGET runtime POST_BUILD COMMAND ${CMAKE_STRIP} runtime)
 
 ADD_CUSTOM_TARGET(AppImageAssistant ALL DEPENDS runtime)
 ADD_CUSTOM_COMMAND(TARGET AppImageAssistant
-  COMMAND cp runtime AppImageAssistant.AppDir/
-  COMMAND ./binary-dependencies/bundle
-  COMMAND rm ./AppImageAssistant || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageAssistant.AppDir ./AppImageAssistant
+  COMMAND test ${CMAKE_BINARY_DIR} != ${CMAKE_SOURCE_DIR} && cp -rp ${CMAKE_SOURCE_DIR}/AppImageAssistant.AppDir ${CMAKE_BINARY_DIR}/ || :
+  COMMAND cp runtime ${CMAKE_BINARY_DIR}/AppImageAssistant.AppDir/
+  COMMAND ${CMAKE_SOURCE_DIR}/binary-dependencies/bundle
+  COMMAND rm -f ${CMAKE_BINARY_DIR}/AppImageAssistant
+  COMMAND ${CMAKE_BINARY_DIR}/AppImageAssistant.AppDir/package ${CMAKE_BINARY_DIR}/AppImageAssistant.AppDir ${CMAKE_BINARY_DIR}/AppImageAssistant
   VERBATIM
 )
 
 ADD_CUSTOM_TARGET(AppImageExtract ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageExtract
-  COMMAND cp AppRun ./AppImageExtract.AppDir
-  COMMAND ./binary-dependencies/bundle
-  COMMAND rm ./AppImageExtract || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageExtract.AppDir ./AppImageExtract
+  COMMAND [ ${CMAKE_BINARY_DIR} != ${CMAKE_SOURCE_DIR} ] && cp -rp ${CMAKE_SOURCE_DIR}/AppImageExtract.AppDir ${CMAKE_BINARY_DIR}/ || :
+  COMMAND cp ${CMAKE_BINARY_DIR}/AppRun ${CMAKE_BINARY_DIR}/AppImageExtract.AppDir
+  COMMAND ${CMAKE_SOURCE_DIR}/binary-dependencies/bundle
+  COMMAND rm -f ${CMAKE_BINARY_DIR}/AppImageExtract
+  COMMAND ${CMAKE_BINARY_DIR}/AppImageAssistant.AppDir/package ${CMAKE_BINARY_DIR}/AppImageExtract.AppDir ${CMAKE_BINARY_DIR}/AppImageExtract
   VERBATIM
 )
 
 ADD_CUSTOM_TARGET(AppImageMonitor ALL DEPENDS AppRun AppImageAssistant)
 ADD_CUSTOM_COMMAND(TARGET AppImageMonitor
-  COMMAND cp AppRun ./AppImageMonitor.AppDir
-  COMMAND ./binary-dependencies/bundle
-  COMMAND rm ./AppImageMonitor || continue
-  COMMAND ./AppImageAssistant.AppDir/package ./AppImageMonitor.AppDir ./AppImageMonitor
+  COMMAND [ ${CMAKE_BINARY_DIR} != ${CMAKE_SOURCE_DIR} ] && cp -rp ${CMAKE_SOURCE_DIR}/AppImageMonitor.AppDir ${CMAKE_BINARY_DIR}/ || :
+  COMMAND cp ${CMAKE_BINARY_DIR}/AppRun ${CMAKE_BINARY_DIR}/AppImageMonitor.AppDir
+  COMMAND ${CMAKE_SOURCE_DIR}/binary-dependencies/bundle
+  COMMAND rm -f ${CMAKE_BINARY_DIR}/AppImageMonitor
+  COMMAND ${CMAKE_BINARY_DIR}/AppImageAssistant.AppDir/package ${CMAKE_BINARY_DIR}/AppImageMonitor.AppDir ${CMAKE_BINARY_DIR}/AppImageMonitor
   VERBATIM
 )
 
