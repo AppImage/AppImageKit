@@ -1,6 +1,7 @@
 language: c
 sudo: required
 os: linux
+dist: trusty
 
 script:
   - bash -ex build.sh
