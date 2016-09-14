@@ -1,12 +1,20 @@
---- a/Makefile.am	2016-09-14 20:36:50.373183135 +0200
-+++ b/Makefile.am	2016-09-14 18:48:06.449429000 +0200
-@@ -1,4 +1,4 @@
+--- a/Makefile.am	2016-09-14 23:23:30.003610060 +0200
++++ b/Makefile.am	2016-09-14 23:21:52.731096000 +0200
+@@ -1,12 +1,7 @@
 -COMPRESSION_LIBS = $(ZLIB_LIBS) $(XZ_LIBS) $(LZO_LIBS) $(LZ4_LIBS)
 +COMPRESSION_LIBS = $(ZLIB_LIBS) $(XZ_LIBS)
  
  ACLOCAL_AMFLAGS = -I m4 --install
  
-@@ -14,6 +14,7 @@
+-# Suppress AppleDouble
+-if MAKE_EXPORT
+-export COPYFILE_DISABLE = 1
+-endif
+-
+ dist_man_MANS =
+ EXTRA_DIST = gen_swap.sh autogen.sh LICENSE CONFIGURATION PLATFORMS NEWS win
+ 
+@@ -14,6 +9,7 @@
  noinst_PROGRAMS =
  
  noinst_LTLIBRARIES = libsquashfuse.la
@@ -14,7 +22,7 @@
  
  # Main library: libsquashfuse
  libsquashfuse_la_SOURCES = swap.c cache.c table.c dir.c file.c fs.c \
-@@ -32,35 +33,14 @@
+@@ -32,35 +28,14 @@
  libfuseprivate_la_CPPFLAGS = $(FUSE_CPPFLAGS)
  libfuseprivate_la_LIBADD =
  
