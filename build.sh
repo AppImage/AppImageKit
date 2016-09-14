@@ -23,7 +23,7 @@ autoconf
 
 ./configure --with-xz=/usr/lib/
 
-sed -i -e 's|-O2|-Os|g' squashfuse/Makefile # Optimize for size
+sed -i -e 's|-O2|-Os|g' Makefile # Optimize for size
 
 make
 
