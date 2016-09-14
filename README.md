@@ -1,4 +1,4 @@
-# appimageruntime
+# appimageruntime [![Build Status](https://travis-ci.org/probonopd/appimageruntime.svg?branch=master)](https://travis-ci.org/probonopd/appimageruntime)
 
 Experimental runtime for next-generation AppImage format based on squashfs.
 
