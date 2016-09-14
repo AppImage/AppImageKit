@@ -4,6 +4,15 @@ Experimental runtime for next-generation AppImage format based on squashfs.
 
 Not for productive use yet. For now use [AppImageKit](https://github.com/probonopd/AppImageKit).
 
+## Building
+
+On a not too recent Ubuntu:
+```
+git clone --recursive https://github.com/probonopd/appimageruntime.git
+cd appimageruntime/
+bash -ex build.sh
+```
+
 ## Usage
 
 There will be a tool that does this for you, but for now
