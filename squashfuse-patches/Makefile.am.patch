@@ -1,0 +1,56 @@
+--- a/Makefile.am	2016-09-14 20:36:50.373183135 +0200
++++ b/Makefile.am	2016-09-14 18:48:06.449429000 +0200
+@@ -1,4 +1,4 @@
+-COMPRESSION_LIBS = $(ZLIB_LIBS) $(XZ_LIBS) $(LZO_LIBS) $(LZ4_LIBS)
++COMPRESSION_LIBS = $(ZLIB_LIBS) $(XZ_LIBS)
+ 
+ ACLOCAL_AMFLAGS = -I m4 --install
+ 
+@@ -14,6 +14,7 @@
+ noinst_PROGRAMS =
+ 
+ noinst_LTLIBRARIES = libsquashfuse.la
++noinst_LTLIBRARIES += libsquashfuse_ll.la
+ 
+ # Main library: libsquashfuse
+ libsquashfuse_la_SOURCES = swap.c cache.c table.c dir.c file.c fs.c \
+@@ -32,35 +33,14 @@
+ libfuseprivate_la_CPPFLAGS = $(FUSE_CPPFLAGS)
+ libfuseprivate_la_LIBADD =
+ 
+-# High-level squashfuse
+-if SQ_WANT_HIGHLEVEL
+-bin_PROGRAMS += squashfuse
+-squashfuse_SOURCES = hl.c
+-squashfuse_CPPFLAGS = $(FUSE_CPPFLAGS)
+-squashfuse_LDADD = libsquashfuse.la libfuseprivate.la $(COMPRESSION_LIBS) \
+-  $(FUSE_LIBS)
+-
+-noinst_LTLIBRARIES += libfuseprivate.la
+-dist_man_MANS += squashfuse.1
+-endif
+-
+ # Low-level squashfuse_ll, if supported
+-if SQ_WANT_LOWLEVEL
+-bin_PROGRAMS += squashfuse_ll
+-squashfuse_ll_SOURCES = ll.c ll_inode.c nonstd-daemon.c ll.h
+-squashfuse_ll_CPPFLAGS = $(FUSE_CPPFLAGS)
+-squashfuse_ll_LDADD = libsquashfuse.la libfuseprivate.la $(COMPRESSION_LIBS) \
++libsquashfuse_ll_la_SOURCES = ll.c ll_inode.c nonstd-daemon.c ll.h
++libsquashfuse_ll_la_CPPFLAGS = $(FUSE_CPPFLAGS)
++libsquashfuse_ll_la_LIBADD = libsquashfuse.la libfuseprivate.la $(COMPRESSION_LIBS) \
+   $(FUSE_LIBS)
+ 
+-noinst_LTLIBRARIES += libfuseprivate.la
+-endif
+ 
+-if SQ_WANT_DEMO
+-# Sample program squashfuse_ls
+-noinst_PROGRAMS += squashfuse_ls
+-squashfuse_ls_SOURCES = ls.c
+-squashfuse_ls_LDADD = libsquashfuse.la $(COMPRESSION_LIBS)
+-endif
++noinst_LTLIBRARIES += libfuseprivate.la
+ 
+ # Handle generation of swap include files
+ CLEANFILES = swap.h.inc swap.c.inc
