@@ -5,7 +5,7 @@ rm -rf build/ || true
 
 # Install build dependencies
 
-sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libtool-bin
+sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzma-dev
 # libtool-bin might be required in newer distributions but is not available in precise
 
 # Patch squashfuse_ll to be a library rather than an executable
