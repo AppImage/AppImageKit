@@ -45,6 +45,14 @@ cc runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquas
 
 printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
+# Compile appimagetool but do not link
+
+cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetool.c
+
+# Now statically link against libsquashfuse and liblzma
+
+cc appimagetool.o ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool
+
 cd ..
 
 # Reset squashfuse to its original state
@@ -55,7 +63,8 @@ cd -
 
 # Strip runtime and check its size and dependencies
 
-strip build/runtime
+rm build/*.o
+strip build/*
+ldd build/appimagetool
 ldd build/runtime
-ls -l build/runtime
-
+ls -l build/*
