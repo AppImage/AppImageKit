@@ -143,24 +143,21 @@ int sfs_mksquashfs(char *source, char *destination) {
     pid_t parent = getpid();
     pid_t pid = fork();
 
-    if (pid == -1)
-    {
+    if (pid == -1) {
         // error, failed to fork()
-    } 
-    else if (pid > 0)
-    {
+        return(-1);
+    } else if (pid > 0) {
         int status;
         waitpid(pid, &status, 0);
-    }
-    else 
-    {
+    } else {
         // we are the child
-        char *newargv[] = { "/usr/bin/mksquashfs", source, destination, "-root-owned", "-noappend", NULL };
+        char *newargv[] = { "mksquashfs", source, destination, "-root-owned", "-noappend", NULL };
         char *newenviron[] = { NULL };
         execve("/usr/bin/mksquashfs", newargv, newenviron);
         perror("execve");   /* execve() returns only on error */
-        exit(EXIT_FAILURE); // exec never returns
+        return(-1); // exec never returns
     }
+    return(0);
 }
 
 
@@ -214,11 +211,15 @@ int main (int argc, char **argv)
       } else {
           /* No destination has been specified, to let's construct one
            * TODO: Find out the architecture and use a $VERSION that might be around in the env */
-          destination = basename(br_strcat (source, ".AppImage"));
+          destination = basename(br_strcat(source, ".AppImage"));
           fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
       }
       fprintf (stdout, "%s should be packaged as %s\n", arguments.args[0], destination);
-      sfs_mksquashfs(source, destination);
+      char *tempfile;
+      tempfile = br_strcat(destination, ".temp");
+      int result = sfs_mksquashfs(source, tempfile);
+      if(result != 0)
+          die("sfs_mksquashfs error");
       fprintf (stderr, "Marking the AppImage as executable...\n");
       if (chmod (destination, 0755) < 0) {
           printf("Could not set executable bit, aborting\n");
