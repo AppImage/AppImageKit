@@ -1,7 +1,5 @@
 # appimagetool [![Build Status](https://travis-ci.org/probonopd/appimagetool.svg?branch=master)](https://travis-ci.org/probonopd/appimagetool)
 
-Experimental runtime for next-generation AppImage format based on squashfs.
-
 Not for productive use yet. For now use [AppImageKit](https://github.com/probonopd/AppImageKit).
 
 ## Building
@@ -30,6 +28,7 @@ Mandatory or optional arguments to long options are also mandatory or optional
 for any corresponding short options.
 ```
 
+`appimagetool` uses an experimental next-generation AppImage format based on squashfs and embeds an experimental runtime for it.
 If you want to use this squashfs-based runtime manually, you can:
 
 ```
