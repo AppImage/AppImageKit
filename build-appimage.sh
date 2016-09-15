@@ -5,7 +5,7 @@ if [ ! -d ./build ] ; then
 fi
 
 mkdir -p appimagetool.AppDir/usr/bin
-cp -f build/appimagetool appimagetool/usr/bin/
+cp -f build/appimagetool appimagetool.AppDir/usr/bin
 
 wget -c "https://github.com/plougher/squashfs-tools/archive/46afc0d.zip"
 unzip 46afc0d.zip
