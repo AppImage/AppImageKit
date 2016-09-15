@@ -228,7 +228,7 @@ I support open source projects that wish to distribute their software as an AppI
 
 ## Contributing
 
-You are invited to contribute to the AppImage format, the AppImageKit tools, and the PortableLinuxApps website (which is a showcase of AppImage).
+You are invited to contribute to the AppImage format, the AppImageKit tools, and the example AppImages provided by us).
 
 The preferred channel of communication for general questions and remarks is our forum and mailing list at http://discourse.appimage.org/
 
