@@ -16,7 +16,13 @@
 #include <libgen.h>
 
 #include <unistd.h>
-           
+
+#include <stdio.h>
+
+extern int _binary_runtime_start;
+extern int _binary_runtime_size;
+
+
 const char *argp_program_version =
   "appimagetool 0.1";
   
@@ -230,6 +236,23 @@ int main (int argc, char **argv)
          die("Not able to open the destination file for writing, aborting");
       }
 
+      /* runtime is embedded into this executable
+       * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
+      int size = (int)&_binary_runtime_size;
+      char *data = (char *)&_binary_runtime_start;
+      if (arguments.verbose)
+          printf("Size of the embedded runtime: %d", size);
+      /* Where to store updateinformation. Fixed offset preferred for easy manipulation 
+       * after the fact. Proposal: 4 KB at the end of the 128 KB padding. 
+       * Hence, offset 126976, max. 4096 bytes long. Which means that the runtime
+       * must not be larger than 126970 bytes.
+       */
+      if(size > 126970){
+          die("Size of the embedded runtime is too large, aborting");
+      }
+      // printf("%s", data);
+      fwrite(data, size, 1, fpdst);
+    
       if(ftruncate(fileno(fpdst), 128*1024) != 0) {
           die("Not able to write padding to destination file, aborting");
       }

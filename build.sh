@@ -40,10 +40,15 @@ cc -D_FILE_OFFSET_BITS=64 -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/gl
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 
 cc runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
+strip runtime
 
 # Insert AppImage magic bytes
 
 printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
+
+# Convert runtime into a data object that can be embedded into appimagetool
+
+ld -r -b binary -o data.o runtime
 
 # Compile appimagetool but do not link
 
@@ -51,7 +56,7 @@ cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/include/glib-2.0 -I/usr/lib/x8
 
 # Now statically link against libsquashfuse and liblzma
 
-cc appimagetool.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool
+cc data.o appimagetool.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool
 
 cd ..
 
@@ -61,7 +66,7 @@ cd squashfuse
 git reset --hard
 cd -
 
-# Strip runtime and check its size and dependencies
+# Strip and check size and dependencies
 
 rm build/*.o
 strip build/*
