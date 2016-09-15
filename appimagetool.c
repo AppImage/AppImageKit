@@ -8,6 +8,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include "binreloc.h"
+#ifndef NULL
+    #define NULL ((void *) 0)
+#endif
+
+#include <libgen.h>
+
 const char *argp_program_version =
   "appimagetool 0.1";
   
@@ -165,9 +172,24 @@ int main (int argc, char **argv)
 
   /* If the first argument is a directory, then we assume that we should package it */
   if(is_directory(arguments.args[0])){
-      fprintf (stdout, "%s is a directory, assuming it should be packaged as an AppImage\n", arguments.args[0]);
+      char *destination;
+      if (arguments.args[1]) {
+          destination = arguments.args[1];
+      } else {
+          char resolved_path[PATH_MAX];
+          realpath(arguments.args[0], resolved_path);
+          destination = basename(br_strcat (resolved_path, ".AppImage"));
+          fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
+      }
+
       die("To be implemented");
-  }
+      fprintf (stderr, "Marking the AppImage as executable...\n");
+      if (chmod (destination, 0755) < 0) {
+          printf("Could not set executable bit, aborting\n");
+          exit(1);
+      }
+      fprintf (stderr, "Success\n");
+}
 
   /* If the first argument is a regular file, then we assume that we should unpack it */
   if(is_regular_file(arguments.args[0])){

@@ -51,7 +51,7 @@ cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/include/glib-2.0 -I/usr/lib/x8
 
 # Now statically link against libsquashfuse and liblzma
 
-cc appimagetool.o ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool
+cc appimagetool.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool
 
 cd ..
 
