@@ -151,10 +151,8 @@ int sfs_mksquashfs(char *source, char *destination) {
         waitpid(pid, &status, 0);
     } else {
         // we are the child
-        char *newargv[] = { "mksquashfs", source, destination, "-root-owned", "-noappend", NULL };
-        char *newenviron[] = { NULL };
-        execvp("mksquashfs", newargv, newenviron);
-        perror("execvp");   /* execvp() returns only on error */
+        execlp("mksquashfs", "mksquashfs", source, destination, "-root-owned", "-noappend", (char *)0);
+        perror("execlp");   /* execvp() returns only on error */
         return(-1); // exec never returns
     }
     return(0);
@@ -216,14 +214,46 @@ int main (int argc, char **argv)
       }
       fprintf (stdout, "%s should be packaged as %s\n", arguments.args[0], destination);
       char *tempfile;
+      fprintf (stderr, "Generating squashfs...\n");
       tempfile = br_strcat(destination, ".temp");
       int result = sfs_mksquashfs(source, tempfile);
       if(result != 0)
           die("sfs_mksquashfs error");
+      
+      fprintf (stderr, "Generating AppImage...\n");
+      FILE *fpsrc = fopen(tempfile, "rb");
+      if (fpsrc == NULL) {
+         die("Not able to open the tempfile for reading, aborting");
+      }
+      FILE *fpdst = fopen(destination, "w");
+      if (fpdst == NULL) {
+         die("Not able to open the destination file for writing, aborting");
+      }
+
+      if(ftruncate(fileno(fpdst), 128*1024) != 0) {
+          die("Not able to write padding to destination file, aborting");
+      }
+      
+      char byte;
+
+      fseek (fpdst, 0, SEEK_CUR);
+
+      while (!feof(fpsrc))
+      {
+          fread(&byte, sizeof(char), 1, fpsrc);
+          fwrite(&byte, sizeof(char), 1, fpdst);
+      }
+      
+      fclose(fpsrc);
+      fclose(fpdst);
+
       fprintf (stderr, "Marking the AppImage as executable...\n");
       if (chmod (destination, 0755) < 0) {
           printf("Could not set executable bit, aborting\n");
           exit(1);
+      }
+      if(unlink(tempfile) != 0) {
+          die("Could not delete the tempfile, aborting");
       }
       fprintf (stderr, "Success\n");
 }
