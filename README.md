@@ -1,4 +1,4 @@
-# AppImageKit [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage)
+# AppImageKit [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
 
 Copyright (c) 2004-16 Simon Peter <probono@puredarwin.org> and contributors.
 
@@ -230,9 +230,15 @@ I support open source projects that wish to distribute their software as an AppI
 
 You are invited to contribute to the AppImage format, the AppImageKit tools, and the PortableLinuxApps website (which is a showcase of AppImage).
 
-The preferred channel of communication is https://github.com/probonopd/AppImageKit - please file [Issues](https://github.com/probonopd/AppImageKit/issues) (also for wishlist items or discussion topics) or submit [Pull requests](https://github.com/probonopd/AppImageKit/pulls).
+The preferred channel of communication for general questions and remarks is our forum and mailing list at http://discourse.appimage.org/
 
-Instead of an IRC channel we use [Gitter](https://gitter.im/probonopd/AppImageKit) which has the advantage that one does not have to be online all the time and one can communicate despite not being in the same timezone.
+For technical contibutions, https://github.com/probonopd/AppImageKit - please file [Issues](https://github.com/probonopd/AppImageKit/issues) (also for wishlist items or discussion topics) or submit [Pull requests](https://github.com/probonopd/AppImageKit/pulls).
+
+There is also the #AppImage IRC channel on irc.freenode.net and we use [Gitter](https://gitter.im/probonopd/AppImageKit) which has the advantage that one does not have to be online all the time and one can communicate despite not being in the same timezone.
+
+## Donations
+
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
 
 ## Acknowledgments
 
