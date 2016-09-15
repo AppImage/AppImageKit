@@ -10,6 +10,7 @@ git clone --recursive https://github.com/probonopd/appimagetool.git
 cd appimagetool/
 bash -ex build.sh
 ```
+A precompiled version can be found on the [Releases](https://github.com/probonopd/appimagetool/releases) page.
 
 ## Usage
 
