@@ -142,7 +142,7 @@ int sfs_ls(char* image) {
 	return 0;
 }
 
-/* Generate a squashfs filesystem using mksquashfs on the $PATH*/
+/* Generate a squashfs filesystem using mksquashfs on the $PATH  */
 int sfs_mksquashfs(char *source, char *destination) {
     pid_t parent = getpid();
     pid_t pid = fork();
@@ -231,13 +231,17 @@ int main (int argc, char **argv)
           fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
       }
       fprintf (stdout, "%s should be packaged as %s\n", arguments.args[0], destination);
+
+      /* mksquashfs can currently not start writing at an offset,
+       * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
+       * should hopefully change that. */
       char *tempfile;
       fprintf (stderr, "Generating squashfs...\n");
       tempfile = br_strcat(destination, ".temp");
       int result = sfs_mksquashfs(source, tempfile);
       if(result != 0)
           die("sfs_mksquashfs error");
-      
+
       fprintf (stderr, "Generating AppImage...\n");
       FILE *fpsrc = fopen(tempfile, "rb");
       if (fpsrc == NULL) {
@@ -265,7 +269,7 @@ int main (int argc, char **argv)
       }
       // printf("%s", data);
       fwrite(data, size, 1, fpdst);
-    
+
       if(ftruncate(fileno(fpdst), 128*1024) != 0) {
           die("Not able to write padding to destination file, aborting");
       }
