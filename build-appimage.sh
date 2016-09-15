@@ -42,6 +42,7 @@ ln -s usr/bin/appimagetool AppRun
 cd ..
 
 # Eat our own dogfood
+export PATH=squashfs-tools-*/squashfs-tools/:$PATH
 build/appimagetool appimagetool.AppDir appimagetool.AppImage
 
 # Test whether it has worked
