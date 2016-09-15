@@ -142,9 +142,7 @@ int sfs_ls(char* image) {
 	return 0;
 }
 
-/* Generate a squashfs filesystem
- * TODO: Rather than call mksquashfs, have this be a function call into its 
- * code which we could link in here, removing the runtime dependency on mksquashfs */
+/* Generate a squashfs filesystem using mksquashfs on the $PATH*/
 int sfs_mksquashfs(char *source, char *destination) {
     pid_t parent = getpid();
     pid_t pid = fork();
@@ -158,12 +156,26 @@ int sfs_mksquashfs(char *source, char *destination) {
     } else {
         // we are the child
         execlp("mksquashfs", "mksquashfs", source, destination, "-root-owned", "-noappend", (char *)0);
-        perror("execlp");   /* execvp() returns only on error */
+        perror("execlp");   // execvp() returns only on error
         return(-1); // exec never returns
     }
     return(0);
 }
 
+/* Generate a squashfs filesystem
+ * The following would work if we link to mksquashfs.o after we renamed 
+ * main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
+ * this because squashfs-tools is not under a permissive license
+int sfs_mksquashfs(char *source, char *destination) {
+    char *child_argv[5];
+    child_argv[0] = NULL;
+    child_argv[1] = source;
+    child_argv[2] = destination;
+    child_argv[3] = "-root-owned";
+    child_argv[4] = "-noappend";
+    mksquashfs_main(5, child_argv);
+}
+ */
 
 // #####################################################################
 
