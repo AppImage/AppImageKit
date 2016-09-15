@@ -15,6 +15,8 @@
 
 #include <libgen.h>
 
+#include <unistd.h>
+           
 const char *argp_program_version =
   "appimagetool 0.1";
   
@@ -110,8 +112,7 @@ int is_regular_file(const char *path)
 }
 
 /* Function that prints the contents of a squashfs file
- * using libsquashfuse (#include "squashfuse.h")
- */
+ * using libsquashfuse (#include "squashfuse.h") */
 int sfs_ls(char* image) {
 	sqfs_err err = SQFS_OK;
 	sqfs_traverse trv;
@@ -135,10 +136,46 @@ int sfs_ls(char* image) {
 	return 0;
 }
 
+/* Generate a squashfs filesystem
+ * TODO: Rather than call mksquashfs, have this be a function call into its 
+ * code which we could link in here, removing the runtime dependency on mksquashfs */
+int sfs_mksquashfs(char *source, char *destination) {
+    pid_t parent = getpid();
+    pid_t pid = fork();
+
+    if (pid == -1)
+    {
+        // error, failed to fork()
+    } 
+    else if (pid > 0)
+    {
+        int status;
+        waitpid(pid, &status, 0);
+    }
+    else 
+    {
+        // we are the child
+        char *newargv[] = { "/usr/bin/mksquashfs", source, destination, "-root-owned", "-noappend", NULL };
+        char *newenviron[] = { NULL };
+        execve("/usr/bin/mksquashfs", newargv, newenviron);
+        perror("execve");   /* execve() returns only on error */
+        exit(EXIT_FAILURE); // exec never returns
+    }
+}
+
+
 // #####################################################################
 
 int main (int argc, char **argv)
 {
+
+  /* Initialize binreloc so that we always know where we live */
+  BrInitError error;
+  if (br_init (&error) == 0) {
+    printf ("Warning: binreloc failed to initialize (error code %d)\n", error);
+  }
+  printf ("This tool is located at %s\n", br_find_exe_dir(NULL));    
+    
   struct arguments arguments;
 
   /* Set argument defaults */
@@ -149,10 +186,6 @@ int main (int argc, char **argv)
   /* Where the magic happens */
   argp_parse (&argp, argc, argv, 0, 0, &arguments);
 
-  /* If in verbose mode */
-  if (arguments.verbose)
-    fprintf (stdout, "Verbose mode, to be implemented");
-  
   /* If in list mode */
   if (arguments.list){
     sfs_ls(arguments.args[0]);
@@ -166,23 +199,26 @@ int main (int argc, char **argv)
   }
   
   /* Print argument values */
-  fprintf (stdout, "SOURCE = %s\nDESTINATION = %s\n\n",
-	   arguments.args[0],
-	   arguments.args[1]);
+  if (arguments.verbose)
+      fprintf (stdout, "Original SOURCE = %s\nOriginal DESTINATION = %s\n",
+        arguments.args[0],
+        arguments.args[1]);
 
   /* If the first argument is a directory, then we assume that we should package it */
   if(is_directory(arguments.args[0])){
       char *destination;
+      char source[PATH_MAX];
+      realpath(arguments.args[0], source);
       if (arguments.args[1]) {
           destination = arguments.args[1];
       } else {
-          char resolved_path[PATH_MAX];
-          realpath(arguments.args[0], resolved_path);
-          destination = basename(br_strcat (resolved_path, ".AppImage"));
+          /* No destination has been specified, to let's construct one
+           * TODO: Find out the architecture and use a $VERSION that might be around in the env */
+          destination = basename(br_strcat (source, ".AppImage"));
           fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
       }
-
-      die("To be implemented");
+      fprintf (stdout, "%s should be packaged as %s\n", arguments.args[0], destination);
+      sfs_mksquashfs(source, destination);
       fprintf (stderr, "Marking the AppImage as executable...\n");
       if (chmod (destination, 0755) < 0) {
           printf("Could not set executable bit, aborting\n");
