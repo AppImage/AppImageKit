@@ -1,7 +1,9 @@
 language: c
 sudo: required
 os: linux
+dist: trusty
 
 script:
   - bash -ex build.sh
-  - curl --upload-file ./build/runtime https://transfer.sh/runtime
+  - bash -ex build-appimage.sh
+  - curl --upload-file ./appimagetool.AppImage https://transfer.sh/appimagetool
