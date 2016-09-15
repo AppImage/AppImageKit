@@ -153,8 +153,8 @@ int sfs_mksquashfs(char *source, char *destination) {
         // we are the child
         char *newargv[] = { "mksquashfs", source, destination, "-root-owned", "-noappend", NULL };
         char *newenviron[] = { NULL };
-        execve("/usr/bin/mksquashfs", newargv, newenviron);
-        perror("execve");   /* execve() returns only on error */
+        execvp("mksquashfs", newargv, newenviron);
+        perror("execvp");   /* execvp() returns only on error */
         return(-1); // exec never returns
     }
     return(0);
