@@ -241,13 +241,14 @@ int main (int argc, char **argv)
       int size = (int)&_binary_runtime_size;
       char *data = (char *)&_binary_runtime_start;
       if (arguments.verbose)
-          printf("Size of the embedded runtime: %d", size);
+          printf("Size of the embedded runtime: %d bytes\n", size);
       /* Where to store updateinformation. Fixed offset preferred for easy manipulation 
        * after the fact. Proposal: 4 KB at the end of the 128 KB padding. 
-       * Hence, offset 126976, max. 4096 bytes long. Which means that the runtime
-       * must not be larger than 126970 bytes.
+       * Hence, offset 126976, max. 4096 bytes long. 
+       * Possibly we might want to store additional information in the future.
+       * Assuming 4 blocks of 4096 bytes each.
        */
-      if(size > 126970){
+      if(size > 128*1024-4*4096-2){
           die("Size of the embedded runtime is too large, aborting");
       }
       // printf("%s", data);
@@ -257,9 +258,8 @@ int main (int argc, char **argv)
           die("Not able to write padding to destination file, aborting");
       }
       
+      fseek (fpdst, 0, SEEK_END);
       char byte;
-
-      fseek (fpdst, 0, SEEK_CUR);
 
       while (!feof(fpsrc))
       {
