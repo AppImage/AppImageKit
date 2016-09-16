@@ -40,20 +40,6 @@ static void die(const char *msg) {
     exit(1);
 }
 
-int is_directory(const char *path) {
-    struct stat statbuf;
-    if (stat(path, &statbuf) != 0)
-        return 0;
-    return S_ISDIR(statbuf.st_mode);
-}
-
-int is_regular_file(const char *path)
-{
-    struct stat path_stat;
-    stat(path, &path_stat);
-    return S_ISREG(path_stat.st_mode);
-}
-
 /* Function that prints the contents of a squashfs file
  * using libsquashfuse (#include "squashfuse.h") 
  * TODO: Implement offset */
@@ -151,7 +137,7 @@ main (int argc, char *argv[])
     }
     
     /* If the first argument is a directory, then we assume that we should package it */
-    if(is_directory(remaining_args[0])){
+    if (g_file_test (remaining_args[0], G_FILE_TEST_IS_DIR)){
         char *destination;
         char source[PATH_MAX];
         realpath(remaining_args[0], source);
@@ -231,7 +217,7 @@ main (int argc, char *argv[])
     }
     
     /* If the first argument is a regular file, then we assume that we should unpack it */
-    if(is_regular_file(remaining_args[0])){
+    if (g_file_test (remaining_args[0], G_FILE_TEST_IS_REGULAR)){
         fprintf (stdout, "%s is a file, assuming it is an AppImage and should be unpacked\n", remaining_args[0]);
         die("To be implemented");
     }
