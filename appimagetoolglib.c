@@ -101,6 +101,24 @@ int sfs_mksquashfs(char *source, char *destination) {
  }
  */
 
+gchar* find_desktop_file(char *source) {
+    GDir *dir;
+    GError *error;
+    const gchar *filename;
+
+    dir = g_dir_open(remaining_args[0], 0, &error);
+    while ((filename = g_dir_read_name(dir)))
+        if(g_pattern_match_simple("*.desktop", filename))
+            return(filename);
+}
+
+gchar* get_desktop_entry(GKeyFile *kf, char *key) {
+    gchar *icon_value = g_key_file_get_string (kf, "Desktop Entry", key, NULL);
+    if (! icon_value)
+        die("Icon= entry not found in .desktop file");
+    return icon_value;
+}
+        
 // #####################################################################
 
 static GOptionEntry entries[] =
@@ -149,7 +167,47 @@ main (int argc, char *argv[])
             destination = basename(br_strcat(source, ".AppImage"));
             fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
         }
-        fprintf (stdout, "%s should be packaged as %s\n", remaining_args[0], destination);
+        fprintf (stdout, "%s should be packaged as %s\n", source, destination);
+
+        /* Check if *.desktop file is present in source AppDir */
+        gchar *desktop_file = find_desktop_file(source);
+        if(desktop_file == NULL){
+            die(".desktop file not found");
+        }
+        if(verbose)
+            fprintf (stdout, "Desktop file: %s\n", desktop_file);
+        
+        /* Read information from .desktop file */
+        gchar* desktop_file_path = g_build_filename(source, desktop_file, NULL);
+        GKeyFile *kf = g_key_file_new ();
+        if (!g_key_file_load_from_file (kf,  desktop_file_path, 0, NULL))
+            die(".desktop file cannot be parsed");
+ 
+        if(verbose){
+            fprintf (stderr,"Icon: %s\n", get_desktop_entry(kf, "Icon"));
+            fprintf (stderr,"Exec: %s\n", get_desktop_entry(kf, "Exec"));
+            fprintf (stderr,"Comment: %s\n", get_desktop_entry(kf, "Comment"));
+            fprintf (stderr,"Type: %s\n", get_desktop_entry(kf, "Type"));
+            fprintf (stderr,"Categories: %s\n", get_desktop_entry(kf, "Categories"));
+        }
+        
+        /* Check if the Icon file is how it is expected */
+        gchar* icon_name = get_desktop_entry(kf, "Icon");
+        char icon_file_path[255];
+        sprintf (icon_file_path, "%s/%s.png", source, icon_name);
+        if (! g_file_test(icon_file_path, G_FILE_TEST_IS_REGULAR)){
+            fprintf (stderr, "%s not present but defined in desktop file\n", icon_file_path);
+            exit(1);
+        }
+
+        /* Check if .DirIcon is present in source AppDir */
+        gchar *diricon_path = g_build_filename(source, ".DirIcon", NULL);
+        if (! g_file_test(diricon_path, G_FILE_TEST_IS_REGULAR)){
+            fprintf (stderr, "Creating .DirIcon symlink based on information from desktop file\n");
+            int res = symlink(basename(icon_file_path), diricon_path);
+            if(res)
+                die("Could not symlink .DirIcon");
+        }
         
         /* mksquashfs can currently not start writing at an offset,
          * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
