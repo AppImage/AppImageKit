@@ -41,8 +41,8 @@ static void die(const char *msg) {
 }
 
 /* Function that prints the contents of a squashfs file
- * using libsquashfuse (#include "squashfuse.h") 
- * TODO: Implement offset */
+* using libsquashfuse (#include "squashfuse.h") 
+* TODO: Implement offset */
 int sfs_ls(char* image) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
@@ -66,7 +66,8 @@ int sfs_ls(char* image) {
     return 0;
 }
 
-/* Generate a squashfs filesystem using mksquashfs on the $PATH  */
+/* Generate a squashfs filesystem using mksquashfs on the $PATH 
+ * execlp(), execvp(), and execvpe() search on the $PATH */
 int sfs_mksquashfs(char *source, char *destination) {
     pid_t parent = getpid();
     pid_t pid = fork();
@@ -87,29 +88,47 @@ int sfs_mksquashfs(char *source, char *destination) {
 }
 
 /* Generate a squashfs filesystem
- * The following would work if we link to mksquashfs.o after we renamed 
- * main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
- * this because squashfs-tools is not under a permissive license
- i *nt sfs_mksquashfs(char *source, char *destination) {
- char *child_argv[5];
- child_argv[0] = NULL;
- child_argv[1] = source;
- child_argv[2] = destination;
- child_argv[3] = "-root-owned";
- child_argv[4] = "-noappend";
- mksquashfs_main(5, child_argv);
- }
- */
+* The following would work if we link to mksquashfs.o after we renamed 
+* main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
+* this because squashfs-tools is not under a permissive license
+i *nt sfs_mksquashfs(char *source, char *destination) {
+char *child_argv[5];
+child_argv[0] = NULL;
+child_argv[1] = source;
+child_argv[2] = destination;
+child_argv[3] = "-root-owned";
+child_argv[4] = "-noappend";
+mksquashfs_main(5, child_argv);
+}
+*/
 
-gchar* find_desktop_file(char *source) {
+gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
     GDir *dir;
-    GError *error;
-    const gchar *filename;
-
-    dir = g_dir_open(remaining_args[0], 0, &error);
-    while ((filename = g_dir_read_name(dir)))
-        if(g_pattern_match_simple("*.desktop", filename))
-            return(filename);
+    gchar *full_name;
+    gchar *resulting;
+    dir = g_dir_open(real_path, 0, NULL);
+    if (dir != NULL) {
+        const gchar *entry;
+        while ((entry = g_dir_read_name(dir)) != NULL) {
+            full_name = g_build_filename(real_path, entry, NULL);
+            if (! g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
+                if(verbose)
+                    fprintf (stderr,"- %s\n", full_name);
+                if(g_pattern_match_simple(pattern, full_name))
+                    return(full_name);
+            }
+            else {
+                resulting = find_first_matching_file(full_name, pattern);
+                if(resulting)
+                    return(resulting);
+            }
+        }
+        g_dir_close(dir);
+        return NULL;
+    }
+    else { 
+        g_warning("%s: %s", real_path, g_strerror(errno));
+    }
 }
 
 gchar* get_desktop_entry(GKeyFile *kf, char *key) {
@@ -159,18 +178,9 @@ main (int argc, char *argv[])
         char *destination;
         char source[PATH_MAX];
         realpath(remaining_args[0], source);
-        if (remaining_args[1]) {
-            destination = remaining_args[1];
-        } else {
-            /* No destination has been specified, to let's construct one
-             * TODO: Find out the architecture and use a $VERSION that might be around in the env */
-            destination = basename(br_strcat(source, ".AppImage"));
-            fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
-        }
-        fprintf (stdout, "%s should be packaged as %s\n", source, destination);
-
+        
         /* Check if *.desktop file is present in source AppDir */
-        gchar *desktop_file = find_desktop_file(source);
+        gchar *desktop_file = find_first_matching_file(source, "*.desktop");
         if(desktop_file == NULL){
             die(".desktop file not found");
         }
@@ -178,12 +188,12 @@ main (int argc, char *argv[])
             fprintf (stdout, "Desktop file: %s\n", desktop_file);
         
         /* Read information from .desktop file */
-        gchar* desktop_file_path = g_build_filename(source, desktop_file, NULL);
         GKeyFile *kf = g_key_file_new ();
-        if (!g_key_file_load_from_file (kf,  desktop_file_path, 0, NULL))
+        if (!g_key_file_load_from_file (kf,  desktop_file, 0, NULL))
             die(".desktop file cannot be parsed");
- 
+
         if(verbose){
+            fprintf (stderr,"Name: %s\n", get_desktop_entry(kf, "Name"));
             fprintf (stderr,"Icon: %s\n", get_desktop_entry(kf, "Icon"));
             fprintf (stderr,"Exec: %s\n", get_desktop_entry(kf, "Exec"));
             fprintf (stderr,"Comment: %s\n", get_desktop_entry(kf, "Comment"));
@@ -191,9 +201,37 @@ main (int argc, char *argv[])
             fprintf (stderr,"Categories: %s\n", get_desktop_entry(kf, "Categories"));
         }
         
+        /* Determine the architecture */
+        gchar* archfile;
+        /* We use the next best .so that we can find to determine the architecture */
+        archfile = find_first_matching_file(source, "*.so*");
+        if(!archfile)
+        {
+            /* If we found no .so we try to guess the main executable - this might be a script though */
+            char guessed_bin_path[PATH_MAX];
+            sprintf (guessed_bin_path, "%s/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
+            archfile = guessed_bin_path;
+        }
+        if(verbose)
+            fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+        
+        if (remaining_args[1]) {
+            destination = remaining_args[1];
+        } else {
+            /* No destination has been specified, to let's construct one
+            * TODO: Find out the architecture and use a $VERSION that might be around in the env */
+            char dest_path[PATH_MAX];
+            sprintf (dest_path, "%s.AppImage", get_desktop_entry(kf, "Name"));
+            destination = dest_path;
+            // destination = basename(br_strcat(source, ".AppImage"));
+            fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
+        }
+        fprintf (stdout, "%s should be packaged as %s\n", source, destination);
+
+        
         /* Check if the Icon file is how it is expected */
         gchar* icon_name = get_desktop_entry(kf, "Icon");
-        char icon_file_path[255];
+        char icon_file_path[PATH_MAX];
         sprintf (icon_file_path, "%s/%s.png", source, icon_name);
         if (! g_file_test(icon_file_path, G_FILE_TEST_IS_REGULAR)){
             fprintf (stderr, "%s not present but defined in desktop file\n", icon_file_path);
@@ -210,8 +248,8 @@ main (int argc, char *argv[])
         }
         
         /* mksquashfs can currently not start writing at an offset,
-         * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
-         * should hopefully change that. */
+        * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
+        * should hopefully change that. */
         char *tempfile;
         fprintf (stderr, "Generating squashfs...\n");
         tempfile = br_strcat(destination, ".temp");
@@ -230,17 +268,17 @@ main (int argc, char *argv[])
         }
         
         /* runtime is embedded into this executable
-         * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
+        * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
         int size = (int)&_binary_runtime_size;
         char *data = (char *)&_binary_runtime_start;
         if (verbose)
             printf("Size of the embedded runtime: %d bytes\n", size);
         /* Where to store updateinformation. Fixed offset preferred for easy manipulation 
-         * after the fact. Proposal: 4 KB at the end of the 128 KB padding. 
-         * Hence, offset 126976, max. 4096 bytes long. 
-         * Possibly we might want to store additional information in the future.
-         * Assuming 4 blocks of 4096 bytes each.
-         */
+        * after the fact. Proposal: 4 KB at the end of the 128 KB padding. 
+        * Hence, offset 126976, max. 4096 bytes long. 
+        * Possibly we might want to store additional information in the future.
+        * Assuming 4 blocks of 4096 bytes each.
+        */
         if(size > 128*1024-4*4096-2){
             die("Size of the embedded runtime is too large, aborting");
         }
