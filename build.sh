@@ -37,10 +37,40 @@ cd build
 
 cc -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
 
-# Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
+# Prepare 1024 bytes of space for updateinformation
+# and create a section .updateinformation to be embedded into the ELF
+#
+# Store updateinformation in PT_NOTE section since if we would store it
+# in an own section, then strip would strip the information about it away
+# http://www.netbsd.org/docs/kernel/elf-notes.html # How to generate
+# https://stackoverflow.com/questions/17637745/can-a-program-read-its-own-elf-section # How to read
 
-cc runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
+# Can be read with
+# readelf -p updateinformation runtime
+
+# Let's use assembler to create a ELF PT_NOTE section that contains 1024 # characters as padding
+cat > updateinformation.S <<\EOF
+        .section ".updateinformation", "a"
+        .p2align 2
+        .long   2f-1f # name size (not including padding), gets calculated automatically
+        .long   4f-3f # value size (not including padding), gets calculated automatically
+        .long   1 # type
+1:      .asciz "updateinformation" # name
+2:      .p2align 2
+3:      .asciz "################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################" # value, 1024 times #, generated in bash using printf '#%.0s' {0..1023}
+4:      .p2align 2
+
+EOF
+
+gcc -c updateinformation.S
+
+# Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
+# and embed updateinformation section
+
+cc updateinformation.o runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
 strip runtime
+
+readelf -p .updateinformation runtime
 
 # Insert AppImage magic bytes
 
