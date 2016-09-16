@@ -35,7 +35,6 @@ THE SOFTWARE.
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
-#include <glib.h>
 
 
 /* ======================================================== Start helper functions for icon extraction */  
@@ -207,9 +206,13 @@ main (int argc, char *argv[])
   // We are using glib anyway for fuseiso, so we can use it here too to make our life easier
   char *xdg_cache_home;
   char thumbnails_medium_dir[FILE_MAX];
-  xdg_cache_home = (getenv("XDG_CACHE_HOME") == NULL
-    ? g_build_filename(g_get_home_dir(), ".cache", NULL)
-    : g_strdup(getenv("XDG_CACHE_HOME")));
+  
+  if(getenv("XDG_CACHE_HOME") == NULL){
+      xdg_cache_home = (char*) malloc(strlen(getenv("HOME")) + strlen("/.cache") + 1);
+  } else {
+      xdg_cache_home = getenv("XDG_CACHE_HOME");
+  }
+  
   sprintf(thumbnails_medium_dir, "%s/thumbnails/normal/", xdg_cache_home);
   /*  printf("%s\n", thumbnails_medium_dir); */
 
@@ -235,7 +238,6 @@ main (int argc, char *argv[])
 
     /* close read pipe */
     close (keepalive_pipe[0]);
-
 
     char *dir = realpath( "/proc/self/exe", NULL );
 
