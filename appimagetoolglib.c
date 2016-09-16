@@ -112,8 +112,6 @@ gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
         while ((entry = g_dir_read_name(dir)) != NULL) {
             full_name = g_build_filename(real_path, entry, NULL);
             if (! g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
-                if(verbose)
-                    fprintf (stderr,"- %s\n", full_name);
                 if(g_pattern_match_simple(pattern, full_name))
                     return(full_name);
             }
@@ -137,7 +135,25 @@ gchar* get_desktop_entry(GKeyFile *kf, char *key) {
         die("Icon= entry not found in .desktop file");
     return icon_value;
 }
-        
+
+/* in-place modification of the string, and assuming the buffer pointed to by
+ * line is large enough to hold the resulting string*/
+static void replacestr(char *line, const char *search, const char *replace)
+{
+     char *sp;
+
+     if ((sp = strstr(line, search)) == NULL) {
+         return;
+     }
+     int search_len = strlen(search);
+     int replace_len = strlen(replace);
+     int tail_len = strlen(sp+search_len);
+
+     memmove(sp+replace_len,sp+search_len,tail_len+1);
+     memcpy(sp, replace, replace_len);
+}
+
+
 // #####################################################################
 
 static GOptionEntry entries[] =
@@ -214,6 +230,26 @@ main (int argc, char *argv[])
         }
         if(verbose)
             fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+        FILE *fp;
+        char line[PATH_MAX];
+        char command[PATH_MAX];
+        sprintf (command, "/usr/bin/file -L -N -b %s", archfile);
+        fp = popen(command, "r");
+        if (fp == NULL)
+            die("Failed to run file command");
+
+        /* Read the output a line at a time - output it. */
+        fgets(line, sizeof(line)-1, fp);
+        gchar* arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
+        replacestr(arch, "-", "_");
+        fprintf (stderr,"Arch: %s\n", arch+1);
+        pclose(fp);
+        
+        if(!arch)
+        {
+            printf("The architecture could not be determined, assuming 'all'\n");
+            arch="all";
+        }
         
         if (remaining_args[1]) {
             destination = remaining_args[1];
@@ -221,13 +257,12 @@ main (int argc, char *argv[])
             /* No destination has been specified, to let's construct one
             * TODO: Find out the architecture and use a $VERSION that might be around in the env */
             char dest_path[PATH_MAX];
-            sprintf (dest_path, "%s.AppImage", get_desktop_entry(kf, "Name"));
+            sprintf (dest_path, "%s-%s.AppImage", get_desktop_entry(kf, "Name"), arch);
             destination = dest_path;
             // destination = basename(br_strcat(source, ".AppImage"));
             fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
         }
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
-
         
         /* Check if the Icon file is how it is expected */
         gchar* icon_name = get_desktop_entry(kf, "Icon");
