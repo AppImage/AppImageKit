@@ -208,7 +208,7 @@ main (int argc, char *argv[])
   char thumbnails_medium_dir[FILE_MAX];
   
   if(getenv("XDG_CACHE_HOME") == NULL){
-      xdg_cache_home = (char*) malloc(strlen(getenv("HOME")) + strlen("/.cache") + 1);
+      xdg_cache_home = "~/.cache/";
   } else {
       xdg_cache_home = getenv("XDG_CACHE_HOME");
   }
