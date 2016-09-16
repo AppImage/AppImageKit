@@ -80,7 +80,7 @@ int sfs_mksquashfs(char *source, char *destination) {
     } else {
         // we are the child
         execlp("mksquashfs", "mksquashfs", source, destination, "-root-owned", "-noappend", (char *)0);
-        perror("execlp");   // execvp() returns only on error
+        perror("execlp");   // execlp() returns only on error
         return(-1); // exec never returns
     }
     return(0);

@@ -80,7 +80,7 @@ readelf -n runtime
 # updateinformation     0x00000401	Unknown note type: (0x00000000)
 
 # The raw updateinformation data can be read out manually like this:
-HEXOFFSET=objdump -h runtime | grep .note.upd-info | awk '{print $6}'
+HEXOFFSET=$(objdump -h runtime | grep .note.upd-info | awk '{print $6}')
 dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+32)) count=1024 | xxd
 
 # Insert AppImage magic bytes
