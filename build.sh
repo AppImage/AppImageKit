@@ -119,5 +119,4 @@ cd -
 
 strip build/appimage*
 ldd build/appimagetool
-ldd build/runtime
 ls -l build/*
