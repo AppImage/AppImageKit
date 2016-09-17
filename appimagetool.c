@@ -162,7 +162,7 @@ static GOptionEntry entries[] =
 {
     // { "repeats", 'r', 0, G_OPTION_ARG_INT, &repeats, "Average over N repetitions", "N" },
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
-    { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING", NULL },
+    { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -340,10 +340,33 @@ main (int argc, char *argv[])
             die("Could not delete the tempfile, aborting");
         }
         
-        /* If updateinformation was provided, then we embed it */
+        /* If updateinformation was provided, then we check and embed it */
         if(updateinformation){
+            if(!g_str_has_prefix(updateinformation,"zsync|"))
+                if(!g_str_has_prefix(updateinformation,"bintray-zsync|"))
+                    die("The provided updateinformation is not in a recognized format");
+        char *ui_type = strtok(updateinformation, "|");
+        if(verbose)
+            printf("updateinformation type: %s\n", ui_type);
+        /* TODO: Further checking of the updateinformation */
+        
+        /* As a courtesy, we also generate the zsync file */
+        gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+        if(!zsyncmake_path){
+            fprintf (stderr, "zsyncmake is not installed, skipping\n");
+        } else {
+            fprintf (stderr, "zsyncmake is installed and updateinformation is provided,"
+                     "hence generating zsync file\n");
+            char command[PATH_MAX];
+            sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
+            fp = popen(command, "r");
+            if (fp == NULL)
+                die("Failed to run zsyncmake command");            
+        }
+        
         char command[PATH_MAX];
-        sprintf (command, "/usr/bin/objdump -h %s", destination);
+        gchar *objdump_path = g_find_program_in_path ("objdump");
+        sprintf (command, "%s -h %s", objdump_path, destination);
         fp = popen(command, "r");
         if (fp == NULL)
             die("Failed to run objdump command");            
@@ -352,7 +375,8 @@ main (int argc, char *argv[])
         while(fgets(line, sizeof(line), fp) != NULL ){
             if(strstr(line, ".note.upd-info") != NULL)
             {
-                printf("%s", line);
+                if(verbose)
+                    printf("%s", line);
                 char buffer[1024];
                 int rv = sprintf(buffer, line);
                 char *token = strtok(buffer, " \t"); // Split the line in tokens
@@ -361,13 +385,15 @@ main (int argc, char *argv[])
                 token = strtok(NULL, " \t"); // We are not interested in this token
                 token = strtok(NULL, " \t"); // We are not interested in this token
                 token = strtok(NULL, " \t"); // We are not interested in this token
-                printf("%s\n", token); // This contains the offset in hex minus 32 in dec
+                if(verbose)
+                    printf("token parsed from objdump: %s\n", token); // This contains the offset in hex minus 32 in dec
                 /* Convert from a string that contains hex to an int and add 32 */
                 ui_offset = (int)strtol(token, NULL, 16) + 32;
-                printf("%i\n", ui_offset);
+                if(verbose)
+                    printf("ui_offset: %i\n", ui_offset);
             }
         }
-        
+        fclose(fp);
         if(ui_offset == NULL)
             die("Could not determine offset for updateinformation");
         fseek(fpdst, ui_offset, SEEK_SET);

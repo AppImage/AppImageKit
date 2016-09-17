@@ -19,11 +19,12 @@ Usage:
   appimagetool [OPTION...] SOURCE [DESTINATION] - Generate, extract, and inspect AppImages
 
 Help Options:
-  -h, --help        Show help options
+  -h, --help                  Show help options
 
 Application Options:
-  -l, --list        List files in SOURCE AppImage
-  -v, --verbose     Produce verbose output
+  -l, --list                  List files in SOURCE AppImage
+  -u, --updateinformation     Embed update information STRING; if zsyncmake is installed, generate zsync file
+  -v, --verbose               Produce verbose output
 ```
 
 `appimagetool` uses an experimental next-generation AppImage format based on squashfs and embeds an experimental runtime for it.
