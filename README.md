@@ -15,18 +15,15 @@ A precompiled version can be found on the [Releases](https://github.com/probonop
 ## Usage
 
 ```
-Usage: appimagetool [OPTION...] SOURCE {DESTINATION}
-appimagetool -- Generate, extract, and inspect AppImages
+Usage:
+  appimagetool [OPTION...] SOURCE [DESTINATION] - Generate, extract, and inspect AppImages
 
-  -d, --dump=FILE            Dump FILE from SOURCE AppImage to stdout
-  -l, --list                 List files in SOURCE AppImage
-  -v, --verbose              Produce verbose output
-  -?, --help                 Give this help list
-      --usage                Give a short usage message
-  -V, --version              Print program version
+Help Options:
+  -h, --help        Show help options
 
-Mandatory or optional arguments to long options are also mandatory or optional
-for any corresponding short options.
+Application Options:
+  -l, --list        List files in SOURCE AppImage
+  -v, --verbose     Produce verbose output
 ```
 
 `appimagetool` uses an experimental next-generation AppImage format based on squashfs and embeds an experimental runtime for it.
