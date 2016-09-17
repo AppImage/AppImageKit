@@ -153,6 +153,12 @@ static void replacestr(char *line, const char *search, const char *replace)
 
      memmove(sp+replace_len,sp+search_len,tail_len+1);
      memcpy(sp, replace, replace_len);
+     
+     /* Do it recursively again until no more work to do */
+
+     if ((sp = strstr(line, search))) {
+         replacestr(line, search, replace);
+     }
 }
 
 
@@ -260,6 +266,7 @@ main (int argc, char *argv[])
             char dest_path[PATH_MAX];
             sprintf (dest_path, "%s-%s.AppImage", get_desktop_entry(kf, "Name"), arch);
             destination = dest_path;
+            replacestr(destination, " ", "_");
             // destination = basename(br_strcat(source, ".AppImage"));
             fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
         }
@@ -341,66 +348,66 @@ main (int argc, char *argv[])
         }
         
         /* If updateinformation was provided, then we check and embed it */
-        if(updateinformation){
+        if(updateinformation != NULL){
             if(!g_str_has_prefix(updateinformation,"zsync|"))
                 if(!g_str_has_prefix(updateinformation,"bintray-zsync|"))
                     die("The provided updateinformation is not in a recognized format");
-        char *ui_type = strtok(updateinformation, "|");
-        if(verbose)
-            printf("updateinformation type: %s\n", ui_type);
-        /* TODO: Further checking of the updateinformation */
-        
-        /* As a courtesy, we also generate the zsync file */
-        gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
-        if(!zsyncmake_path){
-            fprintf (stderr, "zsyncmake is not installed, skipping\n");
-        } else {
-            fprintf (stderr, "zsyncmake is installed and updateinformation is provided,"
-                     "hence generating zsync file\n");
+            char *ui_type = strtok(updateinformation, "|");
+            if(verbose)
+                printf("updateinformation type: %s\n", ui_type);
+            /* TODO: Further checking of the updateinformation */
+            
+            /* As a courtesy, we also generate the zsync file */
+            gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+            if(!zsyncmake_path){
+                fprintf (stderr, "zsyncmake is not installed, skipping\n");
+            } else {
+                fprintf (stderr, "zsyncmake is installed and updateinformation is provided,"
+                        "hence generating zsync file\n");
+                char command[PATH_MAX];
+                sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
+                fp = popen(command, "r");
+                if (fp == NULL)
+                    die("Failed to run zsyncmake command");            
+            }
+            
             char command[PATH_MAX];
-            sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
+            gchar *objdump_path = g_find_program_in_path ("objdump");
+            sprintf (command, "%s -h %s", objdump_path, destination);
             fp = popen(command, "r");
             if (fp == NULL)
-                die("Failed to run zsyncmake command");            
-        }
-        
-        char command[PATH_MAX];
-        gchar *objdump_path = g_find_program_in_path ("objdump");
-        sprintf (command, "%s -h %s", objdump_path, destination);
-        fp = popen(command, "r");
-        if (fp == NULL)
-            die("Failed to run objdump command");            
-        }
-        long int ui_offset;
-        while(fgets(line, sizeof(line), fp) != NULL ){
-            if(strstr(line, ".note.upd-info") != NULL)
-            {
-                if(verbose)
-                    printf("%s", line);
-                char buffer[1024];
-                int rv = sprintf(buffer, line);
-                char *token = strtok(buffer, " \t"); // Split the line in tokens
-                token = strtok(NULL, " \t"); // We are not interested in this token
-                token = strtok(NULL, " \t"); // We are not interested in this token
-                token = strtok(NULL, " \t"); // We are not interested in this token
-                token = strtok(NULL, " \t"); // We are not interested in this token
-                token = strtok(NULL, " \t"); // We are not interested in this token
-                if(verbose)
-                    printf("token parsed from objdump: %s\n", token); // This contains the offset in hex minus 32 in dec
-                /* Convert from a string that contains hex to an int and add 32 */
-                ui_offset = (int)strtol(token, NULL, 16) + 32;
-                if(verbose)
-                    printf("ui_offset: %i\n", ui_offset);
+                die("Failed to run objdump command");            
+            
+            long int ui_offset;
+            while(fgets(line, sizeof(line), fp) != NULL ){
+                if(strstr(line, ".note.upd-info") != NULL)
+                {
+                    if(verbose)
+                        printf("%s", line);
+                    char buffer[1024];
+                    int rv = sprintf(buffer, line);
+                    char *token = strtok(buffer, " \t"); // Split the line in tokens
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    if(verbose)
+                        printf("token parsed from objdump: %s\n", token); // This contains the offset in hex minus 32 in dec
+                    /* Convert from a string that contains hex to an int and add 32 */
+                    ui_offset = (int)strtol(token, NULL, 16) + 32;
+                    if(verbose)
+                        printf("ui_offset: %i\n", ui_offset);
+                }
             }
+            fclose(fp);
+            if(ui_offset == NULL)
+                die("Could not determine offset for updateinformation");
+            fseek(fpdst, ui_offset, SEEK_SET);
+            // fwrite(0x00, 1, 1024, fpdst); // FIXME: Segfaults; why?
+            fseek(fpdst, ui_offset, SEEK_SET);
+            fwrite(updateinformation, strlen(updateinformation), 1, fpdst);
         }
-        fclose(fp);
-        if(ui_offset == NULL)
-            die("Could not determine offset for updateinformation");
-        fseek(fpdst, ui_offset, SEEK_SET);
-        // fwrite(0x00, 1, 1024, fpdst); // FIXME: Segfaults; why?
-        fseek(fpdst, ui_offset, SEEK_SET);
-        fwrite(updateinformation, strlen(updateinformation), 1, fpdst);
-        
         fclose(fpdst);
         fprintf (stderr, "Success\n");
     }
