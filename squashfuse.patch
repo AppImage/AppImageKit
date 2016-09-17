@@ -1,3 +1,32 @@
+--- a/ll.c	2016-09-14 20:36:50.373183135 +0200
++++ b/ll.c	2016-09-14 14:00:08.893303000 +0200
+@@ -390,7 +390,7 @@
+ 	return NULL;
+ }
+ 
+-int main(int argc, char *argv[]) {
++int fusefs_main(int argc, char *argv[], void (*mounted) (void)) {
+ 	struct fuse_args args;
+ 	sqfs_opts opts;
+ 	
+@@ -451,6 +451,8 @@
+ 				if (sqfs_ll_daemonize(fg) != -1) {
+ 					if (fuse_set_signal_handlers(se) != -1) {
+ 						fuse_session_add_chan(se, ch.ch);
++				if (mounted)
++				  mounted ();
+ 						/* FIXME: multithreading */
+ 						err = fuse_session_loop(se);
+ 						fuse_remove_signal_handlers(se);
+@@ -466,6 +468,8 @@
+ 		}
+ 	}
+ 	fuse_opt_free_args(&args);
++	if (mounted)
++	  rmdir (mountpoint);
+ 	free(ll);
+ 	free(mountpoint);
+ 	
 --- a/Makefile.am	2016-09-14 23:23:30.003610060 +0200
 +++ b/Makefile.am	2016-09-14 23:21:52.731096000 +0200
 @@ -1,12 +1,7 @@

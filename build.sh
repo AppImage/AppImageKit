@@ -11,8 +11,7 @@ sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzm
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
-patch -p1 < ../squashfuse-patches/ll.c.patch
-patch -p1 < ../squashfuse-patches/Makefile.am.patch
+patch -p1 < ../squashfuse.patch
 
 # Build libsquashfuse_ll library
 
