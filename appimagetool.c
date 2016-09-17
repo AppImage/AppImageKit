@@ -112,7 +112,7 @@ gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
         while ((entry = g_dir_read_name(dir)) != NULL) {
             full_name = g_build_filename(real_path, entry, NULL);
             if (! g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
-                if(g_pattern_match_simple(pattern, full_name))
+                if(g_pattern_match_simple(pattern, entry))
                     return(full_name);
             }
             else {
