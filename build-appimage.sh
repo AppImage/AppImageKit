@@ -43,7 +43,7 @@ ln -s usr/bin/appimagetool AppRun
 cd ..
 
 # Eat our own dogfood
-build/appimagetool appimagetool.AppDir appimagetool.AppImage
+build/appimagetool appimagetool.AppDir
 
 # Test whether it has worked
 ls -lh ./appimagetool.AppImage

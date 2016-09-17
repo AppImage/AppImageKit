@@ -117,8 +117,7 @@ cd -
 
 # Strip and check size and dependencies
 
-rm build/*.o
-strip build/* || true
+strip build/appimage*
 ldd build/appimagetool
 ldd build/runtime
 ls -l build/*

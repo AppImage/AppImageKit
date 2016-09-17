@@ -6,4 +6,4 @@ dist: trusty
 script:
   - bash -ex build.sh
   - bash -ex build-appimage.sh
-  - curl --upload-file ./appimagetool.AppImage https://transfer.sh/appimagetool
+  - curl --upload-file ./*.AppImage https://transfer.sh/appimagetool

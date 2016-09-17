@@ -130,10 +130,12 @@ gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
 }
 
 gchar* get_desktop_entry(GKeyFile *kf, char *key) {
-    gchar *icon_value = g_key_file_get_string (kf, "Desktop Entry", key, NULL);
-    if (! icon_value)
-        die("Icon= entry not found in .desktop file");
-    return icon_value;
+    gchar *value = g_key_file_get_string (kf, "Desktop Entry", key, NULL);
+    if (! value){
+        fprintf(stderr, "%s entry not found in desktop file", key);
+        exit(1);
+    }
+    return value;
 }
 
 /* in-place modification of the string, and assuming the buffer pointed to by
@@ -225,7 +227,7 @@ main (int argc, char *argv[])
         {
             /* If we found no .so we try to guess the main executable - this might be a script though */
             char guessed_bin_path[PATH_MAX];
-            sprintf (guessed_bin_path, "%s/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
+            sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
             archfile = guessed_bin_path;
         }
         if(verbose)
