@@ -20,8 +20,7 @@
 #include <libgen.h>
 
 #include <unistd.h>
-
-#include <stdio.h>
+#include <string.h>
 
 extern int _binary_runtime_start;
 extern int _binary_runtime_size;
@@ -32,6 +31,7 @@ static gint max_size = 8;
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
 gchar **remaining_args = NULL;
+gchar *updateinformation = NULL;
 
 // #####################################################################
 
@@ -162,6 +162,7 @@ static GOptionEntry entries[] =
 {
     // { "repeats", 'r', 0, G_OPTION_ARG_INT, &repeats, "Average over N repetitions", "N" },
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
+    { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -239,8 +240,6 @@ main (int argc, char *argv[])
         fp = popen(command, "r");
         if (fp == NULL)
             die("Failed to run file command");
-
-        /* Read the output a line at a time - output it. */
         fgets(line, sizeof(line)-1, fp);
         gchar* arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
         replacestr(arch, "-", "_");
@@ -310,12 +309,6 @@ main (int argc, char *argv[])
         char *data = (char *)&_binary_runtime_start;
         if (verbose)
             printf("Size of the embedded runtime: %d bytes\n", size);
-        /* Where to store updateinformation. Fixed offset preferred for easy manipulation 
-        * after the fact. Proposal: 4 KB at the end of the 128 KB padding. 
-        * Hence, offset 126976, max. 4096 bytes long. 
-        * Possibly we might want to store additional information in the future.
-        * Assuming 4 blocks of 4096 bytes each.
-        */
         if(size > 128*1024-4*4096-2){
             die("Size of the embedded runtime is too large, aborting");
         }
@@ -336,7 +329,7 @@ main (int argc, char *argv[])
         }
         
         fclose(fpsrc);
-        fclose(fpdst);
+
         
         fprintf (stderr, "Marking the AppImage as executable...\n");
         if (chmod (destination, 0755) < 0) {
@@ -346,6 +339,41 @@ main (int argc, char *argv[])
         if(unlink(tempfile) != 0) {
             die("Could not delete the tempfile, aborting");
         }
+        
+        /* If updateinformation was provided, then we embed it */
+        if(updateinformation){
+        char command[PATH_MAX];
+        sprintf (command, "/usr/bin/objdump -h %s", destination);
+        fp = popen(command, "r");
+        if (fp == NULL)
+            die("Failed to run objdump command");            
+        }
+        long int ui_offset;
+        while(fgets(line, sizeof(line), fp) != NULL ){
+            if(strstr(line, ".note.upd-info") != NULL)
+            {
+                printf("%s", line);
+                char buffer[1024];
+                int rv = sprintf(buffer, line);
+                char *token = strtok(buffer, " \t");
+                token = strtok(NULL, " \t"); // We are not interested in this
+                token = strtok(NULL, " \t"); // We are not interested in this
+                token = strtok(NULL, " \t"); // We are not interested in this
+                token = strtok(NULL, " \t"); // We are not interested in this
+                token = strtok(NULL, " \t"); // We are not interested in this
+                printf("%s\n", token); // This contains the offset in hex minus 32 in dec
+                /* Convert from a string that contains hex to an int and add 32 */
+                ui_offset = (int)strtol(token, NULL, 16) + 32;
+                printf("%i\n", ui_offset);
+            }
+        }
+        
+        if(ui_offset == NULL)
+            die("Could not determine offset for updateinformation");
+        fseek(fpdst, ui_offset, SEEK_SET);
+        fwrite(updateinformation, 1024, 1, fpdst);
+        
+        fclose(fpdst);
         fprintf (stderr, "Success\n");
     }
     
