@@ -47,4 +47,3 @@ build/appimagetool appimagetool.AppDir
 
 # Test whether it has worked
 ls -lh ./*.AppImage
-./appimagetool.AppImage --version
