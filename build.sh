@@ -54,7 +54,7 @@ cat > updateinformation.S <<\EOF
         .long   2f-1f # name size (not including padding), gets calculated automatically
         .long   4f-3f # value size (not including padding), gets calculated automatically
         .long   0 # type (readelf -a reports this as "Description"; 0 = "Unknown")
-1:      .asciz "updateinformation" # name (readelf -a reports this as "Owner")
+1:      .asciz "AppImage" # name (readelf -a reports this as "Owner")
 2:      .p2align 2
 3:      .asciz ">\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0<" # value, 1024 characters, generated in bash using printf '\\0%.0s' {0..1023}
 4:      .p2align 2
@@ -63,24 +63,63 @@ EOF
 
 gcc -c updateinformation.S
 
+# Let's use assembler to create a ELF PT_NOTE section that contains 1024 # characters as padding
+cat > fsoffset.S <<\EOF
+        .section ".note.fs-offset", "a"
+        .p2align 2
+        .long   2f-1f # name size (not including padding), gets calculated automatically
+        .long   4f-3f # value size (not including padding), gets calculated automatically
+        .long   0 # type (readelf -a reports this as "Description"; 0 = "Unknown")
+1:      .asciz "AppImage" # name (readelf -a reports this as "Owner")
+2:      .p2align 2
+3:      .long 0x77777777
+4:      .p2align 2
+
+EOF
+
+gcc -c fsoffset.S
+
+
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed updateinformation section
 
-cc updateinformation.o runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
+cc updateinformation.o fsoffset.o runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
 strip runtime
 
 # Test if we can read it back
 
 readelf -p .note.upd-info runtime
+readelf -p .note.fs-offset runtime
 
 readelf -n runtime
 # Displaying notes found at file offset 0x00000274 with length 0x00000424:
 # Owner                 Data size	Description
-# updateinformation     0x00000401	Unknown note type: (0x00000000)
+# AppImage              0x00000401	Unknown note type: (0x00000000)
 
 # The raw updateinformation data can be read out manually like this:
 HEXOFFSET=$(objdump -h runtime | grep .note.upd-info | awk '{print $6}')
 dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+32)) count=1024 | xxd
+
+# The raw filesystem offset data can be read out manually like this:
+HEXOFFSET=$(objdump -h runtime | grep .note.fs-offset | awk '{print $6}')
+dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+24)) count=4 | xxd
+
+# Determine the length of the runtime in hex
+RUNTIME_LENGTH=$(printf '%08x' $(ls -l runtime | cut -d " " -f 5))
+echo "runtime length: $RUNTIME_LENGTH"  # e.g., 00019c90
+printf '%d' $(ls -l runtime | cut -d " " -f 5) # e.g., 105616
+
+# Generate the hex string of the length of the runtime for dd to inject
+# It's a bit crude but works (FIXME)
+FIRST=$(expr substr $RUNTIME_LENGTH 1 2)
+SECOND=$(expr substr $RUNTIME_LENGTH 3 2)
+THIRD=$(expr substr $RUNTIME_LENGTH 5 2)
+FOURTH=$(expr substr $RUNTIME_LENGTH 7 2)
+HEXSTRING="\\x$FIRST\\x$SECOND\\x$THIRD\\x$FOURTH"
+printf $HEXSTRING | xxd
+
+# Insert length of the runtime into runtime as the offset
+printf $HEXSTRING | dd of=runtime bs=1 seek=$(($(echo 0x$HEXOFFSET)+24)) count=4 conv=notrunc
 
 # Insert AppImage magic bytes
 
