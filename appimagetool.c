@@ -355,12 +355,12 @@ main (int argc, char *argv[])
                 printf("%s", line);
                 char buffer[1024];
                 int rv = sprintf(buffer, line);
-                char *token = strtok(buffer, " \t");
-                token = strtok(NULL, " \t"); // We are not interested in this
-                token = strtok(NULL, " \t"); // We are not interested in this
-                token = strtok(NULL, " \t"); // We are not interested in this
-                token = strtok(NULL, " \t"); // We are not interested in this
-                token = strtok(NULL, " \t"); // We are not interested in this
+                char *token = strtok(buffer, " \t"); // Split the line in tokens
+                token = strtok(NULL, " \t"); // We are not interested in this token
+                token = strtok(NULL, " \t"); // We are not interested in this token
+                token = strtok(NULL, " \t"); // We are not interested in this token
+                token = strtok(NULL, " \t"); // We are not interested in this token
+                token = strtok(NULL, " \t"); // We are not interested in this token
                 printf("%s\n", token); // This contains the offset in hex minus 32 in dec
                 /* Convert from a string that contains hex to an int and add 32 */
                 ui_offset = (int)strtol(token, NULL, 16) + 32;
@@ -371,7 +371,9 @@ main (int argc, char *argv[])
         if(ui_offset == NULL)
             die("Could not determine offset for updateinformation");
         fseek(fpdst, ui_offset, SEEK_SET);
-        fwrite(updateinformation, 1024, 1, fpdst);
+        // fwrite(0x00, 1, 1024, fpdst); // FIXME: Segfaults; why?
+        fseek(fpdst, ui_offset, SEEK_SET);
+        fwrite(updateinformation, strlen(updateinformation), 1, fpdst);
         
         fclose(fpdst);
         fprintf (stderr, "Success\n");
