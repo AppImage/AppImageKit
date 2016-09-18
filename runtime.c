@@ -221,9 +221,11 @@ main (int argc, char *argv[])
     // We are using glib anyway for fuseiso, so we can use it here too to make our life easier
     char *xdg_cache_home;
     char thumbnails_medium_dir[FILE_MAX];
+    char generated_cache_home[FILE_MAX];
     
     if(getenv("XDG_CACHE_HOME") == NULL){
-        xdg_cache_home = "~/.cache/";
+        sprintf(generated_cache_home, "%s/.cache/", getenv("HOME"));
+        xdg_cache_home = generated_cache_home;
     } else {
         xdg_cache_home = getenv("XDG_CACHE_HOME");
     }
