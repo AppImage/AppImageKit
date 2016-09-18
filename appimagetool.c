@@ -22,6 +22,8 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "elf.h"
+
 extern int _binary_runtime_start;
 extern int _binary_runtime_size;
 
@@ -377,7 +379,7 @@ main (int argc, char *argv[])
             if (fp == NULL)
                 die("Failed to run objdump command");            
             
-            long int ui_offset;
+            long ui_offset = 0;
             while(fgets(line, sizeof(line), fp) != NULL ){
                 if(strstr(line, ".note.upd-info") != NULL)
                 {
@@ -396,11 +398,11 @@ main (int argc, char *argv[])
                     /* Convert from a string that contains hex to an int and add 32 */
                     ui_offset = (int)strtol(token, NULL, 16) + 32;
                     if(verbose)
-                        printf("ui_offset: %i\n", ui_offset);
+                        printf("ui_offset: %lu\n", ui_offset);
                 }
             }
             fclose(fp);
-            if(ui_offset == NULL)
+            if(ui_offset == 0)
                 die("Could not determine offset for updateinformation");
             fseek(fpdst, ui_offset, SEEK_SET);
             // fwrite(0x00, 1, 1024, fpdst); // FIXME: Segfaults; why?

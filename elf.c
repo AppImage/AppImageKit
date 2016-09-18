@@ -1,16 +1,3 @@
-/*
-Calculate the size of an ELF file on disk based on the information in its header 
-
-Example:
-ls -l   126584
-Calculation using the values also reported by readelf -h:
-Start of section headers	e_shoff		124728
-Size of section headers		e_shentsize	64
-Number of section headers	e_shnum		29
-e_shoff + ( e_shentsize * e_shnum ) =	126584
-*/
-
-
 #include <elf.h>
 #include <byteswap.h>
 #include <stdio.h>
@@ -95,7 +82,7 @@ static unsigned long read_elf64(int fd)
 	return(ehdr.e_shoff + (ehdr.e_shentsize * ehdr.e_shnum));
 }
 
-unsigned long get_elf_size(char *fname)
+unsigned long get_elf_size(const char *fname)
 /* TODO, FIXME: This assumes that the section header table (SHT) is
 the last part of the ELF. This is usually the case but
 it could also be that the last section is the last part
