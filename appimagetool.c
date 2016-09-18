@@ -275,6 +275,9 @@ main (int argc, char *argv[])
             * TODO: Find out the architecture and use a $VERSION that might be around in the env */
             char dest_path[PATH_MAX];
             sprintf (dest_path, "%s-%s.AppImage", get_desktop_entry(kf, "Name"), arch);
+            if(g_environ_getenv (g_get_environ (), "VERSION"))
+                sprintf (dest_path, "%s-%s-%s.AppImage", get_desktop_entry(kf, "Name"),
+                         g_environ_getenv (g_get_environ (), "VERSION"), arch);
             destination = dest_path;
             replacestr(destination, " ", "_");
             // destination = basename(br_strcat(source, ".AppImage"));
