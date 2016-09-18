@@ -185,9 +185,17 @@ main (int argc, char *argv[])
     // g_option_context_add_group (context, gtk_get_option_group (TRUE));
     if (!g_option_context_parse (context, &argc, &argv, &error))
     {
-        g_print ("option parsing failed: %s\n", error->message);
+        g_print("option parsing failed: %s\n", error->message);
         exit(1);
     }
+
+    /* Check for dependencies here. Better fail early if they are not present. */
+    if(! g_find_program_in_path ("mksquashfs"))
+        die("mksquashfs is missing but required, please install it");
+    if(! g_find_program_in_path ("objdump"))
+        die("objdump is missing but required, please install it");
+    if(! g_find_program_in_path ("zsyncmake"))
+        g_print("zsyncmake is missing, will not be able to generate zsync files, please install it if you want to use binary delta updates\n");
     
     if(!&remaining_args[0])
         die("SOURCE is missing");
