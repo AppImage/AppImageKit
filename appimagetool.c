@@ -41,14 +41,15 @@ static void die(const char *msg) {
 }
 
 /* Function that prints the contents of a squashfs file
-* using libsquashfuse (#include "squashfuse.h") 
-* TODO: Implement offset */
+* using libsquashfuse (#include "squashfuse.h") */
 int sfs_ls(char* image) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
     sqfs fs;
     
-    if ((err = sqfs_open_image(&fs, image, 0)))
+    unsigned long fs_offset = get_elf_size(image);
+    
+    if ((err = sqfs_open_image(&fs, image, fs_offset)))
         die("sqfs_open_image error, TODO: Implement offset");
     
     if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
@@ -160,7 +161,6 @@ static void replacestr(char *line, const char *search, const char *replace)
          replacestr(line, search, replace);
      }
 }
-
 
 // #####################################################################
 

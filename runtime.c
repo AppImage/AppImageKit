@@ -517,10 +517,11 @@ main (int argc, char *argv[])
         
         /* If called with --icon, then do not run the main app, just print print a message and exit after extracting the icon */ 
         if (arg && strcmp(arg,"appimage-icon")==0) {
-            printf("Written %s\n", path_to_thumbnail);
+            printf("Written icon to %s\n", path_to_thumbnail);
             exit(0);
         }
-        
+    
+
         /* ======================================================== End icon extraction */   
         
 

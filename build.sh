@@ -104,7 +104,7 @@ cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse $(pkg-config --cflags glib-2.0) -I/us
 
 # Now statically link against libsquashfuse and liblzma - glib version
 
-cc data.o appimagetool.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread  $(pkg-config --libs glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool
+cc data.o appimagetool.o ../elf.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread  $(pkg-config --libs glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool
 
 cd ..
 
