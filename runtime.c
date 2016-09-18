@@ -40,7 +40,11 @@
 #include <byteswap.h>
 #include <stdint.h>
 
+long unsigned int fs_offset; // The offset at which a filesystem image is expected = end of this ELF
+
 /* ================= Start ELF parsing */
+
+/* Do not use fixed offset but determine it dynamically, based on the length of the ELF */
 
 typedef Elf32_Nhdr Elf_Nhdr;
 
@@ -115,7 +119,7 @@ static long unsigned int read_elf64(int fd)
 	return(ehdr.e_shoff + (ehdr.e_shentsize * ehdr.e_shnum));
 }
 
-long unsigned int get_elf_size(char *fname)
+static long unsigned int get_elf_size(char *fname)
 /* TODO, FIXME: This assumes that the section header table (SHT) is
 the last part of the ELF. This is usually the case but
 it could also be that the last section is the last part
@@ -124,7 +128,7 @@ of the ELF. This should be checked for.
 {
 	ssize_t ret;
 	int fd;
-	long unsigned int size = 0;
+	static long unsigned int size = 0;
 
 	fd = open(fname, O_RDONLY);
 	if (fd < 0) {
@@ -157,7 +161,7 @@ of the ELF. This should be checked for.
 	close(fd);
 	return size;
 }
-
+        
 /* ================= End ELF parsing */
 
 /* ======================================================== Start helper functions for icon extraction */  
@@ -319,6 +323,16 @@ char* getArg(int argc, char *argv[],char chr)
 int
 main (int argc, char *argv[])
 {
+    fs_offset = get_elf_size("/proc/self/exe");
+    
+    char * arg;
+    /* Just print the offset and then exit */
+    arg=getArg(argc,argv,'-');
+    if(arg && strcmp(arg,"appimage-offset")==0) {
+        printf("%lu\n", fs_offset);
+        exit(0);
+    }
+
     int dir_fd, res;
     char mount_dir[] = "/tmp/.mount_XXXXXX";  /* create mountpoint */
     char filename[100]; /* enough for mount_dir + "/AppRun" */
@@ -363,13 +377,9 @@ main (int argc, char *argv[])
         close (keepalive_pipe[0]);
         
         char *dir = realpath( "/proc/self/exe", NULL );
-        
-        /* TODO: Do not use fixed offset but determine it dynamically,
-         * e.g., based on the length of the ELF */
-        long unsigned int offset = get_elf_size("/proc/self/exe");
-        
+                
         char options[100];
-        sprintf(options, "ro,offset=%lu", offset);
+        sprintf(options, "ro,offset=%lu", fs_offset);
         
         child_argv[0] = dir;
         child_argv[1] = "-o";
@@ -413,8 +423,6 @@ main (int argc, char *argv[])
         }
         real_argv[i] = NULL;
         
-        char * arg;
-        arg=getArg(argc,argv,'-');
         if(arg && strcmp(arg,"appimage-mount")==0) {
             printf("%s\n", mount_dir);
             for (;;) pause();
