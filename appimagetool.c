@@ -219,7 +219,7 @@ main (int argc, char *argv[])
         /* Check if *.desktop file is present in source AppDir */
         gchar *desktop_file = find_first_matching_file(source, "*.desktop");
         if(desktop_file == NULL){
-            die(".desktop file not found");
+            die("$ID.desktop file not found");
         }
         if(verbose)
             fprintf (stdout, "Desktop file: %s\n", desktop_file);
