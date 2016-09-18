@@ -66,7 +66,7 @@ gcc -c updateinformation.S
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed updateinformation section
 
-cc updateinformation.o runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
+cc ../elf.c updateinformation.o runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
 strip runtime
 
 # Test if we can read it back
