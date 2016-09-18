@@ -197,7 +197,7 @@ main (int argc, char *argv[])
     if(! g_find_program_in_path ("objdump"))
         die("objdump is missing but required, please install it");
     if(! g_find_program_in_path ("zsyncmake"))
-        g_print("zsyncmake is missing, will not be able to generate zsync files, please install it if you want to use binary delta updates\n");
+        g_print("WARNING: zsyncmake is missing, will not be able to generate zsync files, please install it if you want to use binary delta updates\n");
     
     if(!&remaining_args[0])
         die("SOURCE is missing");
@@ -224,7 +224,7 @@ main (int argc, char *argv[])
         
         /* Read information from .desktop file */
         GKeyFile *kf = g_key_file_new ();
-        if (!g_key_file_load_from_file (kf,  desktop_file, 0, NULL))
+        if (!g_key_file_load_from_file (kf, desktop_file, 0, NULL))
             die(".desktop file cannot be parsed");
 
         if(verbose){
@@ -288,7 +288,7 @@ main (int argc, char *argv[])
         /* Check if the Icon file is how it is expected */
         gchar* icon_name = get_desktop_entry(kf, "Icon");
         char icon_file_path[PATH_MAX];
-        sprintf (icon_file_path, "%s/%s.png", source, icon_name);
+        sprintf(icon_file_path, "%s/%s.png", source, icon_name);
         if (! g_file_test(icon_file_path, G_FILE_TEST_IS_REGULAR)){
             fprintf (stderr, "%s not present but defined in desktop file\n", icon_file_path);
             exit(1);
@@ -302,7 +302,20 @@ main (int argc, char *argv[])
             if(res)
                 die("Could not symlink .DirIcon");
         }
-        
+ 
+         /* Check if AppStream upstream metadata is present in source AppDir */
+        char application_id[PATH_MAX];
+        sprintf (application_id,  "%s", basename(desktop_file));
+        replacestr(application_id, ".desktop", ".appdata.xml");
+        gchar *appdata_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
+
+        if (! g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)){
+            fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
+            fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
+            fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/\n");
+            fprintf (stderr, "         for more information.\n");
+        }
+ 
         /* mksquashfs can currently not start writing at an offset,
         * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
         * should hopefully change that. */
