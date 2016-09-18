@@ -316,16 +316,7 @@ main (int argc, char *argv[])
         char *data = (char *)&_binary_runtime_start;
         if (verbose)
             printf("Size of the embedded runtime: %d bytes\n", size);
-        if(size > 128*1024-4*4096-2){
-            die("Size of the embedded runtime is too large, aborting");
-        }
-        // printf("%s", data);
         fwrite(data, size, 1, fpdst);
-        
-        if(ftruncate(fileno(fpdst), 128*1024) != 0) {
-            die("Not able to write padding to destination file, aborting");
-        }
-        
         fseek (fpdst, 0, SEEK_END);
         char byte;
         
