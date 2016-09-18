@@ -1,6 +1,19 @@
 # appimagetool [![Build Status](https://travis-ci.org/probonopd/appimagetool.svg?branch=master)](https://travis-ci.org/probonopd/appimagetool)
 
-Not for productive use yet. For now use [AppImageKit](https://github.com/probonopd/AppImageKit).
+Not for productive use yet. For now use [AppImageKit](https://github.com/probonopd/AppImageKit). `appimagetool` uses an experimental next-generation AppImage format based on squashfs and embeds an experimental runtime for it.
+
+## Getting it
+A precompiled version can be found in the last successful Travis CI build, you can get it with:
+
+```
+# Get the ID of the last successful build on Travis CI
+ID=$(wget -q https://api.travis-ci.org/repos/probonopd/appimagetool/builds -O - | head -n 1 | sed -e 's|}|\n|g' | grep '"result":0' | head -n 1 | sed -e 's|,|\n|g' | grep '"id"' | cut -d ":" -f 2)
+
+# Get the transfer.sh URL from the logfile of the last successful build on Travis CI
+URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log.txt" -O - | grep "https://transfer.sh/.*/appimagetool" | tail -n 1 | sed -e 's|\r||g')
+
+wget "$URL"
+```
 
 ## Building
 
@@ -10,10 +23,16 @@ git clone --recursive https://github.com/probonopd/appimagetool.git
 cd appimagetool/
 bash -ex build.sh
 ```
-A precompiled version can be found on the [Releases](https://github.com/probonopd/appimagetool/releases) page.
 
 ## Usage
 
+```
+chmod a+x appimagetool
+
+./appimagetool some.AppDir
+```
+
+Detailed usage:
 ```
 Usage:
   appimagetool [OPTION...] SOURCE [DESTINATION] - Generate, extract, and inspect AppImages
@@ -27,12 +46,11 @@ Application Options:
   -v, --verbose               Produce verbose output
 ```
 
-`appimagetool` uses an experimental next-generation AppImage format based on squashfs and embeds an experimental runtime for it.
-If you want to use this squashfs-based runtime manually, you can:
+If you want to generate an AppImage manually, you can:
 
 ```
 mksquashfs Your.AppDir Your.squashfs -root-owned -noappend
-dd if=Your.squashfs of=Your.AppImage bs=1024 seek=128
-dd conv=notrunc if=runtime of=Your.AppImage
+cat runtime >> Your.AppImage
+cat Your.squashfs >> Your.AppImage
 chmod a+x Your.AppImage
 ```
