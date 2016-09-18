@@ -198,7 +198,9 @@ main (int argc, char *argv[])
         die("objdump is missing but required, please install it");
     if(! g_find_program_in_path ("zsyncmake"))
         g_print("WARNING: zsyncmake is missing, will not be able to generate zsync files, please install it if you want to use binary delta updates\n");
-    
+    if(! g_find_program_in_path ("zsyncmake"))
+        g_print("WARNING: appstreamcli is missing, will not be able to validate AppStream metadata, please install it if you want to use AppStream metadata\n");
+        
     if(!&remaining_args[0])
         die("SOURCE is missing");
     
@@ -308,12 +310,20 @@ main (int argc, char *argv[])
         sprintf (application_id,  "%s", basename(desktop_file));
         replacestr(application_id, ".desktop", ".appdata.xml");
         gchar *appdata_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
-
         if (! g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)){
             fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
             fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
             fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/\n");
             fprintf (stderr, "         for more information.\n");
+        } else {
+            fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", application_id);           
+            if(g_find_program_in_path ("appstreamcli")) {
+                char command[PATH_MAX];
+                sprintf (command, "%s validate-tree %s", g_find_program_in_path ("appstreamcli"), source);
+                int ret = system(command);
+                if (ret != 0)
+                    die("Failed to validate AppStream information with appstreamcli");
+            }
         }
  
         /* mksquashfs can currently not start writing at an offset,
