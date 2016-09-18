@@ -241,7 +241,7 @@ main (int argc, char *argv[])
         /* Determine the architecture */
         gchar* archfile;
         /* We use the next best .so that we can find to determine the architecture */
-        archfile = find_first_matching_file(source, "*.so*");
+        archfile = find_first_matching_file(source, "*.so.*");
         if(!archfile)
         {
             /* If we found no .so we try to guess the main executable - this might be a script though */
