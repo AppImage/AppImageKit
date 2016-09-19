@@ -300,7 +300,7 @@ main (int argc, char *argv[])
                          g_environ_getenv (g_get_environ (), "VERSION"), arch);
                 
                 destination = dest_path;
-            replacestr(destination, "-", "_");
+            replacestr(destination, " ", "_");
             
             // destination = basename(br_strcat(source, ".AppImage"));
             fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
