@@ -34,6 +34,8 @@ static gboolean list = FALSE;
 static gboolean verbose = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
+gchar *bintray_user = NULL;
+gchar *bintray_repo = NULL;
 
 // #####################################################################
 
@@ -43,7 +45,7 @@ static void die(const char *msg) {
 }
 
 /* Function that prints the contents of a squashfs file
-* using libsquashfuse (#include "squashfuse.h") */
+ * using libsquashfuse (#include "squashfuse.h") */
 int sfs_ls(char* image) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
@@ -91,19 +93,19 @@ int sfs_mksquashfs(char *source, char *destination) {
 }
 
 /* Generate a squashfs filesystem
-* The following would work if we link to mksquashfs.o after we renamed 
-* main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
-* this because squashfs-tools is not under a permissive license
-i *nt sfs_mksquashfs(char *source, char *destination) {
-char *child_argv[5];
-child_argv[0] = NULL;
-child_argv[1] = source;
-child_argv[2] = destination;
-child_argv[3] = "-root-owned";
-child_argv[4] = "-noappend";
-mksquashfs_main(5, child_argv);
-}
-*/
+ * The following would work if we link to mksquashfs.o after we renamed 
+ * main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
+ * this because squashfs-tools is not under a permissive license
+ * i *nt sfs_mksquashfs(char *source, char *destination) {
+ * char *child_argv[5];
+ * child_argv[0] = NULL;
+ * child_argv[1] = source;
+ * child_argv[2] = destination;
+ * child_argv[3] = "-root-owned";
+ * child_argv[4] = "-noappend";
+ * mksquashfs_main(5, child_argv);
+ * }
+ */
 
 gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
     GDir *dir;
@@ -145,23 +147,23 @@ gchar* get_desktop_entry(GKeyFile *kf, char *key) {
  * line is large enough to hold the resulting string*/
 static void replacestr(char *line, const char *search, const char *replace)
 {
-     char *sp;
-
-     if ((sp = strstr(line, search)) == NULL) {
-         return;
-     }
-     int search_len = strlen(search);
-     int replace_len = strlen(replace);
-     int tail_len = strlen(sp+search_len);
-
-     memmove(sp+replace_len,sp+search_len,tail_len+1);
-     memcpy(sp, replace, replace_len);
-     
-     /* Do it recursively again until no more work to do */
-
-     if ((sp = strstr(line, search))) {
-         replacestr(line, search, replace);
-     }
+    char *sp;
+    
+    if ((sp = strstr(line, search)) == NULL) {
+        return;
+    }
+    int search_len = strlen(search);
+    int replace_len = strlen(replace);
+    int tail_len = strlen(sp+search_len);
+    
+    memmove(sp+replace_len,sp+search_len,tail_len+1);
+    memcpy(sp, replace, replace_len);
+    
+    /* Do it recursively again until no more work to do */
+    
+    if ((sp = strstr(line, search))) {
+        replacestr(line, search, replace);
+    }
 }
 
 // #####################################################################
@@ -171,6 +173,8 @@ static GOptionEntry entries[] =
     // { "repeats", 'r', 0, G_OPTION_ARG_INT, &repeats, "Average over N repetitions", "N" },
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
+    { "bintray-user", NULL, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
+    { "bintray-repo", NULL, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -181,6 +185,7 @@ main (int argc, char *argv[])
 {
     GError *error = NULL;
     GOptionContext *context;
+    char command[PATH_MAX];
     
     context = g_option_context_new ("SOURCE [DESTINATION] - Generate, extract, and inspect AppImages");
     g_option_context_add_main_entries (context, entries, NULL);
@@ -190,7 +195,7 @@ main (int argc, char *argv[])
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
     }
-
+    
     /* Check for dependencies here. Better fail early if they are not present. */
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs is missing but required, please install it");
@@ -200,7 +205,7 @@ main (int argc, char *argv[])
         g_print("WARNING: zsyncmake is missing, will not be able to generate zsync files, please install it if you want to use binary delta updates\n");
     if(! g_find_program_in_path ("zsyncmake"))
         g_print("WARNING: appstreamcli is missing, will not be able to validate AppStream metadata, please install it if you want to use AppStream metadata\n");
-        
+    
     if(!&remaining_args[0])
         die("SOURCE is missing");
     
@@ -228,7 +233,7 @@ main (int argc, char *argv[])
         GKeyFile *kf = g_key_file_new ();
         if (!g_key_file_load_from_file (kf, desktop_file, 0, NULL))
             die(".desktop file cannot be parsed");
-
+        
         if(verbose){
             fprintf (stderr,"Name: %s\n", get_desktop_entry(kf, "Name"));
             fprintf (stderr,"Icon: %s\n", get_desktop_entry(kf, "Icon"));
@@ -270,18 +275,31 @@ main (int argc, char *argv[])
             arch="all";
         }
         
+        char app_name_for_filename[PATH_MAX];
+        sprintf(app_name_for_filename, "%s", get_desktop_entry(kf, "Name"));
+        replacestr(app_name_for_filename, " ", "_");
+        
+        if(verbose)
+            fprintf (stderr,"App name for filename: %s\n", app_name_for_filename);
+        
         if (remaining_args[1]) {
             destination = remaining_args[1];
         } else {
             /* No destination has been specified, to let's construct one
-            * TODO: Find out the architecture and use a $VERSION that might be around in the env */
+             * TODO: Find out the architecture and use a $VERSION that might be around in the env */
             char dest_path[PATH_MAX];
-            sprintf (dest_path, "%s-%s.AppImage", get_desktop_entry(kf, "Name"), arch);
+            sprintf (dest_path, "%s-%s.AppImage", app_name_for_filename, arch);
+            
+            if(verbose)
+                fprintf (stderr,"dest_path: %s\n", dest_path);
+            
             if(g_environ_getenv (g_get_environ (), "VERSION"))
-                sprintf (dest_path, "%s-%s-%s.AppImage", get_desktop_entry(kf, "Name"),
+                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename,
                          g_environ_getenv (g_get_environ (), "VERSION"), arch);
-            destination = dest_path;
-            replacestr(destination, " ", "_");
+                
+                destination = dest_path;
+            replacestr(destination, "-", "_");
+            
             // destination = basename(br_strcat(source, ".AppImage"));
             fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
         }
@@ -295,7 +313,7 @@ main (int argc, char *argv[])
             fprintf (stderr, "%s not present but defined in desktop file\n", icon_file_path);
             exit(1);
         }
-
+        
         /* Check if .DirIcon is present in source AppDir */
         gchar *diricon_path = g_build_filename(source, ".DirIcon", NULL);
         if (! g_file_test(diricon_path, G_FILE_TEST_IS_REGULAR)){
@@ -304,8 +322,8 @@ main (int argc, char *argv[])
             if(res)
                 die("Could not symlink .DirIcon");
         }
- 
-         /* Check if AppStream upstream metadata is present in source AppDir */
+        
+        /* Check if AppStream upstream metadata is present in source AppDir */
         char application_id[PATH_MAX];
         sprintf (application_id,  "%s", basename(desktop_file));
         replacestr(application_id, ".desktop", ".appdata.xml");
@@ -313,7 +331,7 @@ main (int argc, char *argv[])
         if (! g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)){
             fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
             fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
-            fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/\n");
+            fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps\n");
             fprintf (stderr, "         for more information.\n");
         } else {
             fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", application_id);           
@@ -325,10 +343,10 @@ main (int argc, char *argv[])
                     die("Failed to validate AppStream information with appstreamcli");
             }
         }
- 
+        
         /* mksquashfs can currently not start writing at an offset,
-        * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
-        * should hopefully change that. */
+         * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
+         * should hopefully change that. */
         char *tempfile;
         fprintf (stderr, "Generating squashfs...\n");
         tempfile = br_strcat(destination, ".temp");
@@ -347,7 +365,7 @@ main (int argc, char *argv[])
         }
         
         /* runtime is embedded into this executable
-        * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
+         * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
         int size = (int)&_binary_runtime_size;
         char *data = (char *)&_binary_runtime_start;
         if (verbose)
@@ -363,7 +381,6 @@ main (int argc, char *argv[])
         }
         
         fclose(fpsrc);
-
         
         fprintf (stderr, "Marking the AppImage as executable...\n");
         if (chmod (destination, 0755) < 0) {
@@ -374,46 +391,57 @@ main (int argc, char *argv[])
             die("Could not delete the tempfile, aborting");
         }
         
+        if(bintray_user != NULL){
+            if(bintray_repo != NULL){
+                char buf[1024];
+                sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
+                updateinformation = buf;
+                printf("%s\n", updateinformation);
+            }
+        }
+        
         /* If updateinformation was provided, then we check and embed it */
         if(updateinformation != NULL){
             if(!g_str_has_prefix(updateinformation,"zsync|"))
                 if(!g_str_has_prefix(updateinformation,"bintray-zsync|"))
                     die("The provided updateinformation is not in a recognized format");
-            char *ui_type = strtok(updateinformation, "|");
+                
+            gchar **ui_type = g_strsplit_set(updateinformation, "|", -1);
+                        
             if(verbose)
-                printf("updateinformation type: %s\n", ui_type);
+                printf("updateinformation type: %s\n", ui_type[0]);
             /* TODO: Further checking of the updateinformation */
-            
+
             /* As a courtesy, we also generate the zsync file */
             gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
             if(!zsyncmake_path){
                 fprintf (stderr, "zsyncmake is not installed, skipping\n");
             } else {
                 fprintf (stderr, "zsyncmake is installed and updateinformation is provided,"
-                        "hence generating zsync file\n");
-                char command[PATH_MAX];
+                "hence generating zsync file\n");
                 sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
                 fp = popen(command, "r");
                 if (fp == NULL)
                     die("Failed to run zsyncmake command");            
             }
-            
-            char command[PATH_MAX];
+             
             gchar *objdump_path = g_find_program_in_path ("objdump");
+
             sprintf (command, "%s -h %s", objdump_path, destination);
+            
             fp = popen(command, "r");
             if (fp == NULL)
                 die("Failed to run objdump command");            
-            
+
             long ui_offset = 0;
+            /* TODO: replace with more robust code parsing the ELF like in elf_elf_size */
             while(fgets(line, sizeof(line), fp) != NULL ){
                 if(strstr(line, ".note.upd-info") != NULL)
                 {
                     if(verbose)
                         printf("%s", line);
-                    char buffer[1024];
-                    int rv = sprintf(buffer, line);
-                    char *token = strtok(buffer, " \t"); // Split the line in tokens
+
+                    char *token = strtok(line, " \t"); // Split the line in tokens
                     token = strtok(NULL, " \t"); // We are not interested in this token
                     token = strtok(NULL, " \t"); // We are not interested in this token
                     token = strtok(NULL, " \t"); // We are not interested in this token
@@ -421,13 +449,15 @@ main (int argc, char *argv[])
                     token = strtok(NULL, " \t"); // We are not interested in this token
                     if(verbose)
                         printf("token parsed from objdump: %s\n", token); // This contains the offset in hex minus 32 in dec
-                    /* Convert from a string that contains hex to an int and add 32 */
-                    ui_offset = (int)strtol(token, NULL, 16) + 32;
+                        /* Convert from a string that contains hex to an int and add 24, that is CHANGING (FIXME) */
+                        ui_offset = (int)strtol(token, NULL, 16) + 24;
                     if(verbose)
                         printf("ui_offset: %lu\n", ui_offset);
                 }
             }
             fclose(fp);
+
+            
             if(ui_offset == 0)
                 die("Could not determine offset for updateinformation");
             fseek(fpdst, ui_offset, SEEK_SET);
