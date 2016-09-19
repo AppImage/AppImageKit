@@ -137,7 +137,7 @@ gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
 gchar* get_desktop_entry(GKeyFile *kf, char *key) {
     gchar *value = g_key_file_get_string (kf, "Desktop Entry", key, NULL);
     if (! value){
-        fprintf(stderr, "%s entry not found in desktop file", key);
+        fprintf(stderr, "%s entry not found in desktop file\n", key);
         exit(1);
     }
     return value;
