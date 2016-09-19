@@ -129,6 +129,28 @@ gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
         g_dir_close(dir);
         return NULL;
     }
+    else {
+        g_warning("%s: %s", real_path, g_strerror(errno));
+    }
+}
+
+gchar* find_first_matching_file_nonrecursive(const gchar *real_path, const gchar *pattern) {
+    GDir *dir;
+    gchar *full_name;
+    gchar *resulting;
+    dir = g_dir_open(real_path, 0, NULL);
+    if (dir != NULL) {
+        const gchar *entry;
+        while ((entry = g_dir_read_name(dir)) != NULL) {
+            full_name = g_build_filename(real_path, entry, NULL);
+            if (g_file_test(full_name, G_FILE_TEST_IS_REGULAR)) {
+                if(g_pattern_match_simple(pattern, entry))
+                    return(full_name);
+            }
+        }
+        g_dir_close(dir);
+        return NULL;
+    }
     else { 
         g_warning("%s: %s", real_path, g_strerror(errno));
     }
@@ -224,7 +246,7 @@ main (int argc, char *argv[])
         realpath(remaining_args[0], source);
         
         /* Check if *.desktop file is present in source AppDir */
-        gchar *desktop_file = find_first_matching_file(source, "*.desktop");
+        gchar *desktop_file = find_first_matching_file_nonrecursive(source, "*.desktop");
         if(desktop_file == NULL){
             die("$ID.desktop file not found");
         }
