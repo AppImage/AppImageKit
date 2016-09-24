@@ -54,7 +54,8 @@ readelf -p .upd_info runtime || true # string
 
 # The raw updateinformation data can be read out manually like this:
 HEXOFFSET=$(objdump -h runtime | grep .upd_info | awk '{print $6}')
-dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=1024 | xxd
+HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
+dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
 
 # Insert AppImage magic bytes
 
