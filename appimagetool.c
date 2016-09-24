@@ -434,7 +434,7 @@ main (int argc, char *argv[])
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
                 char buf[1024];
-                sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
+                sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
                 updateinformation = buf;
                 printf("%s\n", updateinformation);
             }
