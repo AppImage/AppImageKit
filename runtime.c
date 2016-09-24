@@ -25,6 +25,8 @@
  * 
  **************************************************************************/
 
+#ident "AppImage by Simon Peter, http://appimage.org/"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
