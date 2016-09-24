@@ -37,50 +37,24 @@ cd build
 cc -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
-# and create a section .updateinformation to be embedded into the ELF
-#
-# Store updateinformation in PT_NOTE section since if we would store it
-# in an own section, then strip would strip the information about it away
-# http://www.netbsd.org/docs/kernel/elf-notes.html # How to generate
-# https://stackoverflow.com/questions/17637745/can-a-program-read-its-own-elf-section # How to read
+printf '\0%.0s' {0..1023} > updateinformation
 
-# Can be read with
-# readelf -p updateinformation runtime
-
-# Let's use assembler to create a ELF PT_NOTE section that contains 1024 # characters as padding
-cat > updateinformation.S <<\EOF
-        .section ".note.upd-info", "a"
-        .p2align 2
-        .long   2f-1f # name size (not including padding), gets calculated automatically
-        .long   4f-3f # value size (not including padding), gets calculated automatically
-        .long   0 # type (readelf -a reports this as "Description"; 0 = "Unknown")
-1:      .asciz "AppImage" # name (readelf -a reports this as "Owner")
-2:      .p2align 2
-3:      .asciz ">\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0<" # value, 1024 characters, generated in bash using printf '\\0%.0s' {0..1023}
-4:      .p2align 2
-
-EOF
-
-gcc -c updateinformation.S
+objcopy --add-section .upd_info=updateinformation \
+          --set-section-flags .upd_info=noload,readonly runtime.o runtime2.o
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed updateinformation section
 
-cc ../elf.c updateinformation.o runtime.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
+cc ../elf.c runtime2.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
 strip runtime
 
 # Test if we can read it back
-
-readelf -p .note.upd-info runtime
-
-readelf -n runtime
-# Displaying notes found at file offset 0x00000274 with length 0x00000424:
-# Owner                 Data size	Description
-# AppImage              0x00000401	Unknown note type: (0x00000000)
+readelf -x .upd_info runtime # hexdump
+readelf -p .upd_info runtime || true # string
 
 # The raw updateinformation data can be read out manually like this:
-HEXOFFSET=$(objdump -h runtime | grep .note.upd-info | awk '{print $6}')
-dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+24)) count=1024 | xxd
+HEXOFFSET=$(objdump -h runtime | grep .upd_info | awk '{print $6}')
+dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=1024 | xxd
 
 # Insert AppImage magic bytes
 

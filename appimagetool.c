@@ -476,7 +476,7 @@ main (int argc, char *argv[])
             long ui_offset = 0;
             /* TODO: replace with more robust code parsing the ELF like in elf_elf_size */
             while(fgets(line, sizeof(line), fp) != NULL ){
-                if(strstr(line, ".note.upd-info") != NULL)
+                if(strstr(line, ".upd_info") != NULL)
                 {
                     if(verbose)
                         printf("%s", line);
@@ -489,8 +489,7 @@ main (int argc, char *argv[])
                     token = strtok(NULL, " \t"); // We are not interested in this token
                     if(verbose)
                         printf("token parsed from objdump: %s\n", token); // This contains the offset in hex minus 32 in dec
-                        /* Convert from a string that contains hex to an int and add 24, that is CHANGING (FIXME) */
-                        ui_offset = (int)strtol(token, NULL, 16) + 24;
+                        ui_offset = (int)strtol(token, NULL, 16) + 0;
                     if(verbose)
                         printf("ui_offset: %lu\n", ui_offset);
                 }
