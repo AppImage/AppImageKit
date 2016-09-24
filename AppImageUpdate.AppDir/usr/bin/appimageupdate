@@ -102,7 +102,7 @@ fi
 
 if [ "$AITYPE" == "02" ] ; then
   HEXOFFSET=$(objdump -h "${ISO}" | grep .upd_info | awk '{print $6}')
-  HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
+  HEXLENGTH=$(objdump -h "${ISO}" | grep .upd_info | awk '{print $3}')
   APPLICATION_USED=$(dd bs=1 if="${ISO}" skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)))
 elif [ "$AITYPE" == "01" ] ; then
   HEXOFFSET=8373 # 33651 in decimal
