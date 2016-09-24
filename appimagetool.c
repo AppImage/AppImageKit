@@ -32,6 +32,7 @@ static gint repeats = 2;
 static gint max_size = 8;
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
+static gboolean version = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
 gchar *bintray_user = NULL;
@@ -197,6 +198,7 @@ static GOptionEntry entries[] =
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
     { "bintray-user", NULL, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", NULL, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
+    { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -217,7 +219,12 @@ main (int argc, char *argv[])
         g_print("option parsing failed: %s\n", error->message);
         exit(1);
     }
-    
+
+    if(version){
+        fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
+        exit(0);
+    }
+        
     /* Check for dependencies here. Better fail early if they are not present. */
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs is missing but required, please install it");

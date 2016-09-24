@@ -213,6 +213,11 @@ main (int argc, char *argv[])
         exit(0);
     }
 
+    if(arg && strcmp(arg,"appimage-version")==0) {
+        fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
+        exit(0);
+    }
+
     int dir_fd, res;
     char mount_dir[] = "/tmp/.mount_XXXXXX";  /* create mountpoint */
     char filename[100]; /* enough for mount_dir + "/AppRun" */
