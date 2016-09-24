@@ -37,15 +37,18 @@ cd build
 cc -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
-printf '\0%.0s' {0..1023} > updateinformation
+printf '\0%.0s' {0..1023} > 1024_blank_bytes
 
-objcopy --add-section .upd_info=updateinformation \
+objcopy --add-section .upd_info=1024_blank_bytes \
           --set-section-flags .upd_info=noload,readonly runtime.o runtime2.o
 
-# Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
-# and embed updateinformation section
+objcopy --add-section .gpg_sig=1024_blank_bytes \
+          --set-section-flags .gpg_sig=noload,readonly runtime2.o runtime3.o
 
-cc ../elf.c runtime2.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
+# Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
+# and embed .upd_info and .gpg_sig sections
+
+cc ../elf.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
 strip runtime
 
 # Test if we can read it back
