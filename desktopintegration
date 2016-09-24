@@ -221,7 +221,7 @@ fi
 
 # We ask the user only if we have found no reason to skip until here
 if [ -z "$SKIP" ] ; then
-  yesno "Install" "Should a desktop file for $APPIMAGE be installed?"
+  yesno "Install" "Would you like to integrate $APPIMAGE with your system?\n\nThis will add it to your applications menu and install icons.\nIf you don't do this you can still launch the application by double-clicking on the AppImage."
 fi
 
 APP=$(echo "$DESKTOPFILE_NAME" | sed -e 's/.desktop//g')
