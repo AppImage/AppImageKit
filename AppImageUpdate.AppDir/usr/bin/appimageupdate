@@ -88,16 +88,28 @@ else
   echo "${1} does not exist"
 fi
 
-# Check if this is an ISO
-# Read ISO 9660 Volume Descriptor #1 header
-HEADER=$(dd if="${ISO}" bs=1 skip=32769 count=5 2>/dev/null)
-if [ "${HEADER}" != "CD001" ] ; then
+# Check the type of this file
+MAGIC=$(dd if="${ISO}" bs=1 skip=8 count=3 2>/dev/null)
+if [ "$MAGIC" == $(echo -e "\x41\x49\x02") ] ; then
+  AITYPE=02
+elif [ "$MAGIC" == $(echo -e "\x41\x49\x01") ] ; then
+  AITYPE=01
+else
   echo "Cannot recognize this type of file"
-  exit 1
+  # exit 1
 fi
 
-# Read ISO 9660 Volume Descriptor #1 field "Application Used" (contents not defined by ISO 9660)
-APPLICATION_USED=$(dd if="${ISO}" bs=1 skip=33651 count=512 2>/dev/null)
+
+if [ "$AITYPE" == "02" ] ; then
+  HEXOFFSET=$(objdump -h "${ISO}" | grep .upd_info | awk '{print $6}')
+  HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
+  APPLICATION_USED=$(dd bs=1 if="${ISO}" skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)))
+elif [ "$AITYPE" == "01" ] ; then
+  HEXOFFSET=8373 # 33651 in decimal
+  # Read ISO 9660 Volume Descriptor #1 field "Application Used" (contents not defined by ISO 9660)
+  APPLICATION_USED=$(dd if="${ISO}" bs=1 skip=$(($(echo 0x$HEXOFFSET)+0)) count=512 2>/dev/null)
+fi
+
 TYPE=$(echo "${APPLICATION_USED}" | cut -d "|" -f 1)
 
 if [ "${2}" == "read" ] ; then
@@ -111,7 +123,7 @@ fi
 
 # Clear ISO 9660 Volume Descriptor #1 field "Application Used"
 if [ "${2}" == "clear" ] ; then
-  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  dd if=/dev/zero of="${ISO}" bs=1 seek=$(($(echo 0x$HEXOFFSET)+0)) count=512 conv=notrunc 2>/dev/null
   echo "Removed ${APPLICATION_USED}"
   exit 0
 fi
@@ -121,8 +133,8 @@ fi
 # bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
 # zsync|http://server.foo/Subsurface-latest-x86_64.AppImage.zsync
 if [ "${2}" == "set" ] ; then
-  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
-  echo "${3}" | dd of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  dd if=/dev/zero of="${ISO}" bs=1 seek=$(($(echo 0x$HEXOFFSET)+0)) count=512 conv=notrunc 2>/dev/null
+  echo "${3}" | dd of="${ISO}" bs=1 seek=$(($(echo 0x$HEXOFFSET)+0)) count=512 conv=notrunc 2>/dev/null
   echo "Changed ${APPLICATION_USED} to ${3}"
   exit 0
 fi
