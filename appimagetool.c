@@ -521,6 +521,8 @@ main (int argc, char *argv[])
                 if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
                     unlink(digestfile);
                 sprintf (command, "%s %s", sha256sum_path, destination);
+                if(verbose)
+                    fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if (fp == NULL)
                     die("sha256sum command did not succeed");
@@ -539,6 +541,8 @@ main (int argc, char *argv[])
                 if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
                 sprintf (command, "%s --detach-sign --armor %s", gpg2_path, digestfile);
+                if(verbose)
+                    fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if(WEXITSTATUS(pclose(fp)) != 0)
                     die("gpg2 command did not succeed");
@@ -571,6 +575,10 @@ main (int argc, char *argv[])
                     fclose(fpsrc2);
                     fclose(fpdst3);
                 }
+                if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(ascfile);
+                if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(digestfile);
             }
         }     
         fprintf (stderr, "Success\n");

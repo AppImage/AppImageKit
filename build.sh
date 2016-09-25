@@ -38,6 +38,12 @@ cc -o digest ../getsection.c ../digest.c -lssl -lcrypto
 # cc -o digest -Wl,-Bdynamic ../digest.c -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl # 1.4 MB
 strip digest
 
+# Compile and link validate tool
+
+cc -o validate ../getsection.c ../validate.c -lssl -lcrypto $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+# cc -o validate -Wl,-Bdynamic validate -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include # 1.4 MB
+strip validate
+
 # Compile runtime but do not link
 
 cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
