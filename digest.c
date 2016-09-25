@@ -12,7 +12,7 @@
 
 typedef unsigned char byte;      
 
-char segment_name[] = ".gpg_sig";
+char segment_name[] = ".sha256_sig";
 
 int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_length)
 {

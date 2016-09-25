@@ -48,11 +48,11 @@ printf '\0%.0s' {0..1023} > 1024_blank_bytes
 objcopy --add-section .upd_info=1024_blank_bytes \
           --set-section-flags .upd_info=noload,readonly runtime.o runtime2.o
 
-objcopy --add-section .gpg_sig=1024_blank_bytes \
-          --set-section-flags .gpg_sig=noload,readonly runtime2.o runtime3.o
+objcopy --add-section .sha256_sig=1024_blank_bytes \
+          --set-section-flags .sha256_sig=noload,readonly runtime2.o runtime3.o
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
-# and embed .upd_info and .gpg_sig sections
+# and embed .upd_info and .sha256_sig sections
 
 cc ../elf.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o runtime
 strip runtime
