@@ -223,9 +223,9 @@ main (int argc, char *argv[])
         unsigned long offset = 0;
         unsigned long length = 0;
         get_elf_section_offset_and_lenghth("/proc/self/exe", ".upd_info", &offset, &length);
-        printf("offset: %lu\n", offset);
-        printf("length: %lu\n", length);
-        print_hex("/proc/self/exe", offset, length);
+        // printf("offset: %lu\n", offset);
+        // printf("length: %lu\n", length);
+        // print_hex("/proc/self/exe", offset, length);
         print_binary("/proc/self/exe", offset, length);
         exit(0);
     }
@@ -234,9 +234,9 @@ main (int argc, char *argv[])
         unsigned long offset = 0;
         unsigned long length = 0;
         get_elf_section_offset_and_lenghth("/proc/self/exe", ".sha256_sig", &offset, &length);
-        printf("offset: %lu\n", offset);
-        printf("length: %lu\n", length);
-        print_hex("/proc/self/exe", offset, length);
+        // printf("offset: %lu\n", offset);
+        // printf("length: %lu\n", length);
+        // print_hex("/proc/self/exe", offset, length);
         print_binary("/proc/self/exe", offset, length);
         exit(0);
     }

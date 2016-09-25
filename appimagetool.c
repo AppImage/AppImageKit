@@ -34,6 +34,7 @@ static gint max_size = 8;
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
 static gboolean version = FALSE;
+static gboolean sign = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
 gchar *bintray_user = NULL;
@@ -47,7 +48,7 @@ static void die(const char *msg) {
 }
 
 /* Function that prints the contents of a squashfs file
- * using libsquashfuse (#include "squashfuse.h") */
+* using libsquashfuse (#include "squashfuse.h") */
 int sfs_ls(char* image) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
@@ -74,7 +75,7 @@ int sfs_ls(char* image) {
 }
 
 /* Generate a squashfs filesystem using mksquashfs on the $PATH 
- * execlp(), execvp(), and execvpe() search on the $PATH */
+* execlp(), execvp(), and execvpe() search on the $PATH */
 int sfs_mksquashfs(char *source, char *destination) {
     pid_t parent = getpid();
     pid_t pid = fork();
@@ -95,19 +96,19 @@ int sfs_mksquashfs(char *source, char *destination) {
 }
 
 /* Generate a squashfs filesystem
- * The following would work if we link to mksquashfs.o after we renamed 
- * main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
- * this because squashfs-tools is not under a permissive license
- * i *nt sfs_mksquashfs(char *source, char *destination) {
- * char *child_argv[5];
- * child_argv[0] = NULL;
- * child_argv[1] = source;
- * child_argv[2] = destination;
- * child_argv[3] = "-root-owned";
- * child_argv[4] = "-noappend";
- * mksquashfs_main(5, child_argv);
- * }
- */
+* The following would work if we link to mksquashfs.o after we renamed 
+* main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
+* this because squashfs-tools is not under a permissive license
+* i *nt sfs_mksquashfs(char *source, char *destination) {
+* char *child_argv[5];
+* child_argv[0] = NULL;
+* child_argv[1] = source;
+* child_argv[2] = destination;
+* child_argv[3] = "-root-owned";
+* child_argv[4] = "-noappend";
+* mksquashfs_main(5, child_argv);
+* }
+*/
 
 gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
     GDir *dir;
@@ -168,7 +169,7 @@ gchar* get_desktop_entry(GKeyFile *kf, char *key) {
 }
 
 /* in-place modification of the string, and assuming the buffer pointed to by
- * line is large enough to hold the resulting string*/
+* line is large enough to hold the resulting string*/
 static void replacestr(char *line, const char *search, const char *replace)
 {
     char *sp;
@@ -201,6 +202,7 @@ static GOptionEntry entries[] =
     { "bintray-repo", NULL, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
+    { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
 };
@@ -235,7 +237,11 @@ main (int argc, char *argv[])
         g_print("WARNING: appstreamcli is missing, please install it if you want to use AppStream metadata\n");
     if(! g_find_program_in_path ("appstream-util"))
         g_print("WARNING: appstream-util is missing, please install it if you want to use AppStream metadata\n");
-        
+    if(! g_find_program_in_path ("gpg2"))
+        g_print("WARNING: gpg2 is missing, please install it if you want to create digital signatures\n");
+    if(! g_find_program_in_path ("sha256sum"))
+        g_print("WARNING: sha256sum is missing, please install it if you want to create digital signatures\n");
+    
     if(!&remaining_args[0])
         die("SOURCE is missing");
     
@@ -316,7 +322,7 @@ main (int argc, char *argv[])
             destination = remaining_args[1];
         } else {
             /* No destination has been specified, to let's construct one
-             * TODO: Find out the architecture and use a $VERSION that might be around in the env */
+            * TODO: Find out the architecture and use a $VERSION that might be around in the env */
             char dest_path[PATH_MAX];
             sprintf (dest_path, "%s-%s.AppImage", app_name_for_filename, arch);
             
@@ -325,7 +331,7 @@ main (int argc, char *argv[])
             
             if(g_environ_getenv (g_get_environ (), "VERSION"))
                 sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename,
-                         g_environ_getenv (g_get_environ (), "VERSION"), arch);
+                        g_environ_getenv (g_get_environ (), "VERSION"), arch);
                 
                 destination = dest_path;
             replacestr(destination, " ", "_");
@@ -391,8 +397,8 @@ main (int argc, char *argv[])
         }
         
         /* mksquashfs can currently not start writing at an offset,
-         * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
-         * should hopefully change that. */
+        * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
+        * should hopefully change that. */
         char *tempfile;
         fprintf (stderr, "Generating squashfs...\n");
         tempfile = br_strcat(destination, ".temp");
@@ -411,7 +417,7 @@ main (int argc, char *argv[])
         }
         
         /* runtime is embedded into this executable
-         * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
+        * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
         int size = (int)&_binary_runtime_size;
         char *data = (char *)&_binary_runtime_start;
         if (verbose)
@@ -495,9 +501,80 @@ main (int argc, char *argv[])
                 fclose(fpdst2);
             }
         }
-        
+
+        if(sign != NULL){
+            /* The user has indicated that he wants to sign */
+            gchar *gpg2_path = g_find_program_in_path ("gpg2");
+            gchar *sha256sum_path = g_find_program_in_path ("sha256sum");
+            if(!gpg2_path){
+                fprintf (stderr, "gpg2 is not installed, cannot sign\n");
+            }
+            else if(!sha256sum_path){
+                fprintf (stderr, "sha256sum is not installed, cannot sign\n");
+            } else {
+                fprintf (stderr, "gpg2 and sha256sum are installed and user requested to sign, "
+                "hence signing\n");
+                char *digestfile;
+                digestfile = br_strcat(destination, ".digest");
+                char *ascfile;
+                ascfile = br_strcat(destination, ".digest.asc");
+                if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(digestfile);
+                sprintf (command, "%s %s", sha256sum_path, destination);
+                fp = popen(command, "r");
+                if (fp == NULL)
+                    die("sha256sum command did not succeed");
+                char output[1024];
+                fgets(output, sizeof(output)-1, fp);
+                if(verbose)
+                    printf("sha256sum: %s\n", g_strsplit_set(output, " ", -1)[0]);
+                FILE *fpx = fopen(digestfile, "w");
+                if (fpx != NULL)
+                {
+                    fputs(g_strsplit_set(output, " ", -1)[0], fpx);
+                    fclose(fpx);
+                }
+                if(WEXITSTATUS(pclose(fp)) != 0)
+                    die("sha256sum command did not succeed");
+                if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(ascfile);
+                sprintf (command, "%s --detach-sign --armor %s", gpg2_path, digestfile);
+                fp = popen(command, "r");
+                if(WEXITSTATUS(pclose(fp)) != 0)
+                    die("gpg2 command did not succeed");
+                unsigned long sig_offset = 0;
+                unsigned long sig_length = 0;
+                get_elf_section_offset_and_lenghth(destination, ".sha256_sig", &sig_offset, &sig_length);
+                if(verbose)
+                    printf("sig_offset: %lu\n", sig_offset);
+                if(verbose)
+                    printf("sig_length: %lu\n", sig_length);
+                if(sig_offset == 0) {
+                    die("Could not determine offset for signature");
+                } else {
+                    FILE *fpdst3 = fopen(destination, "r+");
+                    if (fpdst3 == NULL)
+                        die("Not able to open the destination file for writing, aborting");
+//                    if(strlen(updateinformation)>sig_length)
+//                        die("signature does not fit into segment, aborting");
+                    fseek(fpdst3, sig_offset, SEEK_SET);
+                    FILE *fpsrc2 = fopen(ascfile, "rb");
+                    if (fpsrc2 == NULL) {
+                        die("Not able to open the asc file for reading, aborting");
+                    }
+                    char byte;
+                    while (!feof(fpsrc2))
+                    {
+                        fread(&byte, sizeof(char), 1, fpsrc2);
+                        fwrite(&byte, sizeof(char), 1, fpdst3);
+                    }
+                    fclose(fpsrc2);
+                    fclose(fpdst3);
+                }
+            }
+        }     
         fprintf (stderr, "Success\n");
-    }
+        }
     
     /* If the first argument is a regular file, then we assume that we should unpack it */
     if (g_file_test (remaining_args[0], G_FILE_TEST_IS_REGULAR)){
