@@ -427,6 +427,7 @@ main (int argc, char *argv[])
         }
         
         fclose(fpsrc);
+        fclose(fpdst);
         
         fprintf (stderr, "Marking the AppImage as executable...\n");
         if (chmod (destination, 0755) < 0) {
@@ -470,19 +471,31 @@ main (int argc, char *argv[])
                 if (fp == NULL)
                     die("Failed to run zsyncmake command");            
             }
-
+            
             unsigned long ui_offset = 0;
             unsigned long ui_length = 0;
             get_elf_section_offset_and_lenghth(destination, ".upd_info", &ui_offset, &ui_length);
-            
-            if(ui_offset == 0)
+            if(verbose)
+                printf("ui_offset: %lu\n", ui_offset);
+            if(verbose)
+                printf("ui_length: %lu\n", ui_length);
+            if(ui_offset == 0) {
                 die("Could not determine offset for updateinformation");
-            fseek(fpdst, ui_offset, SEEK_SET);
-            // fwrite(0x00, 1, 1024, fpdst); // FIXME: Segfaults; why?
-            fseek(fpdst, ui_offset, SEEK_SET);
-            fwrite(updateinformation, strlen(updateinformation), 1, fpdst); // TODO: Use ui_length which is the maximum length the segment has available
+            } else {
+                if(strlen(updateinformation)>ui_length)
+                    die("updateinformation does not fit into segment, aborting");
+                FILE *fpdst2 = fopen(destination, "r+");
+                if (fpdst2 == NULL)
+                    die("Not able to open the destination file for writing, aborting");
+                fseek(fpdst2, ui_offset, SEEK_SET);
+                // fseek(fpdst2, ui_offset, SEEK_SET);
+                // fwrite(0x00, 1, 1024, fpdst); // FIXME: Segfaults; why?
+                // fseek(fpdst, ui_offset, SEEK_SET);
+                fwrite(updateinformation, strlen(updateinformation), 1, fpdst2);
+                fclose(fpdst2);
+            }
         }
-        fclose(fpdst);
+        
         fprintf (stderr, "Success\n");
     }
     

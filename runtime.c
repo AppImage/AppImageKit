@@ -39,6 +39,7 @@
 #include <errno.h>
 
 #include "elf.h"
+#include "getsection.h"
 
 static long unsigned int fs_offset; // The offset at which a filesystem image is expected = end of this ELF
         
@@ -218,6 +219,28 @@ main (int argc, char *argv[])
         exit(0);
     }
 
+    if(arg && strcmp(arg,"appimage-updateinformation")==0) {
+        unsigned long offset = 0;
+        unsigned long length = 0;
+        get_elf_section_offset_and_lenghth("/proc/self/exe", ".upd_info", &offset, &length);
+        printf("offset: %lu\n", offset);
+        printf("length: %lu\n", length);
+        print_hex("/proc/self/exe", offset, length);
+        print_binary("/proc/self/exe", offset, length);
+        exit(0);
+    }
+
+    if(arg && strcmp(arg,"appimage-signature")==0) {
+        unsigned long offset = 0;
+        unsigned long length = 0;
+        get_elf_section_offset_and_lenghth("/proc/self/exe", ".sha256_sig", &offset, &length);
+        printf("offset: %lu\n", offset);
+        printf("length: %lu\n", length);
+        print_hex("/proc/self/exe", offset, length);
+        print_binary("/proc/self/exe", offset, length);
+        exit(0);
+    }
+    
     int dir_fd, res;
     char mount_dir[] = "/tmp/.mount_XXXXXX";  /* create mountpoint */
     char filename[100]; /* enough for mount_dir + "/AppRun" */

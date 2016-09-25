@@ -15,7 +15,6 @@ int get_elf_section_offset_and_lenghth(char* fname, char* section_name, unsigned
     Elf64_Shdr *shdr;
     int fd = open(fname, O_RDONLY);
     data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
-    close(fd);
     elf = (Elf64_Ehdr *) data;
     shdr = (Elf64_Shdr *) (data + elf->e_shoff);
     char *strTab = (char *)(data + shdr[elf->e_shstrndx].sh_offset);
@@ -25,6 +24,7 @@ int get_elf_section_offset_and_lenghth(char* fname, char* section_name, unsigned
         *length = shdr[i].sh_size;
         }
     }
+    close(fd);
     return(0);
 }
 
