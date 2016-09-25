@@ -40,8 +40,7 @@ strip digest
 
 # Compile and link validate tool
 
-cc -o validate ../getsection.c ../validate.c -lssl -lcrypto $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
-# cc -o validate -Wl,-Bdynamic validate -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include # 1.4 MB
+cc -o validate ../getsection.c ../validate.c -lssl -lcrypto -lglib-2.0 $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 strip validate
 
 # Compile runtime but do not link
@@ -102,6 +101,7 @@ cd -
 
 # Strip and check size and dependencies
 
+rm build/*.o build/1024_blank_bytes
 strip build/appimage*
 ldd build/appimagetool
 ls -l build/*
