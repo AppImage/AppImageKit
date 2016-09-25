@@ -43,7 +43,11 @@ Help Options:
 Application Options:
   -l, --list                  List files in SOURCE AppImage
   -u, --updateinformation     Embed update information STRING; if zsyncmake is installed, generate zsync file
+  --bintray-user              Bintray user name
+  --bintray-repo              Bintray repository
+  --version                   Show version number
   -v, --verbose               Produce verbose output
+  -s, --sign                  Sign with gpg2
 ```
 
 If you want to generate an AppImage manually, you can:
