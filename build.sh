@@ -5,7 +5,7 @@ rm -rf build/ || true
 
 # Install build dependencies
 
-sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev
+sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev libssl-dev
 # libtool-bin might be required in newer distributions but is not available in precise
 
 # Patch squashfuse_ll to be a library rather than an executable
@@ -31,6 +31,12 @@ cd ..
 
 mkdir build
 cd build
+
+# Compile and link digest tool
+
+cc -o digest -Wl,-Bdynamic ../digest.c -Bstatic -lcrypto -Bdynamic
+# cc -o digest -Wl,-Bdynamic ../digest.c -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl # 1.4 MB
+strip digest
 
 # Compile runtime but do not link
 
