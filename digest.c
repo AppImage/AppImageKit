@@ -11,7 +11,8 @@
 #include <linux/limits.h>
 
 typedef unsigned char byte;      
-            
+
+char segment_name[] = ".gpg_sig";
 
 int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_length)
 {
@@ -78,7 +79,7 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
     }
     SHA256_Final(hash, &sha256);
 
-    printf("totalBytesRead: %i\n", totalBytesRead);
+    // fprintf(stderr, "totalBytesRead: %i\n", totalBytesRead);
     
     for(i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
@@ -91,9 +92,11 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
 
 int main(int argc,char **argv)	{
         if(argc < 2){
-            printf("Calculate a sha256 of a file except a skipped area from offset to offset+length bytes\n");
-            printf("This is useful when a signature is placed in the skipped area\n");
-            printf("Usage: %s file offset length\n", argv[0]);
+            fprintf(stderr, "Usage: %s file offset length\n", argv[0]);
+            fprintf(stderr, "If no offset and length are provided, the ELF section '%s' is skipped\n\n", segment_name);            
+            fprintf(stderr, "Calculate a sha256 of a file except a skipped area from offset to offset+length bytes\n");
+            fprintf(stderr, "which is replaced with 0x00 during checksum calculation.\n");
+            fprintf(stderr, "This is useful when a signature is placed in the skipped area.\n");
             exit(1);
         }
 
@@ -102,7 +105,6 @@ int main(int argc,char **argv)	{
         char *filename = argv[1];   
         
         if(argc < 4){
-            char segment_name[] = ".gpg_sig";
             /* TODO: replace with more robust code parsing the ELF like in elf_elf_size */
             char line[PATH_MAX];
             char command[PATH_MAX];
@@ -110,7 +112,7 @@ int main(int argc,char **argv)	{
             FILE *fp;
             fp = popen(command, "r");
             if (fp == NULL){
-                printf("Failed to run objdump command\n");
+                fprintf(stderr, "Failed to run objdump command\n");
                 exit(1);
             }
             long ui_offset = 0;
@@ -128,7 +130,8 @@ int main(int argc,char **argv)	{
                 }
             }
             fclose(fp);
-            printf("%s offset %i, length %i\n", segment_name, skip_offset, skip_length);
+            if(skip_length > 0)
+                fprintf(stderr, "Skipping ELF section %s with offset %i, length %i\n", segment_name, skip_offset, skip_length);
         } else if(argc == 4) {
             skip_offset = atoi(argv[2]);
             skip_length = atoi(argv[3]);
@@ -140,7 +143,7 @@ int main(int argc,char **argv)	{
     stat(filename, &st);
     int size = st.st_size;
     if(size < skip_offset+skip_length){
-        printf("offset+length cannot be less than the file size\n");
+        fprintf(stderr, "offset+length cannot be less than the file size\n");
         exit(1);
     }
 	static unsigned char buffer[65];
