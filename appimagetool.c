@@ -495,7 +495,7 @@ main (int argc, char *argv[])
                     token = strtok(NULL, " \t"); // We are not interested in this token
                     token = strtok(NULL, " \t"); // We are not interested in this token
                     if(verbose)
-                        printf("token parsed from objdump: %s\n", token); // This contains the offset in hex minus 32 in dec
+                        printf("token parsed from objdump: %s\n", token);
                         ui_offset = (int)strtol(token, NULL, 16) + 0;
                     if(verbose)
                         printf("ui_offset: %lu\n", ui_offset);

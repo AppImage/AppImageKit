@@ -8,8 +8,10 @@
 #include <openssl/sha.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <linux/limits.h>
 
-typedef unsigned char byte;
+typedef unsigned char byte;      
+            
 
 int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_length)
 {
@@ -59,7 +61,14 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
     }
 
     fseek(file, skip_offset+skip_length, SEEK_SET);
-
+    
+    /* Instead of the skipped area, calculate the sha256 of the same amount if 0x00s */
+    int i = 0;
+    for(i = 0; i < skip_length; i++) {
+        SHA256_Update(&sha256, "\0", 1);
+        totalBytesRead += 1;
+    }
+        
     while((bytesRead = fread(buffer, 1, bufSize, file)))
     {
         totalBytesRead += bytesRead;
@@ -71,7 +80,6 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
 
     printf("totalBytesRead: %i\n", totalBytesRead);
     
-    int i = 0;
     for(i = 0; i < SHA256_DIGEST_LENGTH; i++)
     {
         sprintf(outputBuffer + (i * 2), "%02x", hash[i]);
@@ -82,15 +90,52 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
 }
 
 int main(int argc,char **argv)	{
-        if(argc < 4){
+        if(argc < 2){
             printf("Calculate a sha256 of a file except a skipped area from offset to offset+length bytes\n");
             printf("This is useful when a signature is placed in the skipped area\n");
             printf("Usage: %s file offset length\n", argv[0]);
             exit(1);
         }
-    int skip_offset = atoi(argv[2]);
-    int skip_length = atoi(argv[3]);
-    char *filename = argv[1];
+
+        int skip_offset;
+        int skip_length;
+        char *filename = argv[1];   
+        
+        if(argc < 4){
+            char segment_name[] = ".upd_info";
+            /* TODO: replace with more robust code parsing the ELF like in elf_elf_size */
+            char line[PATH_MAX];
+            char command[PATH_MAX];
+            sprintf (command, "/usr/bin/objdump -h %s", filename);
+            FILE *fp;
+            fp = popen(command, "r");
+            if (fp == NULL){
+                printf("Failed to run objdump command\n");
+                exit(1);
+            }
+            long ui_offset = 0;
+            while(fgets(line, sizeof(line), fp) != NULL ){
+                if(strstr(line, segment_name) != NULL)
+                {
+                    char *token = strtok(line, " \t"); // Split the line in tokens
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    token = strtok(NULL, " \t");
+                    skip_length = (int)strtol(token, NULL, 16);
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    token = strtok(NULL, " \t"); // We are not interested in this token
+                    skip_offset = (int)strtol(token, NULL, 16);
+                }
+            }
+            fclose(fp);
+            printf("%s offset %i, length %i\n", segment_name, skip_offset, skip_length);
+        } else if(argc == 4) {
+            skip_offset = atoi(argv[2]);
+            skip_length = atoi(argv[3]);
+        } else {
+            exit(1);
+        }
+
     struct stat st;
     stat(filename, &st);
     int size = st.st_size;
