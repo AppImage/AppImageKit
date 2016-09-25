@@ -34,7 +34,7 @@ cd build
 
 # Compile and link digest tool
 
-cc -o digest digest.c -lssl -lcrypto
+cc -o digest ../digest.c -lssl -lcrypto
 # cc -o digest -Wl,-Bdynamic ../digest.c -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl # 1.4 MB
 strip digest
 
