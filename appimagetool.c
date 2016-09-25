@@ -230,11 +230,11 @@ main (int argc, char *argv[])
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs is missing but required, please install it");
     if(! g_find_program_in_path ("zsyncmake"))
-        g_print("WARNING: zsyncmake is missing, will not be able to generate zsync files, please install it if you want to use binary delta updates\n");
+        g_print("WARNING: zsyncmake is missing, please install it if you want to use binary delta updates\n");
     if(! g_find_program_in_path ("appstreamcli"))
-        g_print("WARNING: appstreamcli is missing, will not be able to validate AppStream metadata, please install it if you want to use AppStream metadata\n");
+        g_print("WARNING: appstreamcli is missing, please install it if you want to use AppStream metadata\n");
     if(! g_find_program_in_path ("appstream-util"))
-        g_print("WARNING: appstream-util is missing, will not be able to validate AppStream metadata, please install it if you want to use AppStream metadata\n");
+        g_print("WARNING: appstream-util is missing, please install it if you want to use AppStream metadata\n");
         
     if(!&remaining_args[0])
         die("SOURCE is missing");
