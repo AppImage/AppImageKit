@@ -102,7 +102,7 @@ int main(int argc,char **argv)	{
         char *filename = argv[1];   
         
         if(argc < 4){
-            char segment_name[] = ".upd_info";
+            char segment_name[] = ".gpg_sig";
             /* TODO: replace with more robust code parsing the ELF like in elf_elf_size */
             char line[PATH_MAX];
             char command[PATH_MAX];
