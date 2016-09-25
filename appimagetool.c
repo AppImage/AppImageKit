@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "elf.h"
+#include "getsection.h"
 
 extern int _binary_runtime_start;
 extern int _binary_runtime_size;
@@ -228,8 +229,6 @@ main (int argc, char *argv[])
     /* Check for dependencies here. Better fail early if they are not present. */
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs is missing but required, please install it");
-    if(! g_find_program_in_path ("objdump"))
-        die("objdump is missing but required, please install it");
     if(! g_find_program_in_path ("zsyncmake"))
         g_print("WARNING: zsyncmake is missing, will not be able to generate zsync files, please install it if you want to use binary delta updates\n");
     if(! g_find_program_in_path ("appstreamcli"))
@@ -471,45 +470,17 @@ main (int argc, char *argv[])
                 if (fp == NULL)
                     die("Failed to run zsyncmake command");            
             }
-             
-            gchar *objdump_path = g_find_program_in_path ("objdump");
 
-            sprintf (command, "%s -h %s", objdump_path, destination);
-            
-            fp = popen(command, "r");
-            if (fp == NULL)
-                die("Failed to run objdump command");            
-
-            long ui_offset = 0;
-            /* TODO: replace with more robust code parsing the ELF like in elf_elf_size */
-            while(fgets(line, sizeof(line), fp) != NULL ){
-                if(strstr(line, ".upd_info") != NULL)
-                {
-                    if(verbose)
-                        printf("%s", line);
-
-                    char *token = strtok(line, " \t"); // Split the line in tokens
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    if(verbose)
-                        printf("token parsed from objdump: %s\n", token);
-                        ui_offset = (int)strtol(token, NULL, 16) + 0;
-                    if(verbose)
-                        printf("ui_offset: %lu\n", ui_offset);
-                }
-            }
-            fclose(fp);
-
+            unsigned long ui_offset = 0;
+            unsigned long ui_length = 0;
+            get_elf_section_offset_and_lenghth(destination, ".upd_info", &ui_offset, &ui_length);
             
             if(ui_offset == 0)
                 die("Could not determine offset for updateinformation");
             fseek(fpdst, ui_offset, SEEK_SET);
             // fwrite(0x00, 1, 1024, fpdst); // FIXME: Segfaults; why?
             fseek(fpdst, ui_offset, SEEK_SET);
-            fwrite(updateinformation, strlen(updateinformation), 1, fpdst);
+            fwrite(updateinformation, strlen(updateinformation), 1, fpdst); // TODO: Use ui_length which is the maximum length the segment has available
         }
         fclose(fpdst);
         fprintf (stderr, "Success\n");

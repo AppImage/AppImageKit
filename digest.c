@@ -1,5 +1,5 @@
 /*
-	cc -o digest digest.c -lssl -lcrypto
+	cc -o digest getsection.c digest.c -lssl -lcrypto
 */
 
 #include <stdio.h>
@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <linux/limits.h>
+
+#include "getsection.h"
 
 typedef unsigned char byte;      
 
@@ -100,38 +102,14 @@ int main(int argc,char **argv)	{
             exit(1);
         }
 
-        int skip_offset;
-        int skip_length;
+        unsigned long skip_offset = 0;
+        unsigned long skip_length = 0;
         char *filename = argv[1];   
         
         if(argc < 4){
-            /* TODO: replace with more robust code parsing the ELF like in elf_elf_size */
-            char line[PATH_MAX];
-            char command[PATH_MAX];
-            sprintf (command, "/usr/bin/objdump -h %s", filename);
-            FILE *fp;
-            fp = popen(command, "r");
-            if (fp == NULL){
-                fprintf(stderr, "Failed to run objdump command\n");
-                exit(1);
-            }
-            long ui_offset = 0;
-            while(fgets(line, sizeof(line), fp) != NULL ){
-                if(strstr(line, segment_name) != NULL)
-                {
-                    char *token = strtok(line, " \t"); // Split the line in tokens
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    token = strtok(NULL, " \t");
-                    skip_length = (int)strtol(token, NULL, 16);
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    token = strtok(NULL, " \t"); // We are not interested in this token
-                    skip_offset = (int)strtol(token, NULL, 16);
-                }
-            }
-            fclose(fp);
+            get_elf_section_offset_and_lenghth(filename, ".sha256_sig", &skip_offset, &skip_length);
             if(skip_length > 0)
-                fprintf(stderr, "Skipping ELF section %s with offset %i, length %i\n", segment_name, skip_offset, skip_length);
+                fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_name, skip_offset, skip_length);
         } else if(argc == 4) {
             skip_offset = atoi(argv[2]);
             skip_length = atoi(argv[3]);

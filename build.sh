@@ -34,7 +34,7 @@ cd build
 
 # Compile and link digest tool
 
-cc -o digest ../digest.c -lssl -lcrypto
+cc -o digest ../getsection.c ../digest.c -lssl -lcrypto
 # cc -o digest -Wl,-Bdynamic ../digest.c -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl # 1.4 MB
 strip digest
 
@@ -76,7 +76,7 @@ ld -r -b binary -o data.o runtime
 
 # Compile appimagetool but do not link - glib version
 
-cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I ../squashfuse $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetool.c
+cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I ../squashfuse $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetool.c ../getsection.c
 
 # Now statically link against libsquashfuse and liblzma - glib version
 
