@@ -171,11 +171,7 @@ cmake .
 make
 ```
 
-Once you have built AppImageKit, try making an AppImage, e.g., of Leafpad. The following has been tested on Ubuntu:
-
-    export APP=leafpad && ./apt-appdir/apt-appdir $APP && ./AppImageAssistant.AppDir/package $APP.AppDir $APP.AppImage && ./$APP.AppImage
-    
-(This is just a proof-of-concept, in reality you should use a proper "recipe" script or AppDirAssistant to create proper AppDirs in order to ensure binary compatibility of your AppImages. See the [Wiki](https://github.com/probonopd/AppImageKit/wiki) for details and for examples on how to bundle real-world software such as LibreOffice, Google Chrome, and others as AppImages.)
+Once you have built AppImageKit, try making an AppImage, e.g., of Leafpad. See the [AppImages](https://github.com/probonopd/AppImages) project for example recipes on how to bundle real-world software such as LibreOffice, Google Chrome, and others as AppImages.
 
 ## Creating AppImages
 
