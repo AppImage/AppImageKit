@@ -286,9 +286,10 @@ main (int argc, char *argv[])
         if(!archfile)
         {
             /* If we found no .so we try to guess the main executable - this might be a script though */
-            char guessed_bin_path[PATH_MAX];
-            sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
-            archfile = guessed_bin_path;
+            // char guessed_bin_path[PATH_MAX];
+            // sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
+            // archfile = guessed_bin_path;
+            archfile = "/proc/self/exe";
         }
         if(verbose)
             fprintf (stderr,"File used for determining architecture: %s\n", archfile);
