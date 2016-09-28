@@ -35,6 +35,7 @@ static gboolean list = FALSE;
 static gboolean verbose = FALSE;
 static gboolean version = FALSE;
 static gboolean sign = FALSE;
+static gboolean no_appstream = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
 gchar *bintray_user = NULL;
@@ -203,6 +204,7 @@ static GOptionEntry entries[] =
     { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
+    { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
 };
@@ -233,10 +235,12 @@ main (int argc, char *argv[])
         die("mksquashfs is missing but required, please install it");
     if(! g_find_program_in_path ("zsyncmake"))
         g_print("WARNING: zsyncmake is missing, please install it if you want to use binary delta updates\n");
-    if(! g_find_program_in_path ("appstreamcli"))
-        g_print("WARNING: appstreamcli is missing, please install it if you want to use AppStream metadata\n");
-    if(! g_find_program_in_path ("appstream-util"))
-        g_print("WARNING: appstream-util is missing, please install it if you want to use AppStream metadata\n");
+    if(! no_appstream)
+        if(! g_find_program_in_path ("appstreamcli"))
+            g_print("WARNING: appstreamcli is missing, please install it if you want to use AppStream metadata\n");
+    if(! no_appstream)
+        if(! g_find_program_in_path ("appstream-util"))
+            g_print("WARNING: appstream-util is missing, please install it if you want to use AppStream metadata\n");
     if(! g_find_program_in_path ("gpg2"))
         g_print("WARNING: gpg2 is missing, please install it if you want to create digital signatures\n");
     if(! g_find_program_in_path ("sha256sum"))
@@ -361,39 +365,41 @@ main (int argc, char *argv[])
         }
         
         /* Check if AppStream upstream metadata is present in source AppDir */
-        char application_id[PATH_MAX];
-        sprintf (application_id,  "%s", basename(desktop_file));
-        replacestr(application_id, ".desktop", ".appdata.xml");
-        gchar *appdata_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
-        if (! g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)){
-            fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
-            fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
-            fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps\n");
-            fprintf (stderr, "         for more information.\n");
-            /* As a courtesy, generate one to be filled by the user */
-            if(g_find_program_in_path ("appstream-util")) {
-                sprintf (command, "%s appdata-from-desktop %s %s", g_find_program_in_path ("appstream-util"), desktop_file, appdata_path);
-                int ret = system(command);
-                if (ret != 0)
-                    die("Failed to generate a template");
-                fprintf (stderr, "A template has been generated in in %s, please edit it\n", appdata_path);
-                exit(1);
-            }
-        } else {
-            fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", application_id);
-            /* Use ximion's appstreamcli to make sure that desktop file and appdata match together */
-            if(g_find_program_in_path ("appstreamcli")) {
-                sprintf (command, "%s validate-tree %s", g_find_program_in_path ("appstreamcli"), source);
-                int ret = system(command);
-                if (ret != 0)
-                    die("Failed to validate AppStream information with appstreamcli");
-            }
-            /* It seems that hughsie's appstream-util does additional validations */
-            if(g_find_program_in_path ("appstream-util")) {
-                sprintf (command, "%s validate-relax %s", g_find_program_in_path ("appstream-util"), appdata_path);
-                int ret = system(command);
-                if (ret != 0)
-                    die("Failed to validate AppStream information with appstream-util");
+        if(! no_appstream){
+            char application_id[PATH_MAX];
+            sprintf (application_id,  "%s", basename(desktop_file));
+            replacestr(application_id, ".desktop", ".appdata.xml");
+            gchar *appdata_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
+            if (! g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)){
+                fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
+                fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
+                fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps\n");
+                fprintf (stderr, "         for more information.\n");
+                /* As a courtesy, generate one to be filled by the user */
+                if(g_find_program_in_path ("appstream-util")) {
+                    sprintf (command, "%s appdata-from-desktop %s %s", g_find_program_in_path ("appstream-util"), desktop_file, appdata_path);
+                    int ret = system(command);
+                    if (ret != 0)
+                        die("Failed to generate a template");
+                    fprintf (stderr, "A template has been generated in in %s, please edit it\n", appdata_path);
+                    exit(1);
+                }
+            } else {
+                fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", application_id);
+                /* Use ximion's appstreamcli to make sure that desktop file and appdata match together */
+                if(g_find_program_in_path ("appstreamcli")) {
+                    sprintf (command, "%s validate-tree %s", g_find_program_in_path ("appstreamcli"), source);
+                    int ret = system(command);
+                    if (ret != 0)
+                        die("Failed to validate AppStream information with appstreamcli");
+                }
+                /* It seems that hughsie's appstream-util does additional validations */
+                if(g_find_program_in_path ("appstream-util")) {
+                    sprintf (command, "%s validate-relax %s", g_find_program_in_path ("appstream-util"), appdata_path);
+                    int ret = system(command);
+                    if (ret != 0)
+                        die("Failed to validate AppStream information with appstream-util");
+                }
             }
         }
         
