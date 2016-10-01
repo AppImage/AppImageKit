@@ -8,8 +8,7 @@ set -e
 # Communication between this script and the GUI happen through
 # file descriptors (&1 = stdout, &2 = stderr, $3 ... up to &9)
 # http://stackoverflow.com/questions/2342826/how-to-pipe-stderr-and-not-stdout
-#
-# echo "######" | tee >(sed -e 's/#/#\n/g' >&1)
+
 
 error()
 {
@@ -27,12 +26,11 @@ error()
 
 finished()
 {
-  echo "#########################" | tee >(sed -e 's/#/#\n/g')
+  echo "#########################"
 }
 
 # A simple dependency check
 which zsync_curl >/dev/null || error "zsync_curl is missing"
-which curl >/dev/null || error "curl is missing"
 which dd >/dev/null || error "dd is missing"
 
 MYSELF="${0}"
@@ -56,10 +54,10 @@ update_myself()
 gpg_check()
 {
   set +e
-  if [ "$(which gpg)" != "" ] ; then
+  if [ "$(which gpg_currently_disabled)" != "" ] ; then
     echo "GPG is installed; hence attempting signature verification"
     ASC_URL=$( echo "${ZSYNC_URL}" | sed -e 's|.zsync|.asc|g' )
-    curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}") && echo "Signature verified"
+    # curl -k -L -O -# "${ASC_URL}" && gpg --verify $(basename "${ASC_URL}") && echo "Signature verified"
   else
     echo "GPG is not installed; hence skipping signature verification" >&2
   fi
@@ -90,16 +88,28 @@ else
   echo "${1} does not exist"
 fi
 
-# Check if this is an ISO
-# Read ISO 9660 Volume Descriptor #1 header
-HEADER=$(dd if="${ISO}" bs=1 skip=32769 count=5 2>/dev/null)
-if [ "${HEADER}" != "CD001" ] ; then
+# Check the type of this file
+MAGIC=$(dd if="${ISO}" bs=1 skip=8 count=3 2>/dev/null)
+if [ "$MAGIC" == $(echo -e "\x41\x49\x02") ] ; then
+  AITYPE=02
+elif [ "$MAGIC" == $(echo -e "\x41\x49\x01") ] ; then
+  AITYPE=01
+else
   echo "Cannot recognize this type of file"
-  exit 1
+  # exit 1
 fi
 
-# Read ISO 9660 Volume Descriptor #1 field "Application Used" (contents not defined by ISO 9660)
-APPLICATION_USED=$(dd if="${ISO}" bs=1 skip=33651 count=512 2>/dev/null)
+
+if [ "$AITYPE" == "02" ] ; then
+  HEXOFFSET=$(objdump -h "${ISO}" | grep .upd_info | awk '{print $6}')
+  HEXLENGTH=$(objdump -h "${ISO}" | grep .upd_info | awk '{print $3}')
+  APPLICATION_USED=$(dd bs=1 if="${ISO}" skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)))
+elif [ "$AITYPE" == "01" ] ; then
+  HEXOFFSET=8373 # 33651 in decimal
+  # Read ISO 9660 Volume Descriptor #1 field "Application Used" (contents not defined by ISO 9660)
+  APPLICATION_USED=$(dd if="${ISO}" bs=1 skip=$(($(echo 0x$HEXOFFSET)+0)) count=512 2>/dev/null)
+fi
+
 TYPE=$(echo "${APPLICATION_USED}" | cut -d "|" -f 1)
 
 if [ "${2}" == "read" ] ; then
@@ -113,7 +123,7 @@ fi
 
 # Clear ISO 9660 Volume Descriptor #1 field "Application Used"
 if [ "${2}" == "clear" ] ; then
-  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  dd if=/dev/zero of="${ISO}" bs=1 seek=$(($(echo 0x$HEXOFFSET)+0)) count=512 conv=notrunc 2>/dev/null
   echo "Removed ${APPLICATION_USED}"
   exit 0
 fi
@@ -123,8 +133,8 @@ fi
 # bintray-zsync|probono|AppImages|Subsurface|Subsurface-_latestVersion-x86_64.AppImage.zsync
 # zsync|http://server.foo/Subsurface-latest-x86_64.AppImage.zsync
 if [ "${2}" == "set" ] ; then
-  dd if=/dev/zero of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
-  echo "${3}" | dd of="${ISO}" bs=1 seek=33651 count=512 conv=notrunc 2>/dev/null
+  dd if=/dev/zero of="${ISO}" bs=1 seek=$(($(echo 0x$HEXOFFSET)+0)) count=512 conv=notrunc 2>/dev/null
+  echo "${3}" | dd of="${ISO}" bs=1 seek=$(($(echo 0x$HEXOFFSET)+0)) count=512 conv=notrunc 2>/dev/null
   echo "Changed ${APPLICATION_USED} to ${3}"
   exit 0
 fi
@@ -140,7 +150,7 @@ if [ "$TYPE" == "zsync" ] ; then
   # downloads and reuse the data already downloaded.
   ZSYNC_URL=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2) # Get the URL of the zsync file
   # Get the file with zsync using $1 as an input file
-  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 && finished
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
   chmod --reference="${ISO}.zs-old" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
@@ -160,7 +170,7 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   ZSYNCDUMMYNAME=$(echo "${APPLICATION_USED}" | cut -d "|" -f 5)
   REDIRECTOR_URL="https://bintray.com/$USERNAME/$REPO/$PACKAGE/_latestVersion"
   DUMMY_URL="https://bintray.com/artifact/download/$USERNAME/$REPO/$ZSYNCDUMMYNAME"
-  VERSION=$(curl -k -r 0-0 -Ls -o /dev/null -w %{url_effective} "${REDIRECTOR_URL}" | cut -d "/" -f 7)
+  VERSION=$(zsync_curl -r "${REDIRECTOR_URL}" | cut -d "/" -f 7)
   if [ "$VERSION" == "_latestVersion" ] ; then
     echo "Error"
     echo "Could not get the latest version from Bintray" >&2
@@ -170,9 +180,9 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   fi
   ZSYNC_URL=$(echo "${DUMMY_URL}" | sed -e "s|_latestVersion|$VERSION|g" )
   # Get the file with zsync using $1 as an input file
-  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 | tee >(sed -e 's/#/#\n/g') && finished
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 && finished
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
-  chmod --reference="${ISO}.zs-old" "${NEWFILE}" # Set the same permissions as for the original file
+  chmod --reference="${ISO}" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
 
 elif [ "$TYPE" == "" ] ; then

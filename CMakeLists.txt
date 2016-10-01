@@ -16,7 +16,7 @@ foreach(LIB ${REQUIRED_LIBRARIES})
   endif(NOT FOUND${LIB})
 endforeach(LIB)
 
-ADD_DEFINITIONS(-g -O2 -D_FILE_OFFSET_BITS=64)
+ADD_DEFINITIONS(-g -Os -D_FILE_OFFSET_BITS=64)
 
 # Begin find glib
 

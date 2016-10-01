@@ -22,6 +22,12 @@ deploy:
     all_branches: true
     
 notifications:
+  irc:
+    channels: 
+      - "chat.freenode.net#AppImage"
+    on_success: always  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: always     # options: [always|never|change] default: always
   webhooks:
     urls:
       - https://webhooks.gitter.im/e/4bf20518805a55998cc2
