@@ -58,7 +58,7 @@ int sfs_ls(char* image) {
     unsigned long fs_offset = get_elf_size(image);
     
     if ((err = sqfs_open_image(&fs, image, fs_offset)))
-        die("sqfs_open_image error, TODO: Implement offset");
+        die("sqfs_open_image error");
     
     if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
         die("sqfs_traverse_open error");
