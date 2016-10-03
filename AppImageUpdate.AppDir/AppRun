@@ -7,6 +7,6 @@ export PATH="${HERE}/usr/bin:${PATH}"
 if [ -z "$1" ] ; then
   exec "${HERE}/usr/bin/appimageupdategui"
 else
-  exec "${HERE}/usr/bin/appimageupdategui" "$@"
+  exec "${HERE}/usr/bin/appimageupdategui" "$1"
 fi
 cd -
