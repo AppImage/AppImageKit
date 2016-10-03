@@ -22,14 +22,14 @@ static void on_open_clicked() {
                                       "gtk-cancel", ResponseType.CANCEL,
                                       "gtk-open", ResponseType.ACCEPT);
         FileFilter filter = new FileFilter ();
-	file_chooser.set_filter (filter);                                    
+	file_chooser.set_filter (filter);
 	filter.add_pattern("*.AppImage");
 	filter.add_pattern("*.iso");
         if (file_chooser.run () == ResponseType.ACCEPT) {
             open_file(file_chooser.get_filename ());
         }
 	else {
-            Posix.exit(0); 
+            Posix.exit(0);
 	}
 	window_main.destroy();
 	file_chooser.destroy();
@@ -46,7 +46,11 @@ static void on_about_clicked() {
 
 static void main (string[] args) {
 	init (ref args);
-
+  if(args.length > 1){
+    open_file(args[1]);
+    Gtk.main();
+    Posix.exit(0);
+  }
 	/* Set up the main window */
 	window_main = new Window();
 	window_main.title = "AppImageUpdate";
@@ -65,7 +69,7 @@ static void main (string[] args) {
 
 	/* Init headerbar for app title and buttons */
 	header_bar = new HeaderBar();
-	header_bar.set_title(window_main.title);      
+	header_bar.set_title(window_main.title);
 	header_bar.show_close_button = true;
 	window_main.set_titlebar(header_bar);
 
@@ -97,10 +101,10 @@ static void main (string[] args) {
 
 	btn_open.set_tooltip_text("Open");
 
-	header_bar.pack_start(btn_open);  
-	header_bar.pack_end(btn_menu); 
+	header_bar.pack_start(btn_open);
+	header_bar.pack_end(btn_menu);
 
-	vbox_main.pack_start(header_bar, false, true);    
+	vbox_main.pack_start(header_bar, false, true);
 
 	window_main.add (vbox_main);
 
