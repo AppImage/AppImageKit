@@ -90,15 +90,17 @@ fi
 
 # Check the type of this file
 MAGIC=$(dd if="${ISO}" bs=1 skip=8 count=3 2>/dev/null)
+HEADER=$(dd if="${ISO}" bs=1 skip=32769 count=5 2>/dev/null) # ISO 9660 Volume Descriptor #1
 if [ "$MAGIC" == $(echo -e "\x41\x49\x02") ] ; then
   AITYPE=02
 elif [ "$MAGIC" == $(echo -e "\x41\x49\x01") ] ; then
+  AITYPE=01
+elif [ "${HEADER}" == "CD001" ] ; then
   AITYPE=01
 else
   echo "Cannot recognize this type of file"
   # exit 1
 fi
-
 
 if [ "$AITYPE" == "02" ] ; then
   HEXOFFSET=$(objdump -h "${ISO}" | grep .upd_info | awk '{print $6}')
