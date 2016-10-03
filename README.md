@@ -48,6 +48,7 @@ Application Options:
   --version                   Show version number
   -v, --verbose               Produce verbose output
   -s, --sign                  Sign with gpg2
+  -n, --no-appstream          Do not check AppStream metadata
 ```
 
 If you want to generate an AppImage manually, you can:
