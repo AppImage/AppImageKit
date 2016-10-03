@@ -204,9 +204,24 @@ char* getArg(int argc, char *argv[],char chr)
 int
 main (int argc, char *argv[])
 {
-    fs_offset = get_elf_size("/proc/self/exe");
-    
+    char appimage_path[FILE_MAX];
     char * arg;
+    
+    /* We might want to operate on a target appimage rather than this file itself,
+     * e.g., for appimaged which must not run untrusted code from random AppImages.
+     * This variable is intended for use by e.g., appimaged and is subject to 
+     * change any time. Do not rely on it being present. We might even limit this
+     * functionality specifically for builds used by appimaged.
+     */
+    if(getenv("TARGET_APPIMAGE") == NULL){
+        sprintf(appimage_path, "/proc/self/exe");
+    } else {
+        sprintf(appimage_path, "%s", getenv("TARGET_APPIMAGE"));
+        printf("Using TARGET_APPIMAGE %s\n", appimage_path);
+    }
+    
+    fs_offset = get_elf_size(appimage_path);
+    
     /* Just print the offset and then exit */
     arg=getArg(argc,argv,'-');
     if(arg && strcmp(arg,"appimage-offset")==0) {
@@ -222,22 +237,22 @@ main (int argc, char *argv[])
     if(arg && strcmp(arg,"appimage-updateinformation")==0) {
         unsigned long offset = 0;
         unsigned long length = 0;
-        get_elf_section_offset_and_lenghth("/proc/self/exe", ".upd_info", &offset, &length);
+        get_elf_section_offset_and_lenghth(appimage_path, ".upd_info", &offset, &length);
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
-        // print_hex("/proc/self/exe", offset, length);
-        print_binary("/proc/self/exe", offset, length);
+        // print_hex(appimage_path, offset, length);
+        print_binary(appimage_path, offset, length);
         exit(0);
     }
 
     if(arg && strcmp(arg,"appimage-signature")==0) {
         unsigned long offset = 0;
         unsigned long length = 0;
-        get_elf_section_offset_and_lenghth("/proc/self/exe", ".sha256_sig", &offset, &length);
+        get_elf_section_offset_and_lenghth(appimage_path, ".sha256_sig", &offset, &length);
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
-        // print_hex("/proc/self/exe", offset, length);
-        print_binary("/proc/self/exe", offset, length);
+        // print_hex(appimage_path, offset, length);
+        print_binary(appimage_path, offset, length);
         exit(0);
     }
     
@@ -286,7 +301,7 @@ main (int argc, char *argv[])
         /* close read pipe */
         close (keepalive_pipe[0]);
         
-        char *dir = realpath( "/proc/self/exe", NULL );
+        char *dir = realpath(appimage_path, NULL );
                 
         char options[100];
         sprintf(options, "ro,offset=%lu", fs_offset);
@@ -366,9 +381,16 @@ main (int argc, char *argv[])
         
         int length;
         char fullpath[FILE_MAX];
-        length = readlink("/proc/self/exe", fullpath, sizeof(fullpath));
-        fullpath[length] = '\0'; 
-        /* printf("%s\n", fullpath); */
+        if(getenv("TARGET_APPIMAGE") == NULL){
+            // If we are operating on this file itself
+            length = readlink(appimage_path, fullpath, sizeof(fullpath));
+            fullpath[length] = '\0'; 
+        } else {
+            // If we are operating on a different AppImage than this file
+            sprintf(fullpath, "%s", appimage_path); // TODO: Make absolute
+        }
+        // printf("appimage_path: %s\n", appimage_path);
+        // printf("fullpath: %s\n", fullpath);
         char theuri[URI_MAX];
         uri_from_filename(fullpath, theuri);
         /* printf("%s\n", theuri);  */
@@ -427,7 +449,7 @@ main (int argc, char *argv[])
         
         /* If called with --icon, then do not run the main app, just print print a message and exit after extracting the icon */ 
         if (arg && strcmp(arg,"appimage-icon")==0) {
-            printf("Written icon to %s\n", path_to_thumbnail);
+            printf("Written icon for %s to %s\n", fullpath, path_to_thumbnail);
             exit(0);
         }
     
@@ -445,10 +467,14 @@ main (int argc, char *argv[])
             setenv( "OWD", cwd, 1 );
         }
         
-        execv (filename, real_argv);
-        /* Error if we continue here */
-        perror ("execv error: ");
-        exit (1);
+        /* If we are operating on an AppImage different from this file,
+         * then we do not execute the payload */
+        if(getenv("TARGET_APPIMAGE") == NULL){
+            execv (filename, real_argv);
+            /* Error if we continue here */
+            perror ("execv error: ");
+            exit (1);
+        }
     }
     
     return 0;
