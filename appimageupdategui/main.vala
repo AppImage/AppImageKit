@@ -23,6 +23,7 @@ static void on_open_clicked() {
                                       "gtk-open", ResponseType.ACCEPT);
         FileFilter filter = new FileFilter ();
 	file_chooser.set_filter (filter);
+  file_chooser.set_current_folder(GLib.Environment.get_variable("HOME"));
 	filter.add_pattern("*.AppImage");
 	filter.add_pattern("*.iso");
         if (file_chooser.run () == ResponseType.ACCEPT) {
@@ -51,6 +52,7 @@ static void main (string[] args) {
     Gtk.main();
     Posix.exit(0);
   }
+
 	/* Set up the main window */
 	window_main = new Window();
 	window_main.title = "AppImageUpdate";
