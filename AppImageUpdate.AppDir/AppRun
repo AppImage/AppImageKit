@@ -4,5 +4,5 @@ HERE="$(dirname "$(readlink -f "${0}")")"
 cd "${HERE}/usr/"
 export LD_LIBRARY_PATH="${HERE}/usr/lib/:${LD_LIBRARY_PATH}"
 export PATH="${HERE}/usr/bin:${PATH}"
-exec "${HERE}/usr/bin/appimageupdate" "$@"
+exec "${HERE}/usr/bin/appimageupdategui" "$1"
 cd -
