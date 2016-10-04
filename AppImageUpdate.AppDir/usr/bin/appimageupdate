@@ -29,6 +29,12 @@ finished()
   echo "#########################"
 }
 
+if [ -e "${1}" ] ; then
+  ISO=$(realpath "${1}") # Make path absolute since we are cd'ing later
+else
+  echo "${1} does not exist"
+fi
+
 # A simple dependency check
 which zsync_curl >/dev/null || error "zsync_curl is missing"
 which dd >/dev/null || error "dd is missing"
@@ -80,12 +86,6 @@ if [ $# -lt 1 ] ; then
     error "${MSG}"
   fi
   exit $RESULT
-fi
-
-if [ -e "${1}" ] ; then
-  ISO="${1}"
-else
-  echo "${1} does not exist"
 fi
 
 # Check the type of this file
