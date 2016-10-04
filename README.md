@@ -30,7 +30,6 @@ Here are some concrete use cases for the AppImage format and the AppImageKit too
 
 Historically, UNIX and Linux systems have made it easy to procure source code, however they have made it comparably difficult to use ready-made software in binary form. In contrast, other systems, most prominently Windows and the classic Macintosh operating system, have made it relatively simple for independent software publishers (ISPs) to distribute software and for end-users to procure and install software from said ISPs, without any instances (such as distributors or App Stores) between the two parties.
 
-
 Package managers were introduced to mitigate the complexities of dealing with source code by providing libraries of precompiled packages from repositories maintained by distributors or third parties. However, the introduction of package managers did not drastically reduce complexities or provide robustness - they merely stacked a management layer on top of an already complex system, effectively preventing the user from manipulating installed software directly.
 
 With the introduction of Mac OS X, arguably the first UNIX-based operating system with widespread mass adoption to a non-technical user base, Apple blended traditional UNIX aspects (such as maintaining a traditional filesystem hierarchy, including `/bin`, `/usr`, `/lib` directories) with common "desktop" approaches (such as "installing" an application by dragging it to the hard disk). While Apple _does_ use a package manager-like approach for managing the base operating system and its updates, it does _not_ do so for the user applications.
@@ -54,6 +53,8 @@ Linus Torvalds addresses some core issues that inhibit Linux from truly conqueri
 > I'm talking about actual application writers that want to make a package of their application for Linux. And I've seen this firsthand with the other project I've been involved with, which is my divelog application. We make binaries for Windows and OS X. We basically don't make binaries for Linux. Why? Because binaries for Linux desktop applications is a major f*ing pain in the ass. Right. You don't make binaries for Linux. You make binaries for Fedora 19, Fedora 20, maybe there's even like RHEL 5 from ten years ago, you make binaries for debian stable, or actually you don't make binaries for debian stable because debian stable has libraries that are so old that anything that was built in the last century doesn't work. But you might make binaries for debian... whatever the codename is for unstable. And even that is a major pain because (...) debian has those rules that you are supposed to use shared libraries.
 
 More on this [here](https://github.com/probonopd/AppImages/blob/master/README.md).
+
+Another hint that something might be broken: https://wiki.debian.org/DontBreakDebian
 
 AppImage to the rescue. 
 
