@@ -31,9 +31,17 @@ public class ProgressWindow : Window {
     private string result_file_name;
 
     public ProgressWindow(string file_name, string[] files_to_be_updated) {
+
+	    var proc_file = File.new_for_path("/proc/self/exe");
+	    FileInfo proc_info;
+	    proc_info = proc_file.query_info("standard::symlink-target", FileQueryInfoFlags.NONE);
+	    var self_path = proc_info.get_symlink_target();
+	    var self_file = File.new_for_path(self_path);
+	    var parent_dir = self_file.get_parent().get_path();
+
             var builder = new Builder();
             try {
-                builder.add_from_file ("ui/progress.ui");
+                builder.add_from_file (parent_dir + "/ui/progress.ui");
             }
             catch (Error e) {
                 error ("Unable to load file: %s", e.message);
