@@ -113,7 +113,7 @@ public class ProgressWindow : Window {
             string a_string = string.joinv(" ", spawn_args);
 	    stdout.printf(a_string);
 
-	    Process.spawn_async_with_pipes ("/",
+	    Process.spawn_async_with_pipes (null,
 		    spawn_args,
 		    spawn_env,
 		    SpawnFlags.SEARCH_PATH | SpawnFlags.DO_NOT_REAP_CHILD,
