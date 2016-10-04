@@ -81,9 +81,16 @@ static void main (string[] args) {
 	var menu_icon = new Image.from_icon_name("gtk-menu" , IconSize.LARGE_TOOLBAR);
 	var open_icon = new Image.from_icon_name("gtk-open" , IconSize.LARGE_TOOLBAR);
 
+	var proc_file = File.new_for_path("/proc/self/exe");
+	FileInfo proc_info;
+	proc_info = proc_file.query_info("standard::symlink-target", FileQueryInfoFlags.NONE);
+	var self_path = proc_info.get_symlink_target();
+	var self_file = File.new_for_path(self_path);
+	var parent_dir = self_file.get_parent().get_path();
+
 	var builder = new Builder();
 	try {
-		builder.add_from_file ("ui/menu.ui");
+		builder.add_from_file (parent_dir + "/ui/menu.ui");
 	}
 	catch (Error e) {
 		error ("Unable to load file: %s", e.message);
