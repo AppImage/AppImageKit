@@ -24,11 +24,6 @@ error()
   exit 1
 }
 
-finished()
-{
-  echo "#########################"
-}
-
 if [ -e "${1}" ] ; then
   ISO=$(realpath "${1}") # Make path absolute since we are cd'ing later
 else
@@ -152,7 +147,7 @@ if [ "$TYPE" == "zsync" ] ; then
   # downloads and reuse the data already downloaded.
   ZSYNC_URL=$(echo "${APPLICATION_USED}" | cut -d "|" -f 2) # Get the URL of the zsync file
   # Get the file with zsync using $1 as an input file
-  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 && finished
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
   chmod --reference="${ISO}.zs-old" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
@@ -182,7 +177,7 @@ elif [ "$TYPE" == "bintray-zsync" ] ; then
   fi
   ZSYNC_URL=$(echo "${DUMMY_URL}" | sed -e "s|_latestVersion|$VERSION|g" )
   # Get the file with zsync using $1 as an input file
-  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1 && finished
+  zsync_curl -I -i "${ISO}" "${ZSYNC_URL}" 2>&1
   NEWFILE=$(basename "${ZSYNC_URL}" | sed -e 's|.zsync||g' ) # FIXME: Use the file that zsync has written!!!
   chmod --reference="${ISO}" "${NEWFILE}" # Set the same permissions as for the original file
   gpg_check
