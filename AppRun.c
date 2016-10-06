@@ -53,10 +53,9 @@ THE SOFTWARE.
 int filter (const struct dirent *dir)
 {
     char *p = (char*) &dir->d_name;
-    while (*++p);
-    while (*--p != '.');
+    p = strrchr(p, '.');
 
-    return !strcmp(p, ".desktop");
+    return p && !strcmp(p, ".desktop");
 }
 
 int main(int argc, char *argv[])
