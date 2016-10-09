@@ -39,7 +39,6 @@
 #include <errno.h>
 
 #include "squashfuse.h"
-#include "fuseprivate.h"
 #include <squashfs_fs.h>
 
 #include "elf.h"
@@ -59,6 +58,41 @@ bool startsWith(const char *pre, const char *str)
     size_t lenpre = strlen(pre),
     lenstr = strlen(str);
     return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
+
+/* Fill in a stat structure. Does not set st_ino */
+sqfs_err private_sqfs_stat(sqfs *fs, sqfs_inode *inode, struct stat *st) {
+	sqfs_err err = SQFS_OK;
+	uid_t id;
+	
+	memset(st, 0, sizeof(*st));
+	st->st_mode = inode->base.mode;
+	st->st_nlink = inode->nlink;
+	st->st_mtime = st->st_ctime = st->st_atime = inode->base.mtime;
+	
+	if (S_ISREG(st->st_mode)) {
+		/* FIXME: do symlinks, dirs, etc have a size? */
+		st->st_size = inode->xtra.reg.file_size;
+		st->st_blocks = st->st_size / 512;
+	} else if (S_ISBLK(st->st_mode) || S_ISCHR(st->st_mode)) {
+		st->st_rdev = sqfs_makedev(inode->xtra.dev.major,
+			inode->xtra.dev.minor);
+	} else if (S_ISLNK(st->st_mode)) {
+		st->st_size = inode->xtra.symlink_size;
+	}
+	
+	st->st_blksize = fs->sb.block_size; /* seriously? */
+	
+	err = sqfs_id_get(fs, inode->base.uid, &id);
+	if (err)
+		return err;
+	st->st_uid = id;
+	err = sqfs_id_get(fs, inode->base.guid, &id);
+	st->st_gid = id;
+	if (err)
+		return err;
+	
+	return SQFS_OK;
 }
 
 /* ================= End ELF parsing */
@@ -298,8 +332,8 @@ main (int argc, char *argv[])
                         }
                     } else if(inode.base.inode_type == SQUASHFS_REG_TYPE){
                         fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
-                        if(sqfs_stat(&fs, &inode, &st) != 0)
-                            die("sqfs_stat error");
+                        if(private_sqfs_stat(&fs, &inode, &st) != 0)
+                            die("private_sqfs_stat error");
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
                         size_t bytes_at_a_time = 1024; 
