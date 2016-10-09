@@ -38,11 +38,14 @@
 #include <pthread.h>
 #include <errno.h>
 
-#include <squashfuse.h>
+#include "squashfuse.h"
+#include "fuseprivate.h"
 #include <squashfs_fs.h>
 
 #include "elf.h"
 #include "getsection.h"
+
+struct stat st;
 
 static long unsigned int fs_offset; // The offset at which a filesystem image is expected = end of this ELF
 
@@ -295,6 +298,8 @@ main (int argc, char *argv[])
                         }
                     } else if(inode.base.inode_type == SQUASHFS_REG_TYPE){
                         fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
+                        if(sqfs_stat(&fs, &inode, &st) != 0)
+                            die("sqfs_stat error");
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
                         size_t bytes_at_a_time = 1024; 
@@ -313,6 +318,7 @@ main (int argc, char *argv[])
                             bytes_already_read = bytes_already_read + bytes_at_a_time;
                         }
                         fclose(f);
+                        chmod (prefixed_path_to_extract, st.st_mode);
                     } else if(inode.base.inode_type == SQUASHFS_SYMLINK_TYPE){
                         size_t size = 1024;
                         char *buf = malloc(size);
@@ -336,7 +342,6 @@ main (int argc, char *argv[])
         sqfs_fd_close(fs.fd);
         exit(0);
     }
-    
     
     if(arg && strcmp(arg,"appimage-version")==0) {
         fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
