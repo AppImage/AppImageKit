@@ -336,33 +336,33 @@ main (int argc, char *argv[])
                             die("private_sqfs_stat error");
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
-                        size_t bytes_at_a_time = 1024; 
+                        size_t bytes_at_a_time = 64*1024;
                         FILE * f;
                         f = fopen (prefixed_path_to_extract, "w+");
                         if (f == NULL)
                             die("fopen error");
                         while (bytes_already_read < inode.xtra.reg.file_size)
                         {
-                            char *buf = malloc(bytes_at_a_time);
+                            char buf[bytes_at_a_time];
                             if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
                                 die("sqfs_read_range error");
                             // fwrite(buf, 1, bytes_at_a_time, stdout);
                             fwrite(buf, 1, bytes_at_a_time, f);
-                            free(buf);                    
                             bytes_already_read = bytes_already_read + bytes_at_a_time;
                         }
                         fclose(f);
                         chmod (prefixed_path_to_extract, st.st_mode);
                     } else if(inode.base.inode_type == SQUASHFS_SYMLINK_TYPE){
-                        size_t size = 1024;
-                        char *buf = malloc(size);
-                        sqfs_readlink(&fs, &inode, buf, &size);
-                        fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
-                        unlink(prefixed_path_to_extract);
-                        int ret = symlink(buf, prefixed_path_to_extract);
+                        size_t size = strlen(trv.path)+1;
+                        char buf[size];
+                        int ret = sqfs_readlink(&fs, &inode, buf, &size);
                         if (ret != 0)
                             die("symlink error");
-                        free(buf);
+                        fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
+                        unlink(prefixed_path_to_extract);
+                        ret = symlink(buf, prefixed_path_to_extract);
+                        if (ret != 0)
+                            die("symlink error");
                     } else {
                         fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
                     }
