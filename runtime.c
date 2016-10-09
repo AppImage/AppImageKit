@@ -38,11 +38,26 @@
 #include <pthread.h>
 #include <errno.h>
 
+#include <squashfuse.h>
+#include <squashfs_fs.h>
+
 #include "elf.h"
 #include "getsection.h"
 
 static long unsigned int fs_offset; // The offset at which a filesystem image is expected = end of this ELF
-        
+
+static void die(const char *msg) {
+    fprintf(stderr, "%s\n", msg);
+    exit(1);
+}
+
+bool startsWith(const char *pre, const char *str)
+{
+    size_t lenpre = strlen(pre),
+    lenstr = strlen(str);
+    return lenstr < lenpre ? false : strncmp(pre, str, lenpre) == 0;
+}
+
 /* ================= End ELF parsing */
 
 /* ======================================================== Start helper functions for icon extraction */  
@@ -228,12 +243,106 @@ main (int argc, char *argv[])
         printf("%lu\n", fs_offset);
         exit(0);
     }
-
+    
+    /* Exract the AppImage */
+    arg=getArg(argc,argv,'-');
+    if(arg && strcmp(arg,"appimage-extract")==0) {
+        sqfs_err err = SQFS_OK;
+        sqfs_traverse trv;
+        sqfs fs;
+        char *image;
+        char *path_to_extract;
+        char *prefix;
+        char prefixed_path_to_extract[1024];
+        
+        prefix = "squashfs-root/";
+        
+        if(access(prefix, F_OK ) == -1 ) {
+            if (mkdir(prefix, 0777) == -1) {
+                perror("mkdir error");
+                exit(EXIT_FAILURE);
+            }
+        }
+        
+        image = "/proc/self/exe";
+        path_to_extract = "-a";
+        
+        if ((err = sqfs_open_image(&fs, image, fs_offset)))
+            exit(1);
+        
+        if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
+            die("sqfs_traverse_open error");
+        while (sqfs_traverse_next(&trv, &err)) {
+            if (!trv.dir_end) {
+                if((startsWith(path_to_extract, trv.path) != 0) || (strcmp("-a", path_to_extract) == 0)){
+                    fprintf(stderr, "trv.path: %s\n", trv.path);
+                    fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
+                    sqfs_inode inode;
+                    if (sqfs_inode_get(&fs, &inode, trv.entry.inode))
+                        die("sqfs_inode_get error");
+                    fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
+                    fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
+                    strcpy(prefixed_path_to_extract, "");
+                    strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
+                    if(inode.base.inode_type == SQUASHFS_DIR_TYPE){
+                        fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
+                        fprintf(stderr, "mkdir: %s/\n", prefixed_path_to_extract);
+                        if(access(prefixed_path_to_extract, F_OK ) == -1 ) {
+                            if (mkdir(prefixed_path_to_extract, 0777) == -1) {
+                                perror("mkdir error");
+                                exit(EXIT_FAILURE);
+                            }
+                        }
+                    } else if(inode.base.inode_type == SQUASHFS_REG_TYPE){
+                        fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
+                        // Read the file in chunks
+                        off_t bytes_already_read = 0;
+                        size_t bytes_at_a_time = 1024; 
+                        FILE * f;
+                        f = fopen (prefixed_path_to_extract, "w+");
+                        if (f == NULL)
+                            die("fopen error");
+                        while (bytes_already_read < inode.xtra.reg.file_size)
+                        {
+                            char *buf = malloc(bytes_at_a_time);
+                            if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
+                                die("sqfs_read_range error");
+                            // fwrite(buf, 1, bytes_at_a_time, stdout);
+                            fwrite(buf, 1, bytes_at_a_time, f);
+                            free(buf);                    
+                            bytes_already_read = bytes_already_read + bytes_at_a_time;
+                        }
+                        fclose(f);
+                    } else if(inode.base.inode_type == SQUASHFS_SYMLINK_TYPE){
+                        size_t size = 1024;
+                        char *buf = malloc(size);
+                        sqfs_readlink(&fs, &inode, buf, &size);
+                        fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
+                        unlink(prefixed_path_to_extract);
+                        int ret = symlink(buf, prefixed_path_to_extract);
+                        if (ret != 0)
+                            die("symlink error");
+                        free(buf);
+                    } else {
+                        fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
+                    }
+                    fprintf(stderr, "\n");
+                }
+            }
+        }
+        if (err)
+            die("sqfs_traverse_next error");
+        sqfs_traverse_close(&trv);
+        sqfs_fd_close(fs.fd);
+        exit(0);
+    }
+    
+    
     if(arg && strcmp(arg,"appimage-version")==0) {
         fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
         exit(0);
     }
-
+    
     if(arg && strcmp(arg,"appimage-updateinformation")==0) {
         unsigned long offset = 0;
         unsigned long length = 0;
@@ -244,7 +353,7 @@ main (int argc, char *argv[])
         print_binary(appimage_path, offset, length);
         exit(0);
     }
-
+    
     if(arg && strcmp(arg,"appimage-signature")==0) {
         unsigned long offset = 0;
         unsigned long length = 0;
@@ -302,7 +411,7 @@ main (int argc, char *argv[])
         close (keepalive_pipe[0]);
         
         char *dir = realpath(appimage_path, NULL );
-                
+        
         char options[100];
         sprintf(options, "ro,offset=%lu", fs_offset);
         
@@ -352,30 +461,7 @@ main (int argc, char *argv[])
             printf("%s\n", mount_dir);
             for (;;) pause();
         }
- 
-        /* Extract all the data from inside the AppImage. 
-         * TODO: Do this without FUSE. squashfuse should be able to
-         * extract without the need for mounting it.
-         * So that users without FUSE can still extract. */
-        if(arg && strcmp(arg,"appimage-extract")==0) {
-            pid_t parent = getpid();
-            pid_t pid = fork();
-            
-            if (pid == -1) {
-                // error, failed to fork()
-                return(-1);
-            } else if (pid > 0) {
-                int status;
-                waitpid(pid, &status, 0);
-            } else {
-                // we are the child
-                execlp("cp", "cp", "-rfv", "--no-preserve=ownership,xattr",  mount_dir, "Extracted.AppDir", (char *)0);
-                perror("execlp");   // execlp() returns only on error
-                return(-1); // exec never returns
-            }
-            exit(0);
-        }
-       
+        
         
         /* ======================================================== Start icon extraction */
         
@@ -452,11 +538,11 @@ main (int argc, char *argv[])
             printf("Written icon for %s to %s\n", fullpath, path_to_thumbnail);
             exit(0);
         }
-    
-
+        
+        
         /* ======================================================== End icon extraction */   
         
-
+        
         /* Setting some environment variables that the app "inside" might use */
         setenv( "APPIMAGE", fullpath, 1 );
         setenv( "APPDIR", mount_dir, 1 );
