@@ -336,7 +336,7 @@ main (int argc, char *argv[])
                             die("private_sqfs_stat error");
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
-                        size_t bytes_at_a_time = 64*1024;
+                        sqfs_off_t bytes_at_a_time = 64*1024;
                         FILE * f;
                         f = fopen (prefixed_path_to_extract, "w+");
                         if (f == NULL)
