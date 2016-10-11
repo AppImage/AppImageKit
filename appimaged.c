@@ -35,10 +35,12 @@
  */
 
 static gboolean verbose = FALSE;
+gchar **remaining_args = NULL;
 
 static GOptionEntry entries[] =
 {
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
+    { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
 };
 
@@ -432,6 +434,30 @@ void signal_handler (int signum)
     keep_running = 0;
 }
 
+int add_dir_to_watch(char *the_dir, int inotify_fd)
+{
+    int wd = watch_dir (inotify_fd, the_dir, IN_ALL_EVENTS);
+    printf("Watching %s\n", the_dir);
+    /* Upon launch, register all the files in the given directory */
+    DIR *d;
+    struct dirent *dir;
+    d = opendir(the_dir);
+    if (d)
+    {
+        while ((dir = readdir(d)) != NULL)
+        {
+            if (dir->d_type == DT_REG)
+            {
+                gchar *ai;
+                ai = g_strconcat (the_dir, dir->d_name, NULL);
+                ai_register(ai);
+            }
+        }
+        closedir(d);
+    }
+    return wd;
+}
+        
 int main (int argc, char **argv)
 {
     GError *error = NULL;
@@ -490,29 +516,41 @@ int main (int argc, char **argv)
         wd = 0;
         printf("\n");
         unsigned long flags;
-        for (index = 1; (index < argc) && (wd >= 0); index++) 
-        {
-            wd = watch_dir (inotify_fd, argv[index], IN_ALL_EVENTS);
-            printf("Watching %s\n", argv[index]);
-            /* Upon launch, register all the files in the given directory */
-            DIR *d;
-            struct dirent *dir;
-            d = opendir(argv[index]);
-            if (d)
+        
+        gchar *dir;
+        
+        /* Watch hardcoded directories if they exist */
+        dir=g_build_filename(g_get_home_dir(), "/Downloads", NULL);
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+             wd = add_dir_to_watch(dir, inotify_fd);
+
+        dir=g_build_filename(g_get_home_dir(), "/bin", NULL);
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+             wd = add_dir_to_watch(dir, inotify_fd);        
+        
+        dir=g_build_filename(g_get_home_dir(), "/Applications", NULL);
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+             wd = add_dir_to_watch(dir, inotify_fd);
+        
+        dir=g_build_filename("/isodevice/Applications", NULL);
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+             wd = add_dir_to_watch(dir, inotify_fd);
+
+        dir=g_build_filename("/usr/local/bin", NULL);
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+             wd = add_dir_to_watch(dir, inotify_fd);
+           
+        dir=g_build_filename("/opt", NULL);
+        if (g_file_test (dir, G_FILE_TEST_IS_DIR))
+             wd = add_dir_to_watch(dir, inotify_fd);
+                   
+        /* Watch additional directories that have been specified on the command line */
+        if(remaining_args){
+            for (index = 0; (index < g_strv_length(remaining_args)) && (wd >= 0); index++) 
             {
-                while ((dir = readdir(d)) != NULL)
-                {
-                    if (dir->d_type == DT_REG)
-                    {
-                        gchar *ai;
-                        ai = g_strconcat (argv[index], dir->d_name, NULL);
-                        ai_register(ai);
-                    }
-                }
-                closedir(d);
+                wd = add_dir_to_watch(remaining_args[index], inotify_fd);
             }
         }
-        
         if (wd > 0) 
         {
             process_inotify_events (q, inotify_fd);
@@ -523,4 +561,3 @@ int main (int argc, char **argv)
     }
     return 0;
 }
-
