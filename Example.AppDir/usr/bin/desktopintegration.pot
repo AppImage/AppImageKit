@@ -1,0 +1,28 @@
+msgid "%s is not named correctly. It should be named %s"
+msgstr ""
+
+msgid "%s not found"
+msgstr ""
+
+msgid "%s, %s, %s missing. At least one is needed. Skipping %s."
+msgstr ""
+
+msgid "%s is missing. Skipping %s."
+msgstr ""
+
+msgid "Desktop file is missing. Please run %s from within an AppImage."
+msgstr ""
+
+msgid ""
+"%s is missing. Probably not running %s from within an AppImage.\\nHence "
+"falling back to using %s"
+msgstr ""
+
+msgid "Install"
+msgstr ""
+
+msgid ""
+"Would you like to integrate %s with your system?\\n\\nThis will add it to "
+"your applications menu and install icons.\\nIf you don't do this you can "
+"still launch the application by double-clicking on the AppImage."
+msgstr ""
