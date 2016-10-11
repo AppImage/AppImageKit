@@ -13,29 +13,38 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <dirent.h>
+
+#include <glib.h>
+#include <glib/gprintf.h>
 
 /*
+Compile with:
+sudo apt-get -y install libglib2.0-dev
+gcc appimaged.c $(pkg-config --cflags glib-2.0) $(pkg-config --libs glib-2.0) -o appimaged
+
 Watch directories for AppImages and register/unregister them with the system
 Partly based on example code from
 http://www.ibm.com/developerworks/library/l-inotify/
 
 TODO:
+- At startup, register all files in the watched directories
 - Recursive direcory watch
 - Add and remove subdirectories on the fly
 - Only watch for the events we are interested in
 */
 
 /* Register AppImage in the system */
-int register_ai (char *cur_event_filename)
+int ai_register (char *cur_event_filename)
 {
-  printf ("### To be implemented: REGISTER\n");
+  printf ("-> REGISTER %s\n", cur_event_filename);
   return 0;
 }
 
 /* Unregister AppImage in the system */
-int unregister_ai (char *cur_event_filename)
+int unai_register (char *cur_event_filename)
 {
-  printf ("### To be implemented: UNREGISTER\n");
+  printf ("-> UNREGISTER %s\n", cur_event_filename);
   return 0;
 }
 
@@ -203,7 +212,7 @@ void handle_event (queue_entry_t event)
       printf ("CLOSE_WRITE: %s \"%s\"\n",
 	      cur_event_file_or_dir, cur_event_filename);
       if(cur_event_file_or_dir == "File")
-              register_ai(cur_event_filename);
+              ai_register(cur_event_filename);
       break;
 
       /* File open read-only was closed */
@@ -220,7 +229,7 @@ void handle_event (queue_entry_t event)
 	      cur_event_file_or_dir, cur_event_filename, 
               cur_event_cookie);
       if(cur_event_file_or_dir == "File")
-              unregister_ai(cur_event_filename);
+              unai_register(cur_event_filename);
       break;
 
       /* File was moved to X */
@@ -229,7 +238,7 @@ void handle_event (queue_entry_t event)
 	      cur_event_file_or_dir, cur_event_filename, 
               cur_event_cookie);
       if(cur_event_file_or_dir == "File")
-              register_ai(cur_event_filename);
+              ai_register(cur_event_filename);
       break;
 
       /* Subdir or file was deleted */
@@ -237,7 +246,7 @@ void handle_event (queue_entry_t event)
       printf ("DELETE: %s \"%s\"\n",
 	      cur_event_file_or_dir, cur_event_filename);
       if(cur_event_file_or_dir == "File")
-              unregister_ai(cur_event_filename);
+              unai_register(cur_event_filename);
       break;
 
       /* Subdir or file was created */
@@ -458,6 +467,23 @@ int main (int argc, char **argv)
       for (index = 1; (index < argc) && (wd >= 0); index++) 
 	{
 	  wd = watch_dir (inotify_fd, argv[index], IN_ALL_EVENTS);
+          printf("Watching %s\n", argv[index]);
+          DIR *d;
+	  struct dirent *dir;
+	  d = opendir(argv[index]);
+	  if (d)
+	  {
+	    while ((dir = readdir(d)) != NULL)
+	    {
+		  if (dir->d_type == DT_REG)
+		  {
+	              gchar *ai;
+                      ai = g_strconcat (argv[index], dir->d_name, NULL);
+		     ai_register(ai);
+		  }
+	    }
+	    closedir(d);
+	  }
 	}
 
       if (wd > 0) 
