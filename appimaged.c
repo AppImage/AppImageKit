@@ -19,43 +19,51 @@
 #include <glib/gprintf.h>
 
 /*
-Compile with:
-sudo apt-get -y install libglib2.0-dev
-gcc appimaged.c $(pkg-config --cflags glib-2.0) $(pkg-config --libs glib-2.0) -o appimaged
+ * Compile with:
+ * sudo apt-get -y install libglib2.0-dev
+ * gcc appimaged.c $(pkg-config --cflags glib-2.0) $(pkg-config --libs glib-2.0) -o appimaged
+ * 
+ * Watch directories for AppImages and register/unregister them with the system
+ * Partly based on example code from
+ * http://www.ibm.com/developerworks/library/l-inotify/
+ * 
+ * TODO:
+ * - Recursive direcory watch
+ * - Also watch /tmp/.mount* and resolve to the launching AppImage
+ * - Add and remove subdirectories on the fly
+ * - Only watch for the events we are interested in
+ */
 
-Watch directories for AppImages and register/unregister them with the system
-Partly based on example code from
-http://www.ibm.com/developerworks/library/l-inotify/
+static gboolean verbose = FALSE;
 
-TODO:
-- At startup, register all files in the watched directories
-- Recursive direcory watch
-- Add and remove subdirectories on the fly
-- Only watch for the events we are interested in
-*/
+static GOptionEntry entries[] =
+{
+    { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
+    { NULL }
+};
 
 /* Register AppImage in the system */
 int ai_register (char *cur_event_filename)
 {
-  printf ("-> REGISTER %s\n", cur_event_filename);
-  return 0;
+    printf ("-> REGISTER %s\n", cur_event_filename);
+    return 0;
 }
 
 /* Unregister AppImage in the system */
 int unai_register (char *cur_event_filename)
 {
-  printf ("-> UNREGISTER %s\n", cur_event_filename);
-  return 0;
+    printf ("-> UNREGISTER %s\n", cur_event_filename);
+    return 0;
 }
 
 /* Simple queue implemented as a singly linked list with head 
-   and tail pointers maintained
-*/
+ * and tail pointers maintained
+ */
 
 struct queue_entry
 {
-  struct queue_entry * next_ptr;   /* Pointer to next entry */
-  struct inotify_event inot_ev;
+    struct queue_entry * next_ptr;   /* Pointer to next entry */
+    struct inotify_event inot_ev;
 };
 
 typedef struct queue_entry * queue_entry_t;
@@ -63,436 +71,456 @@ typedef struct queue_entry * queue_entry_t;
 /*struct queue_struct; */
 struct queue_struct
 {
-  struct queue_entry * head;
-  struct queue_entry * tail;
+    struct queue_entry * head;
+    struct queue_entry * tail;
 };
 typedef struct queue_struct *queue_t;
 
 int queue_empty (queue_t q)
 {
-  return q->head == NULL;
+    return q->head == NULL;
 }
 
 queue_t queue_create ()
 {
-  queue_t q;
-  q = malloc (sizeof (struct queue_struct));
-  if (q == NULL)
-    exit (-1);
-
-  q->head = q->tail = NULL;
-  return q;
+    queue_t q;
+    q = malloc (sizeof (struct queue_struct));
+    if (q == NULL)
+        exit (-1);
+    
+    q->head = q->tail = NULL;
+    return q;
 }
 
 void queue_destroy (queue_t q)
 {
-  if (q != NULL)
+    if (q != NULL)
     {
-      while (q->head != NULL)
-	{
-	  queue_entry_t next = q->head;
-	  q->head = next->next_ptr;
-	  next->next_ptr = NULL;
-	  free (next);
-	}
-      q->head = q->tail = NULL;
-      free (q);
+        while (q->head != NULL)
+        {
+            queue_entry_t next = q->head;
+            q->head = next->next_ptr;
+            next->next_ptr = NULL;
+            free (next);
+        }
+        q->head = q->tail = NULL;
+        free (q);
     }
 }
 
 void queue_enqueue (queue_entry_t d, queue_t q)
 {
-  d->next_ptr = NULL;
-  if (q->tail)
+    d->next_ptr = NULL;
+    if (q->tail)
     {
-       q->tail->next_ptr = d;
-       q->tail = d;
+        q->tail->next_ptr = d;
+        q->tail = d;
     }
-  else
+    else
     {
-      q->head = q->tail = d;
+        q->head = q->tail = d;
     }
 }
 
 queue_entry_t  queue_dequeue (queue_t q)
 {
-  queue_entry_t first = q->head;
-  if (first)
+    queue_entry_t first = q->head;
+    if (first)
     {
-      q->head = first->next_ptr;
-      if (q->head == NULL) 
-	{
-	  q->tail = NULL;
-	}
-      first->next_ptr = NULL;
+        q->head = first->next_ptr;
+        if (q->head == NULL) 
+        {
+            q->tail = NULL;
+        }
+        first->next_ptr = NULL;
     }
-  return first;
+    return first;
 }
 
 extern int keep_running;
 static int watched_items;
 
 /* Create an inotify instance and open a file descriptor
-   to access it */
+ *to access it */
 int open_inotify_fd ()
 {
-  int fd;
-
-  watched_items = 0;
-  fd = inotify_init ();
-
-  if (fd < 0)
+    int fd;
+    
+    watched_items = 0;
+    fd = inotify_init ();
+    
+    if (fd < 0)
     {
-      perror ("inotify_init () = ");
+        perror ("inotify_init () = ");
     }
-  return fd;
+    return fd;
 }
 
 /* Close the open file descriptor that was opened with inotify_init() */
 int close_inotify_fd (int fd)
 {
-  int r;
-
-  if ((r = close (fd)) < 0)
+    int r;
+    
+    if ((r = close (fd)) < 0)
     {
-      perror ("close (fd) = ");
+        perror ("close (fd) = ");
     }
-
-  watched_items = 0;
-  return r;
+    
+    watched_items = 0;
+    return r;
 }
 
 /* This method does the work of determining what happened,
-   then allows us to act appropriately
-*/
+ * then allows us to act appropriately
+ */
 void handle_event (queue_entry_t event)
 {
-  /* If the event was associated with a filename, we will store it here */
-  char *cur_event_filename = NULL;
-  char *cur_event_file_or_dir = NULL;
-  /* This is the watch descriptor the event occurred on */
-  int cur_event_wd = event->inot_ev.wd;
-  int cur_event_cookie = event->inot_ev.cookie;
-  unsigned long flags;
-
-  if (event->inot_ev.len)
+    /* If the event was associated with a filename, we will store it here */
+    char *cur_event_filename = NULL;
+    char *cur_event_file_or_dir = NULL;
+    /* This is the watch descriptor the event occurred on */
+    int cur_event_wd = event->inot_ev.wd;
+    int cur_event_cookie = event->inot_ev.cookie;
+    unsigned long flags;
+    
+    if (event->inot_ev.len)
     {
-      cur_event_filename = event->inot_ev.name;
+        cur_event_filename = event->inot_ev.name;
     }
-  if ( event->inot_ev.mask & IN_ISDIR )
+    if ( event->inot_ev.mask & IN_ISDIR )
     {
-      cur_event_file_or_dir = "Dir";
+        cur_event_file_or_dir = "Dir";
     }
-  else 
+    else 
     {
-      cur_event_file_or_dir = "File";
+        cur_event_file_or_dir = "File";
     }
-  flags = event->inot_ev.mask & 
+    flags = event->inot_ev.mask & 
     ~(IN_ALL_EVENTS | IN_UNMOUNT | IN_Q_OVERFLOW | IN_IGNORED );
-
-  /* Perform event dependent handler routines */
-  /* The mask is the magic that tells us what file operation occurred */
-  switch (event->inot_ev.mask & 
-	  (IN_ALL_EVENTS | IN_UNMOUNT | IN_Q_OVERFLOW | IN_IGNORED))
+    
+    /* Perform event dependent handler routines */
+    /* The mask is the magic that tells us what file operation occurred */
+    switch (event->inot_ev.mask & 
+        (IN_ALL_EVENTS | IN_UNMOUNT | IN_Q_OVERFLOW | IN_IGNORED))
     {
-      /* File was accessed */
-    case IN_ACCESS:
-      break;
-
-      /* File was modified */
-    case IN_MODIFY:
-      break;
-
-      /* File changed attributes */
-    case IN_ATTRIB:
-      break;
-
-      /* File open for writing was closed */
-    case IN_CLOSE_WRITE:
-      printf ("CLOSE_WRITE: %s \"%s\"\n",
-	      cur_event_file_or_dir, cur_event_filename);
-      if(cur_event_file_or_dir == "File")
-              ai_register(cur_event_filename);
-      break;
-
-      /* File open read-only was closed */
-    case IN_CLOSE_NOWRITE:
-      break;
-
-      /* File was opened */
-    case IN_OPEN:
-      break;
-
-      /* File was moved from X */
-    case IN_MOVED_FROM:
-      printf ("MOVED_FROM: %s \"%s\". Cookie=%d\n",
-	      cur_event_file_or_dir, cur_event_filename, 
-              cur_event_cookie);
-      if(cur_event_file_or_dir == "File")
-              unai_register(cur_event_filename);
-      break;
-
-      /* File was moved to X */
-    case IN_MOVED_TO:
-      printf ("MOVED_TO: %s \"%s\". Cookie=%d\n",
-	      cur_event_file_or_dir, cur_event_filename, 
-              cur_event_cookie);
-      if(cur_event_file_or_dir == "File")
-              ai_register(cur_event_filename);
-      break;
-
-      /* Subdir or file was deleted */
-    case IN_DELETE:
-      printf ("DELETE: %s \"%s\"\n",
-	      cur_event_file_or_dir, cur_event_filename);
-      if(cur_event_file_or_dir == "File")
-              unai_register(cur_event_filename);
-      break;
-
-      /* Subdir or file was created */
-    case IN_CREATE:
-      if(cur_event_file_or_dir == "Dir"){
-      printf ("CREATE: %s \"%s\"\n",
-	      cur_event_file_or_dir, cur_event_filename);
-      }
-      break;
-
-      /* Watched entry was deleted */
-    case IN_DELETE_SELF:
-      break;
-
-      /* Watched entry was moved */
-    case IN_MOVE_SELF:
-      break;
-
-      /* Backing FS was unmounted */
-    case IN_UNMOUNT:
-      break;
-
-      /* Too many FS events were received without reading them
-         some event notifications were potentially lost.  */
-    case IN_Q_OVERFLOW:
-      printf ("Warning: AN OVERFLOW EVENT OCCURRED: \n");
-      break;
-
-      /* Watch was removed explicitly by inotify_rm_watch or automatically
-         because file was deleted, or file system was unmounted.  */
-    case IN_IGNORED:
-      watched_items--;
-      printf ("IGNORED: WD #%d\n", cur_event_wd);
-      printf("Watching = %d items\n",watched_items); 
-      break;
-
-      /* Some unknown message received */
-    default:
-      printf ("UNKNOWN EVENT \"%X\" OCCURRED for file \"%s\"\n",
-	      event->inot_ev.mask, cur_event_filename);
-      break;
+        /* File was accessed */
+        case IN_ACCESS:
+            break;
+            
+        /* File was modified */
+        case IN_MODIFY:
+            break;
+            
+        /* File changed attributes */
+        case IN_ATTRIB:
+            break;
+            
+        /* File open for writing was closed */
+        case IN_CLOSE_WRITE:
+            if(verbose)
+                printf ("CLOSE_WRITE: %s \"%s\"\n",
+                        cur_event_file_or_dir, cur_event_filename);
+                if(cur_event_file_or_dir == "File")
+                    ai_register(cur_event_filename);
+                break;
+            
+        /* File open read-only was closed */
+        case IN_CLOSE_NOWRITE:
+            break;
+            
+        /* File was opened */
+        case IN_OPEN:
+            break;
+            
+        /* File was moved from X */
+        case IN_MOVED_FROM:
+            if(verbose)
+                printf ("MOVED_FROM: %s \"%s\". Cookie=%d\n",
+                        cur_event_file_or_dir, cur_event_filename, 
+                        cur_event_cookie);
+                if(cur_event_file_or_dir == "File")
+                    unai_register(cur_event_filename);
+                break;
+            
+        /* File was moved to X */
+        case IN_MOVED_TO:
+            if(verbose)
+                printf ("MOVED_TO: %s \"%s\". Cookie=%d\n",
+                        cur_event_file_or_dir, cur_event_filename, 
+                        cur_event_cookie);
+                if(cur_event_file_or_dir == "File")
+                    ai_register(cur_event_filename);
+                break;
+            
+        /* Subdir or file was deleted */
+        case IN_DELETE:
+            if(verbose)
+                printf ("DELETE: %s \"%s\"\n",
+                        cur_event_file_or_dir, cur_event_filename);
+                if(cur_event_file_or_dir == "File")
+                    unai_register(cur_event_filename);
+                break;
+            
+        /* Subdir or file was created */
+        case IN_CREATE:
+            if(cur_event_file_or_dir == "Dir"){
+                if(verbose)
+                    printf ("CREATE: %s \"%s\"\n",
+                            cur_event_file_or_dir, cur_event_filename);
+            }
+            break;
+            
+        /* Watched entry was deleted */
+        case IN_DELETE_SELF:
+            break;
+            
+        /* Watched entry was moved */
+        case IN_MOVE_SELF:
+            break;
+            
+        /* Backing FS was unmounted */
+        case IN_UNMOUNT:
+            break;
+            
+        /* Too many FS events were received without reading them
+            *        some event notifications were potentially lost.  */
+        case IN_Q_OVERFLOW:
+            if(verbose)
+                printf ("Warning: AN OVERFLOW EVENT OCCURRED: \n");
+            break;
+            
+        /* Watch was removed explicitly by inotify_rm_watch or automatically
+            *        because file was deleted, or file system was unmounted.  */
+        case IN_IGNORED:
+            watched_items--;
+            printf ("IGNORED: WD #%d\n", cur_event_wd);
+            printf("Watching = %d items\n",watched_items); 
+            break;
+            
+        /* Some unknown message received */
+        default:
+            printf ("UNKNOWN EVENT \"%X\" OCCURRED for file \"%s\"\n",
+                    event->inot_ev.mask, cur_event_filename);
+            break;
     }
-  /* If any flags were set other than IN_ISDIR, report the flags */
-  if (flags & (~IN_ISDIR))
+    /* If any flags were set other than IN_ISDIR, report the flags */
+    if (flags & (~IN_ISDIR))
     {
-      flags = event->inot_ev.mask;
-      printf ("Flags=%lX\n", flags);
+        flags = event->inot_ev.mask;
+        printf ("Flags=%lX\n", flags);
     }
 }
 
 void handle_events (queue_t q)
 {
-  queue_entry_t event;
-  while (!queue_empty (q))
+    queue_entry_t event;
+    while (!queue_empty (q))
     {
-      event = queue_dequeue (q);
-      handle_event (event);
-      free (event);
+        event = queue_dequeue (q);
+        handle_event (event);
+        free (event);
     }
 }
 
 int read_events (queue_t q, int fd)
 {
-  char buffer[16384];
-  size_t buffer_i;
-  struct inotify_event *pevent;
-  queue_entry_t event;
-  ssize_t r;
-  size_t event_size, q_event_size;
-  int count = 0;
-
-  r = read (fd, buffer, 16384);
-  if (r <= 0)
-    return r;
-  buffer_i = 0;
-  while (buffer_i < r)
+    char buffer[16384];
+    size_t buffer_i;
+    struct inotify_event *pevent;
+    queue_entry_t event;
+    ssize_t r;
+    size_t event_size, q_event_size;
+    int count = 0;
+    
+    r = read (fd, buffer, 16384);
+    if (r <= 0)
+        return r;
+    buffer_i = 0;
+    while (buffer_i < r)
     {
-      /* Parse events and queue them. */
-      pevent = (struct inotify_event *) &buffer[buffer_i];
-      event_size =  offsetof (struct inotify_event, name) + pevent->len;
-      q_event_size = offsetof (struct queue_entry, inot_ev.name) + pevent->len;
-      event = malloc (q_event_size);
-      memmove (&(event->inot_ev), pevent, event_size);
-      queue_enqueue (event, q);
-      buffer_i += event_size;
-      count++;
+        /* Parse events and queue them. */
+        pevent = (struct inotify_event *) &buffer[buffer_i];
+        event_size =  offsetof (struct inotify_event, name) + pevent->len;
+        q_event_size = offsetof (struct queue_entry, inot_ev.name) + pevent->len;
+        event = malloc (q_event_size);
+        memmove (&(event->inot_ev), pevent, event_size);
+        queue_enqueue (event, q);
+        buffer_i += event_size;
+        count++;
     }
-  return count;
+    return count;
 }
 
 int event_check (int fd)
 {
-  fd_set rfds;
-  FD_ZERO (&rfds);
-  FD_SET (fd, &rfds);
-  /* Wait until an event happens or we get interrupted 
-     by a signal that we catch */
-  return select (FD_SETSIZE, &rfds, NULL, NULL, NULL);
+    fd_set rfds;
+    FD_ZERO (&rfds);
+    FD_SET (fd, &rfds);
+    /* Wait until an event happens or we get interrupted 
+     *    by a signal that we catch */
+    return select (FD_SETSIZE, &rfds, NULL, NULL, NULL);
 }
 
 int process_inotify_events (queue_t q, int fd)
 {
-  while (keep_running && (watched_items > 0))
+    while (keep_running && (watched_items > 0))
     {
-      if (event_check (fd) > 0)
-	{
-	  int r;
-	  r = read_events (q, fd);
-	  if (r < 0)
-	    {
-	      break;
-	    }
-	  else
-	    {
-	      handle_events (q);
-	    }
-	}
+        if (event_check (fd) > 0)
+        {
+            int r;
+            r = read_events (q, fd);
+            if (r < 0)
+            {
+                break;
+            }
+            else
+            {
+                handle_events (q);
+            }
+        }
     }
-  return 0;
+    return 0;
 }
 
 int watch_dir (int fd, const char *dirname, unsigned long mask)
 {
-  int wd;
-  wd = inotify_add_watch (fd, dirname, mask);
-  if (wd < 0)
+    int wd;
+    wd = inotify_add_watch (fd, dirname, mask);
+    if (wd < 0)
     {
-      printf ("Cannot add watch for \"%s\" with event mask %lX", dirname,
-	      mask);
-      fflush (stdout);
-      perror (" ");
+        printf ("Cannot add watch for \"%s\" with event mask %lX", dirname,
+                mask);
+        fflush (stdout);
+        perror (" ");
     }
-  else
+    else
     {
-      watched_items++;
-      printf ("Watching %s WD=%d\n", dirname, wd);
-      printf ("Watching = %d items\n", watched_items); 
+        watched_items++;
+        printf ("Watching %s WD=%d\n", dirname, wd);
+        printf ("Watching = %d items\n", watched_items); 
     }
-  return wd;
+    return wd;
 }
 
 int ignore_wd (int fd, int wd)
 {
-  int r;
-  r = inotify_rm_watch (fd, wd);
-  if (r < 0)
+    int r;
+    r = inotify_rm_watch (fd, wd);
+    if (r < 0)
     {
-      perror ("inotify_rm_watch(fd, wd) = ");
+        perror ("inotify_rm_watch(fd, wd) = ");
     }
-  else 
+    else 
     {
-      watched_items--;
+        watched_items--;
     }
-  return r;
+    return r;
 }
 
 int keep_running;
 
 /* This program will take as arguments one or more directory 
-   or file names, and monitor them, printing event notifications 
-   to the console. It will automatically terminate if all watched
-   items are deleted or unmounted. Use ctrl-C or kill to 
-   terminate otherwise.
-*/
+ * or file names, and monitor them, printing event notifications 
+ * to the console. It will automatically terminate if all watched
+ * items are deleted or unmounted. Use ctrl-C or kill to 
+ * terminate otherwise.
+ */
 
 /* Signal handler that simply resets a flag to cause termination */
 void signal_handler (int signum)
 {
-  keep_running = 0;
+    keep_running = 0;
 }
 
 int main (int argc, char **argv)
 {
-  /* This is the file descriptor for the inotify watch */
-  int inotify_fd;
-
-  keep_running = 1;
-
-  /* Set a ctrl-c signal handler */
-  if (signal (SIGINT, signal_handler) == SIG_IGN)
+    GError *error = NULL;
+    GOptionContext *context;
+    
+    context = g_option_context_new ("");
+    g_option_context_add_main_entries (context, entries, NULL);
+    // g_option_context_add_group (context, gtk_get_option_group (TRUE));
+    if (!g_option_context_parse (context, &argc, &argv, &error))
     {
-      /* Reset to SIG_IGN (ignore) if that was the prior state */
-      signal (SIGINT, SIG_IGN);
+        g_print ("option parsing failed: %s\n", error->message);
+        exit (1);
     }
-
-  /* First we open the inotify dev entry */
-  inotify_fd = open_inotify_fd ();
-  if (inotify_fd > 0)
+    
+    /* This is the file descriptor for the inotify watch */
+    int inotify_fd;
+    
+    keep_running = 1;
+    
+    /* Set a ctrl-c signal handler */
+    if (signal (SIGINT, signal_handler) == SIG_IGN)
     {
-
-      /* We will need a place to enqueue inotify events,
-         this is needed because if you do not read events
-         fast enough, you will miss them. This queue is 
-         probably too small if you are monitoring something
-         like a directory with a lot of files and the directory 
-         is deleted.
-       */
-      queue_t q;
-      q = queue_create (128);
-
-      /* This is the watch descriptor returned for each item we are 
-         watching. A real application might keep these for some use 
-         in the application. This sample only makes sure that none of
-         the watch descriptors is less than 0.
-       */
-      int wd;
-
-
-      /* Watch all events (IN_ALL_EVENTS) for the directories and 
-         files passed in as arguments.
-         Read the article for why you might want to alter this for 
-         more efficient inotify use in your app.      
-       */
-      int index;
-      wd = 0;
-      printf("\n");
-      unsigned long flags;
-      for (index = 1; (index < argc) && (wd >= 0); index++) 
-	{
-	  wd = watch_dir (inotify_fd, argv[index], IN_ALL_EVENTS);
-          printf("Watching %s\n", argv[index]);
-          DIR *d;
-	  struct dirent *dir;
-	  d = opendir(argv[index]);
-	  if (d)
-	  {
-	    while ((dir = readdir(d)) != NULL)
-	    {
-		  if (dir->d_type == DT_REG)
-		  {
-	              gchar *ai;
-                      ai = g_strconcat (argv[index], dir->d_name, NULL);
-		     ai_register(ai);
-		  }
-	    }
-	    closedir(d);
-	  }
-	}
-
-      if (wd > 0) 
-	{
-	  process_inotify_events (q, inotify_fd);
-	}
-      printf ("\nTerminating\n");
-      close_inotify_fd (inotify_fd);
-      queue_destroy (q);
+        /* Reset to SIG_IGN (ignore) if that was the prior state */
+        signal (SIGINT, SIG_IGN);
     }
-  return 0;
+    
+    /* First we open the inotify dev entry */
+    inotify_fd = open_inotify_fd ();
+    if (inotify_fd > 0)
+    {
+        
+        /* We will need a place to enqueue inotify events,
+         *        this is needed because if you do not read events
+         *        fast enough, you will miss them. This queue is 
+         *        probably too small if you are monitoring something
+         *        like a directory with a lot of files and the directory 
+         *        is deleted.
+         */
+        queue_t q;
+        q = queue_create (128);
+        
+        /* This is the watch descriptor returned for each item we are 
+         *        watching. A real application might keep these for some use 
+         *        in the application. This sample only makes sure that none of
+         *        the watch descriptors is less than 0.
+         */
+        int wd;
+        
+        
+        /* Watch all events (IN_ALL_EVENTS) for the directories and 
+         *        files passed in as arguments.
+         *        Read the article for why you might want to alter this for 
+         *        more efficient inotify use in your app.      
+         */
+        int index;
+        wd = 0;
+        printf("\n");
+        unsigned long flags;
+        for (index = 1; (index < argc) && (wd >= 0); index++) 
+        {
+            wd = watch_dir (inotify_fd, argv[index], IN_ALL_EVENTS);
+            printf("Watching %s\n", argv[index]);
+            /* Upon launch, register all the files in the given directory */
+            DIR *d;
+            struct dirent *dir;
+            d = opendir(argv[index]);
+            if (d)
+            {
+                while ((dir = readdir(d)) != NULL)
+                {
+                    if (dir->d_type == DT_REG)
+                    {
+                        gchar *ai;
+                        ai = g_strconcat (argv[index], dir->d_name, NULL);
+                        ai_register(ai);
+                    }
+                }
+                closedir(d);
+            }
+        }
+        
+        if (wd > 0) 
+        {
+            process_inotify_events (q, inotify_fd);
+        }
+        printf ("\nTerminating\n");
+        close_inotify_fd (inotify_fd);
+        queue_destroy (q);
+    }
+    return 0;
 }
+
