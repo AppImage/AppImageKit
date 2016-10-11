@@ -28,12 +28,25 @@
  * http://www.ibm.com/developerworks/library/l-inotify/
  * 
  * TODO:
- * - Recursive direcory watch
+ * - Absolute paths - see https://github.com/jconerly/inotispy/blob/master/src/inotify.c
+ * - Recursive direcory watch - https://github.com/ape-box/watchdog/blob/master/src/wdlib.c
  * - Also watch /tmp/.mount* and resolve to the launching AppImage
  * - Add and remove subdirectories on the fly
  * - Only watch for the events we are interested in
  */
 
+/* This is the file descriptor for the inotify watch */
+extern int inotify_fd;
+int inotify_fd;
+
+/* This is the watch descriptor returned for each item we are 
+*        watching. A real application might keep these for some use 
+*        in the application. This sample only makes sure that none of
+*        the watch descriptors is less than 0.
+*/
+extern int wd;
+int wd;
+        
 static gboolean verbose = FALSE;
 gchar **remaining_args = NULL;
 
@@ -472,9 +485,6 @@ int main (int argc, char **argv)
         exit (1);
     }
     
-    /* This is the file descriptor for the inotify watch */
-    int inotify_fd;
-    
     keep_running = 1;
     
     /* Set a ctrl-c signal handler */
@@ -498,14 +508,6 @@ int main (int argc, char **argv)
          */
         queue_t q;
         q = queue_create (128);
-        
-        /* This is the watch descriptor returned for each item we are 
-         *        watching. A real application might keep these for some use 
-         *        in the application. This sample only makes sure that none of
-         *        the watch descriptors is less than 0.
-         */
-        int wd;
-        
         
         /* Watch all events (IN_ALL_EVENTS) for the directories and 
          *        files passed in as arguments.
@@ -561,3 +563,4 @@ int main (int argc, char **argv)
     }
     return 0;
 }
+
