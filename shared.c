@@ -77,7 +77,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
 /* Find files in the squashfs matching to the regex pattern. 
  * Returns a newly-allocated NULL-terminated array of strings.
  * Use g_strfreev() to free it. */
-gchar **squash_get_matching_files(sqfs *fs, char *pattern) {
+gchar **squash_get_matching_files(sqfs *fs, char *pattern, gboolean verbose) {
     GPtrArray *array = g_ptr_array_new();
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
@@ -92,7 +92,8 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern) {
             r = regexec(&regex, trv.path, 2, match, 0);
             if (r == 0){
                 // We have a match
-                printf("%s\n", trv.path);
+                if(verbose)
+                    printf("squash_get_matching_files found: %s\n", trv.path);
                 g_ptr_array_add(array, g_strdup(trv.path));
             }
         }
@@ -120,7 +121,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(verbose)
             printf("sqfs_open_image: %s\n", path);
     }
-    gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)"); // Topmost desktop file(s)
+    gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", verbose); // Topmost desktop file(s)
     g_strfreev (str_array);
     sqfs_fd_close(fs.fd); 
 }
