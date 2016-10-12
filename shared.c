@@ -174,6 +174,7 @@ int appimage_register_in_system(char *path, gboolean verbose)
 {
     int type = check_appimage_type(path, verbose);
     if(type == 1 || type == 2){
+        printf("\n");
         printf("-> REGISTER %s\n", path);
         printf("get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
     }
@@ -211,6 +212,7 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
 int appimage_unregister_in_system(char *path, gboolean verbose)
 {
     /* The file is already gone by now, so we can't determine its type anymore */
+    printf("\n");
     printf("-> UNREGISTER %s\n", path);
     /* Could use gnome_desktop_thumbnail_factory_lookup instead of the next line */
     

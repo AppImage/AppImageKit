@@ -10,6 +10,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
 
 #include <inotifytools/inotifytools.h>
 #include <inotifytools/inotify.h>
@@ -34,16 +37,6 @@ static GOptionEntry entries[] =
 #define EXCLUDE_CHUNK 1024
 #define WR_EVENTS (IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF)
 
-int add_dir_to_watch(char *dir)
-{
-    if (g_file_test (dir, G_FILE_TEST_IS_DIR)){
-        if(!inotifytools_watch_recursively(dir, WR_EVENTS) ) {
-            fprintf(stderr, "%s\n", strerror(inotifytools_error()));
-            exit(1);
-        }
-    }
-}
-
 /* Run the actual work in treads; 
  * pthread allows to pass only one argument to the thread function, 
  * hence we use a struct as the argument in which the real arguments are */
@@ -64,6 +57,58 @@ void *thread_appimage_unregister_in_system(void *arguments)
     struct arg_struct *args = arguments;
     appimage_unregister_in_system(args->path, args->verbose);
     pthread_exit(NULL);
+}
+
+/* Recursively process the files in this directory and its subdirectories,
+* http://stackoverflow.com/questions/8436841/how-to-recursively-list-directories-in-c-on-linux
+*/
+void initially_register(const char *name, int level)
+{
+    DIR *dir;
+    struct dirent *entry;
+
+    if (!(dir = opendir(name)))
+        fprintf(stderr, "opendir error\n");
+    if (!(entry = readdir(dir)))
+        fprintf(stderr, "readdir error\n");
+
+    do {
+        if (entry->d_type == DT_DIR) {
+            char path[1024];
+            int len = snprintf(path, sizeof(path)-1, "%s/%s", name, entry->d_name);
+            path[len] = 0;
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+            initially_register(path, level + 1);
+        }
+        else
+            printf("%s/%s\n", name, entry->d_name);
+        int ret;
+        gchar *absolute_path = g_build_path(G_DIR_SEPARATOR_S, name, entry->d_name, NULL);
+                if(g_file_test(absolute_path, G_FILE_TEST_IS_REGULAR)){
+            pthread_t some_thread;
+            struct arg_struct args;
+            args.path = absolute_path;
+            args.verbose = verbose;
+            ret = pthread_create(&some_thread, NULL, thread_appimage_register_in_system, &args);
+            if (!ret) {
+                pthread_join(some_thread, NULL);
+            }
+        }
+    } while (entry = readdir(dir));
+    closedir(dir);
+}
+
+int add_dir_to_watch(char *directory)
+{
+    if (g_file_test (directory, G_FILE_TEST_IS_DIR)){
+        if(!inotifytools_watch_recursively(directory, WR_EVENTS) ) {
+            fprintf(stderr, "%s\n", strerror(inotifytools_error()));
+            exit(1);
+        
+        }
+        initially_register(directory, 0);
+    }
 }
 
 void handle_event(struct inotify_event *event)
