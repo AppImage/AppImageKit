@@ -122,7 +122,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
             printf("sqfs_open_image: %s\n", path);
     }
     
-    /* Get topmost desktop file(s) */
+    /* Get desktop file(s) in the root directory of the AppImage */
     gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", verbose); // Only in root dir
     // gchar **str_array = squash_get_matching_files(&fs, "(^.*?.desktop$)", verbose); // Not only there
     /* Work trough the NULL-terminated array of strings */
@@ -134,7 +134,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     g_strfreev (str_array);
 
     /* Get icon file(s) */
-    str_array = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*$)", verbose); 
+    str_array = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$)", verbose); 
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
@@ -142,7 +142,30 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
+
+    /* Get MIME xml file(s) */
+    str_array = squash_get_matching_files(&fs, "(^usr/share/mime/.*.xml$)", verbose); 
+    /* Work trough the NULL-terminated array of strings */
+    for (int i=0; str_array[i]; ++i) {
+        const char *ch = str_array[i]; 
+        printf("Got MIME: %s\n", str_array[i]);
+    }
+    /* Free the NULL-terminated array of strings and its contents */
+    g_strfreev (str_array);
     
+    /* Get AppStream metainfo file(s) 
+     * TODO: Check if the id matches
+     */
+    str_array = squash_get_matching_files(&fs, "(^usr/share/appdata/.*metainfo.xml$)", verbose); 
+    /* Work trough the NULL-terminated array of strings */
+    for (int i=0; str_array[i]; ++i) {
+        const char *ch = str_array[i]; 
+        printf("Got AppStream metainfo: %s\n", str_array[i]);
+    }
+    /* Free the NULL-terminated array of strings and its contents */
+    g_strfreev (str_array);
+    
+    /* Close the squashfs filesystem only after we need no more data from it */
     sqfs_fd_close(fs.fd); 
 }
 
