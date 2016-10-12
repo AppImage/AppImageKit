@@ -13,7 +13,7 @@
 #include "elf.h"
 #include "getsection.h"
 
-#include <fnmatch.h>
+#include <regex.h>
 
 #define FNM_FILE_NAME 2
 
@@ -81,7 +81,12 @@ void squash_get_matching_files(sqfs *fs, char *pattern) {
         printf("sqfs_traverse_open error\n");
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
-            if(fnmatch (pattern, trv.path, FNM_FILE_NAME) == 0)
+            int r;
+            regex_t regex;
+            regmatch_t match[2];
+            regcomp(&regex, pattern, REG_ICASE | REG_EXTENDED);
+            r = regexec(&regex, trv.path, 2, match, 0);
+            if (r == 0)
                 printf("%s\n", trv.path);
         }
     }
@@ -106,7 +111,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(verbose)
             printf("sqfs_open_image: %s\n", path);
     }
-    squash_get_matching_files(&fs, "*.desktop");
+    squash_get_matching_files(&fs, "(^[^/]*?.desktop$)"); // Topmost desktop file(s)
     sqfs_fd_close(fs.fd); 
 }
 
