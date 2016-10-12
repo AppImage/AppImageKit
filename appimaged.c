@@ -60,18 +60,18 @@ void *thread_appimage_unregister_in_system(void *arguments)
 }
 
 /* Recursively process the files in this directory and its subdirectories,
-* http://stackoverflow.com/questions/8436841/how-to-recursively-list-directories-in-c-on-linux
-*/
+ * http://stackoverflow.com/questions/8436841/how-to-recursively-list-directories-in-c-on-linux
+ */
 void initially_register(const char *name, int level)
 {
     DIR *dir;
     struct dirent *entry;
-
+    
     if (!(dir = opendir(name)))
         fprintf(stderr, "opendir error\n");
     if (!(entry = readdir(dir)))
         fprintf(stderr, "readdir error\n");
-
+    
     do {
         if (entry->d_type == DT_DIR) {
             char path[1024];
@@ -81,18 +81,18 @@ void initially_register(const char *name, int level)
                 continue;
             initially_register(path, level + 1);
         }
-        else
-            printf("%s/%s\n", name, entry->d_name);
-        int ret;
-        gchar *absolute_path = g_build_path(G_DIR_SEPARATOR_S, name, entry->d_name, NULL);
-                if(g_file_test(absolute_path, G_FILE_TEST_IS_REGULAR)){
-            pthread_t some_thread;
-            struct arg_struct args;
-            args.path = absolute_path;
-            args.verbose = verbose;
-            ret = pthread_create(&some_thread, NULL, thread_appimage_register_in_system, &args);
-            if (!ret) {
-                pthread_join(some_thread, NULL);
+        else {
+            int ret;
+            gchar *absolute_path = g_build_path(G_DIR_SEPARATOR_S, name, entry->d_name, NULL);
+            if(g_file_test(absolute_path, G_FILE_TEST_IS_REGULAR)){
+                pthread_t some_thread;
+                struct arg_struct args;
+                args.path = absolute_path;
+                args.verbose = verbose;
+                ret = pthread_create(&some_thread, NULL, thread_appimage_register_in_system, &args);
+                if (!ret) {
+                    pthread_join(some_thread, NULL);
+                }
             }
         }
     } while (entry = readdir(dir));
@@ -105,7 +105,7 @@ int add_dir_to_watch(char *directory)
         if(!inotifytools_watch_recursively(directory, WR_EVENTS) ) {
             fprintf(stderr, "%s\n", strerror(inotifytools_error()));
             exit(1);
-        
+            
         }
         initially_register(directory, 0);
     }
