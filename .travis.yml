@@ -8,7 +8,7 @@ script:
   - bash -ex build-appimage.sh
   - curl --upload-file ./*.AppImage https://transfer.sh/appimagetool
   - curl --upload-file ./build/validate https://transfer.sh/validate
-  - curl --upload-file ./build/appimaged https://transfer.sh/validate
+  - curl --upload-file ./build/appimaged https://transfer.sh/appimaged
   
 notifications:
   irc:
