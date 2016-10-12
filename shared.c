@@ -121,15 +121,28 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(verbose)
             printf("sqfs_open_image: %s\n", path);
     }
+    
     /* Get topmost desktop file(s) */
-    gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", verbose); 
+    gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", verbose); // Only in root dir
+    // gchar **str_array = squash_get_matching_files(&fs, "(^.*?.desktop$)", verbose); // Not only there
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
-        printf("Got: %s\n", str_array[i]);
+        printf("Got root desktop: %s\n", str_array[i]);
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
+
+    /* Get icon file(s) */
+    str_array = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*$)", verbose); 
+    /* Work trough the NULL-terminated array of strings */
+    for (int i=0; str_array[i]; ++i) {
+        const char *ch = str_array[i]; 
+        printf("Got icon: %s\n", str_array[i]);
+    }
+    /* Free the NULL-terminated array of strings and its contents */
+    g_strfreev (str_array);
+    
     sqfs_fd_close(fs.fd); 
 }
 
