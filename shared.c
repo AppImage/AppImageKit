@@ -13,14 +13,18 @@
 #include "elf.h"
 #include "getsection.h"
 
+#include <fnmatch.h>
+
+#define FNM_FILE_NAME 2
+
 #define URI_MAX (FILE_MAX * 3 + 8)
 
 /* Return the path of the thumbnail regardless whether it already exists; may be useful because
- G*_FILE_ATTRIBUTE_THUMBNAIL_PATH only exists if the thumbnail is already there.
- Since the md5 actually incorporates the ".png" ending so we might not want to use
- this as a general identifier for the AppImage.
- Check libgnomeui/gnome-thumbnail.h for actually generating thumbnails in the correct
- sizes at the correct locations automatically; which would draw in a dependency on gdk-pixbuf.
+* G*_FILE_ATTRIBUTE_THUMBNAIL_PATH only exists if the thumbnail is already there.
+* Since the md5 actually incorporates the ".png" ending so we might not want to use
+* this as a general identifier for the AppImage.
+* Check libgnomeui/gnome-thumbnail.h for actually generating thumbnails in the correct
+* sizes at the correct locations automatically; which would draw in a dependency on gdk-pixbuf.
 */
 char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 {
@@ -64,11 +68,26 @@ int check_appimage_type(char *path, gboolean verbose)
     }
 }
 
-
 /* Register a type 1 AppImage in the system */
 bool appimage_type1_register_in_system(char *path, gboolean verbose)
 {
     printf("ISO9660 based type 1 AppImage, not yet implemented: %s\n", path);
+}
+
+void squash_get_matching_files(sqfs *fs, char *pattern) {
+    sqfs_err err = SQFS_OK;
+    sqfs_traverse trv;
+    if ((err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs))))
+        printf("sqfs_traverse_open error\n");
+    while (sqfs_traverse_next(&trv, &err)) {
+        if (!trv.dir_end) {
+            if(fnmatch (pattern, trv.path, FNM_FILE_NAME) == 0)
+                printf("%s\n", trv.path);
+        }
+    }
+    if (err)
+        printf("sqfs_traverse_next error\n");
+    sqfs_traverse_close(&trv);
 }
 
 /* Register a type 2 AppImage in the system */
@@ -87,6 +106,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(verbose)
             printf("sqfs_open_image: %s\n", path);
     }
+    squash_get_matching_files(&fs, "*.desktop");
     sqfs_fd_close(fs.fd); 
 }
 
@@ -99,11 +119,11 @@ int appimage_register_in_system(char *path, gboolean verbose)
         printf("get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
     }
     /* TODO: Generate thumbnails.
-     * Generating proper thumbnails involves more than just copying images out of the AppImage,
-     * including checking if the thumbnail already exists and if it's valid 
-     * and writing attributes into the thumbnail, see
-     * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#CREATION */
-
+    * Generating proper thumbnails involves more than just copying images out of the AppImage,
+    * including checking if the thumbnail already exists and if it's valid 
+    * and writing attributes into the thumbnail, see
+    * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#CREATION */
+    
     if(type == 1){
         appimage_type1_register_in_system(path, verbose);
     }
@@ -134,7 +154,7 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     /* The file is already gone by now, so we can't determine its type anymore */
     printf("-> UNREGISTER %s\n", path);
     /* Could use gnome_desktop_thumbnail_factory_lookup instead of the next line */
-
+    
     /* Delete the thumbnails if they exist */
     delete_thumbnail(path, "normal", verbose); // 128x128
     delete_thumbnail(path, "large", verbose); // 256x256
