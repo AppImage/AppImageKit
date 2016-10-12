@@ -19,11 +19,11 @@ chmod a+x Subsurface-4.5.1.449-x86_64.AppImage
 ./Subsurface-4.5.1.449-x86_64.AppImage
 
 # Get the updater
-wget http://bintray.com/artifact/download/probono/AppImages/AppImageUpdate-20151218-x86_64.AppImage
-chmod a+x AppImageUpdate-20151218-x86_64.AppImage
+wget https://dl.bintray.com/probono/AppImages/AppImageUpdate-408.gb8f778d-x86_64.AppImage
+chmod a+x AppImageUpdate-408.gb8f778d-x86_64.AppImage
 
 # Update Subsurface to the latest version
-./AppImageUpdate-20151218-x86_64.AppImage ./Subsurface-4.5.1.449-x86_64.AppImage
+./AppImageUpdate-408.gb8f778d-x86_64.AppImage ./Subsurface-4.5.1.449-x86_64.AppImage
 
 # Look there is a newer version! Run it
 NEW=$(ls Subsurface-*.AppImage | sort -V | tail -n 1)
