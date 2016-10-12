@@ -81,7 +81,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gboolean verbose) {
     GPtrArray *array = g_ptr_array_new();
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
-    if ((err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs))))
+    if (err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs)))
         printf("sqfs_traverse_open error\n");
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
@@ -103,6 +103,33 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gboolean verbose) {
         printf("sqfs_traverse_next error\n");
     sqfs_traverse_close(&trv);
     return (gchar **) g_ptr_array_free(array, FALSE);
+}
+
+/* Loads a desktop file from squashfs into an empty GKeyFile structure. */
+gboolean g_key_file_load_from_squash(sqfs *fs, char *path, GKeyFile *key_file_structure, gboolean verbose) {
+    int success;
+    printf("g_key_file_load_from_squash: %s\n", path);
+    sqfs_inode *inode;
+    bool found;
+
+    sqfs_err err = sqfs_lookup_path(fs, inode, path, &found);
+    if (err)
+        printf("sqfs_lookup_path error: %ui\n", err); // ############################## ALWAYS GIVES ERROR
+    if (!found)
+        printf("sqfs_lookup_path not found: %is\n", SQFS_ERR); // ##################### ALWAYS GIVES ERROR
+    
+    printf("alive #######\n");    
+    /*
+    success = g_key_file_load_from_data (key_file_structure,
+                           const gchar *data,
+                           gsize length,
+                           GKeyFileFlags flags,
+                           NULL);
+    */
+    
+    if(! success)
+        printf("g_key_file_load_from_squash error: %s\n", path);
+    return success;
 }
 
 /* Register a type 2 AppImage in the system */
@@ -129,6 +156,10 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
         printf("Got root desktop: %s\n", str_array[i]);
+        GKeyFile *key_file_structure = g_key_file_new();
+        g_key_file_load_from_squash(&fs, str_array[i], key_file_structure,  verbose);
+        g_key_file_free(key_file_structure);
+        
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
