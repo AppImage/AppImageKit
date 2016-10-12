@@ -33,17 +33,44 @@ static GOptionEntry entries[] =
 #define EXCLUDE_CHUNK 1024
 #define WR_EVENTS (IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF)
 
-/* Register AppImage in the system */
-int ai_register (char *path)
+/* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
+int check_appimage_type(char *path)
 {
-    printf ("-> REGISTER? %s\n", path);
+    FILE *f;
+    char buffer[4];
+    if (f = fopen(path, "rt"))
+    {
+        fseek(f, 8, SEEK_SET);
+        fread(buffer, 1, 3, f);
+        buffer[4] = 0;
+        fclose(f);
+        if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x01)){
+            printf("AppImage type 1\n");
+            return 1;
+        } else if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x02)){
+            printf("AppImage type 2\n");
+            return 2;
+        } else {
+            return -1;
+        }
+    }
+}
+
+/* Register AppImage in the system */
+int ai_register(char *path)
+{
+    int type = check_appimage_type(path);
+    if(type == 2){
+        printf ("-> REGISTER %s\n", path);
+    }
     return 0;
 }
 
 /* Unregister AppImage in the system */
 int ai_unregister (char *path)
 {
-    printf ("-> UNREGISTER? %s\n", path);
+    // The file is already gone by now, so we can't determine its type anymore
+    printf ("-> UNREGISTER %s\n", path);
     return 0;
 }
 
@@ -110,6 +137,10 @@ int main(int argc, char ** argv) {
     
     struct inotify_event * event = inotifytools_next_event(-1);
     while (event) {
+        if(verbose){
+            inotifytools_printf(event, "%w%f %e\n");
+        }
+        fflush(stdout);        
         handle_event(event);
         fflush(stdout);        
         event = inotifytools_next_event(-1);
