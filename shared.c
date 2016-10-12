@@ -74,7 +74,11 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
     printf("ISO9660 based type 1 AppImage, not yet implemented: %s\n", path);
 }
 
-void squash_get_matching_files(sqfs *fs, char *pattern) {
+/* Find files in the squashfs matching to the regex pattern. 
+ * Returns a newly-allocated NULL-terminated array of strings.
+ * Use g_strfreev() to free it. */
+gchar **squash_get_matching_files(sqfs *fs, char *pattern) {
+    GPtrArray *array = g_ptr_array_new();
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
     if ((err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs))))
@@ -86,13 +90,18 @@ void squash_get_matching_files(sqfs *fs, char *pattern) {
             regmatch_t match[2];
             regcomp(&regex, pattern, REG_ICASE | REG_EXTENDED);
             r = regexec(&regex, trv.path, 2, match, 0);
-            if (r == 0)
+            if (r == 0){
+                // We have a match
                 printf("%s\n", trv.path);
+                g_ptr_array_add(array, g_strdup(trv.path));
+            }
         }
     }
+    g_ptr_array_add(array, NULL);
     if (err)
         printf("sqfs_traverse_next error\n");
     sqfs_traverse_close(&trv);
+    return (gchar **) g_ptr_array_free(array, FALSE);
 }
 
 /* Register a type 2 AppImage in the system */
@@ -111,7 +120,8 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(verbose)
             printf("sqfs_open_image: %s\n", path);
     }
-    squash_get_matching_files(&fs, "(^[^/]*?.desktop$)"); // Topmost desktop file(s)
+    gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)"); // Topmost desktop file(s)
+    g_strfreev (str_array);
     sqfs_fd_close(fs.fd); 
 }
 
