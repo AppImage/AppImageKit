@@ -5,7 +5,7 @@ rm -rf build/ || true
 
 # Install build dependencies
 
-sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev libssl-dev
+sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev
 # libtool-bin might be required in newer distributions but is not available in precise
 
 # Patch squashfuse_ll to be a library rather than an executable
@@ -90,6 +90,9 @@ cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.
 # Version without glib
 # cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetoolnoglib.c
 # cc data.o appimagetoolnoglib.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetoolnoglib
+
+# appimaged, an optional component
+gcc ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -linotifytools $(pkg-config --cflags glib-2.0) $(pkg-config --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) -ldl -lpthread -llzma -o appimaged
 
 cd ..
 

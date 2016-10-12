@@ -1,7 +1,4 @@
 /*
- * Compile with:
- * sudo apt-get -y install libglib2.0-dev libinotifytools0-dev
- * gcc appimaged.c -linotifytools $(pkg-config --cflags glib-2.0) $(pkg-config --libs glib-2.0) -ldl -lpthread -o appimaged
  * 
  * Watch directories for AppImages and register/unregister them with the system
  * 
@@ -20,6 +17,10 @@
 #include <glib.h>
 #include <glib/gprintf.h>
 
+#include "shared.c"
+
+#include <pthread.h>
+
 static gboolean verbose = FALSE;
 gchar **remaining_args = NULL;
 
@@ -33,47 +34,6 @@ static GOptionEntry entries[] =
 #define EXCLUDE_CHUNK 1024
 #define WR_EVENTS (IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF)
 
-/* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
-int check_appimage_type(char *path)
-{
-    FILE *f;
-    char buffer[4];
-    if (f = fopen(path, "rt"))
-    {
-        fseek(f, 8, SEEK_SET);
-        fread(buffer, 1, 3, f);
-        buffer[4] = 0;
-        fclose(f);
-        if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x01)){
-            printf("AppImage type 1\n");
-            return 1;
-        } else if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x02)){
-            printf("AppImage type 2\n");
-            return 2;
-        } else {
-            return -1;
-        }
-    }
-}
-
-/* Register AppImage in the system */
-int ai_register(char *path)
-{
-    int type = check_appimage_type(path);
-    if(type == 2){
-        printf ("-> REGISTER %s\n", path);
-    }
-    return 0;
-}
-
-/* Unregister AppImage in the system */
-int ai_unregister (char *path)
-{
-    // The file is already gone by now, so we can't determine its type anymore
-    printf ("-> UNREGISTER %s\n", path);
-    return 0;
-}
-
 int add_dir_to_watch(char *dir)
 {
     if (g_file_test (dir, G_FILE_TEST_IS_DIR)){
@@ -84,18 +44,55 @@ int add_dir_to_watch(char *dir)
     }
 }
 
+/* Run the actual work in treads; 
+ * pthread allows to pass only one argument to the thread function, 
+ * hence we use a struct as the argument in which the real arguments are */
+struct arg_struct {
+    char* path;
+    gboolean verbose;
+};
+
+void *thread_appimage_register_in_system(void *arguments)
+{
+    struct arg_struct *args = arguments;
+    appimage_register_in_system(args->path, args->verbose);
+    pthread_exit(NULL);
+}
+
+void *thread_appimage_unregister_in_system(void *arguments)
+{
+    struct arg_struct *args = arguments;
+    appimage_unregister_in_system(args->path, args->verbose);
+    pthread_exit(NULL);
+}
+
 void handle_event(struct inotify_event *event)
 {
+    int ret;
     gchar *absolute_path = g_build_path(G_DIR_SEPARATOR_S, inotifytools_filename_from_wd(event->wd), event->name, NULL);
     
     if(event->mask & IN_CLOSE_WRITE | event->mask & IN_MOVED_TO){
         if(g_file_test(absolute_path, G_FILE_TEST_IS_REGULAR)){
-            ai_register(absolute_path);
+            pthread_t some_thread;
+            struct arg_struct args;
+            args.path = absolute_path;
+            args.verbose = verbose;
+            ret = pthread_create(&some_thread, NULL, thread_appimage_register_in_system, &args);
+            if (!ret) {
+                pthread_join(some_thread, NULL);
+            }
         }
     }
     
     if(event->mask & IN_MOVED_FROM | event->mask & IN_DELETE){
-        ai_unregister(absolute_path);
+        pthread_t some_thread;
+        struct arg_struct args;
+        args.path = absolute_path;
+        args.verbose = verbose;
+        ret = pthread_create(&some_thread, NULL, thread_appimage_unregister_in_system, &args);
+        if (!ret) {
+            pthread_join(some_thread, NULL);
+        }
     }
     
     /* Too many FS events were received, some event notifications were potentially lost */
