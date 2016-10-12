@@ -44,6 +44,10 @@
 #include "elf.h"
 #include "getsection.h"
 
+#include <fnmatch.h>
+
+#define FNM_FILE_NAME 2
+
 struct stat st;
 
 static long unsigned int fs_offset; // The offset at which a filesystem image is expected = end of this ELF
@@ -288,7 +292,7 @@ main (int argc, char *argv[])
         sqfs_traverse trv;
         sqfs fs;
         char *image;
-        char *path_to_extract;
+        char *pattern;
         char *prefix;
         char prefixed_path_to_extract[1024];
         
@@ -301,17 +305,17 @@ main (int argc, char *argv[])
             }
         }
         
-        image = "/proc/self/exe";
-        path_to_extract = "-a";
+        if(argc == 3)
+            pattern = argv[2];
         
-        if ((err = sqfs_open_image(&fs, image, fs_offset)))
+        if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
             exit(1);
         
         if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
             die("sqfs_traverse_open error");
         while (sqfs_traverse_next(&trv, &err)) {
             if (!trv.dir_end) {
-                if((startsWith(path_to_extract, trv.path) != 0) || (strcmp("-a", path_to_extract) == 0)){
+                if((argc != 3) || (fnmatch (pattern, trv.path, FNM_FILE_NAME) == 0)){
                     fprintf(stderr, "trv.path: %s\n", trv.path);
                     fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
                     sqfs_inode inode;
