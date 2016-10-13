@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#
+# This is supposed to be run on Travis CI trusty. Also works for me on Ubuntu 16.04.
+# I don't have the time to mess around with autotools and the like.
+#
+
 # Clean up from previous run
 rm -rf build/ || true
 
