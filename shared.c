@@ -476,16 +476,13 @@ void unregister_using_md5_id(const char *name, int level, char* md5, gboolean ve
             unregister_using_md5_id(path, level + 1, md5, verbose);
         }
         
-        else if(strstr(entry->d_name, md5)) {
-            printf("%s/%s\n", name, entry->d_name);
-            
+        else if(strstr(entry->d_name, g_strdup_printf("%s_%s", vendorprefix, md5))) {
             gchar *path_to_be_deleted = g_strdup_printf("%s/%s", name, entry->d_name);
             if(g_file_test(path_to_be_deleted, G_FILE_TEST_IS_REGULAR)){
-                // g_unlink(path_to_be_deleted);
+                g_unlink(path_to_be_deleted);
                 if(verbose)
                     fprintf(stderr, "deleted: %s\n", path_to_be_deleted);
-            }           
-            
+            }
         }
     } while (entry = readdir(dir));
     closedir(dir);
