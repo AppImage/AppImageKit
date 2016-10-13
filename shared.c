@@ -383,30 +383,31 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     str_array = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$)", md5, verbose); 
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
-        const char *ch = str_array[i]; 
-        fprintf(stderr, "Got icon: %s\n", str_array[i]);
+        const char *ch = str_array[i];
+        if(verbose)
+            fprintf(stderr, "Got icon: %s\n", str_array[i]);
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
-    
+
     /* Get MIME xml file(s) */
     str_array = squash_get_matching_files(&fs, "(^usr/share/mime/packages/.*.xml$)", md5, verbose); 
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
-        const char *ch = str_array[i]; 
-        fprintf(stderr, "Got MIME: %s\n", str_array[i]);
+        const char *ch = str_array[i];
+        if(verbose)
+            fprintf(stderr, "Got MIME: %s\n", str_array[i]);
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
     
     /* Get AppStream metainfo file(s) 
-     * TODO: Check if the id matches
-     */
+     * TODO: Check if the id matches */
     str_array = squash_get_matching_files(&fs, "(^usr/share/appdata/.*metainfo.xml$)", md5, verbose); 
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
-        fprintf(stderr, "Got AppStream metainfo: %s\n", str_array[i]);
+        fprintf(stderr, "TODO: Do something with the AppStream metainfo: %s\n", str_array[i]);
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
