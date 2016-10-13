@@ -1,6 +1,6 @@
 /*
- * 
- * Watch directories for AppImages and register/unregister them with the system
+ * Optional daempon to watch directories for AppImages 
+ * and register/unregister them with the system
  * 
  * TODO:
  * - Also watch /tmp/.mount* and resolve to the launching AppImage

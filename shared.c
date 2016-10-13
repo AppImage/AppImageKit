@@ -56,11 +56,11 @@ int check_appimage_type(char *path, gboolean verbose)
         fclose(f);
         if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x01)){
             if(verbose)
-                printf("AppImage type 1\n");
+                fprintf(stderr, "AppImage type 1\n");
             return 1;
         } else if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x02)){
             if(verbose)
-                printf("AppImage type 2\n");
+                fprintf(stderr, "AppImage type 2\n");
             return 2;
         } else {
             return -1;
@@ -71,7 +71,7 @@ int check_appimage_type(char *path, gboolean verbose)
 /* Register a type 1 AppImage in the system */
 bool appimage_type1_register_in_system(char *path, gboolean verbose)
 {
-    printf("ISO9660 based type 1 AppImage, not yet implemented: %s\n", path);
+    fprintf(stderr, "ISO9660 based type 1 AppImage, not yet implemented: %s\n", path);
 }
 
 /* Find files in the squashfs matching to the regex pattern. 
@@ -82,7 +82,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gboolean verbose) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
     if (err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs)))
-        printf("sqfs_traverse_open error\n");
+        fprintf(stderr, "sqfs_traverse_open error\n");
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
             int r;
@@ -93,43 +93,69 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gboolean verbose) {
             if (r == 0){
                 // We have a match
                 if(verbose)
-                    printf("squash_get_matching_files found: %s\n", trv.path);
+                    fprintf(stderr, "squash_get_matching_files found: %s\n", trv.path);
                 g_ptr_array_add(array, g_strdup(trv.path));
             }
         }
     }
     g_ptr_array_add(array, NULL);
     if (err)
-        printf("sqfs_traverse_next error\n");
+        fprintf(stderr, "sqfs_traverse_next error\n");
     sqfs_traverse_close(&trv);
     return (gchar **) g_ptr_array_free(array, FALSE);
 }
 
-/* Loads a desktop file from squashfs into an empty GKeyFile structure. */
+/* Loads a desktop file from squashfs into an empty GKeyFile structure.
+ * FIXME: Use sqfs_lookup_path() instead of g_key_file_load_from_squash()
+ * should help for performance. Please submit a pull request if you can
+ * get it to work.
+ */
 gboolean g_key_file_load_from_squash(sqfs *fs, char *path, GKeyFile *key_file_structure, gboolean verbose) {
-    int success;
-    printf("g_key_file_load_from_squash: %s\n", path);
-    sqfs_inode *inode;
-    bool found;
-
-    sqfs_err err = sqfs_lookup_path(fs, inode, path, &found);
+    sqfs_traverse trv;
+    sqfs_err err = SQFS_OK;
+    gboolean success;
+    if (err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs)))
+        fprintf(stderr, "sqfs_traverse_open error\n");
+    while (sqfs_traverse_next(&trv, &err)) {
+        if (!trv.dir_end) {
+            if (strcmp(path, trv.path) == 0){
+                sqfs_inode inode;
+                if (sqfs_inode_get(fs, &inode, trv.entry.inode))
+                    fprintf(stderr, "sqfs_inode_get error\n");
+                if (inode.base.inode_type == SQUASHFS_REG_TYPE){
+                    off_t bytes_already_read = 0;
+                    sqfs_off_t max_bytes_to_read = 256*1024;
+                    char buf[max_bytes_to_read];
+                    if (sqfs_read_range(fs, &inode, (sqfs_off_t) bytes_already_read, &max_bytes_to_read, buf))
+                        fprintf(stderr, "sqfs_read_range error\n");
+                    // fwrite(buf, 1, max_bytes_to_read, stdout);
+                    success = g_key_file_load_from_data (key_file_structure, buf, max_bytes_to_read, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+                } else {
+                    fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
+                }
+            break;
+            }
+        }
+    }
+    
     if (err)
-        printf("sqfs_lookup_path error: %ui\n", err); // ############################## ALWAYS GIVES ERROR
-    if (!found)
-        printf("sqfs_lookup_path not found: %is\n", SQFS_ERR); // ##################### ALWAYS GIVES ERROR
-    
-    printf("alive #######\n");    
-    /*
-    success = g_key_file_load_from_data (key_file_structure,
-                           const gchar *data,
-                           gsize length,
-                           GKeyFileFlags flags,
-                           NULL);
-    */
-    
-    if(! success)
-        printf("g_key_file_load_from_squash error: %s\n", path);
+        fprintf(stderr, "sqfs_traverse_next error\n");
+    sqfs_traverse_close(&trv);
+
     return success;
+}
+
+/* Write a modified desktop file to disk that points to the AppImage for execution */
+void write_edited_desktop_file(GKeyFile *key_file_structure, char* path, gboolean verbose){
+    if(verbose)
+        fprintf(stderr, "%s", g_key_file_to_data(key_file_structure, NULL, NULL));
+    if(!g_key_file_has_key(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, NULL)){
+        fprintf(stderr, "Desktop file has no Exec key\n");
+        return;
+    }
+    g_key_file_set_value (key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, path);
+    fprintf(stderr, "Installing desktop file\n");
+    fprintf(stderr, "%s", g_key_file_to_data(key_file_structure, NULL, NULL));
 }
 
 /* Register a type 2 AppImage in the system */
@@ -138,15 +164,15 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     long unsigned int fs_offset; // The offset at which a squashfs image is expected
     fs_offset = get_elf_size(path);
     if(verbose)
-        printf("fs_offset: %lu\n", fs_offset);
+        fprintf(stderr, "fs_offset: %lu\n", fs_offset);
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
     sqfs fs;
     if (err = sqfs_open_image(&fs, path, fs_offset)){
-        printf("sqfs_open_image error: %s\n", path);
+        fprintf(stderr, "sqfs_open_image error: %s\n", path);
     } else {
         if(verbose)
-            printf("sqfs_open_image: %s\n", path);
+            fprintf(stderr, "sqfs_open_image: %s\n", path);
     }
     
     /* Get desktop file(s) in the root directory of the AppImage */
@@ -155,9 +181,11 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
-        printf("Got root desktop: %s\n", str_array[i]);
+        fprintf(stderr, "Got root desktop: %s\n", str_array[i]);
         GKeyFile *key_file_structure = g_key_file_new();
-        g_key_file_load_from_squash(&fs, str_array[i], key_file_structure,  verbose);
+        gboolean success = g_key_file_load_from_squash(&fs, str_array[i], key_file_structure, verbose);
+        if(success)
+            write_edited_desktop_file(key_file_structure, path, verbose);
         g_key_file_free(key_file_structure);
         
     }
@@ -169,7 +197,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
-        printf("Got icon: %s\n", str_array[i]);
+        fprintf(stderr, "Got icon: %s\n", str_array[i]);
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
@@ -179,7 +207,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
-        printf("Got MIME: %s\n", str_array[i]);
+        fprintf(stderr, "Got MIME: %s\n", str_array[i]);
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
@@ -191,7 +219,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
-        printf("Got AppStream metainfo: %s\n", str_array[i]);
+        fprintf(stderr, "Got AppStream metainfo: %s\n", str_array[i]);
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
@@ -205,9 +233,9 @@ int appimage_register_in_system(char *path, gboolean verbose)
 {
     int type = check_appimage_type(path, verbose);
     if(type == 1 || type == 2){
-        printf("\n");
-        printf("-> REGISTER %s\n", path);
-        printf("get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
+        fprintf(stderr, "\n");
+        fprintf(stderr, "-> REGISTER %s\n", path);
+        fprintf(stderr, "get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
     }
     /* TODO: Generate thumbnails.
     * Generating proper thumbnails involves more than just copying images out of the AppImage,
@@ -231,11 +259,11 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
 {
     gchar *thumbnail_path = get_thumbnail_path(path, size, verbose);
     if(verbose)
-        printf("get_thumbnail_path: %s\n", thumbnail_path);
+        fprintf(stderr, "get_thumbnail_path: %s\n", thumbnail_path);
     if(g_file_test(thumbnail_path, G_FILE_TEST_IS_REGULAR)){
         g_unlink(thumbnail_path);
         if(verbose)
-            printf("deleted: %s\n", thumbnail_path);
+            fprintf(stderr, "deleted: %s\n", thumbnail_path);
     }
 }
 
@@ -243,8 +271,8 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
 int appimage_unregister_in_system(char *path, gboolean verbose)
 {
     /* The file is already gone by now, so we can't determine its type anymore */
-    printf("\n");
-    printf("-> UNREGISTER %s\n", path);
+    fprintf(stderr, "\n");
+    fprintf(stderr, "-> UNREGISTER %s\n", path);
     /* Could use gnome_desktop_thumbnail_factory_lookup instead of the next line */
     
     /* Delete the thumbnails if they exist */
