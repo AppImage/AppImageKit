@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <stdio.h>
 
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -146,7 +150,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, char *md5, gboolean v
                         dest = g_build_path("/", dest_dirname, dest_basename, NULL);
                         if(g_mkdir_with_parents(dest_dirname, 0755))
                             fprintf(stderr, "Could not create directory: %s\n", dest_dirname);
-
+                        
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
                         sqfs_off_t bytes_at_a_time = 64*1024;
@@ -166,7 +170,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, char *md5, gboolean v
                         }
                         fclose(f);
                         chmod (dest, 0644);
-
+                        
                         if(verbose)
                             fprintf(stderr, "Installed: %s\n", dest);
                     }
@@ -231,7 +235,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     gchar *tryexec_path = replace_str(appimage_path," ", "\\ "); // TryExec does not support blanks
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimage_path);
     
-
+    
     gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, NULL)));
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, icon_with_md5);
     /* At compile time, inject VERSION_NUMBER like this:
@@ -450,9 +454,49 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
     }
 }
 
+/* Recursively delete files in path and subdirectories that contain the given md5
+ */
+void unregister_using_md5_id(const char *name, int level, char* md5, gboolean verbose)
+{
+    DIR *dir;
+    struct dirent *entry;
+    
+    if (!(dir = opendir(name)))
+        return;
+    if (!(entry = readdir(dir)))
+        return;
+    
+    do {
+        if (entry->d_type == DT_DIR) {
+            char path[1024];
+            int len = snprintf(path, sizeof(path)-1, "%s/%s", name, entry->d_name);
+            path[len] = 0;
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+            unregister_using_md5_id(path, level + 1, md5, verbose);
+        }
+        
+        else if(strstr(entry->d_name, md5)) {
+            printf("%s/%s\n", name, entry->d_name);
+            
+            gchar *path_to_be_deleted = g_strdup_printf("%s/%s", name, entry->d_name);
+            if(g_file_test(path_to_be_deleted, G_FILE_TEST_IS_REGULAR)){
+                // g_unlink(path_to_be_deleted);
+                if(verbose)
+                    fprintf(stderr, "deleted: %s\n", path_to_be_deleted);
+            }           
+            
+        }
+    } while (entry = readdir(dir));
+    closedir(dir);
+}
+
+
 /* Unregister an AppImage in the system */
 int appimage_unregister_in_system(char *path, gboolean verbose)
 {
+    char *md5 = get_md5(path);
+    
     /* The file is already gone by now, so we can't determine its type anymore */
     fprintf(stderr, "\n");
     fprintf(stderr, "-> UNREGISTER %s\n", path);
@@ -461,5 +505,8 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     /* Delete the thumbnails if they exist */
     delete_thumbnail(path, "normal", verbose); // 128x128
     delete_thumbnail(path, "large", verbose); // 256x256
+    
+    unregister_using_md5_id(g_get_user_data_dir(), 0, md5, verbose);
+    
     return 0;
 }

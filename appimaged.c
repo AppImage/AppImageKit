@@ -2,9 +2,11 @@
  * Optional daempon to watch directories for AppImages 
  * and register/unregister them with the system
  * 
- * TODO:
- * - Also watch /tmp/.mount* and resolve to the launching AppImage
- * - Add and remove subdirectories on the fly - see https://github.com/paragone/configure-via-inotify/blob/master/inotify/src/inotifywatch.c
+ * TODO (feel free to send pull requests):
+ * - Switch to https://developer.gnome.org/gio/stable/GFileMonitor.html (but with subdirectories)
+ *   which would drop the dependency on libinotifytools.so.0
+ * - Add and remove subdirectories on the fly at runtime - 
+ *   see https://github.com/paragone/configure-via-inotify/blob/master/inotify/src/inotifywatch.c
  */
 
 #include <stdio.h>
