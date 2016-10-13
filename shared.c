@@ -78,6 +78,7 @@ int check_appimage_type(char *path, gboolean verbose)
     char buffer[4];
     if (f = fopen(path, "rt"))
     {
+        /* Check magic bytes at offset 8 */
         fseek(f, 8, SEEK_SET);
         fread(buffer, 1, 3, f);
         buffer[4] = 0;
@@ -144,13 +145,15 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, char *md5, gboolean v
                         sqfs_off_t bytes_at_a_time = 64*1024;
                         FILE * f;
                         f = fopen (dest, "w+");
-                        if (f == NULL)
-                            die("fopen error");
+                        if (f == NULL){
+                            fprintf(stderr, "fopen error\n");
+                            break;
+                        }
                         while (bytes_already_read < inode.xtra.reg.file_size)
                         {
                             char buf[bytes_at_a_time];
-                            if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
-                                die("sqfs_read_range error");
+                            if (sqfs_read_range(fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
+                                fprintf(stderr, "sqfs_read_range error\n");
                             fwrite(buf, 1, bytes_at_a_time, f);
                             bytes_already_read = bytes_already_read + bytes_at_a_time;
                         }
