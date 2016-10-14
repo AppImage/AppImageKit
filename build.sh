@@ -21,7 +21,7 @@ autoheader
 automake --force-missing --add-missing
 autoconf
 
-./configure --with-xz=/usr/lib/ ./configure --without-lz4 --without-lzo
+./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
 
 sed -i -e 's|-O2|-Os|g' Makefile # Optimize for size
 
