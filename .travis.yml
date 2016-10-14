@@ -7,7 +7,7 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y git autoconf libtool make gcc libtool libfuse-dev liblz4-dev liblzo2-dev liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev 
   # libtool-bin might be required in newer distributions but is not available in precise
-  - sudo cp pkgconfig/liblz4.pc /usr/lib64/ #fix this noob distribution
+  - sudo cp pkgconfig/liblz4.pc /usr/lib/x86_64-linux-gnu/pkgconfig/ #fix this noob distribution
 
 
 script:
