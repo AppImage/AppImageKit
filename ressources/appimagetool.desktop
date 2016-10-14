@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=appimagetool
+Exec=appimagetool
+Comment=Tool to generate AppImages from AppDirs
+Icon=appimagetool
+Categories=Development;
+Terminal=true

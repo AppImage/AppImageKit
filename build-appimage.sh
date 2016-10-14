@@ -18,34 +18,24 @@ patch -p1 < 13.diff
 cd squashfs-tools
 make
 strip mksquashfs
-#sudo cp mksquashfs /usr/local/bin
+cp mksquashfs ../../build
 
 cd ../../
 
-cp squashfs-tools-*/squashfs-tools/mksquashfs appimagetool.AppDir/usr/bin/
 cp build/appimagetool appimagetool.AppDir/usr/bin/
+cp build/mksquashfs appimagetool.AppDir/usr/bin/
+
+cp ressources/appimagetool.desktop appimagetool.AppDir
+cp ressources/appimagetool.png appimagetool.AppDir
 
 cd appimagetool.AppDir
-
-cat > appimagetool.desktop <<\EOF
-[Desktop Entry]
-Name=appimagetool
-Exec=appimagetool
-Comment=Tool to generate AppImages from AppDirs
-Icon=appimagetool
-Categories=Development;
-Terminal=true
-EOF
-
-wget "https://avatars2.githubusercontent.com/u/16617932?v=3&s=200" -O appimagetool.png
 ln -s appimagetool.png .DirIcon
-
 ln -s usr/bin/appimagetool AppRun
-
 cd ..
 
 # Eat our own dogfood
-build/appimagetool appimagetool.AppDir
+PATH="$PATH:build"
+appimagetool appimagetool.AppDir
 
 # Test whether it has worked
 ls -lh ./*.AppImage
