@@ -3,6 +3,12 @@ sudo: required
 os: linux
 dist: trusty
 
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev 
+  # libtool-bin might be required in newer distributions but is not available in precise
+
+
 script:
   - bash -ex build.sh
   - bash -ex build-appimage.sh
