@@ -140,16 +140,23 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, char *md5, gboolean v
                 if(verbose)
                     fprintf(stderr, "squash_get_matching_files found: %s\n", trv.path);
                 g_ptr_array_add(array, g_strdup(trv.path));
-                if((g_str_has_prefix (trv.path, "usr/share/icons/")) || ((g_str_has_prefix(trv.path, "usr/share/mime/")) && (g_str_has_suffix(trv.path, ".xml")))){
+                if((g_str_has_prefix (trv.path, "usr/share/icons/")) || (g_str_has_prefix (trv.path, "usr/share/pixmaps/")) || ((g_str_has_prefix(trv.path, "usr/share/mime/")) && (g_str_has_suffix(trv.path, ".xml")))){
                     gchar *dest;
                     
                     if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
                         gchar *dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));
                         gchar *dest_basename;
+
                         dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
                         dest = g_build_path("/", dest_dirname, dest_basename, NULL);
-                        if(g_mkdir_with_parents(dest_dirname, 0755))
-                            fprintf(stderr, "Could not create directory: %s\n", dest_dirname);
+                        /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
+                         * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
+                        if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){
+                            
+                            dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
+                        }
+                        if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
+                            fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
                         
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
@@ -360,6 +367,9 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
             fprintf(stderr, "sqfs_open_image: %s\n", path);
     }
     
+    /* TOOO: Change so that only one run of squash_get_matching_files is needed in total,
+     * this should hopefully improve performance */
+    
     /* Get desktop file(s) in the root directory of the AppImage */
     gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", md5, verbose); // Only in root dir
     // gchar **str_array = squash_get_matching_files(&fs, "(^.*?.desktop$)", md5, verbose); // Not only there
@@ -379,41 +389,11 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev (str_array);
     
-    /* Get icon file(s) */
-    str_array = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$)", md5, verbose); 
-    /* Work trough the NULL-terminated array of strings */
-    for (int i=0; str_array[i]; ++i) {
-        const char *ch = str_array[i];
-        if(verbose)
-            fprintf(stderr, "Got icon: %s\n", str_array[i]);
-    }
-    /* Free the NULL-terminated array of strings and its contents */
-    g_strfreev (str_array);
+    /* Get relevant  file(s) */
+    squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$)", md5, verbose); 
+    
+    /* The above also gets AppStream metainfo file(s), TODO: Check if the id matches and do something with them*/
 
-    /* Get MIME xml file(s) */
-    str_array = squash_get_matching_files(&fs, "(^usr/share/mime/packages/.*.xml$)", md5, verbose); 
-    /* Work trough the NULL-terminated array of strings */
-    for (int i=0; str_array[i]; ++i) {
-        const char *ch = str_array[i];
-        if(verbose)
-            fprintf(stderr, "Got MIME: %s\n", str_array[i]);
-    }
-    /* Free the NULL-terminated array of strings and its contents */
-    g_strfreev (str_array);
-    
-    /* Get AppStream metainfo file(s) 
-     * TODO: Check if the id matches */
-    str_array = squash_get_matching_files(&fs, "(^usr/share/appdata/.*metainfo.xml$)", md5, verbose); 
-    /* Work trough the NULL-terminated array of strings */
-    for (int i=0; str_array[i]; ++i) {
-        const char *ch = str_array[i]; 
-        fprintf(stderr, "TODO: Do something with the AppStream metainfo: %s\n", str_array[i]);
-    }
-    /* Free the NULL-terminated array of strings and its contents */
-    g_strfreev (str_array);
-    
-    /* Close the squashfs filesystem only after we need no more data from it */
-    sqfs_fd_close(fs.fd); 
 }
 
 /* Register an AppImage in the system */
