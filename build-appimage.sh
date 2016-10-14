@@ -25,8 +25,8 @@ cd ../../
 cp build/appimagetool appimagetool.AppDir/usr/bin/
 cp build/mksquashfs appimagetool.AppDir/usr/bin/
 
-cp ressources/appimagetool.desktop appimagetool.AppDir
-cp ressources/appimagetool.png appimagetool.AppDir
+cp resources/appimagetool.desktop appimagetool.AppDir
+cp resources/appimagetool.png appimagetool.AppDir
 
 cd appimagetool.AppDir
 ln -s appimagetool.png .DirIcon
