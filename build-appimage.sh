@@ -16,7 +16,7 @@ wget https://patch-diff.githubusercontent.com/raw/plougher/squashfs-tools/pull/1
 patch -p1 < 13.diff
 
 cd squashfs-tools
-make
+make XZ_SUPPORT=1
 strip mksquashfs
 cp mksquashfs ../../build
 
