@@ -8,7 +8,7 @@ mkdir -p appimagetool.AppDir/usr/bin
 cp -f build/appimagetool appimagetool.AppDir/usr/bin
 
 # Add -offset option to skip n bytes : https://github.com/plougher/squashfs-tools/pull/13
-# It seems squashfs-tools is dead.
+# It seems squashfs-tools need a new maintainer.
 wget -c "https://github.com/plougher/squashfs-tools/archive/46afc0d.zip"
 unzip 46afc0d.zip
 cd squashfs-tools-*/
