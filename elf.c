@@ -13,7 +13,6 @@ typedef Elf32_Nhdr Elf_Nhdr;
 
 static char *fname;
 static Elf64_Ehdr ehdr;
-static Elf64_Phdr *phdr;
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
 #define ELFDATANATIVE ELFDATA2LSB
@@ -47,7 +46,7 @@ static uint64_t file64_to_cpu(uint64_t val)
 static unsigned long read_elf32(int fd)
 {
 	Elf32_Ehdr ehdr32;
-	ssize_t ret, i;
+	ssize_t ret;
 
 	ret = pread(fd, &ehdr32, sizeof(ehdr32), 0);
 	if (ret < 0 || (size_t)ret != sizeof(ehdr)) {
@@ -66,7 +65,7 @@ static unsigned long read_elf32(int fd)
 static unsigned long read_elf64(int fd)
 {
 	Elf64_Ehdr ehdr64;
-	ssize_t ret, i;
+	ssize_t ret;
 
 	ret = pread(fd, &ehdr64, sizeof(ehdr64), 0);
 	if (ret < 0 || (size_t)ret != sizeof(ehdr)) {
