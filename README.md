@@ -2,7 +2,10 @@
 
 Not for productive use yet. For now use [AppImageKit](https://github.com/probonopd/AppImageKit). `appimagetool` uses an experimental next-generation AppImage format based on squashfs and embeds an experimental runtime for it.
 
-## Getting it
+## Usage
+
+### appimagetool
+
 A precompiled version can be found in the last successful Travis CI build, you can get it with:
 
 ```
@@ -14,18 +17,7 @@ URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log
 
 wget "$URL"
 ```
-
-## Building
-
-On a not too recent Ubuntu:
-```
-git clone --recursive https://github.com/probonopd/appimagetool.git
-cd appimagetool/
-bash -ex build.sh
-```
-
-## Usage
-
+Usage in a nutshell:
 ```
 chmod a+x appimagetool
 
@@ -58,4 +50,31 @@ mksquashfs Your.AppDir Your.squashfs -root-owned -noappend
 cat runtime >> Your.AppImage
 cat Your.squashfs >> Your.AppImage
 chmod a+x Your.AppImage
+```
+### appimaged
+
+`appimaged` is an optional daemon that watches locations like `~/bin` and `~/Downloads` for AppImages and if it detects some, registers them with the system, so that they show up in the menu, have their icons show up, MIME types associated, etc. It also unregisters AppImages again from the system if they are deleted.
+
+A precompiled version can be found in the last successful Travis CI build, you can get it with:
+
+```
+# Get the ID of the last successful build on Travis CI
+ID=$(wget -q https://api.travis-ci.org/repos/probonopd/appimagetool/builds -O - | head -n 1 | sed -e 's|}|\n|g' | grep '"result":0' | head -n 1 | sed -e 's|,|\n|g' | grep '"id"' | cut -d ":" -f 2)
+
+# Get the transfer.sh URL from the logfile of the last successful build on Travis CI
+URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log.txt" -O - | grep "https://transfer.sh/.*/appimaged" | tail -n 1 | sed -e 's|\r||g')
+
+wget "$URL"
+```
+
+__NOTE:__ It may be necessary to restart (or `xkill`) dash, nautilus, to recognize new directories that didn't exist prior to the first run of `appimaged`. Alternatively, it should be sufficient to log out of the session and log in again after having run appimaged once.
+
+## Building
+
+On a not too recent Ubuntu:
+```
+git clone --recursive https://github.com/probonopd/appimagetool.git
+cd appimagetool/
+bash -ex install-build-deps.sh
+bash -ex build.sh
 ```
