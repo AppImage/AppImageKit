@@ -107,6 +107,20 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
     fprintf(stderr, "ISO9660 based type 1 AppImage, not yet implemented: %s\n", path);
 }
 
+/* Get filename extension */
+static gchar *get_file_extension(const gchar *filename)
+{
+    gchar **tokens;
+    gchar *extension;
+    tokens = g_strsplit(filename, ".", 2);
+    if (tokens[0] == NULL)
+	extension = NULL;
+    else
+	extension = g_strdup(tokens[1]);
+    g_strfreev(tokens);
+    return extension;
+}
+
 /* Find files in the squashfs matching to the regex pattern. 
  * Returns a newly-allocated NULL-terminated array of strings.
  * Use g_strfreev() to free it. 
@@ -119,7 +133,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
  * with a custom name that involves the md5 identifier to tie them to a particular
  * AppImage.
  */
-gchar **squash_get_matching_files(sqfs *fs, char *pattern, char *md5, gboolean verbose) {
+gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_value_original, char *md5, gboolean verbose) {
     GPtrArray *array = g_ptr_array_new();
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
@@ -140,21 +154,31 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, char *md5, gboolean v
                 if(verbose)
                     fprintf(stderr, "squash_get_matching_files found: %s\n", trv.path);
                 g_ptr_array_add(array, g_strdup(trv.path));
-                if((g_str_has_prefix (trv.path, "usr/share/icons/")) || (g_str_has_prefix (trv.path, "usr/share/pixmaps/")) || ((g_str_has_prefix(trv.path, "usr/share/mime/")) && (g_str_has_suffix(trv.path, ".xml")))){
-                    gchar *dest;
-                    
-                    if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
-                        gchar *dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));
-                        gchar *dest_basename;
-
+                if(verbose)
+                    fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
+                gchar *dest = NULL;
+                gchar *dest_dirname;
+                gchar *dest_basename;
+                if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
+                    if(g_str_has_prefix (trv.path, "usr/share/icons/") || g_str_has_prefix (trv.path, "usr/share/pixmaps/") ||(g_str_has_prefix(trv.path, "usr/share/mime/")) && (g_str_has_suffix(trv.path, ".xml"))){
+                        dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));          
                         dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
                         dest = g_build_path("/", dest_dirname, dest_basename, NULL);
-                        /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
-                         * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
-                        if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){
-                            
-                            dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
-                        }
+                    }
+                    /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
+                     * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
+                    if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){
+                        dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
+                    }
+                    /* Some AppImages only have the icon in their root directory, so we have to get it from there */
+                    if((g_str_has_prefix(trv.path, desktop_icon_value_original)) && (! strstr(trv.path, "/")) && ( (g_str_has_suffix(trv.path, ".png")) || (g_str_has_suffix(trv.path, ".xpm")) || (g_str_has_suffix(trv.path, ".svg")) || (g_str_has_suffix(trv.path, ".svgz")))){
+                        fprintf(stderr, "if succeed xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: %s\n", trv.path);
+                        dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(trv.path));
+                        dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
+                    }
+                    
+                    if(dest){
+                        fprintf(stderr, "destination: %s\n", dest);
                         if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
                             fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
                         
@@ -182,6 +206,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, char *md5, gboolean v
                             fprintf(stderr, "Installed: %s\n", dest);
                     }
                 }
+                
             }
         }
     }
@@ -352,6 +377,8 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
 {
     long unsigned int fs_offset; // The offset at which a squashfs image is expected
     char *md5 = get_md5(path);
+    GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
+    gchar *desktop_icon_value_original = "iDoNotMatchARegex"; // FIXME: otherwise the regex does weird stuff in the first run
     if(verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
     fs_offset = get_elf_size(path);
@@ -371,29 +398,32 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
      * this should hopefully improve performance */
     
     /* Get desktop file(s) in the root directory of the AppImage */
-    gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", md5, verbose); // Only in root dir
+    gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", desktop_icon_value_original, md5, verbose); // Only in root dir
     // gchar **str_array = squash_get_matching_files(&fs, "(^.*?.desktop$)", md5, verbose); // Not only there
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
         const char *ch = str_array[i]; 
         fprintf(stderr, "Got root desktop: %s\n", str_array[i]);
-        GKeyFile *key_file_structure = g_key_file_new();
         gboolean success = g_key_file_load_from_squash(&fs, str_array[i], key_file_structure, verbose);
         if(success){
             gchar *desktop_filename = g_path_get_basename(str_array[i]);
+            
+            desktop_icon_value_original = g_strdup_printf("%s", g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, NULL));
+            if(verbose)
+                fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
             write_edited_desktop_file(key_file_structure, path, desktop_filename, md5, verbose);
         }
         g_key_file_free(key_file_structure);
         
     }
     /* Free the NULL-terminated array of strings and its contents */
-    g_strfreev (str_array);
+    g_strfreev(str_array);
     
     /* Get relevant  file(s) */
-    squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$)", md5, verbose); 
+    squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)", desktop_icon_value_original, md5, verbose); 
     
     /* The above also gets AppStream metainfo file(s), TODO: Check if the id matches and do something with them*/
-
+    
 }
 
 /* Register an AppImage in the system */
