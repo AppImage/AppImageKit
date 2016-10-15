@@ -60,7 +60,7 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 # and embed .upd_info and .sha256_sig sections
 
 cc ../elf.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a  -lfuse -lpthread -lz $(pkg-config --libs liblzma )  -o runtime
-strip runtime
+#strip runtime
 
 
 # Test if we can read it back
