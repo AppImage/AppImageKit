@@ -14,7 +14,7 @@ sudo cp mksquashfs /usr/local/bin
 
 cd ../../
 
-cp squashfs-tools-*/squashfs-tools/mksquashfs appimagetool.AppDir/usr/bin/
+cp squashfs-tools/squashfs-tools/mksquashfs appimagetool.AppDir/usr/bin/
 cp build/appimagetool appimagetool.AppDir/usr/bin/
 
 cd appimagetool.AppDir
