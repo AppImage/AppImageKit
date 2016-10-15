@@ -30,6 +30,13 @@ make
 cd ..
 
 mkdir build
+
+# Compile runtime
+make -f Makefile.runtime
+strip runtime
+mv runtime build
+make -f Makefile.runtime clean
+
 cd build
 
 # Compile and link digest tool
@@ -42,12 +49,6 @@ strip digest
 
 cc -o validate ../getsection.c ../validate.c -lssl -lcrypto -lglib-2.0 $(pkg-config --cflags glib-2.0)
 strip validate
-
-make -f Makefile.runtime
-strip runtime
-mv runtime build
-make -f Makefile.runtime clean
-
 
 # Test if we can read it back
 readelf -x .upd_info runtime # hexdump
