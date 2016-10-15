@@ -27,15 +27,18 @@
 
 #ident "AppImage by Simon Peter, http://appimage.org/"
 
+#define _GNU_SOURCE
+
 #include "squashfuse.h"
 #include <squashfs_fs.h>
 #include <nonstd.h>
 
+#include <limits.h>
+#include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <signal.h>
 #include <string.h>
 #include <unistd.h>
@@ -48,7 +51,6 @@
 
 #include <fnmatch.h>
 
-#define FNM_FILE_NAME 2
 
 struct stat st;
 
