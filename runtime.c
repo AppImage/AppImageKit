@@ -27,6 +27,10 @@
 
 #ident "AppImage by Simon Peter, http://appimage.org/"
 
+#include "squashfuse.h"
+#include <squashfs_fs.h>
+#include <nonstd.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -37,9 +41,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <errno.h>
-
-#include "squashfuse.h"
-#include <squashfs_fs.h>
+#include <wait.h>
 
 #include "elf.h"
 #include "getsection.h"
@@ -193,7 +195,6 @@ static int uri_from_filename( const char *dir, char *newuri )
     char newstring[URI_MAX];
     strncpy(newstring, uri, URI_MAX); 
     newstring[URI_MAX - 1] = 0; 
-    unsigned int i = 0;
     escape_uri_string(newstring, newuri, FILE_MAX*3+8, UNSAFE_PATH);
     return 1;
 }
@@ -241,10 +242,8 @@ void
 fuse_mounted (void)
 {
     pthread_t thread;
-    int res;
-    
     fuse_pid = getpid();
-    res = pthread_create(&thread, NULL, write_pipe_thread, keepalive_pipe);
+    pthread_create(&thread, NULL, write_pipe_thread, keepalive_pipe);
 }
 
 char* getArg(int argc, char *argv[],char chr)
@@ -291,7 +290,6 @@ main (int argc, char *argv[])
         sqfs_err err = SQFS_OK;
         sqfs_traverse trv;
         sqfs fs;
-        char *image;
         char *pattern;
         char *prefix;
         char prefixed_path_to_extract[1024];
@@ -542,8 +540,7 @@ main (int argc, char *argv[])
         
         /* open destination file */
         char mkcmd[FILE_MAX];
-        char iconsdir[FILE_MAX];
-        
+
         sprintf(mkcmd, "mkdir -p '%s'", thumbnails_medium_dir);
         system(mkcmd);
         if((to = fopen(path_to_thumbnail, "wb"))==NULL) {
