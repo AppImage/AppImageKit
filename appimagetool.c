@@ -345,16 +345,30 @@ main (int argc, char *argv[])
             fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
         }
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
-        
         /* Check if the Icon file is how it is expected */
         gchar* icon_name = get_desktop_entry(kf, "Icon");
-        char icon_file_path[PATH_MAX];
-        sprintf(icon_file_path, "%s/%s.png", source, icon_name);
+        gchar* icon_file_path;
+        gchar* icon_file_png;
+        gchar* icon_file_svg;
+        gchar* icon_file_svgz;
+        gchar* icon_file_xpm;
+        icon_file_png = g_strdup_printf("%s/%s.png", source, icon_name);
+        icon_file_svg = g_strdup_printf("%s/%s.svg", source, icon_name);
+        icon_file_svgz = g_strdup_printf("%s/%s.svgz", source, icon_name);
+        icon_file_xpm = g_strdup_printf("%s/%s.xpm", source, icon_name);
+        if(g_file_test(icon_file_png, G_FILE_TEST_IS_REGULAR))
+            icon_file_path = icon_file_png;
+        if(g_file_test(icon_file_svg, G_FILE_TEST_IS_REGULAR))
+            icon_file_path = icon_file_svg;
+        if(g_file_test(icon_file_svgz, G_FILE_TEST_IS_REGULAR))
+            icon_file_path = icon_file_svgz;
+        if(g_file_test(icon_file_xpm, G_FILE_TEST_IS_REGULAR))
+            icon_file_path = icon_file_xpm;
         if (! g_file_test(icon_file_path, G_FILE_TEST_IS_REGULAR)){
-            fprintf (stderr, "%s not present but defined in desktop file\n", icon_file_path);
+            fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} not present but defined in desktop file\n", icon_name);
             exit(1);
         }
-        
+       
         /* Check if .DirIcon is present in source AppDir */
         gchar *diricon_path = g_build_filename(source, ".DirIcon", NULL);
         if (! g_file_test(diricon_path, G_FILE_TEST_IS_REGULAR)){
