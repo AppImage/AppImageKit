@@ -7,13 +7,7 @@ fi
 mkdir -p appimagetool.AppDir/usr/bin
 cp -f build/appimagetool appimagetool.AppDir/usr/bin
 
-wget -c "https://github.com/plougher/squashfs-tools/archive/46afc0d.zip"
-unzip 46afc0d.zip
-cd squashfs-tools-*/
-wget https://patch-diff.githubusercontent.com/raw/plougher/squashfs-tools/pull/13.diff
-patch -p1 < 13.diff
-
-cd squashfs-tools
+cd squashfs-tools/squashfs-tools
 make
 strip mksquashfs
 sudo cp mksquashfs /usr/local/bin
@@ -35,8 +29,8 @@ Categories=Development;
 Terminal=true
 EOF
 
-wget "https://avatars2.githubusercontent.com/u/16617932?v=3&s=200" -O appimagetool.png
-ln -s appimagetool.png .DirIcon
+cp ../appimagetool.svg .
+ln -s appimagetool.svg .DirIcon
 
 ln -s usr/bin/appimagetool AppRun
 
