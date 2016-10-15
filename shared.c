@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include <stdio.h>
+#include <errno.h>
 
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -24,6 +25,17 @@
 #define URI_MAX (FILE_MAX * 3 + 8)
 
 char *vendorprefix = "appimagekit";
+
+void set_executable(char *path, gboolean verbose)
+{
+    int result = chmod(path, 0755); // TODO: Only do this if signature verification passed
+    if(result != 0){
+        fprintf(stderr, "Could not set %s executable: %s\n", path, strerror(errno));
+    } else {
+        if(verbose)
+            fprintf(stderr, "Set %s executable\n", path);
+    }
+}
 
 /* Search and replace on a string, this really should be in Glib
  * https://mail.gnome.org/archives/gtk-list/2012-February/msg00005.html */
@@ -105,6 +117,7 @@ int check_appimage_type(char *path, gboolean verbose)
 bool appimage_type1_register_in_system(char *path, gboolean verbose)
 {
     fprintf(stderr, "ISO9660 based type 1 AppImage, not yet implemented: %s\n", path);
+    set_executable(path, verbose);
 }
 
 /* Get filename extension */
@@ -389,6 +402,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     sqfs fs;
     if (err = sqfs_open_image(&fs, path, fs_offset)){
         fprintf(stderr, "sqfs_open_image error: %s\n", path);
+        return FALSE;
     } else {
         if(verbose)
             fprintf(stderr, "sqfs_open_image: %s\n", path);
@@ -424,6 +438,9 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     
     /* The above also gets AppStream metainfo file(s), TODO: Check if the id matches and do something with them*/
     
+    set_executable(path, verbose);
+    
+    return TRUE;
 }
 
 /* Register an AppImage in the system */
