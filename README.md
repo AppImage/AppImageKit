@@ -21,6 +21,7 @@ On a not too recent Ubuntu:
 ```
 git clone --recursive https://github.com/probonopd/appimagetool.git
 cd appimagetool/
+bash -ex install-build-deps.sh
 bash -ex build.sh
 ```
 
