@@ -93,7 +93,6 @@ cd -
 
 # Strip and check size and dependencies
 
-rm build/*.o build/1024_blank_bytes
 strip build/appimage*
 ldd build/appimagetool
 ls -l build/*
