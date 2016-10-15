@@ -66,6 +66,24 @@ URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log
 
 wget "$URL"
 ```
+Usage in a nutshell:
+
+```
+./appimaged
+```
+It will register the AppImages in with your system from the following places:
+* $HOME/Downloads
+* $HOME/bin
+* /Applications
+* /isodevice/Applications
+* /opt
+* /usr/local/bin
+
+Run `appimaged -v` for increased verbosity.
+
+If you have `AppImageUpdate` on your `$PATH`, then it can also do this neat trick:
+
+![screenshot from 2016-10-15 16-37-05](https://cloud.githubusercontent.com/assets/2480569/19410850/0390fe9c-92f6-11e6-9882-3ca6d360a190.jpg)
 
 __NOTE:__ It may be necessary to restart (or `xkill`) dash, nautilus, to recognize new directories that didn't exist prior to the first run of `appimaged`. Alternatively, it should be sufficient to log out of the session and log in again after having run appimaged once.
 
