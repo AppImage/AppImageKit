@@ -1,7 +1,7 @@
 /**************************************************************************
  * 
  * Copyright (c) 2004-16 Simon Peter
- * Copyright (c) 2007 Alexander Larsson
+ * Portions Copyright (c) 2007 Alexander Larsson
  * 
  * All Rights Reserved.
  * 
@@ -32,6 +32,7 @@
 #include "squashfuse.h"
 #include <squashfs_fs.h>
 #include <nonstd.h>
+#include <linux/limits.h>
 
 #include <limits.h>
 #include <stdlib.h>
@@ -105,117 +106,6 @@ sqfs_err private_sqfs_stat(sqfs *fs, sqfs_inode *inode, struct stat *st) {
 
 /* ================= End ELF parsing */
 
-/* ======================================================== Start helper functions for icon extraction */  
-/* 
- * Constructs the name of the thumbnail image for $HOME/.thumbnails for the executable that is itself
- * See http://people.freedesktop.org/~vuntz/thumbnail-spec-cache/
- * Partly borrowed from
- * http://www.google.com/codesearch#n76pnUnMG18/trunk/blender/imbuf/intern/thumbs.c&q=.thumbnails/normal%20lang:c%20md5&type=cs
- */
-
-#include "md5.h"
-#include "md5.c"
-#include <ctype.h>
-#include <time.h>
-#include <unistd.h>
-
-#define FILE_MAX                                 240
-#define URI_MAX FILE_MAX*3 + 8
-
-/* --- begin of adapted code from glib ---
- * The following code is adapted from function g_escape_uri_string from the gnome glib
- * Source: http://svn.gnome.org/viewcvs/glib/trunk/glib/gconvert.c?view=markup
- * released under the Gnu General Public License.
- * NOTE THIS DOESN'T WORK PROPERLY FOR öäüß - FIXME
- */
-
-typedef enum {
-    UNSAFE_ALL        = 0x1,  /* Escape all unsafe characters   */
-    UNSAFE_ALLOW_PLUS = 0x2,  /* Allows '+'  */
-    UNSAFE_PATH       = 0x8,  /* Allows '/', '&', '=', ':', '@', '+', '$' and ',' */
-    UNSAFE_HOST       = 0x10, /* Allows '/' and ':' and '@' */
-    UNSAFE_SLASHES    = 0x20  /* Allows all characters except for '/' and '%' */
-} UnsafeCharacterSet;
-
-static const unsigned char acceptable[96] = {
-    /* A table of the ASCII chars from space (32) to DEL (127) */
-    0x00,0x3F,0x20,0x20,0x28,0x00,0x2C,0x3F,0x3F,0x3F,0x3F,0x2A,0x28,0x3F,0x3F,0x1C,
-    0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x38,0x20,0x20,0x2C,0x20,0x20,
-    0x38,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,
-    0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x20,0x20,0x20,0x20,0x3F,
-    0x20,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,
-    0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x3F,0x20,0x20,0x20,0x3F,0x20
-};
-
-static const char hex[17] = "0123456789abcdef";
-
-void escape_uri_string (const char *string, char* escaped_string, int len,UnsafeCharacterSet mask)
-{
-    #define ACCEPTABLE(a) ((a)>=32 && (a)<128 && (acceptable[(a)-32] & use_mask))
-    
-    const char *p;
-    char *q;
-    int c;
-    UnsafeCharacterSet use_mask;
-    use_mask = mask;
-    
-    for (q = escaped_string, p = string; (*p != '\0') && len; p++) {
-        c = (unsigned char) *p;
-        len--;
-        
-        if (!ACCEPTABLE (c)) {
-            *q++ = '%'; /* means hex coming */
-            *q++ = hex[c >> 4];
-            *q++ = hex[c & 15];
-        } else {
-            *q++ = *p;
-        }
-    }
-    
-    *q = '\0';
-}
-
-void to_hex_char(char* hexbytes, const unsigned char* bytes, int len)
-{
-    const unsigned char *p;
-    char *q;
-    
-    for (q = hexbytes, p = bytes; len; p++) {
-        const unsigned char c = (unsigned char) *p;
-        len--;
-        *q++ = hex[c >> 4];
-        *q++ = hex[c & 15];
-    }
-}
-
-/* --- end of adapted code from glib --- */
-
-static int uri_from_filename( const char *dir, char *newuri )
-{
-    char uri[URI_MAX];
-    sprintf (uri, "file://%s", dir);
-    char newstring[URI_MAX];
-    strncpy(newstring, uri, URI_MAX); 
-    newstring[URI_MAX - 1] = 0; 
-    escape_uri_string(newstring, newuri, FILE_MAX*3+8, UNSAFE_PATH);
-    return 1;
-}
-
-
-static void thumbname_from_uri(const char* uri, char* thumb)
-{
-    char hexdigest[33];
-    unsigned char digest[16];
-    md5_buffer( uri, strlen(uri), digest);
-    hexdigest[0] = '\0';
-    to_hex_char(hexdigest, digest, 16);
-    hexdigest[32] = '\0';
-    sprintf(thumb, "%s.png", hexdigest);
-    
-}
-
-/* ======================================================== End helper functions for icon extraction */  
-
 extern int fusefs_main(int argc, char *argv[], void (*mounted) (void));
 extern void ext2_quit(void);
 
@@ -261,7 +151,7 @@ char* getArg(int argc, char *argv[],char chr)
 int
 main (int argc, char *argv[])
 {
-    char appimage_path[FILE_MAX];
+    char appimage_path[PATH_MAX];
     char * arg;
     
     /* We might want to operate on a target appimage rather than this file itself,
@@ -415,21 +305,6 @@ main (int argc, char *argv[])
     char **real_argv;
     int i;
     
-    // We are using glib anyway for fuseiso, so we can use it here too to make our life easier
-    char *xdg_cache_home;
-    char thumbnails_medium_dir[FILE_MAX];
-    char generated_cache_home[FILE_MAX];
-    
-    if(getenv("XDG_CACHE_HOME") == NULL){
-        sprintf(generated_cache_home, "%s/.cache/", getenv("HOME"));
-        xdg_cache_home = generated_cache_home;
-    } else {
-        xdg_cache_home = getenv("XDG_CACHE_HOME");
-    }
-    
-    sprintf(thumbnails_medium_dir, "%s/thumbnails/normal/", xdg_cache_home);
-    /*  printf("%s\n", thumbnails_medium_dir); */
-    
     if (mkdtemp(mount_dir) == NULL) {
         exit (1);
     }
@@ -481,6 +356,8 @@ main (int argc, char *argv[])
             // perror ("open dir error: ");
             printf("Could not mount AppImage\n");
             printf("Please see https://github.com/probonopd/AppImageKit/wiki/FUSE\n");
+            /* TODO: dlopen() libfuse and be nice if it is not there, e.g., offer
+             * to extract the files to a temp location and run AppRun */
             exit (1);
         }
         
@@ -504,12 +381,10 @@ main (int argc, char *argv[])
             printf("%s\n", mount_dir);
             for (;;) pause();
         }
-        
-        
-        /* ======================================================== Start icon extraction */
-        
+
         int length;
-        char fullpath[FILE_MAX];
+        char fullpath[PATH_MAX];
+        
         if(getenv("TARGET_APPIMAGE") == NULL){
             // If we are operating on this file itself
             length = readlink(appimage_path, fullpath, sizeof(fullpath));
@@ -518,73 +393,7 @@ main (int argc, char *argv[])
             // If we are operating on a different AppImage than this file
             sprintf(fullpath, "%s", appimage_path); // TODO: Make absolute
         }
-        // printf("appimage_path: %s\n", appimage_path);
-        // printf("fullpath: %s\n", fullpath);
-        char theuri[URI_MAX];
-        uri_from_filename(fullpath, theuri);
-        /* printf("%s\n", theuri);  */
-        char path_to_thumbnail[URI_MAX];
-        char thumbname[URI_MAX];
-        thumbname_from_uri(theuri, thumbname);
-        sprintf(path_to_thumbnail, "%s%s", thumbnails_medium_dir, thumbname);
-        
-        FILE *from, *to;
-        char ch;
-        
-        char diricon[FILE_MAX];
-        sprintf (diricon, "%s/.DirIcon", mount_dir);
-        
-        /* open source file */
-        if((from = fopen(diricon, "rb"))==NULL) {
-            printf("Cannot open %s\n", diricon);
-            exit(1);
-        }
-        
-        /* open destination file */
-        char mkcmd[FILE_MAX];
-
-        sprintf(mkcmd, "mkdir -p '%s'", thumbnails_medium_dir);
-        system(mkcmd);
-        if((to = fopen(path_to_thumbnail, "wb"))==NULL) {
-            printf("Cannot open %s for writing\n", path_to_thumbnail);
-            
-        } else {
-            
-            /* copy the file */
-            while(!feof(from)) {
-                ch = fgetc(from);
-                if(ferror(from)) {
-                    printf("Error reading source file\n");
-                    exit(1);
-                }
-                if(!feof(from)) fputc(ch, to);
-                if(ferror(to)) {
-                    printf("Error writing destination file\n");
-                    exit(1);
-                }
-            }
-            
-            if(fclose(from)==EOF) {
-                printf("Error closing source file\n");
-                exit(1);
-            }
-            
-            if(fclose(to)==EOF) {
-                printf("Error closing destination file\n");
-                exit(1);
-            }
-        }
-        
-        /* If called with --icon, then do not run the main app, just print print a message and exit after extracting the icon */ 
-        if (arg && strcmp(arg,"appimage-icon")==0) {
-            printf("Written icon for %s to %s\n", fullpath, path_to_thumbnail);
-            exit(0);
-        }
-        
-        
-        /* ======================================================== End icon extraction */   
-        
-        
+                
         /* Setting some environment variables that the app "inside" might use */
         setenv( "APPIMAGE", fullpath, 1 );
         setenv( "APPDIR", mount_dir, 1 );
