@@ -368,7 +368,7 @@ main (int argc, char *argv[])
             fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} not present but defined in desktop file\n", icon_name);
             exit(1);
         }
-        fprintf (stdout, "dddddddddddddddddddddddddddddddddddddddd alive 3\n");            
+       
         /* Check if .DirIcon is present in source AppDir */
         gchar *diricon_path = g_build_filename(source, ".DirIcon", NULL);
         if (! g_file_test(diricon_path, G_FILE_TEST_IS_REGULAR)){
