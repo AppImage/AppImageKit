@@ -280,15 +280,17 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     gchar *tryexec_path = replace_str(appimage_path," ", "\\ "); // TryExec does not support blanks
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimage_path);
     
-    // Add AppImageUpdate desktop action
+    /* Add AppImageUpdate desktop action
+     * https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s10.html 
+     * This will only work if AppImageUpdate is on the user's $PATH.
+     * TODO: we could have it call this appimaged instance instead of AppImageUpdate and let it
+     * figure out how to update the AppImage */
     gchar *appimageupdate_group = "Desktop Action AppImageUpdate";
     gchar *appimageupdate_exec = g_strdup_printf("%s %s", "AppImageUpdate", appimage_path);
     gchar *appimageupdate_tryexec = "AppImageUpdate";
-    
     g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_NAME, "Update");
     g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_EXEC, appimageupdate_exec);
     g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimageupdate_tryexec);
-    
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ACTIONS, "AppImageUpdate;");
     
     gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, NULL)));
