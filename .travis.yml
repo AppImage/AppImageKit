@@ -4,6 +4,7 @@ os: linux
 dist: trusty
 
 script:
+  - bash -ex install-build-deps.sh
   - bash -ex build.sh
   - bash -ex build-appimage.sh
   - curl --upload-file ./*.AppImage https://transfer.sh/appimagetool

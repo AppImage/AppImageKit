@@ -8,11 +8,6 @@
 # Clean up from previous run
 rm -rf build/ || true
 
-# Install build dependencies
-
-sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev
-# libtool-bin might be required in newer distributions but is not available in precise
-
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
