@@ -172,13 +172,13 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     }
                     /* Some AppImages only have the icon in their root directory, so we have to get it from there */
                     if((g_str_has_prefix(trv.path, desktop_icon_value_original)) && (! strstr(trv.path, "/")) && ( (g_str_has_suffix(trv.path, ".png")) || (g_str_has_suffix(trv.path, ".xpm")) || (g_str_has_suffix(trv.path, ".svg")) || (g_str_has_suffix(trv.path, ".svgz")))){
-                        fprintf(stderr, "if succeed xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx: %s\n", trv.path);
                         dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(trv.path));
                         dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
                     }
                     
                     if(dest){
-                        fprintf(stderr, "destination: %s\n", dest);
+                        if(verbose)
+                            fprintf(stderr, "install: %s\n", dest);
                         if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
                             fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
                         
@@ -364,7 +364,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     gchar *partial_path = g_strdup_printf("applications/appimagekit_%s-%s", md5, desktop_filename);
     gchar *destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
     if(verbose)
-        fprintf(stderr, "destination: %s\n", destination);
+        fprintf(stderr, "install: %s\n", destination);
     if(g_mkdir_with_parents(g_path_get_dirname(destination), 0755))
         fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(destination));    
     g_key_file_save_to_file(key_file_structure, destination, NULL);
@@ -433,14 +433,15 @@ int appimage_register_in_system(char *path, gboolean verbose)
     if(type == 1 || type == 2){
         fprintf(stderr, "\n");
         fprintf(stderr, "-> REGISTER %s\n", path);
-        fprintf(stderr, "get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
     }
     /* TODO: Generate thumbnails.
      * Generating proper thumbnails involves more than just copying images out of the AppImage,
      * including checking if the thumbnail already exists and if it's valid 
      * and writing attributes into the thumbnail, see
      * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#CREATION */
-    
+    if(verbose)
+        fprintf(stderr, "get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
+        
     if(type == 1){
         appimage_type1_register_in_system(path, verbose);
     }
