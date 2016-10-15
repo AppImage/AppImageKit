@@ -458,6 +458,8 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
 /* Register an AppImage in the system */
 int appimage_register_in_system(char *path, gboolean verbose)
 {
+    if((g_str_has_suffix(path, ".part")) || (g_str_has_suffix(path, ".tmp")) || (g_str_has_suffix(path, ".download")) || (g_str_has_suffix(path, ".~")))
+        return 0;
     int type = check_appimage_type(path, verbose);
     if(type == 1 || type == 2){
         fprintf(stderr, "\n");
