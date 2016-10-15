@@ -27,6 +27,8 @@ bash -ex build.sh
 
 ## Usage
 
+### appimagetool
+
 ```
 chmod a+x appimagetool
 
@@ -60,3 +62,6 @@ cat runtime >> Your.AppImage
 cat Your.squashfs >> Your.AppImage
 chmod a+x Your.AppImage
 ```
+### appimaged
+
+`appimaged` is an optional daemon that watches locations like `~/bin` and `~/Downloads` for AppImages and if it detects some, registers them with the system, so that they show up in the menu, have their icons show up, MIME types associated, etc. It also unregisters AppImages again from the system if they are deleted.
