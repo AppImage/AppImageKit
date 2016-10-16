@@ -24,7 +24,7 @@ Volunteers wanted for the following topics. Feel free to send a PR that adds you
 
 ## Desktop integration
 
-* Resurrect appimaged (probonopd) **DONE** **See [video](https://www.youtube.com/watch?v=ckKiDcRXWgE)**
+* Resurrect appimaged (probonopd) **[DONE](https://www.youtube.com/watch?v=ckKiDcRXWgE)**
 * Sandbox using firejail (see the sandbox GUI integration experiments in this repository)
 * Test/use GNOME portals
 
