@@ -81,11 +81,21 @@ It will register the AppImages in with your system from the following places:
 
 Run `appimaged -v` for increased verbosity.
 
+__NOTE:__ It may be necessary to restart (or `xkill`) dash, nautilus, to recognize new directories that didn't exist prior to the first run of `appimaged`. Alternatively, it should be sufficient to log out of the session and log in again after having run appimaged once.
+
 If you have `AppImageUpdate` on your `$PATH`, then it can also do this neat trick:
 
 ![screenshot from 2016-10-15 16-37-05](https://cloud.githubusercontent.com/assets/2480569/19410850/0390fe9c-92f6-11e6-9882-3ca6d360a190.jpg)
 
-__NOTE:__ It may be necessary to restart (or `xkill`) dash, nautilus, to recognize new directories that didn't exist prior to the first run of `appimaged`. Alternatively, it should be sufficient to log out of the session and log in again after having run appimaged once.
+Here is an easy way to get the latest AppImageUpdate onto your `$PATH`:
+
+```
+APP=AppImageUpdate
+nodeFileName=$(wget -q "https://bintray.com/package/files/probono/AppImages/$APP?order=desc&sort=fileLastModified&basePath=&tab=files" -O - | grep -e '-x86_64.AppImage">' | cut -d '"' -f 6 | head -n 1)
+wget -c "https://bintray.com/$nodeFileName" -O "$APP"
+chmod a+x "$APP"
+sudo mv "$APP" /usr/local/bin/
+```
 
 ## Building
 
