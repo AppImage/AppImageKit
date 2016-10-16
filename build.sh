@@ -30,13 +30,6 @@ make
 cd ..
 
 mkdir build
-
-# Compile runtime
-make -f Makefile.runtime
-strip runtime
-mv runtime build
-make -f Makefile.runtime clean
-
 cd build
 
 # Compile and link digest tool
@@ -50,6 +43,26 @@ strip digest
 cc -o validate ../getsection.c ../validate.c -lssl -lcrypto -lglib-2.0 $(pkg-config --cflags glib-2.0)
 strip validate
 
+# Compile runtime but do not link
+
+cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -I../squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
+
+# Prepare 1024 bytes of space for updateinformation
+printf '\0%.0s' {0..1023} > 1024_blank_bytes
+
+objcopy --add-section .upd_info=1024_blank_bytes \
+          --set-section-flags .upd_info=noload,readonly runtime.o runtime2.o
+
+objcopy --add-section .sha256_sig=1024_blank_bytes \
+          --set-section-flags .sha256_sig=noload,readonly runtime2.o runtime3.o
+
+# Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
+# and embed .upd_info and .sha256_sig sections
+
+cc ../elf.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a  -lfuse -lpthread -lz $(pkg-config --libs liblzma )  -o runtime
+strip runtime
+
+
 # Test if we can read it back
 readelf -x .upd_info runtime # hexdump
 readelf -p .upd_info runtime || true # string
@@ -60,9 +73,8 @@ HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
 dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
 
 # Insert AppImage magic bytes
-# verify with : xxd  -g 4 -l 16 runtime
-printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
+printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
 # Convert runtime into a data object that can be embedded into appimagetool
 
@@ -93,6 +105,7 @@ cd -
 
 # Strip and check size and dependencies
 
+rm build/*.o build/1024_blank_bytes
 strip build/appimage*
 ldd build/appimagetool
 ls -l build/*
