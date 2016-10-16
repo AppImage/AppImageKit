@@ -343,11 +343,11 @@ main (int argc, char *argv[])
         if(0 != fusefs_main (5, child_argv, fuse_mounted)){
             char *title;
             char *body;
-            title = "Cannot mount AppImage, please check your FUSE setup";
-            body = "You might still be able to extract the contents of this AppImage\n \
-            if you run it with the --appimage-extract option.\n \
-            See https://github.com/probonopd/AppImageKit/wiki/FUSE\n \
-            for more information";
+            title = "Cannot mount AppImage, please check your FUSE setup.";
+            body = "You might still be able to extract the contents of this AppImage \n"
+            "if you run it with the --appimage-extract option. \n"
+            "See https://github.com/probonopd/AppImageKit/wiki/FUSE \n"
+            "for more information";
             notify(title, body, NULL); // 3 seconds timeout
         };
     } else {
