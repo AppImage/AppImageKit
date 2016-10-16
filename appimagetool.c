@@ -518,7 +518,7 @@ main (int argc, char *argv[])
             if(!zsyncmake_path){
                 fprintf (stderr, "zsyncmake is not installed, skipping\n");
             } else {
-                fprintf (stderr, "zsyncmake is installed and updateinformation is provided,"
+                fprintf (stderr, "zsyncmake is installed and updateinformation is provided, "
                 "hence generating zsync file\n");
                 sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
                 fp = popen(command, "r");
