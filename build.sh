@@ -15,15 +15,14 @@ patch -p1 < ../squashfuse.patch
 
 # Build libsquashfuse_ll library
 
-libtoolize --force
-aclocal
-autoheader
-automake --force-missing --add-missing
-autoconf
-
-./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
-
-sed -i -e 's|-O2|-Os|g' Makefile # Optimize for size
+if [ ! -e ./Makefile ] ; then
+  libtoolize --force
+  aclocal
+  autoheader
+  automake --force-missing --add-missing
+  autoconf
+  ./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
+fi
 
 make
 
@@ -59,9 +58,8 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed .upd_info and .sha256_sig sections
 
-cc ../elf.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a  -lfuse -lpthread -lz $(pkg-config --libs liblzma )  -o runtime
+cc ../elf.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a  -lfuse -lpthread -lz $(pkg-config --libs liblzma ) -ldl -o runtime
 strip runtime
-
 
 # Test if we can read it back
 readelf -x .upd_info runtime # hexdump
@@ -97,15 +95,10 @@ cc -std=gnu99 -Wl,-Bdynamic -DVERSION_NUMBER=\"$(git describe --tags --always --
 
 cd ..
 
-# Reset squashfuse to its original state
-
-cd squashfuse
-git reset --hard
-cd -
-
 # Strip and check size and dependencies
 
 rm build/*.o build/1024_blank_bytes
-strip build/appimage*
+strip build/* 2>/dev/null
+chmod a+x build/*
 ldd build/appimagetool
-ls -l build/*
+ls -lh build/*
