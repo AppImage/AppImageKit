@@ -14,8 +14,8 @@ all: runtime
 	printf '\0%.0s' {0..1023} > $@
 
 # Compile runtime but do not link
-runtime.o: runtime.c notify.c
-	$(CC) -c $(CFLAGS) -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
+runtime.o: runtime.c
+	$(CC) -c $(CFLAGS) $^ -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
 	-I./squashfuse/ -D_FILE_OFFSET_BITS=64 $^
 
 # Add .upd_info and .sha256_sig sections
@@ -27,8 +27,8 @@ embed: 1024_blank_bytes runtime
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # TODO: generate runtime in fonction of the compressor we choose to avoid embeded unncessary compression.
-runtime: runtime.o notify.o
-	$(CC) $(CFLAGS) elf.c getsection.c notify.c runtime.o ./squashfuse/.libs/libsquashfuse_ll.a \
+runtime: runtime.o notify.o elf.o getsection.o
+	$(CC) $(CFLAGS) $^ ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
 	-lfuse -lpthread -lz -linotifytools -ldl `pkg-config --libs liblzma` -o runtime
 
