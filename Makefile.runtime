@@ -9,9 +9,9 @@ COPY_FILE     = $(COPY)
 all: runtime
 
 # Compile runtime but do not link
-runtime.o: runtime.c
+runtime.o: runtime.c notify.c
 	$(CC) -c $(CFLAGS) -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
-	-I./squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os runtime.c
+	-I./squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os notify.c runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
 1024_blank_bytes.o:
@@ -28,10 +28,10 @@ runtime3.o: 1024_blank_bytes.o runtime2.o
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed .upd_info and .sha256_sig sections
 # TODO: generate runtime in fonction of the compressor we choose to avoid embeded unncessary compression.
-runtime: runtime3.o
-	$(CC) $(CFLAGS) elf.c getsection.c runtime3.o ./squashfuse/.libs/libsquashfuse_ll.a \
+runtime: runtime3.o notify.o
+	$(CC) $(CFLAGS) elf.c getsection.c runtime3.o notify.o ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
-	-lfuse -lpthread -lz `pkg-config --libs liblzma` -o runtime
+	-lfuse -lpthread -lz -linotifytools -ldl `pkg-config --libs liblzma` -o runtime
 
 install: runtime
 	$(MKDIR) build

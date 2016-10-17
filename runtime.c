@@ -52,7 +52,8 @@
 
 #include <fnmatch.h>
 
-#include "notify.c"
+//#include "notify.c"
+extern int notify(char *title, char *body, int timeout);
 
 struct stat st;
 
