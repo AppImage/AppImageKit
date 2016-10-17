@@ -313,13 +313,34 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
      * This will only work if AppImageUpdate is on the user's $PATH.
      * TODO: we could have it call this appimaged instance instead of AppImageUpdate and let it
      * figure out how to update the AppImage */
-    gchar *appimageupdate_group = "Desktop Action AppImageUpdate";
-    gchar *appimageupdate_exec = g_strdup_printf("%s %s", "AppImageUpdate", appimage_path);
-    gchar *appimageupdate_tryexec = "AppImageUpdate";
-    g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_NAME, "Update");
-    g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_EXEC, appimageupdate_exec);
-    g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimageupdate_tryexec);
-    g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ACTIONS, "AppImageUpdate;");
+    if(g_find_program_in_path ("AppImageUpdate")){
+        unsigned long offset = 0;
+        unsigned long length = 0;
+        get_elf_section_offset_and_lenghth(appimage_path, ".upd_info", &offset, &length);
+        fprintf(stderr, ".upd_info offset: %lu\n", offset);
+        fprintf(stderr, ".upd_info length: %lu\n", length);
+        if(length != 1024)
+            fprintf(stderr, "WARNING: .upd_info length is %lu rather than 1024, this might be a bug in the AppImage\n", length);
+        FILE *binary;
+        char buffer[4];
+        if (binary = fopen(appimage_path, "rt"))
+        {
+            /* Check whether the first three bytes at the offset are not NULL */
+            fseek(binary, offset, SEEK_SET);
+            fread(buffer, 1, 3, binary);
+            buffer[4] = 0;
+            fclose(binary);
+            if((buffer[0] != 0x00) && (buffer[1] != 0x00) && (buffer[2] != 0x00)){
+                gchar *appimageupdate_group = "Desktop Action AppImageUpdate";
+                gchar *appimageupdate_exec = g_strdup_printf("%s %s", "AppImageUpdate", appimage_path);
+                gchar *appimageupdate_tryexec = "AppImageUpdate";
+                g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_NAME, "Update");
+                g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_EXEC, appimageupdate_exec);
+                g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimageupdate_tryexec);
+                g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ACTIONS, "AppImageUpdate;");
+            }
+        }
+    }
     
     gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, NULL)));
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, icon_with_md5);
@@ -486,7 +507,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
 /* Register an AppImage in the system */
 int appimage_register_in_system(char *path, gboolean verbose)
 {
-    if((g_str_has_suffix(path, ".part")) || (g_str_has_suffix(path, ".tmp")) || (g_str_has_suffix(path, ".download")) || (g_str_has_suffix(path, ".~")))
+    if((g_str_has_suffix(path, ".part")) || (g_str_has_suffix(path, ".tmp")) || (g_str_has_suffix(path, ".download")) || (g_str_has_suffix(path, ".zs-old")) || (g_str_has_suffix(path, ".~")))
         return 0;
     int type = check_appimage_type(path, verbose);
     if(type == 1 || type == 2){
