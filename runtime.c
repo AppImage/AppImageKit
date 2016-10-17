@@ -52,6 +52,7 @@
 
 #include <fnmatch.h>
 
+#include "notify.c"
 
 struct stat st;
 
@@ -107,7 +108,7 @@ sqfs_err private_sqfs_stat(sqfs *fs, sqfs_inode *inode, struct stat *st) {
 /* ================= End ELF parsing */
 
 extern int fusefs_main(int argc, char *argv[], void (*mounted) (void));
-extern void ext2_quit(void);
+// extern void ext2_quit(void);
 
 static pid_t fuse_pid;
 static int keepalive_pipe[2];
@@ -310,13 +311,13 @@ main (int argc, char *argv[])
     }
     
     if (pipe (keepalive_pipe) == -1) {
-        perror ("pipe error: ");
+        perror ("pipe error");
         exit (1);
     }
     
     pid = fork ();
     if (pid == -1) {
-        perror ("fork error: ");
+        perror ("fork error");
         exit (1);
     }
     
@@ -339,7 +340,16 @@ main (int argc, char *argv[])
         child_argv[3] = dir;
         child_argv[4] = mount_dir;
         
-        fusefs_main (5, child_argv, fuse_mounted);
+        if(0 != fusefs_main (5, child_argv, fuse_mounted)){
+            char *title;
+            char *body;
+            title = "Cannot mount AppImage, please check your FUSE setup.";
+            body = "You might still be able to extract the contents of this AppImage \n"
+            "if you run it with the --appimage-extract option. \n"
+            "See https://github.com/probonopd/AppImageKit/wiki/FUSE \n"
+            "for more information";
+            notify(title, body, NULL); // 3 seconds timeout
+        };
     } else {
         /* in parent, child is $pid */
         int c;
@@ -353,9 +363,7 @@ main (int argc, char *argv[])
         
         dir_fd = open (mount_dir, O_RDONLY);
         if (dir_fd == -1) {
-            // perror ("open dir error: ");
-            printf("Could not mount AppImage\n");
-            printf("Please see https://github.com/probonopd/AppImageKit/wiki/FUSE\n");
+            perror ("open dir error");
             /* TODO: dlopen() libfuse and be nice if it is not there, e.g., offer
              * to extract the files to a temp location and run AppRun */
             exit (1);
@@ -363,7 +371,7 @@ main (int argc, char *argv[])
         
         res = dup2 (dir_fd, 1023);
         if (res == -1) {
-            perror ("dup2 error: ");
+            perror ("dup2 error");
             exit (1);
         }
         close (dir_fd);
@@ -407,9 +415,10 @@ main (int argc, char *argv[])
         /* If we are operating on an AppImage different from this file,
          * then we do not execute the payload */
         if(getenv("TARGET_APPIMAGE") == NULL){
+            /* TODO: Find a way to get the exit status and/or output of this */
             execv (filename, real_argv);
             /* Error if we continue here */
-            perror ("execv error: ");
+            perror ("execv error");
             exit (1);
         }
     }
