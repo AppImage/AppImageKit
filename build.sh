@@ -11,7 +11,7 @@ rm -rf build/ || true
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
-patch -p1 < ../squashfuse.patch
+patch -p1 --backup < ../squashfuse.patch
 
 # Build libsquashfuse_ll library
 
@@ -32,9 +32,7 @@ cd ..
 mkdir build
 
 # Compile runtime
-make -f Makefile.runtime
-strip runtime
-mv runtime build
+make -f Makefile.runtime install
 make -f Makefile.runtime clean
 
 cd build
@@ -58,11 +56,6 @@ readelf -p .upd_info runtime || true # string
 HEXOFFSET=$(objdump -h runtime | grep .upd_info | awk '{print $6}')
 HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
 dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
-
-# Insert AppImage magic bytes
-# verify with : xxd  -g 4 -l 16 runtime
-printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
-
 
 # Convert runtime into a data object that can be embedded into appimagetool
 

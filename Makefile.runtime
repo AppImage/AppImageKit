@@ -1,12 +1,17 @@
 CC            = gcc
 CFLAGS        = -std=gnu99 -Wall -Wno-unused-parameter -Wno-unused-result -Wformat-security -O2 -Wall
+STRIP         = strip
+MAGIC         = echo "8: 414902" | xxd -r -
+MKDIR         = mkdir -p
+COPY          = cp -f
+COPY_FILE     = $(COPY)
 
 all: runtime
 
 # Compile runtime but do not link
 runtime.o: runtime.c
-	$(CC) $(CFLAGS) -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
-	-I./squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os -c runtime.c
+	$(CC) -c $(CFLAGS) -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
+	-I./squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
 1024_blank_bytes.o:
@@ -27,6 +32,14 @@ runtime: runtime3.o
 	$(CC) $(CFLAGS) elf.c getsection.c runtime3.o ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
 	-lfuse -lpthread -lz `pkg-config --libs liblzma` -o runtime
+
+install: runtime
+	$(MKDIR) build
+	$(COPY_FILE) runtime build
+	$(STRIP) build/runtime
+	# Insert AppImage magic bytes at offset 8
+	# verify with : xxd -s 0x8 -l3 -g3 runtime
+	$(MAGIC) build/runtime
 
 clean:
 	rm -f *.o
