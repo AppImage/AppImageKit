@@ -121,9 +121,9 @@ int sfs_mksquashfs(char *source, char *destination) {
         {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
-            execlp("mksquashfs", "mksquashfs", source, destination, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", NULL);
+            execlp("mksquashfs", "mksquashfs", source, destination, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", "-root-owned", NULL);
         } else {
-        execlp("mksquashfs", "mksquashfs", source, destination, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", NULL);
+        execlp("mksquashfs", "mksquashfs", source, destination, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", "-root-owned", NULL);
         }
         perror("execlp");   // execlp() returns only on error
         return(-1); // exec never returns
