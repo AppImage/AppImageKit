@@ -1,0 +1,34 @@
+msgid "%s is not named correctly. It should be named %s"
+msgstr "%s ist nicht richtig benannt. Es sollte %s benannt werden."
+
+msgid "%s not found"
+msgstr "%s nicht gefunden."
+
+msgid "%s, %s, %s missing. At least one is needed. Skipping %s."
+msgstr "%s, %s und %s fehlt. Mindestens ein benötigt. Skipping %s."
+
+msgid "%s is missing. Skipping %s."
+msgstr "%s fehlt. Auslassen von %s."
+
+msgid "Desktop file is missing. Please run %s from within an AppImage."
+msgstr "Desktop-Datei fehlt. Bitte führen Sie %s innerhalb einer AppImage."
+
+msgid ""
+"%s is missing. Probably not running %s from within an AppImage.\\nHence "
+"falling back to using %s"
+msgstr ""
+"%s fehlt. Wahrscheinlich %s nicht läuft innerhalb einer AppImage.\\nDaher "
+"fallen zurück %s zu verwenden."
+
+msgid "Install"
+msgstr "Installieren"
+
+msgid ""
+"Would you like to integrate %s with your system?\\n\\nThis will add it to "
+"your applications menu and install icons.\\nIf you don't do this you can "
+"still launch the application by double-clicking on the AppImage."
+msgstr ""
+"Möchten Sie %s mit Ihrem System zu integrieren?\n\nDadurch wird es für Ihre "
+"Anwendungen Menü hinzufügen und Symbole installieren.\nWenn Sie dies nicht "
+"tun, können Sie immer noch die Anwendung starten, indem Sie einen Doppelklick "
+"auf den AppImage."
