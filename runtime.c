@@ -349,7 +349,7 @@ main (int argc, char *argv[])
             "if you run it with the --appimage-extract option. \n"
             "See https://github.com/probonopd/AppImageKit/wiki/FUSE \n"
             "for more information";
-            notify(title, body, NULL); // 3 seconds timeout
+	    notify(title, body, 3000); // 3 seconds timeout
         };
     } else {
         /* in parent, child is $pid */
