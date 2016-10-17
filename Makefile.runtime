@@ -12,6 +12,7 @@ all: runtime
 # Prepare 1024 bytes of space for updateinformation
 1024_blank_bytes:
 	printf '\0%.0s' {0..1023} > $@
+	stat $@
 
 # Compile runtime but do not link
 runtime.o: runtime.c
@@ -24,6 +25,7 @@ embed: 1024_blank_bytes runtime
 		--set-section-flags .upd_info=noload,readonly runtime
 	objcopy --add-section .sha256_sig=1024_blank_bytes \
 		--set-section-flags .sha256_sig=noload,readonly runtime
+	stat runtime
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # TODO: generate runtime in fonction of the compressor we choose to avoid embeded unncessary compression.
