@@ -24,6 +24,8 @@ if [ ! -e ./Makefile ] ; then
   ./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
 fi
 
+bash --version
+
 make
 
 cd ..

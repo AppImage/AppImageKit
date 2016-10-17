@@ -11,7 +11,8 @@ all: runtime
 
 # Prepare 1024 bytes of space for updateinformation
 1024_blank_bytes:
-	printf '\0%.0s' {0..1023} > $@
+	#printf '\0%.0s' {0..1023} > $@
+	echo "03FF: 00" | xxd -r > $@
 	stat $@
 
 # Compile runtime but do not link
