@@ -15,15 +15,14 @@ patch -p1 --backup < ../squashfuse.patch
 
 # Build libsquashfuse_ll library
 
-libtoolize --force
-aclocal
-autoheader
-automake --force-missing --add-missing
-autoconf
-
-./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
-
-sed -i -e 's|-O2|-Os|g' Makefile # Optimize for size
+if [ ! -e ./Makefile ] ; then
+  libtoolize --force
+  aclocal
+  autoheader
+  automake --force-missing --add-missing
+  autoconf
+  ./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
+fi
 
 make
 
@@ -78,14 +77,10 @@ cc -std=gnu99 -Wl,-Bdynamic -DVERSION_NUMBER=\"$(git describe --tags --always --
 
 cd ..
 
-# Reset squashfuse to its original state
-
-cd squashfuse
-git reset --hard
-cd -
-
 # Strip and check size and dependencies
 
-strip build/appimage*
+rm build/*.o
+strip build/* 2>/dev/null
+chmod a+x build/*
 ldd build/appimagetool
-ls -l build/*
+ls -lh build/*
