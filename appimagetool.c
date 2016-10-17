@@ -67,6 +67,7 @@ gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
+gchar *sqfs_comp = "gzip";
 
 // #####################################################################
 
@@ -116,7 +117,14 @@ int sfs_mksquashfs(char *source, char *destination) {
         waitpid(pid, &status, 0);
     } else {
         // we are the child
-        execlp("mksquashfs", "mksquashfs", source, destination, "-root-owned", "-noappend", (char *)0);
+        if(0==strcmp("xz", sqfs_comp))
+        {
+            // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
+            // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
+            execlp("mksquashfs", "mksquashfs", source, destination, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", "-root-owned", NULL);
+        } else {
+        execlp("mksquashfs", "mksquashfs", source, destination, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", "-root-owned", NULL);
+        }
         perror("execlp");   // execlp() returns only on error
         return(-1); // exec never returns
     }
@@ -231,6 +239,7 @@ static GOptionEntry entries[] =
     { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
+    { "comp", NULL, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL }, 
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -256,7 +265,9 @@ main (int argc, char *argv[])
         fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
         exit(0);
     }
-        
+
+    if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
+        die("Only gzip (faster execution, larger files) and xz (slower execution, smaller files) compression is supported at the moment. Let us know if there are reasons for more, should be easy to add. You could help the project by doing some systematic size/performance measurements. Watch for size, execution speed, and zsync delta size.");
     /* Check for dependencies here. Better fail early if they are not present. */
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs is missing but required, please install it");
