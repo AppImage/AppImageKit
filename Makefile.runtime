@@ -29,7 +29,7 @@ embed: 1024_blank_bytes runtime
 	stat runtime
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
-# TODO: generate runtime in fonction of the compressor we choose to avoid embeded unncessary compression.
+# TODO: generate runtime in function of the compressor we choose to avoid embeded unnecessary compression.
 runtime: runtime.o notify.o elf.o getsection.o
 	$(CC) $(CFLAGS) $^ ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
