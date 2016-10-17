@@ -1,4 +1,4 @@
-!#/bin/bash
+#!/bin/bash
 
 #
 # This is supposed to be run on Travis CI trusty. Also works for me on Ubuntu 16.04.
