@@ -1,4 +1,4 @@
-#!/bin/bash
+!#/bin/bash
 
 #
 # This is supposed to be run on Travis CI trusty. Also works for me on Ubuntu 16.04.
@@ -11,7 +11,7 @@ rm -rf build/ || true
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
-patch -p1 < ../squashfuse.patch
+patch -p1 -N < ../squashfuse.patch
 
 # Build libsquashfuse_ll library
 
