@@ -1,5 +1,5 @@
 CC            = gcc
-CFLAGS        = -std=gnu99 -Wall -Wno-unused-parameter -Wno-unused-result -Wformat-security -O2 -Wall
+CFLAGS        = -std=gnu99 -Wall -Wno-unused-parameter -Wno-unused-result -Wformat-security -Os -Wall -g
 STRIP         = strip
 MAGIC         = echo "8: 414902" | xxd -r -
 MKDIR         = mkdir -p
@@ -7,42 +7,41 @@ COPY          = cp -f
 COPY_FILE     = $(COPY)
 
 all: runtime
+.PHONY: all embed mrproper
+
+# Prepare 1024 bytes of space for updateinformation
+1024_blank_bytes:
+	printf '\0%.0s' {0..1023} > $@
 
 # Compile runtime but do not link
 runtime.o: runtime.c notify.c
 	$(CC) -c $(CFLAGS) -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
-	-I./squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os notify.c runtime.c
+	-I./squashfuse/ -D_FILE_OFFSET_BITS=64 $^
 
-# Prepare 1024 bytes of space for updateinformation
-1024_blank_bytes.o:
-	printf '\0%.0s' {0..1023} > 1024_blank_bytes.o
-
-runtime2.o: 1024_blank_bytes.o runtime.o
-	objcopy --add-section .upd_info=1024_blank_bytes.o \
-	--set-section-flags .upd_info=noload,readonly runtime.o runtime2.o
-
-runtime3.o: 1024_blank_bytes.o runtime2.o
-	objcopy --add-section .sha256_sig=1024_blank_bytes.o \
-	--set-section-flags .sha256_sig=noload,readonly runtime2.o runtime3.o
+# Add .upd_info and .sha256_sig sections
+embed: 1024_blank_bytes runtime
+	objcopy --add-section .upd_info=1024_blank_bytes \
+		--set-section-flags .upd_info=noload,readonly runtime
+	objcopy --add-section .sha256_sig=1024_blank_bytes \
+		--set-section-flags .sha256_sig=noload,readonly runtime
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
-# and embed .upd_info and .sha256_sig sections
 # TODO: generate runtime in fonction of the compressor we choose to avoid embeded unncessary compression.
-runtime: runtime3.o notify.o
-	$(CC) $(CFLAGS) elf.c getsection.c runtime3.o notify.o ./squashfuse/.libs/libsquashfuse_ll.a \
+runtime: runtime.o notify.o
+	$(CC) $(CFLAGS) elf.c getsection.c notify.c runtime.o ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
 	-lfuse -lpthread -lz -linotifytools -ldl `pkg-config --libs liblzma` -o runtime
 
-install: runtime
+install: runtime embed
 	$(MKDIR) build
 	$(COPY_FILE) runtime build
 	$(STRIP) build/runtime
 	# Insert AppImage magic bytes at offset 8
-	# verify with : xxd -s 0x8 -l3 -g3 runtime
+	# verify with : xxd -ps -s 0x8 -l 3 build/runtime
 	$(MAGIC) build/runtime
 
 clean:
-	rm -f *.o
+	rm -f *.o 1024_blank_bytes
 
 mrproper: clean
 	rm -f runtime
