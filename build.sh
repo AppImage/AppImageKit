@@ -11,7 +11,7 @@ rm -rf build/ || true
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
-patch -p1 --backup < ../squashfuse.patch
+if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
 
 # Build libsquashfuse_ll library
 
