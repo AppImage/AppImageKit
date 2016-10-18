@@ -22,7 +22,7 @@ if [ ! -e ./Makefile ] ; then
   automake --force-missing --add-missing
   autoconf
   ./configure --disable-demo --disable-high-level \
-    --with-xz=/usr/lib/ --without-lz4 --without-lzo
+    --with-xz=/usr/lib/ --without-lzo
 fi
 
 bash --version
@@ -69,14 +69,14 @@ cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSE
 
 # Now statically link against libsquashfuse and liblzma - glib version
 
-cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread  $(pkg-config --libs glib-2.0 liblzma ) -lz -Wl,-Bdynamic -o appimagetool
+cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread  $(pkg-config --libs glib-2.0 liblzma liblz4) -lz -Wl,-Bdynamic -o appimagetool
 
 # Version without glib
 # cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetoolnoglib.c
 # cc data.o appimagetoolnoglib.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetoolnoglib
 
 # appimaged, an optional component
-cc -std=gnu99 ../getsection.c -Wl,-Bdynamic -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -Wl,-Bstatic -linotifytools -Wl,-Bdynamic $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) -ldl -lpthread -lz $(pkg-config --libs liblzma )  -o appimaged
+cc -std=gnu99 ../getsection.c -Wl,-Bdynamic -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -Wl,-Bstatic -linotifytools -Wl,-Bdynamic $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) -ldl -lpthread -lz $(pkg-config --libs liblzma liblz4)  -o appimaged
 
 cd ..
 

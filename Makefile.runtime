@@ -33,7 +33,7 @@ embed: 1024_blank_bytes runtime
 runtime: runtime.o notify.o elf.o getsection.o
 	$(CC) $(CFLAGS) $^ ./squashfuse/.libs/libsquashfuse_ll.a \
 	./squashfuse/.libs/libsquashfuse.a ./squashfuse/.libs/libfuseprivate.a \
-	-lfuse -lpthread -lz -linotifytools -ldl `pkg-config --libs liblzma` -o runtime
+	-lfuse -lpthread -lz -linotifytools -ldl `pkg-config --libs liblzma liblz4` -o runtime
 
 install: runtime embed
 	$(MKDIR) build
