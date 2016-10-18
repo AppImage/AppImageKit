@@ -1,49 +1,8 @@
---- a/ll.c	2016-09-14 20:36:50.373183135 +0200
-+++ b/ll.c	2016-09-14 14:00:08.893303000 +0200
-@@ -390,7 +390,7 @@
- 	return NULL;
- }
- 
--int main(int argc, char *argv[]) {
-+int fusefs_main(int argc, char *argv[], void (*mounted) (void)) {
- 	struct fuse_args args;
- 	sqfs_opts opts;
- 	
-@@ -451,6 +451,8 @@
- 				if (sqfs_ll_daemonize(fg) != -1) {
- 					if (fuse_set_signal_handlers(se) != -1) {
- 						fuse_session_add_chan(se, ch.ch);
-+				if (mounted)
-+				  mounted ();
- 						/* FIXME: multithreading */
- 						err = fuse_session_loop(se);
- 						fuse_remove_signal_handlers(se);
-@@ -466,6 +468,8 @@
- 		}
- 	}
- 	fuse_opt_free_args(&args);
-+	if (mounted)
-+	  rmdir (mountpoint);
- 	free(ll);
- 	free(mountpoint);
- 	
---- a/Makefile.am	2016-09-14 23:23:30.003610060 +0200
-+++ b/Makefile.am	2016-09-14 23:21:52.731096000 +0200
-@@ -1,12 +1,7 @@
--COMPRESSION_LIBS = $(ZLIB_LIBS) $(XZ_LIBS) $(LZO_LIBS) $(LZ4_LIBS)
-+COMPRESSION_LIBS = $(ZLIB_LIBS) $(XZ_LIBS)
- 
- ACLOCAL_AMFLAGS = -I m4 --install
- 
--# Suppress AppleDouble
--if MAKE_EXPORT
--export COPYFILE_DISABLE = 1
--endif
--
- dist_man_MANS =
- EXTRA_DIST = gen_swap.sh autogen.sh LICENSE CONFIGURATION PLATFORMS NEWS win
- 
-@@ -14,6 +9,7 @@
+diff --git a/Makefile.am b/Makefile.am
+index f0d7cde..70c4aa0 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -14,6 +14,7 @@ bin_PROGRAMS =
  noinst_PROGRAMS =
  
  noinst_LTLIBRARIES = libsquashfuse.la
@@ -51,24 +10,10 @@
  
  # Main library: libsquashfuse
  libsquashfuse_la_SOURCES = swap.c cache.c table.c dir.c file.c fs.c \
-@@ -32,35 +28,14 @@
- libfuseprivate_la_CPPFLAGS = $(FUSE_CPPFLAGS)
- libfuseprivate_la_LIBADD =
+@@ -46,10 +47,9 @@ endif
  
--# High-level squashfuse
--if SQ_WANT_HIGHLEVEL
--bin_PROGRAMS += squashfuse
--squashfuse_SOURCES = hl.c
--squashfuse_CPPFLAGS = $(FUSE_CPPFLAGS)
--squashfuse_LDADD = libsquashfuse.la libfuseprivate.la $(COMPRESSION_LIBS) \
--  $(FUSE_LIBS)
--
--noinst_LTLIBRARIES += libfuseprivate.la
--dist_man_MANS += squashfuse.1
--endif
--
  # Low-level squashfuse_ll, if supported
--if SQ_WANT_LOWLEVEL
+ if SQ_WANT_LOWLEVEL
 -bin_PROGRAMS += squashfuse_ll
 -squashfuse_ll_SOURCES = ll.c ll_inode.c nonstd-daemon.c ll.h
 -squashfuse_ll_CPPFLAGS = $(FUSE_CPPFLAGS)
@@ -78,16 +23,35 @@
 +libsquashfuse_ll_la_LIBADD = libsquashfuse.la libfuseprivate.la $(COMPRESSION_LIBS) \
    $(FUSE_LIBS)
  
--noinst_LTLIBRARIES += libfuseprivate.la
--endif
+ noinst_LTLIBRARIES += libfuseprivate.la
+diff --git a/ll.c b/ll.c
+index a2c7902..8fcb3f4 100644
+--- a/ll.c
++++ b/ll.c
+@@ -390,7 +390,7 @@ static sqfs_ll *sqfs_ll_open(const char *path, size_t offset) {
+ 	return NULL;
+ }
  
--if SQ_WANT_DEMO
--# Sample program squashfuse_ls
--noinst_PROGRAMS += squashfuse_ls
--squashfuse_ls_SOURCES = ls.c
--squashfuse_ls_LDADD = libsquashfuse.la $(COMPRESSION_LIBS)
--endif
-+noinst_LTLIBRARIES += libfuseprivate.la
- 
- # Handle generation of swap include files
- CLEANFILES = swap.h.inc swap.c.inc
+-int main(int argc, char *argv[]) {
++int fusefs_main(int argc, char *argv[], void (*mounted) (void)) {
+ 	struct fuse_args args;
+ 	sqfs_opts opts;
+ 	
+@@ -451,6 +451,8 @@ int main(int argc, char *argv[]) {
+ 				if (sqfs_ll_daemonize(fg) != -1) {
+ 					if (fuse_set_signal_handlers(se) != -1) {
+ 						fuse_session_add_chan(se, ch.ch);
++				if (mounted)
++				  mounted ();
+ 						/* FIXME: multithreading */
+ 						err = fuse_session_loop(se);
+ 						fuse_remove_signal_handlers(se);
+@@ -466,6 +468,8 @@ int main(int argc, char *argv[]) {
+ 		}
+ 	}
+ 	fuse_opt_free_args(&args);
++	if (mounted)
++	  rmdir (mountpoint);
+ 	free(ll);
+ 	free(mountpoint);
+ 	

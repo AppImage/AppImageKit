@@ -32,7 +32,6 @@
 #include "squashfuse.h"
 #include <squashfs_fs.h>
 #include <nonstd.h>
-#include <linux/limits.h>
 
 #include <limits.h>
 #include <stdlib.h>
@@ -52,7 +51,8 @@
 
 #include <fnmatch.h>
 
-#include "notify.c"
+//#include "notify.c"
+extern int notify(char *title, char *body, int timeout);
 
 struct stat st;
 
@@ -348,7 +348,7 @@ main (int argc, char *argv[])
             "if you run it with the --appimage-extract option. \n"
             "See https://github.com/probonopd/AppImageKit/wiki/FUSE \n"
             "for more information";
-            notify(title, body, NULL); // 3 seconds timeout
+	    notify(title, body, 0); // 3 seconds timeout
         };
     } else {
         /* in parent, child is $pid */

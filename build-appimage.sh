@@ -10,7 +10,7 @@ cp -f build/appimagetool appimagetool.AppDir/usr/bin
 # Add -offset option to skip n bytes : https://github.com/plougher/squashfs-tools/pull/13
 # It seems squashfs-tools need a new maintainer.
 cd squashfs-tools/squashfs-tools
-make XZ_SUPPORT=1 mksquashfs
+make XZ_SUPPORT=1 LZ4_SUPPORT=1 mksquashfs
 strip mksquashfs
 cp mksquashfs ../../build
 

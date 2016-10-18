@@ -11,7 +11,7 @@ rm -rf build/ || true
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
-patch -p1 -N < ../squashfuse.patch
+if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
 
 # Build libsquashfuse_ll library
 
@@ -21,14 +21,22 @@ if [ ! -e ./Makefile ] ; then
   autoheader
   automake --force-missing --add-missing
   autoconf
-  ./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
+  ./configure --disable-demo --disable-high-level \
+    --with-xz=/usr/lib/ --without-lzo
 fi
+
+bash --version
 
 make
 
 cd ..
 
 mkdir build
+
+# Compile runtime
+make -f Makefile.runtime install
+make -f Makefile.runtime clean
+
 cd build
 
 # Compile and link digest tool
@@ -42,25 +50,6 @@ strip digest
 cc -o validate ../getsection.c ../validate.c -lssl -lcrypto -lglib-2.0 $(pkg-config --cflags glib-2.0)
 strip validate
 
-# Compile runtime but do not link
-
-cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -I../squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
-
-# Prepare 1024 bytes of space for updateinformation
-printf '\0%.0s' {0..1023} > 1024_blank_bytes
-
-objcopy --add-section .upd_info=1024_blank_bytes \
-          --set-section-flags .upd_info=noload,readonly runtime.o runtime2.o
-
-objcopy --add-section .sha256_sig=1024_blank_bytes \
-          --set-section-flags .sha256_sig=noload,readonly runtime2.o runtime3.o
-
-# Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
-# and embed .upd_info and .sha256_sig sections
-
-cc ../elf.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a  -lfuse -lpthread -lz $(pkg-config --libs liblzma ) -ldl -o runtime
-strip runtime
-
 # Test if we can read it back
 readelf -x .upd_info runtime # hexdump
 readelf -p .upd_info runtime || true # string
@@ -69,10 +58,6 @@ readelf -p .upd_info runtime || true # string
 HEXOFFSET=$(objdump -h runtime | grep .upd_info | awk '{print $6}')
 HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
 dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
-
-# Insert AppImage magic bytes
-
-printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
 # Convert runtime into a data object that can be embedded into appimagetool
 
@@ -84,20 +69,20 @@ cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSE
 
 # Now statically link against libsquashfuse and liblzma - glib version
 
-cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread  $(pkg-config --libs glib-2.0 liblzma ) -lz -Wl,-Bdynamic -o appimagetool
+cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread  $(pkg-config --libs glib-2.0 liblzma liblz4) -lz -Wl,-Bdynamic -o appimagetool
 
 # Version without glib
 # cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetoolnoglib.c
 # cc data.o appimagetoolnoglib.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetoolnoglib
 
 # appimaged, an optional component
-cc -std=gnu99 ../getsection.c -Wl,-Bdynamic -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -Wl,-Bstatic -linotifytools -Wl,-Bdynamic $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) -ldl -lpthread -lz $(pkg-config --libs liblzma )  -o appimaged
+cc -std=gnu99 ../getsection.c -Wl,-Bdynamic -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -Wl,-Bstatic -linotifytools -Wl,-Bdynamic $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) -ldl -lpthread -lz $(pkg-config --libs liblzma liblz4)  -o appimaged
 
 cd ..
 
 # Strip and check size and dependencies
 
-rm build/*.o build/1024_blank_bytes
+rm build/*.o
 strip build/* 2>/dev/null
 chmod a+x build/*
 ldd build/appimagetool

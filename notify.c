@@ -74,6 +74,7 @@ int notify(char *title, char *body, int timeout)
         show(n, NULL );
         dlclose(handle );
     }
+    return 0;
 }
 
 /*
