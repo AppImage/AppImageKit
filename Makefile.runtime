@@ -1,5 +1,5 @@
 CC            = gcc
-CFLAGS        = -std=gnu99 -Wall -Wno-unused-parameter -Wno-unused-result -Wformat-security -Os -Wall -g
+CFLAGS        = -std=gnu99 -Wall -Wno-unused-parameter -Wno-unused-result -Wformat-security -Os -g
 STRIP         = strip
 MAGIC         = echo "8: 414902" | xxd -r -
 MKDIR         = mkdir -p

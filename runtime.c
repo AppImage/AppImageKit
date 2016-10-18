@@ -32,7 +32,6 @@
 #include "squashfuse.h"
 #include <squashfs_fs.h>
 #include <nonstd.h>
-#include <linux/limits.h>
 
 #include <limits.h>
 #include <stdlib.h>
