@@ -21,7 +21,8 @@ if [ ! -e ./Makefile ] ; then
   autoheader
   automake --force-missing --add-missing
   autoconf
-  ./configure --with-xz=/usr/lib/ --without-lz4 --without-lzo
+  ./configure --disable-demo --disable-high-level --disable-high-level \
+    --with-xz=/usr/lib/ --without-lz4 --without-lzo
 fi
 
 bash --version
