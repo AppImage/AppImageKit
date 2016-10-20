@@ -1,32 +1,15 @@
 language: c
-sudo: required
-os: linux
-dist: trusty
+compiler: gcc
 
-before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y git autoconf libtool make gcc libtool libfuse-dev liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev 
-  # libtool-bin might be required in newer distributions but is not available in precise
-
-
+services:
+ - docker
+ 
+env:
+# - DOCKER_IMAGE=toopher/centos-i386:centos6 # Pull request welcome that makes this work
+ - DOCKER_IMAGE=library/centos:6.8
+ 
 script:
-  - bash -ex install-build-deps.sh
-  - bash -ex build.sh
-  - bash -ex build-appimage.sh
-  - curl --upload-file ./*.AppImage https://transfer.sh/appimagetool
-  - curl --upload-file ./build/validate https://transfer.sh/validate
-  - curl --upload-file ./build/appimaged https://transfer.sh/appimaged
+ - docker run -i -v "${PWD}:/appimagetool" "$DOCKER_IMAGE" /bin/bash -c "cd /appimagetool ; yum -y install sudo ; sudo ./build.sh"
 
-notifications:
-  irc:
-    channels:
-      - "chat.freenode.net#AppImage"
-    on_success: always  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: never     # options: [always|never|change] default: always
-  webhooks:
-    urls:
-      - https://webhooks.gitter.im/e/4bf20518805a55998cc2
-    on_success: always  # options: [always|never|change] default: always
-    on_failure: always  # options: [always|never|change] default: always
-    on_start: never     # options: [always|never|change] default: always
+after_success:
+- file out/*

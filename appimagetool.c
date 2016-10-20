@@ -372,9 +372,9 @@ main (int argc, char *argv[])
             if(verbose)
                 fprintf (stderr,"dest_path: %s\n", dest_path);
             
-            if(g_environ_getenv (g_get_environ (), "VERSION"))
-                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename,
-                        g_environ_getenv (g_get_environ (), "VERSION"), arch);
+//            if(g_environ_getenv (g_get_environ (), "VERSION"))
+//                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename,
+//                        g_environ_getenv (g_get_environ (), "VERSION"), arch);
                 
                 destination = dest_path;
             replacestr(destination, " ", "_");
