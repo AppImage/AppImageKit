@@ -21,6 +21,7 @@ if [ ! -e ./Makefile ] ; then
   autoheader
   automake --force-missing --add-missing
   autoconf
+  sed -i '/PKG_CHECK_MODULES.*/,/,:./d' configure # https://github.com/vasi/squashfuse/issues/12
   ./configure --disable-demo --disable-high-level \
     --with-xz=/usr/lib/ --without-lzo
 fi
