@@ -16,10 +16,10 @@ if [ -e /usr/bin/apt-get ] ; then
 fi
 
 if [ -e /usr/bin/yum ] ; then
-  # Install and enable EPEL and Devtoolset-3 by Software Collections
-  # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-3/
+  # Install and enable EPEL and Devtoolset-4 by Software Collections
+  # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-4/
   yum -y install centos-release-scl-rh epel-release
-  yum -y install devtoolset-3-gcc.x86_64
+  yum -y install devtoolset-4-gcc.x86_64
   # Install and enable Autotools by Pavel Raiskup
   # https://www.softwarecollections.org/en/scls/praiskup/autotools/
   rpm -ivh https://www.softwarecollections.org/en/scls/praiskup/autotools/epel-6-x86_64/download/praiskup-autotools-epel-6-x86_64.noarch.rpm
