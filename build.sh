@@ -27,7 +27,7 @@ if [ -e /usr/bin/yum ] ; then
 
   yum -y install epel-release
   yum -y install git wget make binutils fuse glibc-devel glib2-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
-  . /opt/rh/devtoolset-3/enable
+  . /opt/rh/devtoolset-4/enable
   . /opt/rh/autotools-latest/enable
 
   # Unlike Ubuntu, CentOS does not provide .a, so we need to build it
