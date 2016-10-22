@@ -508,7 +508,10 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     g_strfreev(str_array);
     
     /* Get relevant  file(s) */
-    squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)", desktop_icon_value_original, md5, verbose); 
+    gchar **str_array2 = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)", desktop_icon_value_original, md5, verbose);
+    
+    /* Free the NULL-terminated array of strings and its contents */
+    g_strfreev(str_array2);
     
     /* The above also gets AppStream metainfo file(s), TODO: Check if the id matches and do something with them*/
     
