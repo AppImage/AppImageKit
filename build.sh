@@ -13,7 +13,7 @@ HERE="$(dirname "$(readlink -f "${0}")")"
 
 HERE="$(dirname "$(readlink -f "${0}")")"
 
-which git 2>&1 >/dev/null || . "$HERE/build.sh"
+which git 2>&1 >/dev/null || . "$HERE/install-build-deps.sh"
 
 # Fetch git submodules
 git submodule init
