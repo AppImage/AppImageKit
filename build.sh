@@ -10,41 +10,6 @@ set -x
 
 HERE="$(dirname "$(readlink -f "${0}")")"
 
-if [ -e /usr/bin/apt-get ] ; then
-  apt-get update
-  bash -ex ./install-build-deps.sh
-fi
-
-if [ -e /usr/bin/yum ] ; then
-  # Install and enable EPEL and Devtoolset-4 by Software Collections
-  # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-4/
-  yum -y install centos-release-scl-rh epel-release
-  yum -y install devtoolset-4-gcc.x86_64
-  # Install and enable Autotools by Pavel Raiskup
-  # https://www.softwarecollections.org/en/scls/praiskup/autotools/
-  rpm -ivh https://www.softwarecollections.org/en/scls/praiskup/autotools/epel-6-x86_64/download/praiskup-autotools-epel-6-x86_64.noarch.rpm
-  yum -y install autotools-latest # 19 MB
-
-  yum -y install epel-release
-  yum -y install git wget make binutils fuse glibc-devel glib2-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
-  . /opt/rh/devtoolset-4/enable
-  . /opt/rh/autotools-latest/enable
-
-  # Unlike Ubuntu, CentOS does not provide .a, so we need to build it
-  wget http://tukaani.org/xz/xz-5.2.2.tar.gz
-  tar xzfv xz-5.2.2.tar.gz 
-  cd xz-5.2.2
-  ./configure --enable-static && make && make install
-  rm /usr/local/lib/liblzma.so* /usr/*/liblzma.so || true # Don't want the dynamic one
-  cd -
-fi
-
-# Install dependencies for Arch Linux
-if [ -e /usr/bin/pacman ] ; then
-  echo "Please submit a pull request if you would like to see Arch Linux support."
-  exit 1
-fi
-
 # Fetch git submodules
 git submodule init
 git submodule update
@@ -61,7 +26,7 @@ if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
 wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
 tar xf inotify-tools-3.14.tar.gz
 cd inotify-tools-3.14
-./configure --prefix=/usr && make && su -c 'make install'
+./configure --prefix=/usr && make && sudo make install
 cd -
 rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* || true # Don't want the dynamic one
 
@@ -76,7 +41,7 @@ if [ ! -e ./Makefile ] ; then
   autoreconf -fi || true # Errors out, but the following succeeds then?
   autoconf
   sed -i '/PKG_CHECK_MODULES.*/,/,:./d' configure # https://github.com/vasi/squashfuse/issues/12
-  ./configure --disable-demo --disable-high-level --without-lzo --with-xz=/usr/lib/
+  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=/usr/lib/
 fi
 
 bash --version
