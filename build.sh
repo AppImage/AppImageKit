@@ -31,7 +31,7 @@ if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ;
     cd inotify-tools-3.14
     ./configure --prefix=/usr && make && sudo make install
     cd -
-    sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* || true # Don't want the dynamic one
+    sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* 2>/dev/null || true # Don't want the dynamic one
 fi
 
 cd squashfuse
