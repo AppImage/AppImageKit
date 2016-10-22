@@ -25,7 +25,6 @@ cp resources/appimagetool.svg appimagetool.AppDir
 
 cd appimagetool.AppDir
 ln -sf appimagetool.svg .DirIcon
-ln -sf usr/bin/appimagetool AppRun
 cd ..
 
 # Eat our own dogfood
