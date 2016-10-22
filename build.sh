@@ -24,7 +24,7 @@ rm -rf build/ || true
 
 # Patch squashfuse_ll to be a library rather than an executable
 
-if [ 1 -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ; then
+if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ; then
     # Build inotify-tools; the one from does not have .a
     wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
     tar xf inotify-tools-3.14.tar.gz
