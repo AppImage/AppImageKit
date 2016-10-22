@@ -252,7 +252,21 @@ main (int argc, char *argv[])
      * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6 */
     char* version_env;
     version_env = getenv("VERSION");
+
+    /* Parse OWD environment variable.
+     * If it is available then cd there. It is the original CWD prior to running AppRun */
+    char* owd_env = NULL;
+    owd_env = getenv("OWD");    
+    if(NULL!=owd_env){
+        int ret;
+        ret = chdir(owd_env);
+        if (ret != 0){
+            fprintf(stderr, "Could not cd into %s\n", owd_env);
+            exit(1);
             
+        }
+    }
+        
     GError *error = NULL;
     GOptionContext *context;
     char command[PATH_MAX];
@@ -262,7 +276,7 @@ main (int argc, char *argv[])
     // g_option_context_add_group (context, gtk_get_option_group (TRUE));
     if (!g_option_context_parse (context, &argc, &argv, &error))
     {
-        g_print("option parsing failed: %s\n", error->message);
+        fprintf(stderr, "Option parsing failed: %s\n", error->message);
         exit(1);
     }
 
