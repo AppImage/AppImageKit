@@ -3,12 +3,17 @@
 set -e
 set -x
 
+HERE="$(dirname "$(readlink -f "${0}")")"
+
+
 #
 # This script installs the required build-time dependencies
 # and builds AppImage
 #
 
 HERE="$(dirname "$(readlink -f "${0}")")"
+
+which git 2>&1 >/dev/null || . "$HERE/build.sh"
 
 # Fetch git submodules
 git submodule init
@@ -28,7 +33,7 @@ tar xf inotify-tools-3.14.tar.gz
 cd inotify-tools-3.14
 ./configure --prefix=/usr && make && sudo make install
 cd -
-rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* || true # Don't want the dynamic one
+sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* || true # Don't want the dynamic one
 
 # Build libsquashfuse_ll library
 
@@ -140,7 +145,7 @@ for FILE in $(ls build/*) ; do
   ldd "build/$FILE" || true
 done
 
-bash -ex build-appimage.sh
+bash -ex "$HERE/build-appimage.sh"
 curl --upload-file ./*.AppImage https://transfer.sh/appimagetool
 
 mkdir -p /out/
