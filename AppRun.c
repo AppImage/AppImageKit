@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
     sprintf( path, "%s", dirname(dir) );
 
-    // printf( "Moving to %s ...\n", path );
+    /* Do NOT cd for now; appimagetool doesn't like it (yet) FIXME
 
     ret = chdir(path);
 
@@ -81,6 +81,8 @@ int main(int argc, char *argv[])
         die( "Could not cd into %s\n", path );
     }
 
+    */
+    
     struct dirent **namelist;
 
     ret = scandir( ".", &namelist, filter, NULL );
