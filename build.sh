@@ -24,16 +24,18 @@ rm -rf build/ || true
 
 # Patch squashfuse_ll to be a library rather than an executable
 
+if [ 1 -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ; then
+    # Build inotify-tools; the one from does not have .a
+    wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
+    tar xf inotify-tools-3.14.tar.gz
+    cd inotify-tools-3.14
+    ./configure --prefix=/usr && make && sudo make install
+    cd -
+    sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* || true # Don't want the dynamic one
+fi
+
 cd squashfuse
 if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
-
-# Build inotify-tools; the one from does not have .a
-wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
-tar xf inotify-tools-3.14.tar.gz
-cd inotify-tools-3.14
-./configure --prefix=/usr && make && sudo make install
-cd -
-sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* || true # Don't want the dynamic one
 
 # Build libsquashfuse_ll library
 
