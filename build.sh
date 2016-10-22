@@ -149,7 +149,7 @@ done
 
 bash -ex "$HERE/build-appimage.sh"
 curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
-curl --upload-file ./appimaged-*.AppImage https://transfer.sh/appimaged
+curl --upload-file ./appimaged https://transfer.sh/appimaged
 
 mkdir -p /out/
 cp build/* ./*.AppImage /out/
