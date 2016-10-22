@@ -72,9 +72,18 @@ int main(int argc, char *argv[])
 
     sprintf( path, "%s", dirname(dir) );
 
+    // printf( "Moving to %s ...\n", path );
+
+    ret = chdir(path);
+
+    if ( ret != 0 )
+    {
+        die( "Could not cd into %s\n", path );
+    }
+
     struct dirent **namelist;
 
-    ret = scandir(path, &namelist, filter, NULL );
+    ret = scandir( ".", &namelist, filter, NULL );
 
     if ( ret == 0 )
     {
@@ -119,22 +128,11 @@ int main(int argc, char *argv[])
     char *executable = basename(line+5);
     // printf( "Executing '%s' ...\n", executable );
 
-    /* Do NOT cd for now; appimagetool doesn't like it (yet) FIXME
-
-    ret = chdir(path);
-
-    if ( ret != 0 )
-    {
-        die( "Could not cd into %s\n", path );
-    }
-    
     ret = chdir("usr");
     if ( ret != 0 )
     {
         die( "Could not cd into %s\n", "usr" );
     }
-
-    */
 
     /* Build environment */
     char *env, *new_env[7];
