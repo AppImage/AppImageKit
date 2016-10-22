@@ -187,6 +187,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
             regmatch_t match[2];
             regcomp(&regex, pattern, REG_ICASE | REG_EXTENDED);
             r = regexec(&regex, trv.path, 2, match, 0);
+            regfree(&regex);
             sqfs_inode inode;
             if(sqfs_inode_get(fs, &inode, trv.entry.inode))
                 fprintf(stderr, "sqfs_inode_get error\n");
@@ -247,7 +248,6 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                             fprintf(stderr, "Installed: %s\n", dest);
                     }
                 }
-                
             }
         }
     }
