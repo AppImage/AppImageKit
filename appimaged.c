@@ -44,8 +44,8 @@
 #include <sys/types.h>
 #include <dirent.h>
 
-#include "../inotifytools/inotifytools.h"
-#include "../inotifytools/inotify.h"
+#include <inotifytools/inotifytools.h>
+#include <inotifytools/inotify.h>
 
 #include <glib.h>
 #include <glib/gprintf.h>
