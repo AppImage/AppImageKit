@@ -16,6 +16,7 @@ cp mksquashfs ../../build
 
 cd ../../
 
+cp build/AppRun appimagetool.AppDir/
 cp build/appimagetool appimagetool.AppDir/usr/bin/
 cp build/mksquashfs appimagetool.AppDir/usr/bin/
 
