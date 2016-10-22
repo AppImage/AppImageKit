@@ -148,7 +148,7 @@ for FILE in $(ls build/*) ; do
 done
 
 bash -ex "$HERE/build-appimage.sh"
-curl --upload-file ./*.AppImage https://transfer.sh/appimagetool
+curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
 
 mkdir -p /out/
 cp build/* ./*.AppImage /out/

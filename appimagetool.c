@@ -248,6 +248,11 @@ static GOptionEntry entries[] =
 int
 main (int argc, char *argv[])
 {
+    /* Parse VERSION environment variable.
+     * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6 */
+    char* version_env;
+    version_env = getenv("VERSION");
+            
     GError *error = NULL;
     GOptionContext *context;
     char command[PATH_MAX];
@@ -372,11 +377,10 @@ main (int argc, char *argv[])
             if(verbose)
                 fprintf (stderr,"dest_path: %s\n", dest_path);
             
-//            if(g_environ_getenv (g_get_environ (), "VERSION"))
-//                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename,
-//                        g_environ_getenv (g_get_environ (), "VERSION"), arch);
-                
-                destination = dest_path;
+            if (version_env!=NULL)
+                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename, version_env, arch);
+            
+            destination = dest_path;
             replacestr(destination, " ", "_");
             
             // destination = basename(br_strcat(source, ".AppImage"));
