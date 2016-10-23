@@ -69,7 +69,9 @@ int main(int argc, char *argv[])
     /* Extract executable from .desktop file */
 
     FILE *f;
-    f = fopen(namelist[0]->d_name, "r");
+    char *desktop_file = malloc(LINE_SIZE);
+    snprintf(desktop_file, LINE_SIZE-1, "%s/%s", appdir, namelist[0]->d_name);
+    f = fopen(desktop_file, "r");
 
     char *line = malloc(LINE_SIZE);
     unsigned int n = LINE_SIZE;
@@ -148,5 +150,6 @@ int main(int argc, char *argv[])
         die("Error executing '%s'; return code: %d\n", executable, ret);
 
     free(line);
+    free(desktop_file);
     return 0;
 }
