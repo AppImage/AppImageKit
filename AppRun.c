@@ -103,36 +103,43 @@ int main(int argc, char *argv[])
 
     /* Build environment */
     char *old_env;
-    char new_env[2048];
-
+    int length = 2047;
+    char new_env1[length+1];
+    char new_env2[length+1];
+    char new_env3[length+1];
+    char new_env4[length+1];
+    char new_env5[length+1];
+    char new_env6[length+1];
+    char new_env7[length+1];
+    
     old_env = getenv("PATH") ?: "";
-    sprintf(new_env, "PATH=%s/usr/bin/:%s/usr/sbin/:%s/usr/games/:%s/bin/:%s/sbin/:%s", appdir, appdir, appdir, appdir, appdir, old_env);
-    putenv(new_env);
+    snprintf(new_env1, length, "PATH=%s/usr/bin/:%s/usr/sbin/:%s/usr/games/:%s/bin/:%s/sbin/:%s", appdir, appdir, appdir, appdir, appdir, old_env);
+    putenv(new_env1);
     
     old_env = getenv("LD_LIBRARY_PATH") ?: "";
-    sprintf(new_env, "LD_LIBRARY_PATH=%s/usr/lib/:%s/usr/lib/i386-linux-gnu/:%s/usr/lib/x86_64-linux-gnu/:%s/usr/lib32/:%s/usr/lib64/:%s/lib/:%s/lib/i386-linux-gnu/:%s/lib/x86_64-linux-gnu/:%s/lib32/:%s/lib64/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
-    putenv(new_env);
+    snprintf(new_env2, length, "LD_LIBRARY_PATH=%s/usr/lib/:%s/usr/lib/i386-linux-gnu/:%s/usr/lib/x86_64-linux-gnu/:%s/usr/lib32/:%s/usr/lib64/:%s/lib/:%s/lib/i386-linux-gnu/:%s/lib/x86_64-linux-gnu/:%s/lib32/:%s/lib64/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
+    putenv(new_env2);
 
     old_env = getenv("PYTHONPATH") ?: "";
-    sprintf(new_env, "PYTHONPATH=%s/usr/share/pyshared/:%s", appdir, old_env);
-    putenv(new_env);
+    snprintf(new_env3, length, "PYTHONPATH=%s/usr/share/pyshared/:%s", appdir, old_env);
+    putenv(new_env3);
 
     old_env = getenv("XDG_DATA_DIRS") ?: "";
-    sprintf(new_env, "XDG_DATA_DIRS=%s/usr/share/:%s", appdir, old_env);
-    putenv(new_env);
+    snprintf(new_env4, length, "XDG_DATA_DIRS=%s/usr/share/:%s", appdir, old_env);
+    putenv(new_env4);
 
     old_env = getenv("PERLLIB") ?: "";
-    sprintf(new_env, "PERLLIB=%s/usr/share/perl5/:%s/usr/lib/perl5/:%s", appdir, appdir, old_env);
-    putenv(new_env);
+    snprintf(new_env5, length, "PERLLIB=%s/usr/share/perl5/:%s/usr/lib/perl5/:%s", appdir, appdir, old_env);
+    putenv(new_env5);
 
     /* http://askubuntu.com/questions/251712/how-can-i-install-a-gsettings-schema-without-root-privileges */
     old_env = getenv("GSETTINGS_SCHEMA_DIR") ?: "";
-    sprintf(new_env, "GSETTINGS_SCHEMA_DIR=%s/usr/share/glib-2.0/schemas/:%s", appdir, old_env);
-    putenv(new_env);
+    snprintf(new_env6, length, "GSETTINGS_SCHEMA_DIR=%s/usr/share/glib-2.0/schemas/:%s", appdir, old_env);
+    putenv(new_env6);
     
     old_env = getenv("QT_PLUGIN_PATH") ?: "";
-    sprintf(new_env, "QT_PLUGIN_PATH=%s/usr/lib/qt4/plugins/:%s/usr/lib/i386-linux-gnu/qt4/plugins/:%s/usr/lib/x86_64-linux-gnu/qt4/plugins/:%s/usr/lib32/qt4/plugins/:%s/usr/lib64/qt4/plugins/:%s/usr/lib/qt5/plugins/:%s/usr/lib/i386-linux-gnu/qt5/plugins/:%s/usr/lib/x86_64-linux-gnu/qt5/plugins/:%s/usr/lib32/qt5/plugins/:%s/usr/lib64/qt5/plugins/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
-    putenv(new_env);
+    snprintf(new_env7, length, "QT_PLUGIN_PATH=%s/usr/lib/qt4/plugins/:%s/usr/lib/i386-linux-gnu/qt4/plugins/:%s/usr/lib/x86_64-linux-gnu/qt4/plugins/:%s/usr/lib32/qt4/plugins/:%s/usr/lib64/qt4/plugins/:%s/usr/lib/qt5/plugins/:%s/usr/lib/i386-linux-gnu/qt5/plugins/:%s/usr/lib/x86_64-linux-gnu/qt5/plugins/:%s/usr/lib32/qt5/plugins/:%s/usr/lib64/qt5/plugins/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
+    putenv(new_env7);
     
     /* Run */
     ret = execvp(executable, argv); // FIXME: What about arguments in the Exec= line of the desktop file?
