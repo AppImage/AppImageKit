@@ -56,12 +56,14 @@ char *vendorprefix = "appimagekit";
 
 void set_executable(char *path, gboolean verbose)
 {
-    int result = chmod(path, 0755); // TODO: Only do this if signature verification passed
-    if(result != 0){
-        fprintf(stderr, "Could not set %s executable: %s\n", path, strerror(errno));
-    } else {
-        if(verbose)
-            fprintf(stderr, "Set %s executable\n", path);
+    if(!g_find_program_in_path ("firejail")){
+        int result = chmod(path, 0755); // TODO: Only do this if signature verification passed
+        if(result != 0){
+            fprintf(stderr, "Could not set %s executable: %s\n", path, strerror(errno));
+        } else {
+            if(verbose)
+                fprintf(stderr, "Set %s executable\n", path);
+        }
     }
 }
 
@@ -307,6 +309,22 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, appimage_path);
     gchar *tryexec_path = replace_str(appimage_path," ", "\\ "); // TryExec does not support blanks
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimage_path);
+
+    /* If firejail is on the $PATH, then use it to run AppImages */
+    if(g_find_program_in_path ("firejail")){
+        char *firejail_exec;
+        firejail_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --noprofile --appimage '%s'", appimage_path);
+        g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_exec);
+
+        gchar *firejail_profile_group = "Desktop Action FirejailProfile";
+        gchar *firejail_profile_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --private --appimage '%s'", appimage_path);
+        gchar *firejail_tryexec = "firejail";
+        g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_NAME, "Run without sandbox profile");
+        g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_profile_exec);
+        g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, firejail_tryexec);
+        g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "FirejailProfile;");
+            
+    }
     
     /* Add AppImageUpdate desktop action
      * https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s10.html 
