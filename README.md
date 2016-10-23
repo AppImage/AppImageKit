@@ -2,9 +2,7 @@
 
 Working but still changing every day, if you are looking for stable solution then use [AppImageKit](https://github.com/probonopd/AppImageKit) instead. `appimagetool` uses a next-generation AppImage format based on squashfs and embeds a runtime for it. `appimaged` is a daemon that handles registering and unregistering AppImages with the system (e.g., menu entries, icons, MIME types, binary delta updates, and such).
 
-## Usage
-
-### appimagetool
+## appimagetool usage
 
 A precompiled version can be found in the last successful Travis CI build, you can get it with:
 
@@ -51,9 +49,9 @@ cat runtime >> Your.AppImage
 cat Your.squashfs >> Your.AppImage
 chmod a+x Your.AppImage
 ```
-### appimaged
+## appimaged usage
 
-`appimaged` is an optional daemon that watches locations like `~/bin` and `~/Downloads` for AppImages and if it detects some, registers them with the system, so that they show up in the menu, have their icons show up, MIME types associated, etc. It also unregisters AppImages again from the system if they are deleted.
+`appimaged` is an optional daemon that watches locations like `~/bin` and `~/Downloads` for AppImages and if it detects some, registers them with the system, so that they show up in the menu, have their icons show up, MIME types associated, etc. It also unregisters AppImages again from the system if they are deleted. If [firejail](https://github.com/netblue30/firejail) is installed, it runs the AppImages with it.
 
 A precompiled version can be found in the last successful Travis CI build, you can get it with:
 
