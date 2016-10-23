@@ -1,7 +1,7 @@
 /**************************************************************************
 
-Copyright (c) 2010 RazZziel
 Copyright (c) 2004-16 Simon Peter
+Portions Copyright (c) 2010 RazZziel
 
 All Rights Reserved.
 
@@ -34,19 +34,9 @@ THE SOFTWARE.
 
 #define die(...)                                \
     do {                                        \
-        fprintf( stderr, "Error: " __VA_ARGS__ );   \
-        exit( 1 );                              \
+        fprintf(stderr, "Error: " __VA_ARGS__);   \
+        exit(1);                              \
     } while (0);
-
-#define NEW_LD_LIBRARY_PATH "LD_LIBRARY_PATH=./lib/:./lib/i386-linux-gnu/:./lib/x86_64-linux-gnu/:./lib32/:./lib64/:../lib/:../lib/i386-linux-gnu/:../lib/x86_64-linux-gnu/:../lib32/:../lib64/:%s"
-#define NEW_PATH "PATH=./bin/:./sbin/:./games/:../bin/:../sbin/:%s"
-#define NEW_PYTHONPATH "PYTHONPATH=./share/pyshared/:%s"
-#define NEW_XDG_DATA_DIRS "XDG_DATA_DIRS=./share/:%s"
-#define NEW_QT_PLUGIN_PATH "QT_PLUGIN_PATH=./lib/qt4/plugins/:./lib/i386-linux-gnu/qt4/plugins/:./lib/x86_64-linux-gnu/qt4/plugins/:./lib32/qt4/plugins/:./lib64/qt4/plugins/:./lib/qt5/plugins/:./lib/i386-linux-gnu/qt5/plugins/:./lib/x86_64-linux-gnu/qt5/plugins/:./lib32/qt5/plugins/:./lib64/qt5/plugins/:%s"
-#define NEW_PERLLIB "PERLLIB=./share/perl5/:./lib/perl5/:%s"
-
-// http://askubuntu.com/questions/251712/how-can-i-install-a-gsettings-schema-without-root-privileges
-#define NEW_GSETTINGS_SCHEMA_DIR "GSETTINGS_SCHEMA_DIR=./share/glib-2.0/schemas/:%s" 
 
 #define LINE_SIZE 255
 
@@ -54,146 +44,102 @@ int filter (const struct dirent *dir)
 {
     char *p = (char*) &dir->d_name;
     p = strrchr(p, '.');
-
     return p && !strcmp(p, ".desktop");
 }
 
 int main(int argc, char *argv[])
 {
+    char *appdir = dirname(realpath("/proc/self/exe", NULL));
+    if (!appdir)
+        die("Could not access /proc/self/exe\n");
+    
     char path[LINE_SIZE];
     int ret;
-    FILE *f;
-
-    char *dir = realpath( "/proc/self/exe", NULL );
-    if (!dir)
-    {
-        die( "Could not access /proc/self/exe\n" );
-    }
-
-    sprintf( path, "%s", dirname(dir) );
-
-    // printf( "Moving to %s ...\n", path );
-
-    ret = chdir(path);
-
-    if ( ret != 0 )
-    {
-        die( "Could not cd into %s\n", path );
-    }
 
     struct dirent **namelist;
 
-    ret = scandir( ".", &namelist, filter, NULL );
+    ret = scandir(appdir, &namelist, filter, NULL);
 
-    if ( ret == 0 )
-    {
-        die( "No .desktop files found\n" );
+    if (ret == 0) {
+        die("No .desktop files found\n");
+    } else if(ret == -1) {
+        die("Could not scan directory %s\n", appdir);
     }
-    else if ( ret == -1 )
-    {
-        die( "Could not scan directory %s\n", path );
-    }
+    
+    /* Extract executable from .desktop file */
 
-
-    /* Extract executable from .desktop file 
-    printf( "Extracting executable name from '%s' ...\n",
-            namelist[0]->d_name ); */
-
+    FILE *f;
     f = fopen(namelist[0]->d_name, "r");
 
     char *line = malloc(LINE_SIZE);
     unsigned int n = LINE_SIZE;
     int found = 0;
 
-    while (getline( &line, &n, f ) != -1)
+    while (getline(&line, &n, f) != -1)
     {
         if (!strncmp(line,"Exec=",5))
         {
             char *p = line+5;
-            while (*++p && *p != ' ' &&  *p != '%'  &&  *p != '\n' );
+            while (*++p && *p != ' ' &&  *p != '%'  &&  *p != '\n');
             *p = 0;
             found = 1;
             break;
         }
     }
 
-    fclose( f );
+    fclose(f);
 
     if (!found)
-    {
-        die( "Executable not found, make sure there is a line starting with 'Exec='\n" );
-    }
+      die("Executable not found, make sure there is a line starting with 'Exec='\n");
 
     /* Execution */
     char *executable = basename(line+5);
-    // printf( "Executing '%s' ...\n", executable );
 
-    ret = chdir("usr");
-    if ( ret != 0 )
-    {
-        die( "Could not cd into %s\n", "usr" );
-    }
+    char usr_in_appdir[1024];
+    sprintf(usr_in_appdir, "%s/usr", appdir);
+    ret = chdir(usr_in_appdir);
+    if (ret != 0)
+        die("Could not cd into %s\n", usr_in_appdir);
 
     /* Build environment */
-    char *env, *new_env[7];
+    char *old_env;
+    char new_env[2048];
 
-    env = getenv("LD_LIBRARY_PATH") ?: "";
-    new_env[0] = malloc( strlen(NEW_LD_LIBRARY_PATH) + strlen(env) );
-    sprintf( new_env[0], NEW_LD_LIBRARY_PATH, env );
-    // printf( "  using %s\n", new_env[0] );
-    putenv( new_env[0] );
-
-    env = getenv("PATH") ?: "";
-    new_env[1] = malloc( strlen(NEW_PATH) + strlen(env) );
-    sprintf( new_env[1], NEW_PATH, env );
-    // printf( "  using %s\n", new_env[1] );
-    putenv( new_env[1] );
-
-    env = getenv("PYTHONPATH") ?: "";
-    new_env[2] = malloc( strlen(NEW_PYTHONPATH) + strlen(env) );
-    sprintf( new_env[2], NEW_PYTHONPATH, env );
-    // printf( "  using %s\n", new_env[2] );
-    putenv( new_env[2] );
-
-    env = getenv("XDG_DATA_DIRS") ?: "";
-    new_env[3] = malloc( strlen(NEW_XDG_DATA_DIRS) + strlen(env) );
-    sprintf( new_env[3], NEW_XDG_DATA_DIRS, env );
-    // printf( "  using %s\n", new_env[3] );
-    putenv( new_env[3] );
-
-    env = getenv("QT_PLUGIN_PATH") ?: "";
-    new_env[4] = malloc( strlen(NEW_QT_PLUGIN_PATH) + strlen(env) );
-    sprintf( new_env[4], NEW_QT_PLUGIN_PATH, env );
-    // printf( "  using %s\n", new_env[4] );
-    putenv( new_env[4] );
-
-    env = getenv("PERLLIB") ?: "";
-    new_env[5] = malloc( strlen(NEW_PERLLIB) + strlen(env) );
-    sprintf( new_env[5], NEW_PERLLIB, env );
-    // printf( "  using %s\n", new_env[5] );
-    putenv( new_env[5] );
+    old_env = getenv("PATH") ?: "";
+    sprintf(new_env, "PATH=%s/usr/bin/:%s/usr/sbin/:%s/usr/games/:%s/bin/:%s/sbin/:%s", appdir, appdir, appdir, appdir, appdir, old_env);
+    putenv(new_env);
     
-    env = getenv("GSETTINGS_SCHEMA_DIR") ?: "";
-    new_env[6] = malloc( strlen(NEW_GSETTINGS_SCHEMA_DIR) + strlen(env) );
-    sprintf( new_env[6], NEW_GSETTINGS_SCHEMA_DIR, env );
-    // printf( "  using %s\n", new_env[6] );
-    putenv( new_env[6] );    
+    old_env = getenv("LD_LIBRARY_PATH") ?: "";
+    sprintf(new_env, "LD_LIBRARY_PATH=%s/usr/lib/:%s/usr/lib/i386-linux-gnu/:%s/usr/lib/x86_64-linux-gnu/:%s/usr/lib32/:%s/usr/lib64/:%s/lib/:%s/lib/i386-linux-gnu/:%s/lib/x86_64-linux-gnu/:%s/lib32/:%s/lib64/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
+    putenv(new_env);
 
+    old_env = getenv("PYTHONPATH") ?: "";
+    sprintf(new_env, "PYTHONPATH=%s/usr/share/pyshared/:%s", appdir, old_env);
+    putenv(new_env);
+
+    old_env = getenv("XDG_DATA_DIRS") ?: "";
+    sprintf(new_env, "XDG_DATA_DIRS=%s/usr/share/:%s", appdir, old_env);
+    putenv(new_env);
+
+    old_env = getenv("PERLLIB") ?: "";
+    sprintf(new_env, "PERLLIB=%s/usr/share/perl5/:%s/usr/lib/perl5/:%s", appdir, appdir, old_env);
+    putenv(new_env);
+
+    /* http://askubuntu.com/questions/251712/how-can-i-install-a-gsettings-schema-without-root-privileges */
+    old_env = getenv("GSETTINGS_SCHEMA_DIR") ?: "";
+    sprintf(new_env, "GSETTINGS_SCHEMA_DIR=%s/usr/share/glib-2.0/schemas/:%s", appdir, old_env);
+    putenv(new_env);
+    
+    old_env = getenv("QT_PLUGIN_PATH") ?: "";
+    sprintf(new_env, "QT_PLUGIN_PATH=%s/usr/lib/qt4/plugins/:%s/usr/lib/i386-linux-gnu/qt4/plugins/:%s/usr/lib/x86_64-linux-gnu/qt4/plugins/:%s/usr/lib32/qt4/plugins/:%s/usr/lib64/qt4/plugins/:%s/usr/lib/qt5/plugins/:%s/usr/lib/i386-linux-gnu/qt5/plugins/:%s/usr/lib/x86_64-linux-gnu/qt5/plugins/:%s/usr/lib32/qt5/plugins/:%s/usr/lib64/qt5/plugins/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
+    putenv(new_env);
+    
     /* Run */
-    ret = execvp(executable, argv);
+    ret = execvp(executable, argv); // FIXME: What about arguments in the Exec= line of the desktop file?
 
     if (ret == -1)
-    {
-        die( "Error executing '%s'; return code: %d\n", executable, ret );
-    }
+        die("Error executing '%s'; return code: %d\n", executable, ret);
 
-    free(new_env[6]);
-    free(new_env[5]);
-    free(new_env[4]);
-    free(new_env[3]);
-    free(new_env[2]);
-    free(new_env[1]);
-    free(new_env[0]);
     free(line);
     return 0;
 }

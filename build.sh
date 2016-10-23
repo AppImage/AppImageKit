@@ -22,10 +22,9 @@ git submodule update
 # Clean up from previous run
 rm -rf build/ || true
 
-# Patch squashfuse_ll to be a library rather than an executable
+# Build inotify-tools; the one from CentOS does not have .a
 
 if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ; then
-    # Build inotify-tools; the one from does not have .a
     wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
     tar xf inotify-tools-3.14.tar.gz
     cd inotify-tools-3.14
@@ -33,6 +32,8 @@ if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ;
     cd -
     sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* 2>/dev/null || true # Don't want the dynamic one
 fi
+
+# Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
 if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
