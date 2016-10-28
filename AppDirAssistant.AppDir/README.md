@@ -1,5 +1,5 @@
 # Deprecation notice
 
-AppImageAssistant will be replaced by `appimagetool`.
+AppDirAssistant is deprecated and has been replaced by yaml-based recpies.
 
-Also, it will be moved from its current temporary location to this repository once we think it's ready to roll. Please see http://discourse.appimage.org/t/65 for more information.
+Please see hhttps://github.com/probonopd/AppImages/tree/master/recipes/metafor more information.
