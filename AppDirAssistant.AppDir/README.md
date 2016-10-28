@@ -1,4 +1,4 @@
-# Deprecation notice
+# Depreciation notice
 
 AppDirAssistant is deprecated and has been replaced by yaml-based recpies.
 
