@@ -535,6 +535,10 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
             break;
         }
 
+        /* Skip all but regular files; FIXME: Also handle symlinks correctly */
+        if(! archive_entry_filetype(entry) & AE_IFREG)
+            break;
+        
         gchar *filename;
         filename = replace_str(archive_entry_pathname(entry), "./", "");
         
@@ -571,7 +575,6 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         
         /* Get icon file(s) and act on them in one go */
         
-        
         if(g_str_has_prefix (filename, "usr/share/icons/") || g_str_has_prefix (filename, "usr/share/pixmaps/") ||(g_str_has_prefix(filename, "usr/share/mime/")) && (g_str_has_suffix(filename, ".xml"))){
             dest_dirname = g_path_get_dirname(replace_str(filename, "usr/share", g_get_user_data_dir()));          
             dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(filename));
@@ -583,16 +586,17 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
             dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
         }
         /* Some AppImages only have the icon in their root directory, so we have to get it from there */
-        if((g_str_has_prefix(filename, desktop_icon_value_original)) && (! strstr(filename, "/")) && ( (g_str_has_suffix(filename, ".png")) || (g_str_has_suffix(filename, ".xpm")) || (g_str_has_suffix(filename, ".svg")) || (g_str_has_suffix(filename, ".svgz")))){
-            dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
-            dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
+        if(desktop_icon_value_original){
+            if((g_str_has_prefix(filename, desktop_icon_value_original)) && (! strstr(filename, "/")) && ( (g_str_has_suffix(filename, ".png")) || (g_str_has_suffix(filename, ".xpm")) || (g_str_has_suffix(filename, ".svg")) || (g_str_has_suffix(filename, ".svgz")))){
+                dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
+                dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
+            }
         }
                     
         if(dest){
-            fprintf(stderr, "%s --> %s\n", filename, dest);
+            fprintf(stderr, "DEBUGGING: FIXME: EXTRACT USING LIBARCHIVE: %s --> %s\n", filename, dest);
         }
-
-        /*
+        
         if(dest){
             if(verbose)
                 fprintf(stderr, "install: %s\n", dest);
@@ -610,28 +614,36 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
             }
             ssize_t size;
             const void *buff;
-            ssize_t buffsize = 64*1024;
+            char first_buff[32768];
+            int fp;
             for (;;) {
-                fprintf(stderr, "ALIVE1\n", filename, dest);
-            archive_read_support_format_raw(a); // Otherwise the next line segfaults
-            size = archive_read_data(a, buff, buffsize);
-            fprintf(stderr, "ALIVE1.1\n", filename, dest);
-            if (size < 0) {
-                fprintf(stderr, "archive_read_data error\n");
-            }
-            if (size == 0)
-                break;
-            fprintf(stderr, "ALIVE2\n", filename, dest);
-            // write(f, buff, size);
-            fwrite(buff, 1, size, f);
-            }
-            fclose(f);
-            chmod (dest, 0644);
+                archive_read_support_format_raw(a); // Otherwise the next lines segfault
+                archive_read_support_compression_all(a);
+                fp = fopen(dest, "wb");
+                for (;;) {
+                    size = archive_read_data(a, first_buff, 16384);
+                    if (size < 0)
+                    {
+                        printf ( "error archive_read_data\n" );
+                        return 0;
+                    }
+                    
+                    if (size == 0) break;
+                    
+                    if (fp) fwrite(first_buff, 1, size, fp);
+                }
+                
+                fclose( fp );
+                chmod (dest, 0644);
+                
+                if(verbose)
+                    fprintf(stderr, "Installed: %s\n", dest);
+            }        
             
-            if(verbose)
-                fprintf(stderr, "Installed: %s\n", dest);
-        }        
-        */
+       
+            
+        }
+        
         
     }
     archive_read_close(a);
