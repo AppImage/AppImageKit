@@ -594,57 +594,39 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         }
                     
         if(dest){
-            fprintf(stderr, "DEBUGGING: FIXME: EXTRACT USING LIBARCHIVE: %s --> %s\n", filename, dest);
-        }
         
-        if(dest){
             if(verbose)
                 fprintf(stderr, "install: %s\n", dest);
+            
             if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
                 fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
+        
+            FILE *f;
+            f = fopen(dest, "w+");
             
-            // Read the file in chunks
-            off_t bytes_already_read = 0;
-            off_t bytes_at_a_time = 64*1024;
-            FILE * f;
-            f = fopen (dest, "w+");
             if (f == NULL){
                 fprintf(stderr, "fopen error\n");
                 break;
             }
-            ssize_t size;
-            const void *buff;
-            char first_buff[32768];
-            int fp;
-            for (;;) {
-                archive_read_support_format_raw(a); // Otherwise the next lines segfault
-                archive_read_support_compression_all(a);
-                fp = fopen(dest, "wb");
-                for (;;) {
-                    size = archive_read_data(a, first_buff, 16384);
-                    if (size < 0)
-                    {
-                        printf ( "error archive_read_data\n" );
-                        return 0;
-                    }
-                    
-                    if (size == 0) break;
-                    
-                    if (fp) fwrite(first_buff, 1, size, fp);
-                }
-                
-                fclose( fp );
-                chmod (dest, 0644);
-                
-                if(verbose)
-                    fprintf(stderr, "Installed: %s\n", dest);
-            }        
             
-       
+            const int sizeBuffer = 64*1024; // FIXME: Handle files correctly that are smaller or larger
+            char* data = NULL;
+            data = (char*) malloc(sizeBuffer);
+            r = archive_read_data(a, data, sizeBuffer);
+            if (r != ARCHIVE_OK) {
+                fprintf(stderr, "archive_read_data error: %s\n", archive_error_string(a)); // FIXME: Getting many errors here, because of zisofs?
+            }
             
+            fwrite(data, 1, sizeBuffer, f);
+        
+            fclose(f);
+            chmod (dest, 0644);
+            
+            free(data);
+            
+            if(verbose)
+                fprintf(stderr, "Installed: %s\n", dest);   
         }
-        
-        
     }
     archive_read_close(a);
     archive_read_free(a);
