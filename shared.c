@@ -609,20 +609,26 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
                 break;
             }
             
-            const int sizeBuffer = 64*1024; // FIXME: Handle files correctly that are smaller or larger
-            char* data = NULL;
-            data = (char*) malloc(sizeBuffer);
-            r = archive_read_data(a, data, sizeBuffer);
-            if (r != ARCHIVE_OK) {
-                fprintf(stderr, "archive_read_data error: %s\n", archive_error_string(a)); // FIXME: Getting many errors here, because of zisofs?
+            int r;
+            const void *buff;
+            size_t size;
+            int64_t offset;
+
+
+            for (;;) {
+                r = archive_read_data_block(a, &buff, &size, &offset);
+                if (r == ARCHIVE_EOF)
+                    break;
+                if (r != ARCHIVE_OK) {
+                    fprintf(stderr, "%s\n", archive_error_string(a));
+                    break;
+                }
+                fwrite(buff, 1, size, f);
             }
             
-            fwrite(data, 1, sizeBuffer, f);
-        
             fclose(f);
             chmod (dest, 0644);
-            
-            free(data);
+
             
             if(verbose)
                 fprintf(stderr, "Installed: %s\n", dest);   
