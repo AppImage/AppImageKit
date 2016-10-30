@@ -4,7 +4,7 @@
 
 if [ -e /usr/bin/apt-get ] ; then
   apt-get update
-  sudo apt-get -y install git autoconf libtool make gcc libtool libfuse-dev \
+  sudo apt-get -y install git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
   liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev
   # libtool-bin might be required in newer distributions but is not available in precise
   sudo cp resources/liblz4.pc /usr/lib/x86_64-linux-gnu/pkgconfig/
@@ -21,7 +21,7 @@ if [ -e /usr/bin/yum ] ; then
   yum -y install autotools-latest # 19 MB
 
   yum -y install epel-release
-  yum -y install git wget make binutils fuse glibc-devel glib2-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
+  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
   . /opt/rh/devtoolset-4/enable
   . /opt/rh/autotools-latest/enable
 
