@@ -503,7 +503,7 @@ copy_data(struct archive *ar, struct archive *aw)
         }
     }
   archive_write_close(aw);
-  archive_write_free(aw);
+  archive_write_finish(aw);
 }
 
 /* Register a type 1 AppImage in the system */
@@ -635,7 +635,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         }
     }
     archive_read_close(a);
-    archive_read_free(a);
+    archive_read_finish(a);
 }
 
 /* Register a type 2 AppImage in the system */
