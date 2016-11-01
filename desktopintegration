@@ -137,7 +137,7 @@ check_prevent "/usr/share/$VENDORPREFIX/no_desktopintegration"
 check_prevent "/etc/$VENDORPREFIX/no_desktopintegration"
 
 # Exit immediately if appimaged is running
-pidof appimaged 2>/dev/null && exit 0
+pidof appimaged >/dev/null 2>&1 && exit 0
 
 # Exit immediately if $DESKTOPINTEGRATION is not empty
 if [ ! -z "$DESKTOPINTEGRATION" ] ; then
