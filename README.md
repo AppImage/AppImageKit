@@ -7,10 +7,10 @@ Using AppImageKit you can package desktop applications as AppImages that run on 
 The __AppImage__ format is a format for packaging applications in a way that allows them to
 run on a variety of different target systems (base operating systems, distributions) without further modification. 
 
-__AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and  provides  tools  for
-conveniently handling AppImages.
-
 https://en.wikipedia.org/wiki/AppImage
+
+__AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and  provides  tools such as `appimagetool` and `appimaged` for conveniently handling AppImages.
+
 `appimagetool` uses a next-generation AppImage format based on squashfs and embeds a runtime for it. `appimaged` is a daemon that handles registering and unregistering AppImages with the system (e.g., menu entries, icons, MIME types, binary delta updates, and such).
 
 ## appimagetool usage
