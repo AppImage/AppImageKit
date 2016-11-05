@@ -46,7 +46,8 @@
 #include "elf.h"
 #include "getsection.h"
 
-#include <archive.h>
+#include <archive3.h> // CentOS
+// #include <archive3.h> // Other systems
 #include <archive_entry.h>
 
 #include <regex.h>
