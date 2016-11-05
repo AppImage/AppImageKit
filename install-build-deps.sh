@@ -21,7 +21,7 @@ if [ -e /usr/bin/yum ] ; then
   yum -y install autotools-latest # 19 MB
 
   yum -y install epel-release
-  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive-devel libarchive-static-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
+  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
   . /opt/rh/devtoolset-4/enable
   . /opt/rh/autotools-latest/enable
 
