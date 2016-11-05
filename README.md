@@ -115,7 +115,7 @@ cd AppImageKit/
 sed -i -e 's|archive3.h|archive.h|g' ./shared.c
 sed -i -e 's|archive_entry3.h|archive_entry.h|g' ./shared.c
 sed -i -e 's|-larchive3|-larchive|g' ./build.sh
-bash -ex install-build-deps.sh
+sudo bash -ex install-build-deps.sh
 bash -ex build.sh
 ```
 
