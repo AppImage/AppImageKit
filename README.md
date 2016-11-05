@@ -25,11 +25,10 @@ ID=$(wget -q https://api.travis-ci.org/repos/probonopd/AppImageKit/builds -O - |
 URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log.txt" -O - | grep "https://transfer.sh/.*/appimagetool" | tail -n 1 | sed -e 's|\r||g')
 
 wget "$URL"
-```
-Usage in a nutshell:
-```
 chmod a+x appimagetool
-
+```
+Usage in a nutshell, assuming that you already have an [AppDir](https://github.com/AppImage/AppImageSpec/blob/master/draft.md#appdir) in place:
+```
 ./appimagetool some.AppDir
 ```
 
@@ -74,6 +73,7 @@ ID=$(wget -q https://api.travis-ci.org/repos/probonopd/AppImageKit/builds -O - |
 URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log.txt" -O - | grep "https://transfer.sh/.*/appimaged" | tail -n 1 | sed -e 's|\r||g')
 
 wget "$URL"
+chmod a+x appimaged
 ```
 Usage in a nutshell:
 
