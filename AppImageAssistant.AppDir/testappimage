@@ -72,7 +72,14 @@ fi
 # In case of Fedora-like ISOs
 if [ -e /tmp/$PREF/iso/LiveOS/squashfs.img ] ; then
     mount -o loop,ro /tmp/$PREF/iso/LiveOS/squashfs.img /tmp/$PREF/iso/
-    THEFS=/tmp/$PREF/iso/LiveOS/ext3fs.img || exit 1
+    if [ -e /tmp/$PREF/iso/LiveOS/ext3fs.img ] ; then
+      # F23 and below use https://github.com/rhinstaller/livecd-tools
+      THEFS=/tmp/$PREF/iso/LiveOS/ext3fs.img || exit 1
+    fi
+    if [ -e /tmp/$PREF/iso/LiveOS/rootfs.img ] ; then
+      # F24 and above use https://github.com/rhinstaller/lorax and livemedia-creator
+      THEFS=/tmp/$PREF/iso/LiveOS/rootfs.img || exit 1
+    fi
     mount "$THEFS" /tmp/$PREF/unionfs/root -o loop,ro || exit 1
 fi
 
