@@ -48,6 +48,8 @@ appimagetool appimaged.AppDir/
 # Test whether it has worked
 ls -lh ./*.AppImage
 
-# Upload
-curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
-curl --upload-file ./AppImage_daemon-*.AppImage https://transfer.sh/appimaged
+if [ ! -z $TRAVIS ] ; then
+  # Upload
+  curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
+  curl --upload-file ./AppImage_daemon-*.AppImage https://transfer.sh/appimaged
+fi
