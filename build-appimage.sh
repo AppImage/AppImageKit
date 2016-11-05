@@ -36,7 +36,7 @@ mkdir -p appimaged.AppDir/usr/lib
 cp -f build/appimaged appimagetool.AppDir/usr/bin
 
 cp build/AppRun appimaged.AppDir/
-cp find /usr/lib -name libarchive.so.3 appimaged.AppDir/usr/lib
+find /usr/lib -name libarchive.so.3 -exec cp {} appimaged.AppDir/usr/lib/ \;
 
 cp resources/appimaged.desktop appimaged.AppDir/
 cp resources/appimagetool.svg appimaged.AppDir/appimaged.svg
