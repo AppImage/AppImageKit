@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=AppImage daemon
+Exec=appimaged
+Comment=Optional daemon to integrate AppImages with the desktop
+Icon=appimaged
+Categories=Development;
+Terminal=true
+NoDisplay=true
