@@ -1,5 +1,16 @@
-# AppImageKit [![Build Status](https://travis-ci.org/probonopd/appimagetool.svg?branch=master)](https://travis-ci.org/probonopd/appimagetool)
+# AppImageKit [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
 
+Copyright (c) 2004-16 Simon Peter <probono@puredarwin.org> and contributors.
+
+Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
+
+The __AppImage__ format is a format for packaging applications in a way that allows them to
+run on a variety of different target systems (base operating systems, distributions) without further modification. 
+
+__AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and  provides  tools  for
+conveniently handling AppImages.
+
+https://en.wikipedia.org/wiki/AppImage
 `appimagetool` uses a next-generation AppImage format based on squashfs and embeds a runtime for it. `appimaged` is a daemon that handles registering and unregistering AppImages with the system (e.g., menu entries, icons, MIME types, binary delta updates, and such).
 
 ## appimagetool usage
