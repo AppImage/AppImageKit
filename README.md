@@ -57,7 +57,7 @@ A precompiled version can be found in the last successful Travis CI build, you c
 
 ```
 # Get the ID of the last successful build on Travis CI
-ID=$(wget -q https://api.travis-ci.org/repos/probonopd/appimagetool/builds -O - | head -n 1 | sed -e 's|}|\n|g' | grep '"result":0' | head -n 1 | sed -e 's|,|\n|g' | grep '"id"' | cut -d ":" -f 2)
+ID=$(wget -q https://api.travis-ci.org/repos/probonopd/AppImageKit/builds -O - | head -n 1 | sed -e 's|}|\n|g' | grep '"result":0' | head -n 1 | sed -e 's|,|\n|g' | grep '"id"' | cut -d ":" -f 2)
 
 # Get the transfer.sh URL from the logfile of the last successful build on Travis CI
 URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log.txt" -O - | grep "https://transfer.sh/.*/appimaged" | tail -n 1 | sed -e 's|\r||g')
@@ -99,8 +99,8 @@ sudo mv "$APP" /usr/local/bin/
 
 On a not too recent Ubuntu:
 ```
-git clone --recursive https://github.com/probonopd/appimagetool.git
-cd appimagetool/
+git clone --recursive https://github.com/probonopd/AppImageKit.git
+cd AppImageKit/
 bash -ex install-build-deps.sh
 bash -ex build.sh
 ```
