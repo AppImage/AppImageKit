@@ -110,10 +110,13 @@ sudo mv "$APP" /usr/local/bin/
 
 On a not too recent Ubuntu:
 ```
-git clone --recursive https://github.com/probonopd/AppImageKit.git
+git clone -b appimagetool/master --single-branch --recursive https://github.com/probonopd/AppImageKit
 cd AppImageKit/
+sed -i -e 's|archive3.h|archive.h|g' ./shared.c
+sed -i -e 's|archive_entry3.h|archive_entry.h|g' ./shared.c
+sed -i -e 's|-larchive3|-larchive|g' ./build.sh
 bash -ex install-build-deps.sh
 bash -ex build.sh
 ```
 
-It might be necessary to rename `-larchive3` to `-larchive` and change the libarchive3 includes in `shared.c` since CentOS (which is used to compile AppImageKit on Travis CI) and Ubuntu cannot agree on library names.
+Note: It is necessary to rename `-larchive3` to `-larchive` and change the libarchive3 includes in `shared.c` since CentOS (which is used to compile AppImageKit on Travis CI) and Ubuntu cannot agree on library names. Send a pull request if you know a proper solution.
