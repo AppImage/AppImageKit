@@ -33,7 +33,7 @@ appimagetool appimagetool.AppDir/
 
 mkdir -p appimaged.AppDir/usr/bin
 mkdir -p appimaged.AppDir/usr/lib
-cp -f build/appimaged appimagetool.AppDir/usr/bin
+cp -f build/appimaged appimaged.AppDir/usr/bin
 
 cp build/AppRun appimaged.AppDir/
 find /usr/lib -name libarchive.so.3 -exec cp {} appimaged.AppDir/usr/lib/ \;
