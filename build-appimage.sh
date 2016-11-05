@@ -23,13 +23,31 @@ cp build/mksquashfs appimagetool.AppDir/usr/bin/
 cp resources/appimagetool.desktop appimagetool.AppDir/
 cp resources/appimagetool.svg appimagetool.AppDir/
 
-cd appimagetool.AppDir
-ln -sf appimagetool.svg .DirIcon
-cd ..
+( cd appimagetool.AppDir ; ln -sf appimagetool.svg .DirIcon )
 
 # Eat our own dogfood
 PATH="$PATH:build"
 appimagetool appimagetool.AppDir/
 
+#######################################################################
+
+mkdir -p appimaged.AppDir/usr/bin
+mkdir -p appimaged.AppDir/usr/lib
+cp -f build/appimaged appimagetool.AppDir/usr/bin
+
+cp build/AppRun appimaged.AppDir/
+cp find /usr/lib -name libarchive.so.3 appimaged.AppDir/usr/lib
+
+cp resources/appimaged.desktop appimaged.AppDir/
+cp resources/appimagetool.svg appimaged.AppDir/appimaged.svg
+
+appimagetool appimaged.AppDir/
+
+#######################################################################
+
 # Test whether it has worked
 ls -lh ./*.AppImage
+
+# Upload
+curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
+curl --upload-file ./appimaged-*.AppImage https://transfer.sh/appimaged
