@@ -1,4 +1,5 @@
 [Desktop Entry]
+Type=Application
 Name=appimagetool
 Exec=appimagetool
 Comment=Tool to generate AppImages from AppDirs

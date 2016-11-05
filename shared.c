@@ -458,14 +458,23 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     /* FIXME: The following is most likely not correct; see the comments above.
      * Open a GitHub issue or send a pull request if you would like to propose asolution. */
     /* TODO: Check for consistency of the id with the AppStream file, if it exists in the AppImage */
-    gchar *partial_path = g_strdup_printf("applications/appimagekit_%s-%s", md5, desktop_filename);
-    gchar *destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
+    gchar *partial_path;
+    partial_path = g_strdup_printf("applications/appimagekit_%s-%s", md5, desktop_filename);
+    gchar *destination;
+    destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
+
+    /* When appimaged installs itself, then to the $XDG_CONFIG_HOME/autostart/ directory, falling back to ~/.config/autostart/ */
+    if(strcmp ("appimaged.desktop", desktop_filename) == 0) {
+        fprintf(stderr, "Installing to autostart: %s\n", desktop_filename);
+        partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
+        destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
+    }
+
     if(verbose)
         fprintf(stderr, "install: %s\n", destination);
     if(g_mkdir_with_parents(g_path_get_dirname(destination), 0755))
-        fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(destination));    
-    
-    
+        fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(destination));
+
     // g_key_file_save_to_file(key_file_structure, destination, NULL);
     // g_key_file_save_to_file is too new, only since 2.40
     /* Write config file on disk */

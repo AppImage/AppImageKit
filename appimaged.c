@@ -199,7 +199,24 @@ int main(int argc, char ** argv) {
         fprintf(stderr, "inotifytools_initialize error\n");
         exit(1);
     }
-    
+
+    gchar *user_bin_dir = g_build_filename(g_get_home_dir(), "/.local/bin", NULL);
+    gchar *installed_appimaged_location = g_build_filename(user_bin_dir, "appimaged", NULL);
+
+    /* When we run from inside an AppImage, then we check if we are installed
+     * in a per-user location and if not, we install ourselves there */
+    if(g_getenv("APPIMAGE") != NULL){
+        printf("Running from within %s\n", g_getenv("APPIMAGE"));
+        if (! g_file_test (installed_appimaged_location, G_FILE_TEST_IS_REGULAR)){
+            printf ("%s is not installed, moving it to %s\n", argv[0], installed_appimaged_location);
+            g_mkdir_with_parents(user_bin_dir, 0755);
+            gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", g_getenv("APPIMAGE"), installed_appimaged_location);
+            system(command);
+            exit(0);
+        }
+    }
+
+    add_dir_to_watch(user_bin_dir);
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Downloads", NULL));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
     add_dir_to_watch(g_build_filename("/Applications", NULL));
