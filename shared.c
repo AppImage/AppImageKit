@@ -46,9 +46,11 @@
 #include "elf.h"
 #include "getsection.h"
 
+// FIXME: Use IFDEF
 #include <archive3.h> // CentOS
-// #include <archive3.h> // Other systems
-#include <archive_entry.h>
+// #include <archive.h> // Other systems
+#include <archive_entry3.h> // CentOS
+// #include <archive_entry.h> // Other systems
 
 #include <regex.h>
 
