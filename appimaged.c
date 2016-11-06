@@ -248,6 +248,10 @@ int main(int argc, char ** argv) {
                 if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
                     fprintf(stderr, "* Installed %s\n", installed_appimaged_location);
                 if(g_file_test (destination, G_FILE_TEST_EXISTS))
+                    gchar *command3 = g_strdup_printf("sed -i -e 's|^Exec=.*|Exec=%s|g' \"%s\"", installed_appimaged_location, destination);
+                    if(verbose):
+                        fprintf(stderr, "%s\n", command3);
+                    system(command3);
                     fprintf(stderr, "* Installed %s\n", destination);
                 if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
                     fprintf(stderr, "\nTo uninstall, run %s --uninstall and follow the instructions\n\n", installed_appimaged_location);
