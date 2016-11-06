@@ -202,16 +202,24 @@ int main(int argc, char ** argv) {
 
     gchar *user_bin_dir = g_build_filename(g_get_home_dir(), "/.local/bin", NULL);
     gchar *installed_appimaged_location = g_build_filename(user_bin_dir, "appimaged", NULL);
-
+    gchar *appimage_location = g_getenv("APPIMAGE");
+    gchar *own_desktop_file_location = g_build_filename(g_getenv("APPDIR"), "/appimaged.desktop", NULL);
+    
     /* When we run from inside an AppImage, then we check if we are installed
      * in a per-user location and if not, we install ourselves there */
-    if(g_getenv("APPIMAGE") != NULL){
-        printf("Running from within %s\n", g_getenv("APPIMAGE"));
-        if (! g_file_test (installed_appimaged_location, G_FILE_TEST_IS_REGULAR)){
+    if(((appimage_location != NULL)) && ((appdir_location != NULL))){
+        printf("Running from within %s\n", appimage_location);
+        if ((! g_file_test (installed_appimaged_location, G_FILE_TEST_IS_REGULAR)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
             printf ("%s is not installed, moving it to %s\n", argv[0], installed_appimaged_location);
             g_mkdir_with_parents(user_bin_dir, 0755);
-            gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", g_getenv("APPIMAGE"), installed_appimaged_location);
+            gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", appimage_location, installed_appimaged_location);
             system(command);
+            /* When appimaged installs itself, then to the $XDG_CONFIG_HOME/autostart/ directory, falling back to ~/.config/autostart/ */
+            fprintf(stderr, "Installing to autostart: %s\n", own_desktop_file_location);
+            partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
+            destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
+            gchar *command2 = g_strdup_printf("cp \"%s\" \"%s\"", own_desktop_file_location, destination);
+            system(command2);
             exit(0);
         }
     }
