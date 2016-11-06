@@ -232,7 +232,7 @@ int main(int argc, char ** argv) {
      * in a per-user location and if not, we install ourselves there */
     if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
         printf("Running from within %s\n", appimage_location);
-        if ( (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
+        if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
             printf ("%s is not installed, moving it to %s\n", argv[0], installed_appimaged_location);
             g_mkdir_with_parents(user_bin_dir, 0755);
             gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", appimage_location, installed_appimaged_location);
