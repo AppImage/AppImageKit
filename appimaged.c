@@ -230,16 +230,6 @@ int main(int argc, char ** argv) {
         exit(0);
     }    
     
-    /* When we run from inside an AppImage, then we check if we are installed
-     * in a per-user location and if not, we install ourselves there */
-    if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
-        if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
-            printf ("%s is not installed, please run\n", argv[0]);
-            printf ("%s --install\n\n", argv[0]);
-            exit(1);
-        }
-    }
-    
     if(install != NULL){
         if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
             printf("Running from within %s\n", appimage_location);
@@ -267,6 +257,16 @@ int main(int argc, char ** argv) {
         }
     }
 
+    /* When we run from inside an AppImage, then we check if we are installed
+     * in a per-user location and if not, we install ourselves there */
+    if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
+        if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
+            printf ("%s is not installed, please run\n", argv[0]);
+            printf ("%s --install\n\n", argv[0]);
+            exit(1);
+        }
+    }
+    
     add_dir_to_watch(user_bin_dir);
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Downloads", NULL));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
