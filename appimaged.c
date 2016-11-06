@@ -224,7 +224,7 @@ int main(int argc, char ** argv) {
             if(g_file_test (destination, G_FILE_TEST_EXISTS))
                 fprintf(stderr, "* Please delete %s\n", destination);
             fprintf(stderr, "* To remove all AppImage desktop integration, run\n");
-            fprintf(stderr, "  find ~/.local/share -name 'appimagekit_*' -exec rm {} \;");
+            fprintf(stderr, "  find ~/.local/share -name 'appimagekit_*' -exec rm {} \;\n\n");
         exit(0);
     }    
     
