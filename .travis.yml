@@ -2,18 +2,20 @@ language: c
 compiler: gcc
 
 services:
- - docker
+  - docker
  
 env:
 # - DOCKER_IMAGE=toopher/centos-i386:centos6 # Pull request welcome that makes this work
- - DOCKER_IMAGE=library/centos:6.8
+  - DOCKER_IMAGE=library/centos:6.8
  
 script:
- - mkdir -p ./out/
- - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
+  - mkdir -p ./out/
+  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
 
 after_success:
-- file out/*
+  - file out/*
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - bash -x ./upload.sh out/*
 
 notifications:
   irc:
