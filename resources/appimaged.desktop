@@ -1,6 +1,6 @@
 [Desktop Entry]
 Type=Application
-Name=AppImage daemon
+Name=appimaged
 Exec=appimaged
 Comment=Optional daemon to integrate AppImages with the desktop
 Icon=appimaged
