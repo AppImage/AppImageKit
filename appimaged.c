@@ -272,7 +272,7 @@ int main(int argc, char ** argv) {
     /* When we run from inside an AppImage, then we check if we are installed
      * in a per-user location and if not, we install ourselves there */
     if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
-        if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
+        if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && ((! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) || (! g_file_test (destination, G_FILE_TEST_EXISTS))) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
             char *title;
             char *body;
             title = g_strdup_printf("Not installed\n", argv[0]);
