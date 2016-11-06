@@ -549,6 +549,8 @@ main (int argc, char *argv[])
                 fprintf (stderr, "zsyncmake is installed and updateinformation is provided, "
                 "hence generating zsync file\n");
                 sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
+                if(verbose)
+                    fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if (fp == NULL)
                     die("Failed to run zsyncmake command");            
