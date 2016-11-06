@@ -16,6 +16,7 @@ after_success:
   - ls -lh out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash ./upload.sh out/*
+  - env
 
 notifications:
   irc:
