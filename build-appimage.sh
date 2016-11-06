@@ -29,7 +29,7 @@ cp resources/appimagetool.svg appimagetool.AppDir/
 
 # Eat our own dogfood
 PATH="$PATH:build"
-appimagetool appimagetool.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage.zsync"
+appimagetool appimagetool.AppDir/ -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage.zsync"
 
 #######################################################################
 
@@ -43,6 +43,6 @@ find /usr/lib -name libarchive.so.3 -exec cp {} appimaged.AppDir/usr/lib/ \;
 cp resources/appimaged.desktop appimaged.AppDir/
 cp resources/appimagetool.svg appimaged.AppDir/appimaged.svg
 
-appimagetool appimaged.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync"
+appimagetool appimaged.AppDir/ -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync"
 
 #######################################################################
