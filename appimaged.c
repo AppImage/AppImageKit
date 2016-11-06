@@ -252,11 +252,13 @@ int main(int argc, char ** argv) {
                 fprintf(stderr, "Installing to autostart: %s\n", own_desktop_file_location);
                 g_mkdir_with_parents(g_path_get_dirname(destination), 0755);
                 gchar *command2 = g_strdup_printf("cp \"%s\" \"%s\"", own_desktop_file_location, destination);
+                system(command2);
                 if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
                     fprintf(stderr, "* Installed %s\n", installed_appimaged_location);
                 if(g_file_test (destination, G_FILE_TEST_EXISTS))
                     fprintf(stderr, "* Installed %s\n", destination);
-                system(command2);
+                if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
+                    fprintf(stderr, "\nTo uninstall, run %s --uninstall and follow the instructions\n\n", installed_appimaged_location);
                 exit(0);
             }
         } else {
