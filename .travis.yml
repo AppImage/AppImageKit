@@ -9,7 +9,8 @@ env:
  - DOCKER_IMAGE=library/centos:6.8
  
 script:
- - docker run -i -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
+ - mkdir -p ./out/
+ - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
 
 after_success:
 - file out/*
