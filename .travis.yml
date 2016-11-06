@@ -15,8 +15,8 @@ script:
 after_success:
   - ls -lh out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-  - rm out/appimaged out/appimagetool || true # We have AppImages for these
-  - rm out/runtime || true # Not needed, might confuse users
+  - rm -rf out/appimaged out/appimagetool || true # We have AppImages for these
+  - rm -rf out/runtime || true # Not needed, might confuse users
   - bash ./upload.sh out/*
 
 notifications:
