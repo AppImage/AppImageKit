@@ -54,6 +54,8 @@
 
 #include <pthread.h>
 
+extern int notify(char *title, char *body, int timeout);
+
 static gboolean verbose = FALSE;
 static gboolean version = FALSE;
 static gboolean install = FALSE;
@@ -261,8 +263,11 @@ int main(int argc, char ** argv) {
      * in a per-user location and if not, we install ourselves there */
     if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
         if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
-            printf ("%s is not installed, please run\n", argv[0]);
-            printf ("%s --install\n\n", argv[0]);
+            char *title;
+            char *body;
+            title = g_strdup_printf("%s is not installed, \n", argv[0]);
+            body = g_strdup_printf("Please run %s --install", argv[0]);
+            notify(title, body, 0);
             exit(1);
         }
     }
