@@ -75,11 +75,13 @@ URL=$(wget -q "https://s3.amazonaws.com/archive.travis-ci.org/jobs/$((ID+1))/log
 wget "$URL"
 chmod a+x appimaged
 ```
+
 Usage in a nutshell:
 
 ```
 ./appimaged
 ```
+
 It will register the AppImages in with your system from the following places:
 * $HOME/Downloads
 * $HOME/bin
@@ -89,6 +91,22 @@ It will register the AppImages in with your system from the following places:
 * /usr/local/bin
 
 Run `appimaged -v` for increased verbosity.
+
+Detailed usage:
+```
+Usage:
+  appimaged [OPTION...] 
+
+Help Options:
+  -h, --help          Show help options
+
+Application Options:
+  -v, --verbose       Be verbose
+  -i, --install       Install this appimaged instance to $HOME
+  -u, --uninstall     Uninstall an appimaged instance from $HOME
+  --version           Show version number
+
+```
 
 __NOTE:__ It may be necessary to restart (or `xkill`) dash, nautilus, to recognize new directories that didn't exist prior to the first run of `appimaged`. Alternatively, it should be sufficient to log out of the session and log in again after having run appimaged once.
 
