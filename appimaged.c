@@ -215,7 +215,9 @@ int main(int argc, char ** argv) {
     gchar *own_desktop_file_location = g_build_filename(g_getenv("APPDIR"), "/appimaged.desktop", NULL);
     gchar *global_autostart_file = "/etc/xdg/autostart/appimaged.desktop";
     gchar *global_systemd_file = "/usr/lib/systemd/user/appimaged.service";
-
+    gchar *partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
+    gchar *destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
+    
     if(uninstall){
             if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
                 fprintf(stderr, "* Please delete %s\n", installed_appimaged_location);
@@ -237,8 +239,6 @@ int main(int argc, char ** argv) {
             system(command);
             /* When appimaged installs itself, then to the $XDG_CONFIG_HOME/autostart/ directory, falling back to ~/.config/autostart/ */
             fprintf(stderr, "Installing to autostart: %s\n", own_desktop_file_location);
-            gchar *partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
-            gchar *destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
             g_mkdir_with_parents(g_path_get_dirname(destination), 0755);
             gchar *command2 = g_strdup_printf("cp \"%s\" \"%s\"", own_desktop_file_location, destination);
             if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
