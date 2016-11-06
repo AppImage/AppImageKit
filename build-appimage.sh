@@ -27,7 +27,7 @@ cp resources/appimagetool.svg appimagetool.AppDir/
 
 # Eat our own dogfood
 PATH="$PATH:build"
-appimagetool appimagetool.AppDir/
+appimagetool appimagetool.AppDir/ -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage.zsync"
 
 #######################################################################
 
@@ -41,15 +41,6 @@ find /usr/lib -name libarchive.so.3 -exec cp {} appimaged.AppDir/usr/lib/ \;
 cp resources/appimaged.desktop appimaged.AppDir/
 cp resources/appimagetool.svg appimaged.AppDir/appimaged.svg
 
-appimagetool appimaged.AppDir/
+appimagetool appimaged.AppDir/ -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync"
 
 #######################################################################
-
-# Test whether it has worked
-ls -lh ./*.AppImage
-
-# if [ -e /etc/centos-release ] ; then
-  # Upload when we are running on Travis CI (FIXME: $TRAVIS is not propagated inside the docker container)
-  # curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
-  # curl --upload-file ./AppImage_daemon-*.AppImage https://transfer.sh/appimaged
-# fi
