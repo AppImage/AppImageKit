@@ -20,6 +20,8 @@ cp build/AppRun appimagetool.AppDir/
 cp build/appimagetool appimagetool.AppDir/usr/bin/
 cp build/mksquashfs appimagetool.AppDir/usr/bin/
 
+cp $(which zsyncmake) appimagetool.AppDir/usr/bin/
+
 cp resources/appimagetool.desktop appimagetool.AppDir/
 cp resources/appimagetool.svg appimagetool.AppDir/
 
