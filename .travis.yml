@@ -13,9 +13,9 @@ script:
   - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
 
 after_success:
-  - file out/*
+  - ls -lh out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
-  - bash -x ./upload.sh out/*
+  - bash ./upload.sh out/*
 
 notifications:
   irc:
