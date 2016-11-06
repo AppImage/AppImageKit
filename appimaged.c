@@ -211,12 +211,14 @@ int main(int argc, char ** argv) {
     gchar *installed_appimaged_location = g_build_filename(user_bin_dir, "appimaged", NULL);
     gchar *appimage_location = g_getenv("APPIMAGE");
     gchar *own_desktop_file_location = g_build_filename(g_getenv("APPDIR"), "/appimaged.desktop", NULL);
+    gchar *global_autostart_file = "/etc/xdg/autostart/appimaged.desktop";
+    gchar *global_systemd_file = "/usr/lib/systemd/user/appimaged.service";
     
     /* When we run from inside an AppImage, then we check if we are installed
      * in a per-user location and if not, we install ourselves there */
     if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
         printf("Running from within %s\n", appimage_location);
-        if ((! g_file_test (installed_appimaged_location, G_FILE_TEST_IS_REGULAR)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
+        if ( (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
             printf ("%s is not installed, moving it to %s\n", argv[0], installed_appimaged_location);
             g_mkdir_with_parents(user_bin_dir, 0755);
             gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", appimage_location, installed_appimaged_location);
@@ -225,6 +227,7 @@ int main(int argc, char ** argv) {
             fprintf(stderr, "Installing to autostart: %s\n", own_desktop_file_location);
             gchar *partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
             gchar *destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
+            g_mkdir_with_parents(g_path_get_dirname(destination), 0755);
             gchar *command2 = g_strdup_printf("cp \"%s\" \"%s\"", own_desktop_file_location, destination);
             system(command2);
             exit(0);
