@@ -126,7 +126,7 @@ sudo mv "$APP" /usr/local/bin/
 
 ## Building
 
-__NOTE:__ The AppImage project supplies binaries that application developers can use. These binaries are built using the CentOS 6 Docker on Travis CI build system in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to AppImageKit, when needing another architecture than `x86_64`, or when trying to reproduce our binaries.
+__NOTE:__ The AppImage project supplies [binaries](https://github.com/probonopd/AppImageKit/releases/tag/continuous) that application developers can use. These binaries are built using the CentOS 6 Docker on Travis CI build system in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to AppImageKit, when needing another architecture than `x86_64`, or when trying to reproduce our binaries.
 
 On a not too recent Ubuntu:
 ```
