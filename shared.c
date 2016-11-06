@@ -464,11 +464,9 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     gchar *destination;
     destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
 
-    /* When appimaged installs itself, then to the $XDG_CONFIG_HOME/autostart/ directory, falling back to ~/.config/autostart/ */
+    /* When appimaged sees itself, then do nothing here */
     if(strcmp ("appimaged.desktop", desktop_filename) == 0) {
-        fprintf(stderr, "Installing to autostart: %s\n", desktop_filename);
-        partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
-        destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
+        return;
     }
 
     if(verbose)
