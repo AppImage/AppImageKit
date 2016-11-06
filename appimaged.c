@@ -56,11 +56,13 @@
 
 static gboolean verbose = FALSE;
 static gboolean version = FALSE;
+static gboolean uninstall = FALSE;
 gchar **remaining_args = NULL;
 
 static GOptionEntry entries[] =
 {
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
+    { "uninstall", 'u', 0, G_OPTION_ARG_NONE, &uninstall, "Uninstall an appimaged instance from $HOME", NULL },
     { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -213,6 +215,14 @@ int main(int argc, char ** argv) {
     gchar *own_desktop_file_location = g_build_filename(g_getenv("APPDIR"), "/appimaged.desktop", NULL);
     gchar *global_autostart_file = "/etc/xdg/autostart/appimaged.desktop";
     gchar *global_systemd_file = "/usr/lib/systemd/user/appimaged.service";
+
+    if(uninstall){
+            if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
+                fprintf(stderr, "* Please delete %s\n", installed_appimaged_location);
+            if(g_file_test (destination, G_FILE_TEST_EXISTS))
+                fprintf(stderr, "* Please delete %s\n", destination);
+        exit(0);
+    }    
     
     /* When we run from inside an AppImage, then we check if we are installed
      * in a per-user location and if not, we install ourselves there */
@@ -229,6 +239,10 @@ int main(int argc, char ** argv) {
             gchar *destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
             g_mkdir_with_parents(g_path_get_dirname(destination), 0755);
             gchar *command2 = g_strdup_printf("cp \"%s\" \"%s\"", own_desktop_file_location, destination);
+            if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
+                fprintf(stderr, "* Installed %s\n", installed_appimaged_location);
+            if(g_file_test (destination, G_FILE_TEST_EXISTS))
+                fprintf(stderr, "* Installed %s\n", destination);
             system(command2);
             exit(0);
         }
