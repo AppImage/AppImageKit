@@ -55,11 +55,13 @@
 #include <pthread.h>
 
 static gboolean verbose = FALSE;
+static gboolean version = FALSE;
 gchar **remaining_args = NULL;
 
 static GOptionEntry entries[] =
 {
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
+    { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
 };
@@ -193,6 +195,11 @@ int main(int argc, char ** argv) {
     {
         g_print("option parsing failed: %s\n", error->message);
         exit (1);
+    }
+
+    if(version){
+        fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
+        exit(0);
     }
     
     if ( !inotifytools_initialize()){
