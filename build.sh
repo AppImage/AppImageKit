@@ -153,5 +153,7 @@ done
 
 bash -ex "$HERE/build-appimage.sh"
 
+ls -lh
+
 mkdir -p /out/
 cp build/* ./*.AppImage* /out/
