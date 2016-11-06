@@ -251,10 +251,15 @@ int main(int argc, char ** argv) {
                     fprintf(stderr, "* Installed %s\n", destination);
                 if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
                     fprintf(stderr, "\nTo uninstall, run %s --uninstall and follow the instructions\n\n", installed_appimaged_location);
+                char *title;
+                char *body;
+                title = g_strdup_printf("Please log out");
+                body = g_strdup_printf("and log in again to complete the installation");
+                notify(title, body, 15);
                 exit(0);
             }
         } else {
-            printf("Not running from within an AppImage. This binary cannotbe installed in this way.\n");
+            printf("Not running from within an AppImage. This binary cannot be installed in this way.\n");
             exit(1);
         }
     }
@@ -265,9 +270,9 @@ int main(int argc, char ** argv) {
         if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
             char *title;
             char *body;
-            title = g_strdup_printf("%s is not installed, \n", argv[0]);
+            title = g_strdup_printf("Not installed\n", argv[0]);
             body = g_strdup_printf("Please run %s --install", argv[0]);
-            notify(title, body, 0);
+            notify(title, body, 15);
             exit(1);
         }
     }
