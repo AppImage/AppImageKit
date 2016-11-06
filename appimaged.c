@@ -221,6 +221,8 @@ int main(int argc, char ** argv) {
                 fprintf(stderr, "* Please delete %s\n", installed_appimaged_location);
             if(g_file_test (destination, G_FILE_TEST_EXISTS))
                 fprintf(stderr, "* Please delete %s\n", destination);
+            fprintf(stderr, "* To remove all AppImage desktop integration, run\n");
+            fprintf(stderr, "  find ~/.local/share -name 'appimagekit_*' -exec rm {} \;");
         exit(0);
     }    
     
