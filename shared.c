@@ -547,7 +547,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         }
 
         /* Skip all but regular files; FIXME: Also handle symlinks correctly */
-        if(! archive_entry_filetype(entry) & AE_IFREG)
+        if(archive_entry_filetype(entry) != AE_IFREG)
             break;
         
         gchar *filename;
