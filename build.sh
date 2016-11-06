@@ -154,4 +154,4 @@ done
 bash -ex "$HERE/build-appimage.sh"
 
 mkdir -p /out/
-cp build/* ./*.AppImage /out/
+cp build/* ./*.AppImage* /out/
