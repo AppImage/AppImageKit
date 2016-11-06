@@ -56,12 +56,14 @@
 
 static gboolean verbose = FALSE;
 static gboolean version = FALSE;
+static gboolean install = FALSE;
 static gboolean uninstall = FALSE;
 gchar **remaining_args = NULL;
 
 static GOptionEntry entries[] =
 {
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
+    { "install", 'i', 0, G_OPTION_ARG_NONE, &uninstall, "Install this appimaged instance to $HOME", NULL },
     { "uninstall", 'u', 0, G_OPTION_ARG_NONE, &uninstall, "Uninstall an appimaged instance from $HOME", NULL },
     { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
@@ -231,22 +233,35 @@ int main(int argc, char ** argv) {
     /* When we run from inside an AppImage, then we check if we are installed
      * in a per-user location and if not, we install ourselves there */
     if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
-        printf("Running from within %s\n", appimage_location);
         if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
-            printf ("%s is not installed, moving it to %s\n", argv[0], installed_appimaged_location);
-            g_mkdir_with_parents(user_bin_dir, 0755);
-            gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", appimage_location, installed_appimaged_location);
-            system(command);
-            /* When appimaged installs itself, then to the $XDG_CONFIG_HOME/autostart/ directory, falling back to ~/.config/autostart/ */
-            fprintf(stderr, "Installing to autostart: %s\n", own_desktop_file_location);
-            g_mkdir_with_parents(g_path_get_dirname(destination), 0755);
-            gchar *command2 = g_strdup_printf("cp \"%s\" \"%s\"", own_desktop_file_location, destination);
-            if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
-                fprintf(stderr, "* Installed %s\n", installed_appimaged_location);
-            if(g_file_test (destination, G_FILE_TEST_EXISTS))
-                fprintf(stderr, "* Installed %s\n", destination);
-            system(command2);
-            exit(0);
+            printf ("%s is not installed, please run\n", argv[0]);
+            printf ("%s --install\n\n", argv[0]);
+            exit(1);
+        }
+    }
+    
+    if(install != NULL){
+        if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
+            printf("Running from within %s\n", appimage_location);
+            if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
+                printf ("%s is not installed, moving it to %s\n", argv[0], installed_appimaged_location);
+                g_mkdir_with_parents(user_bin_dir, 0755);
+                gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", appimage_location, installed_appimaged_location);
+                system(command);
+                /* When appimaged installs itself, then to the $XDG_CONFIG_HOME/autostart/ directory, falling back to ~/.config/autostart/ */
+                fprintf(stderr, "Installing to autostart: %s\n", own_desktop_file_location);
+                g_mkdir_with_parents(g_path_get_dirname(destination), 0755);
+                gchar *command2 = g_strdup_printf("cp \"%s\" \"%s\"", own_desktop_file_location, destination);
+                if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
+                    fprintf(stderr, "* Installed %s\n", installed_appimaged_location);
+                if(g_file_test (destination, G_FILE_TEST_EXISTS))
+                    fprintf(stderr, "* Installed %s\n", destination);
+                system(command2);
+                exit(0);
+            }
+        } else {
+            printf("Not running from within an AppImage. This binary cannotbe installed in this way.\n");
+            exit(1);
         }
     }
 
