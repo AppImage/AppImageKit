@@ -63,7 +63,7 @@ gchar **remaining_args = NULL;
 static GOptionEntry entries[] =
 {
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
-    { "install", 'i', 0, G_OPTION_ARG_NONE, &uninstall, "Install this appimaged instance to $HOME", NULL },
+    { "install", 'i', 0, G_OPTION_ARG_NONE, &install, "Install this appimaged instance to $HOME", NULL },
     { "uninstall", 'u', 0, G_OPTION_ARG_NONE, &uninstall, "Uninstall an appimaged instance from $HOME", NULL },
     { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
@@ -243,7 +243,7 @@ int main(int argc, char ** argv) {
     if(install != NULL){
         if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
             printf("Running from within %s\n", appimage_location);
-            if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
+            if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS))){
                 printf ("%s is not installed, moving it to %s\n", argv[0], installed_appimaged_location);
                 g_mkdir_with_parents(user_bin_dir, 0755);
                 gchar *command = g_strdup_printf("mv \"%s\" \"%s\"", appimage_location, installed_appimaged_location);
