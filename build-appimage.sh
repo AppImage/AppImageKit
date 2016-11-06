@@ -48,8 +48,8 @@ appimagetool appimaged.AppDir/
 # Test whether it has worked
 ls -lh ./*.AppImage
 
-if [ ! -z $TRAVIS ] ; then
-  # Upload
+if [ -e /etc/centos-release ] ; then
+  # Upload when we are running on Travis CI (FIXME: $TRAVIS is not propagated inside the docker container)
   curl --upload-file ./appimagetool-*.AppImage https://transfer.sh/appimagetool
   curl --upload-file ./AppImage_daemon-*.AppImage https://transfer.sh/appimaged
 fi
