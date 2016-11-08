@@ -178,17 +178,7 @@ if [ -z "$APPIMAGE" ] ; then
   # Not running from within an AppImage; hence using the AppRun for Exec=
 fi
 
-# Construct path to the icon according to
-# http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html
-ABS_APPIMAGE=$(readlink -e "$APPIMAGE")
-ICONURL="file://$ABS_APPIMAGE"
-MD5=$(echo -n $ICONURL | md5sum | cut -c -32)
-ICONFILE="$HOME/.cache/thumbnails/normal/$MD5.png"
-if [ ! -f "$ICONFILE" ] ; then
-  echo "$ICONFILE is missing. Probably not running ${THIS} from within an AppImage."
-  echo "Hence falling back to using .DirIcon"
-  ICONFILE="$APPDIR/.DirIcon"
-fi
+ICONFILE="$APPDIR/.DirIcon"
 
 # $XDG_DATA_DIRS contains the default paths /usr/local/share:/usr/share
 # desktop file has to be installed in an applications subdirectory
