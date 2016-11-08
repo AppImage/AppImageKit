@@ -10,7 +10,7 @@ env:
  
 script:
   - mkdir -p ./out/
-  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
+  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" export TRAVIS=1 && /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
 
 after_success:
   - ls -lh out/*
