@@ -9,14 +9,25 @@ env:
   - DOCKER_IMAGE=library/centos:6.8
  
 script:
+  - rm -rf data.tar.g* .gnu* || true
+  - wget https://github.com/probonopd/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
+  - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg )
+  - tar xf data.tar.gz
+  - sudo chown -R $USER .gnu*
+  - rm -rf $HOME/.gnu* ; mv .gnu* $HOME/
+  - find $HOME/.gnu*
   - mkdir -p ./out/
-  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" export TRAVIS=1 && /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
-
-after_success:
+  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
   - ls -lh out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - find ./out/appimagetool.AppDir/
+  - find ./out/appimaged.AppDir/
+  - export PATH=./appimagetool.AppDir/usr/bin/:$PATH
+  - ( cd out/ ; ./appimagetool.AppDir/usr/bin/appimagetool ./appimagetool.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage.zsync" )
+  - ( cd out/ ; ./appimagetool.AppDir/usr/bin/appimagetool ./appimaged.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync" )
   - rm -rf out/appimaged out/appimagetool || true # We have AppImages for these
   - rm -rf out/runtime || true # Not needed, might confuse users
+  - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
   - bash ./upload.sh out/*
 
 notifications:
@@ -41,5 +52,3 @@ branches:
   except:
   - # Do not build tags that we create when we upload to GitHub Releases
   - /^(?i:continuous)$/
-
-secure: "mxQFPlyUZsvP4OucRMDM1e3YjTsFQP5/e81FMIjCDgqlcoqMtIlEPNgGeK0MJbw1aciQuTfKz79wA9WyaDyvigEnkAXNviNXhL15jW2HWfinWr5P4/ubeWa9VpyJtLNhkPUO0l8314GJiuG6KB+V5lB9djQ6xxwHTrfQUfWvaaY=" # $KEY

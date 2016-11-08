@@ -1,5 +1,5 @@
 #!/bin/bash
-
+echo $KEY | md5sum
 set -e
 set -x
 
@@ -156,4 +156,4 @@ bash -ex "$HERE/build-appimage.sh"
 ls -lh
 
 mkdir -p /out/
-cp build/* ./*.AppImage* /out/
+cp -r build/* ./*.AppDir /out/
