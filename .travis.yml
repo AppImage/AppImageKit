@@ -41,3 +41,5 @@ branches:
   except:
   - # Do not build tags that we create when we upload to GitHub Releases
   - /^(?i:continuous)$/
+
+secure: "mxQFPlyUZsvP4OucRMDM1e3YjTsFQP5/e81FMIjCDgqlcoqMtIlEPNgGeK0MJbw1aciQuTfKz79wA9WyaDyvigEnkAXNviNXhL15jW2HWfinWr5P4/ubeWa9VpyJtLNhkPUO0l8314GJiuG6KB+V5lB9djQ6xxwHTrfQUfWvaaY=" # $KEY
