@@ -622,41 +622,43 @@ main (int argc, char *argv[])
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
-                if(WEXITSTATUS(pclose(fp)) != 0)
-                    fprintf (stderr, "ERROR: gpg2 command did not succeed, could not sign. Continuing\n");
-                unsigned long sig_offset = 0;
-                unsigned long sig_length = 0;
-                get_elf_section_offset_and_lenghth(destination, ".sha256_sig", &sig_offset, &sig_length);
-                if(verbose)
-                    printf("sig_offset: %lu\n", sig_offset);
-                if(verbose)
-                    printf("sig_length: %lu\n", sig_length);
-                if(sig_offset == 0) {
-                    die("Could not determine offset for signature");
+                if(WEXITSTATUS(pclose(fp)) != 0) { 
+                    fprintf (stderr, "ERROR: gpg2 command did not succeed, could not sign, continuing\n");
                 } else {
-                    FILE *fpdst3 = fopen(destination, "r+");
-                    if (fpdst3 == NULL)
-                        die("Not able to open the destination file for writing, aborting");
-//                    if(strlen(updateinformation)>sig_length)
-//                        die("signature does not fit into segment, aborting");
-                    fseek(fpdst3, sig_offset, SEEK_SET);
-                    FILE *fpsrc2 = fopen(ascfile, "rb");
-                    if (fpsrc2 == NULL) {
-                        die("Not able to open the asc file for reading, aborting");
+                    unsigned long sig_offset = 0;
+                    unsigned long sig_length = 0;
+                    get_elf_section_offset_and_lenghth(destination, ".sha256_sig", &sig_offset, &sig_length);
+                    if(verbose)
+                        printf("sig_offset: %lu\n", sig_offset);
+                    if(verbose)
+                        printf("sig_length: %lu\n", sig_length);
+                    if(sig_offset == 0) {
+                        die("Could not determine offset for signature");
+                    } else {
+                        FILE *fpdst3 = fopen(destination, "r+");
+                        if (fpdst3 == NULL)
+                            die("Not able to open the destination file for writing, aborting");
+    //                    if(strlen(updateinformation)>sig_length)
+    //                        die("signature does not fit into segment, aborting");
+                        fseek(fpdst3, sig_offset, SEEK_SET);
+                        FILE *fpsrc2 = fopen(ascfile, "rb");
+                        if (fpsrc2 == NULL) {
+                            die("Not able to open the asc file for reading, aborting");
+                        }
+                        char byte;
+                        while (!feof(fpsrc2))
+                        {
+                            fread(&byte, sizeof(char), 1, fpsrc2);
+                            fwrite(&byte, sizeof(char), 1, fpdst3);
+                        }
+                        fclose(fpsrc2);
+                        fclose(fpdst3);
                     }
-                    char byte;
-                    while (!feof(fpsrc2))
-                    {
-                        fread(&byte, sizeof(char), 1, fpsrc2);
-                        fwrite(&byte, sizeof(char), 1, fpdst3);
-                    }
-                    fclose(fpsrc2);
-                    fclose(fpdst3);
+                    if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
+                        unlink(ascfile);
+                    if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
+                        unlink(digestfile);
                 }
-                if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
-                    unlink(ascfile);
-                if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
-                    unlink(digestfile);
             }
         }     
         fprintf (stderr, "Success\n");
