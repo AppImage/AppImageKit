@@ -503,9 +503,6 @@ main (int argc, char *argv[])
             printf("Could not set executable bit, aborting\n");
             exit(1);
         }
-        if(unlink(tempfile) != 0) {
-            die("Could not delete the tempfile, aborting");
-        }
         
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
