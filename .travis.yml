@@ -22,7 +22,7 @@ script:
   - export PATH=./appimagetool.AppDir/usr/bin/:$PATH
   - ( cd out/ ; ./appimagetool.AppDir/usr/bin/appimagetool ./appimagetool.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage.zsync" )
   - ( cd out/ ; ./appimagetool.AppDir/usr/bin/appimagetool ./appimaged.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync" )
-  - rm -rf out/appimaged out/appimagetool out/verify out/digest || true
+  - rm -rf out/appimaged out/appimagetool out/validate out/digest || true
   - rm -rf out/runtime || true # Not needed, might confuse users
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
   - bash ./upload.sh out/*
