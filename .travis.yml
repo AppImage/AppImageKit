@@ -11,7 +11,7 @@ env:
 script:
   - rm -rf data.tar.g* .gnu* || true
   - wget https://github.com/probonopd/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
-  - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg )
+  - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
   - ( tar xf data.tar.gz ; sudo chown -R $USER .gnu* ; rm -rf $HOME/.gnu* ; mv .gnu* $HOME/ ) || true
   - mkdir -p ./out/
   - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
