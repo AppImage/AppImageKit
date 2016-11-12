@@ -623,7 +623,7 @@ main (int argc, char *argv[])
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if(WEXITSTATUS(pclose(fp)) != 0)
-                    die("gpg2 command did not succeed");
+                    fprintf (stderr, "ERROR: gpg2 command did not succeed, could not sign. Continuing\n");
                 unsigned long sig_offset = 0;
                 unsigned long sig_length = 0;
                 get_elf_section_offset_and_lenghth(destination, ".sha256_sig", &sig_offset, &sig_length);
