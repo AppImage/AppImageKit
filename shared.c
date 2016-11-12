@@ -46,11 +46,13 @@
 #include "elf.h"
 #include "getsection.h"
 
-// FIXME: Use IFDEF
-#include <archive3.h> // CentOS
-// #include <archive.h> // Other systems
-#include <archive_entry3.h> // CentOS
-// #include <archive_entry.h> // Other systems
+#if HAVE_LIBARCHIVE3 == 1 // CentOS
+# include <archive3.h>
+# include <archive_entry3.h>
+#else // other systems
+# include <archive.h>
+# include <archive_entry.h>
+#endif
 
 #include <regex.h>
 
