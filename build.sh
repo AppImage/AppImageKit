@@ -5,7 +5,6 @@ set -x
 
 HERE="$(dirname "$(readlink -f "${0}")")"
 
-
 #
 # This script installs the required build-time dependencies
 # and builds AppImage
@@ -138,7 +137,7 @@ cc ../AppRun.c -o AppRun
 # check for libarchive name
 have_libarchive3=0
 archive_n=
-if printf "#include <archive3.h>\nint main(){return 0;}" | cc -w -O0 -xc - -Wl,--no-as-needed -larchive3 ; then
+if printf "#include <archive3.h>\nint main(){return 0;}" | cc -w -O0 -xc - -Wl,--no-as-needed -larchive3 2>/dev/null ; then
   have_libarchive3=1
   archive_n=3
 fi
