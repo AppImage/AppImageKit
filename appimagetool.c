@@ -105,7 +105,7 @@ int sfs_ls(char* image) {
 
 /* Generate a squashfs filesystem using mksquashfs on the $PATH 
 * execlp(), execvp(), and execvpe() search on the $PATH */
-int sfs_mksquashfs(char *source, char *destination) {
+int sfs_mksquashfs(char *source, char *destination, int offset) {
     pid_t parent = getpid();
     pid_t pid = fork();
     
@@ -117,13 +117,15 @@ int sfs_mksquashfs(char *source, char *destination) {
         waitpid(pid, &status, 0);
     } else {
         // we are the child
+	gchar *offset_string;
+	offset_string = g_strdup_printf("%i", offset);
         if(0==strcmp("xz", sqfs_comp))
         {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
-            execlp("mksquashfs", "mksquashfs", source, destination, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", "-root-owned", NULL);
+            execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset_string, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", "-root-owned", NULL);
         } else {
-        execlp("mksquashfs", "mksquashfs", source, destination, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", "-root-owned", NULL);
+        execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset_string, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", "-root-owned", NULL);
         }
         perror("execlp");   // execlp() returns only on error
         return(-1); // exec never returns
@@ -472,52 +474,36 @@ main (int argc, char *argv[])
             }
         }
         
-        /* mksquashfs can currently not start writing at an offset,
-        * so we need a tempfile. https://github.com/plougher/squashfs-tools/pull/13
+        /* Upstream mksquashfs can currently not start writing at an offset,
+        * so we need a patched one. https://github.com/plougher/squashfs-tools/pull/13
         * should hopefully change that. */
-        char *tempfile;
+
         fprintf (stderr, "Generating squashfs...\n");
-        tempfile = br_strcat(destination, ".temp");
-        int result = sfs_mksquashfs(source, tempfile);
-        if(result != 0)
-            die("sfs_mksquashfs error");
-        
-        fprintf (stderr, "Generating AppImage...\n");
-        FILE *fpsrc = fopen(tempfile, "rb");
-        if (fpsrc == NULL) {
-            die("Not able to open the tempfile for reading, aborting");
-        }
-        FILE *fpdst = fopen(destination, "w");
-        if (fpdst == NULL) {
-            die("Not able to open the destination file for writing, aborting");
-        }
-        
         /* runtime is embedded into this executable
         * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
         int size = (int)&_binary_runtime_size;
         char *data = (char *)&_binary_runtime_start;
         if (verbose)
             printf("Size of the embedded runtime: %d bytes\n", size);
-        fwrite(data, size, 1, fpdst);
-        fseek (fpdst, 0, SEEK_END);
-        char byte;
         
-        while (!feof(fpsrc))
-        {
-            fread(&byte, sizeof(char), 1, fpsrc);
-            fwrite(&byte, sizeof(char), 1, fpdst);
+        int result = sfs_mksquashfs(source, destination, size);
+        if(result != 0)
+            die("sfs_mksquashfs error");
+        
+        fprintf (stderr, "Embedding ELF...\n");
+        FILE *fpdst = fopen(destination, "rb+");
+        if (fpdst == NULL) {
+            die("Not able to open the AppImage for writing, aborting");
         }
-        
-        fclose(fpsrc);
+
+        fseek(fpdst, 0, SEEK_SET);
+        fwrite(data, size, 1, fpdst);
         fclose(fpdst);
-        
+
         fprintf (stderr, "Marking the AppImage as executable...\n");
         if (chmod (destination, 0755) < 0) {
             printf("Could not set executable bit, aborting\n");
             exit(1);
-        }
-        if(unlink(tempfile) != 0) {
-            die("Could not delete the tempfile, aborting");
         }
         
         if(bintray_user != NULL){

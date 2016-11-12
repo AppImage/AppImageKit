@@ -19,7 +19,7 @@ cp mksquashfs ../../build
 
 cd ../../
 
-cp build/AppRun appimagetool.AppDir/
+cp resources/AppRun appimagetool.AppDir/
 cp build/appimagetool appimagetool.AppDir/usr/bin/
 cp build/mksquashfs appimagetool.AppDir/usr/bin/
 
@@ -39,7 +39,7 @@ mkdir -p appimaged.AppDir/usr/lib
 cp -f build/appimaged appimaged.AppDir/usr/bin
 cp -f build/validate appimaged.AppDir/usr/bin
 
-cp build/AppRun appimaged.AppDir/
+cp resources/AppRun appimaged.AppDir/
 find /usr/lib -name libarchive.so.3 -exec cp {} appimaged.AppDir/usr/lib/ \;
 
 cp resources/appimaged.desktop appimaged.AppDir/
