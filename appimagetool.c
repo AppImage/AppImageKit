@@ -117,13 +117,15 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         waitpid(pid, &status, 0);
     } else {
         // we are the child
+	gchar *offset_string;
+	offset_string = g_strdup_printf("%i", offset);
         if(0==strcmp("xz", sqfs_comp))
         {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
-            execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", "-root-owned", NULL);
+            execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset_string, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", "-root-owned", NULL);
         } else {
-        execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", "-root-owned", NULL);
+        execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset_string, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", "-root-owned", NULL);
         }
         perror("execlp");   // execlp() returns only on error
         return(-1); // exec never returns
@@ -489,12 +491,12 @@ main (int argc, char *argv[])
             die("sfs_mksquashfs error");
         
         fprintf (stderr, "Embedding ELF...\n");
-        FILE *fpdst = fopen(destination, "w+");
+        FILE *fpdst = fopen(destination, "rb+");
         if (fpdst == NULL) {
             die("Not able to open the AppImage for writing, aborting");
         }
 
-        rewind(fpdst);
+        fseek(fpdst, 0, SEEK_SET);
         fwrite(data, size, 1, fpdst);
         fclose(fpdst);
 
