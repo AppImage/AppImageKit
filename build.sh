@@ -151,7 +151,7 @@ for FILE in $(ls build/*) ; do
   ldd "build/$FILE" || true
 done
 
-bash -ex "$HERE/build-appimage.sh"
+bash -ex "$HERE/build-appdirs.sh"
 
 ls -lh
 
