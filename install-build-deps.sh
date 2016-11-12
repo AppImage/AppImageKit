@@ -23,7 +23,7 @@ if [ -e /usr/bin/yum ] ; then
   rpm -ivh ftp://fr2.rpmfind.net/linux/dag/redhat/el6/en/x86_64/dag/RPMS/zsync-0.6.2-1.el6.rf.x86_64.rpm
 
   yum -y install epel-release
-  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-devel vim-common # inotify-tools-devel lz4-devel
+  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-static openssl-devel vim-common # inotify-tools-devel lz4-devel
   . /opt/rh/devtoolset-4/enable
   . /opt/rh/autotools-latest/enable
 
