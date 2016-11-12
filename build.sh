@@ -98,13 +98,13 @@ ld -r -b binary -o data.o runtime
 
 # Compile and link digest tool
 
-cc -o digest ../getsection.c ../digest.c -lssl -lcrypto
+cc -o digest ../getsection.c ../digest.c -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -ldl
 # cc -o digest -Wl,-Bdynamic ../digest.c -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl # 1.4 MB
 strip digest
 
 # Compile and link validate tool
 
-cc -o validate ../getsection.c ../validate.c -lssl -lcrypto -lglib-2.0 $(pkg-config --cflags glib-2.0)
+cc -o validate ../getsection.c ../validate.c -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lglib-2.0 $(pkg-config --cflags glib-2.0) -ldl
 strip validate
 
 # Test if we can read it back
