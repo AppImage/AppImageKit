@@ -49,7 +49,7 @@ static unsigned long read_elf32(int fd)
 	ssize_t ret;
 
 	ret = pread(fd, &ehdr32, sizeof(ehdr32), 0);
-	if (ret < 0 || (size_t)ret != sizeof(ehdr)) {
+	if (ret < 0 || (size_t)ret != sizeof(ehdr32)) {
 		fprintf(stderr, "Read of ELF header from %s failed: %s\n",
 			fname, strerror(errno));
 		exit(10);
