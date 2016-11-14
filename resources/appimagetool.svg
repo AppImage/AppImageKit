@@ -1,728 +1,320 @@
-
-
-
-
-<!DOCTYPE html>
-<html lang="en" class="">
-  <head prefix="og: http://ogp.me/ns# fb: http://ogp.me/ns/fb# object: http://ogp.me/ns/object# article: http://ogp.me/ns/article# profile: http://ogp.me/ns/profile#">
-    <meta charset='utf-8'>
-    
-
-    <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/frameworks-5a4495e55512ce6485712c2e324df0deb8ae50fcff010fb645e54987c5b83a53.css" media="all" rel="stylesheet" />
-    <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/github-2f3f59ccad6d2e2f9fe870a81958689138f9f1cb5fa6750352f0b9825e20c124.css" media="all" rel="stylesheet" />
-    
-    
-    <link crossorigin="anonymous" href="https://assets-cdn.github.com/assets/site-4a18dc1c93cc7113ea22c7c6b62826f621b52a57f32caea97c682100ac10de36.css" media="all" rel="stylesheet" />
-    
-
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta http-equiv="Content-Language" content="en">
-    <meta name="viewport" content="width=device-width">
-    
-    <title>AppImageKit/appimage-assistant_alt.svg at master · probonopd/AppImageKit · GitHub</title>
-    <link rel="search" type="application/opensearchdescription+xml" href="/opensearch.xml" title="GitHub">
-    <link rel="fluid-icon" href="https://github.com/fluidicon.png" title="GitHub">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
-    <meta property="fb:app_id" content="1401488693436528">
-
-      <meta content="https://avatars2.githubusercontent.com/u/2480569?v=3&amp;s=400" name="twitter:image:src" /><meta content="@github" name="twitter:site" /><meta content="summary" name="twitter:card" /><meta content="probonopd/AppImageKit" name="twitter:title" /><meta content="Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, debian and derivatives." name="twitter:description" />
-      <meta content="https://avatars2.githubusercontent.com/u/2480569?v=3&amp;s=400" property="og:image" /><meta content="GitHub" property="og:site_name" /><meta content="object" property="og:type" /><meta content="probonopd/AppImageKit" property="og:title" /><meta content="https://github.com/probonopd/AppImageKit" property="og:url" /><meta content="Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, debian and derivatives." property="og:description" />
-      <meta name="browser-stats-url" content="https://api.github.com/_private/browser/stats">
-    <meta name="browser-errors-url" content="https://api.github.com/_private/browser/errors">
-    <link rel="assets" href="https://assets-cdn.github.com/">
-    
-    <meta name="pjax-timeout" content="1000">
-    
-    <meta name="request-id" content="52E83CD1:6760:A4E83C4:58020A0B" data-pjax-transient>
-
-    <meta name="msapplication-TileImage" content="/windows-tile.png">
-    <meta name="msapplication-TileColor" content="#ffffff">
-    <meta name="selected-link" value="repo_source" data-pjax-transient>
-
-    <meta name="google-site-verification" content="KT5gs8h0wvaagLKAVWq8bbeNwnZZK1r1XQysX3xurLU">
-<meta name="google-site-verification" content="ZzhVyEFwb7w3e0-uOTltm8Jsck2F5StVihD0exw2fsA">
-    <meta name="google-analytics" content="UA-3769691-2">
-
-<meta content="collector.githubapp.com" name="octolytics-host" /><meta content="github" name="octolytics-app-id" /><meta content="52E83CD1:6760:A4E83C4:58020A0B" name="octolytics-dimension-request_id" />
-<meta content="/&lt;user-name&gt;/&lt;repo-name&gt;/blob/show" data-pjax-transient="true" name="analytics-location" />
-
-
-
-  <meta class="js-ga-set" name="dimension1" content="Logged Out">
-
-
-
-        <meta name="hostname" content="github.com">
-    <meta name="user-login" content="">
-
-        <meta name="expected-hostname" content="github.com">
-      <meta name="js-proxy-site-detection-payload" content="MGFiZjQzMjYyZGFiYWRjN2YyMDI4NmIyZTIxOTNmZWFmYWE4OWVkNTU2MzM0YzBmYmUxNmVmYmIzNmZjNTNiOXx7InJlbW90ZV9hZGRyZXNzIjoiODIuMjMyLjYwLjIwOSIsInJlcXVlc3RfaWQiOiI1MkU4M0NEMTo2NzYwOkE0RTgzQzQ6NTgwMjBBMEIiLCJ0aW1lc3RhbXAiOjE0NzY1Mjg2NTIsImhvc3QiOiJnaXRodWIuY29tIn0=">
-
-
-      <link rel="mask-icon" href="https://assets-cdn.github.com/pinned-octocat.svg" color="#4078c0">
-      <link rel="icon" type="image/x-icon" href="https://assets-cdn.github.com/favicon.ico">
-
-    <meta name="html-safe-nonce" content="ee7547c3a7eb458282c2bbaf9f9c4a8020d08805">
-    <meta content="857752a954ae4b0abfb6bf5bc238f4dedeeac942" name="form-nonce" />
-
-    <meta http-equiv="x-pjax-version" content="8dc2b52fe181da28844bd05c1035559b">
-    
-
-      
-  <meta name="description" content="Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, debian and derivatives.">
-  <meta name="go-import" content="github.com/probonopd/AppImageKit git https://github.com/probonopd/AppImageKit.git">
-
-  <meta content="2480569" name="octolytics-dimension-user_id" /><meta content="probonopd" name="octolytics-dimension-user_login" /><meta content="9435153" name="octolytics-dimension-repository_id" /><meta content="probonopd/AppImageKit" name="octolytics-dimension-repository_nwo" /><meta content="true" name="octolytics-dimension-repository_public" /><meta content="false" name="octolytics-dimension-repository_is_fork" /><meta content="9435153" name="octolytics-dimension-repository_network_root_id" /><meta content="probonopd/AppImageKit" name="octolytics-dimension-repository_network_root_nwo" />
-  <link href="https://github.com/probonopd/AppImageKit/commits/master.atom" rel="alternate" title="Recent Commits to AppImageKit:master" type="application/atom+xml">
-
-
-      <link rel="canonical" href="https://github.com/probonopd/AppImageKit/blob/master/artwork/appimage-assistant_alt.svg" data-pjax-transient>
-  </head>
-
-
-  <body class="logged-out  env-production  vis-public page-blob">
-    <div id="js-pjax-loader-bar" class="pjax-loader-bar"><div class="progress"></div></div>
-    <a href="#start-of-content" tabindex="1" class="accessibility-aid js-skip-to-content">Skip to content</a>
-
-    
-    
-    
-
-
-
-          <header class="site-header js-details-container" role="banner">
-  <div class="container-responsive">
-    <a class="header-logo-invertocat" href="https://github.com/" aria-label="Homepage" data-ga-click="(Logged out) Header, go to homepage, icon:logo-wordmark">
-      <svg aria-hidden="true" class="octicon octicon-mark-github" height="32" version="1.1" viewBox="0 0 16 16" width="32"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
-    </a>
-
-    <button class="btn-link float-right site-header-toggle js-details-target" type="button" aria-label="Toggle navigation">
-      <svg aria-hidden="true" class="octicon octicon-three-bars" height="24" version="1.1" viewBox="0 0 12 16" width="18"><path d="M11.41 9H.59C0 9 0 8.59 0 8c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zm0-4H.59C0 5 0 4.59 0 4c0-.59 0-1 .59-1H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1h.01zM.59 11H11.4c.59 0 .59.41.59 1 0 .59 0 1-.59 1H.59C0 13 0 12.59 0 12c0-.59 0-1 .59-1z"></path></svg>
-    </button>
-
-    <div class="site-header-menu">
-      <nav class="site-header-nav site-header-nav-main">
-        <a href="/personal" class="js-selected-navigation-item nav-item nav-item-personal" data-ga-click="Header, click, Nav menu - item:personal" data-selected-links="/personal /personal">
-          Personal
-</a>        <a href="/open-source" class="js-selected-navigation-item nav-item nav-item-opensource" data-ga-click="Header, click, Nav menu - item:opensource" data-selected-links="/open-source /open-source">
-          Open source
-</a>        <a href="/business" class="js-selected-navigation-item nav-item nav-item-business" data-ga-click="Header, click, Nav menu - item:business" data-selected-links="/business /business/partners /business/features /business/customers /business">
-          Business
-</a>        <a href="/explore" class="js-selected-navigation-item nav-item nav-item-explore" data-ga-click="Header, click, Nav menu - item:explore" data-selected-links="/explore /trending /trending/developers /integrations /integrations/feature/code /integrations/feature/collaborate /integrations/feature/ship /explore">
-          Explore
-</a>      </nav>
-
-      <div class="site-header-actions">
-            <a class="btn btn-primary site-header-actions-btn" href="/join?source=header-repo" data-ga-click="(Logged out) Header, clicked Sign up, text:sign-up">Sign up</a>
-          <a class="btn site-header-actions-btn mr-2" href="/login?return_to=%2Fprobonopd%2FAppImageKit%2Fblob%2Fmaster%2Fartwork%2Fappimage-assistant_alt.svg" data-ga-click="(Logged out) Header, clicked Sign in, text:sign-in">Sign in</a>
-      </div>
-
-        <nav class="site-header-nav site-header-nav-secondary">
-          <a class="nav-item" href="/pricing">Pricing</a>
-          <a class="nav-item" href="/blog">Blog</a>
-          <a class="nav-item" href="https://help.github.com">Support</a>
-          <a class="nav-item header-search-link" href="https://github.com/search">Search GitHub</a>
-              <div class="header-search scoped-search site-scoped-search js-site-search" role="search">
-  <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="/probonopd/AppImageKit/search" class="js-site-search-form" data-scoped-search-url="/probonopd/AppImageKit/search" data-unscoped-search-url="/search" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
-    <label class="form-control header-search-wrapper js-chromeless-input-container">
-      <div class="header-search-scope">This repository</div>
-      <input type="text"
-        class="form-control header-search-input js-site-search-focus js-site-search-field is-clearable"
-        data-hotkey="s"
-        name="q"
-        placeholder="Search"
-        aria-label="Search this repository"
-        data-unscoped-placeholder="Search GitHub"
-        data-scoped-placeholder="Search"
-        autocapitalize="off">
-    </label>
-</form></div>
-
-        </nav>
-    </div>
-  </div>
-</header>
-
-
-
-    <div id="start-of-content" class="accessibility-aid"></div>
-
-      <div id="js-flash-container">
-</div>
-
-
-    <div role="main">
-        <div itemscope itemtype="http://schema.org/SoftwareSourceCode">
-    <div id="js-repo-pjax-container" data-pjax-container>
-      
-<div class="pagehead repohead instapaper_ignore readability-menu experiment-repo-nav">
-  <div class="container repohead-details-container">
-
-    
-
-<ul class="pagehead-actions">
-
-  <li>
-      <a href="/login?return_to=%2Fprobonopd%2FAppImageKit"
-    class="btn btn-sm btn-with-count tooltipped tooltipped-n"
-    aria-label="You must be signed in to watch a repository" rel="nofollow">
-    <svg aria-hidden="true" class="octicon octicon-eye" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M8.06 2C3 2 0 8 0 8s3 6 8.06 6C13 14 16 8 16 8s-3-6-7.94-6zM8 12c-2.2 0-4-1.78-4-4 0-2.2 1.8-4 4-4 2.22 0 4 1.8 4 4 0 2.22-1.78 4-4 4zm2-4c0 1.11-.89 2-2 2-1.11 0-2-.89-2-2 0-1.11.89-2 2-2 1.11 0 2 .89 2 2z"></path></svg>
-    Watch
-  </a>
-  <a class="social-count" href="/probonopd/AppImageKit/watchers"
-     aria-label="88 users are watching this repository">
-    88
-  </a>
-
-  </li>
-
-  <li>
-      <a href="/login?return_to=%2Fprobonopd%2FAppImageKit"
-    class="btn btn-sm btn-with-count tooltipped tooltipped-n"
-    aria-label="You must be signed in to star a repository" rel="nofollow">
-    <svg aria-hidden="true" class="octicon octicon-star" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M14 6l-4.9-.64L7 1 4.9 5.36 0 6l3.6 3.26L2.67 14 7 11.67 11.33 14l-.93-4.74z"></path></svg>
-    Star
-  </a>
-
-    <a class="social-count js-social-count" href="/probonopd/AppImageKit/stargazers"
-      aria-label="1224 users starred this repository">
-      1,224
-    </a>
-
-  </li>
-
-  <li>
-      <a href="/login?return_to=%2Fprobonopd%2FAppImageKit"
-        class="btn btn-sm btn-with-count tooltipped tooltipped-n"
-        aria-label="You must be signed in to fork a repository" rel="nofollow">
-        <svg aria-hidden="true" class="octicon octicon-repo-forked" height="16" version="1.1" viewBox="0 0 10 16" width="10"><path d="M8 1a1.993 1.993 0 0 0-1 3.72V6L5 8 3 6V4.72A1.993 1.993 0 0 0 2 1a1.993 1.993 0 0 0-1 3.72V6.5l3 3v1.78A1.993 1.993 0 0 0 5 15a1.993 1.993 0 0 0 1-3.72V9.5l3-3V4.72A1.993 1.993 0 0 0 8 1zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3 10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zm3-10c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
-        Fork
-      </a>
-
-    <a href="/probonopd/AppImageKit/network" class="social-count"
-       aria-label="80 users are forked this repository">
-      80
-    </a>
-  </li>
-</ul>
-
-    <h1 class="public ">
-  <svg aria-hidden="true" class="octicon octicon-repo" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M4 9H3V8h1v1zm0-3H3v1h1V6zm0-2H3v1h1V4zm0-2H3v1h1V2zm8-1v12c0 .55-.45 1-1 1H6v2l-1.5-1.5L3 16v-2H1c-.55 0-1-.45-1-1V1c0-.55.45-1 1-1h10c.55 0 1 .45 1 1zm-1 10H1v2h2v-1h3v1h5v-2zm0-10H2v9h9V1z"></path></svg>
-  <span class="author" itemprop="author"><a href="/probonopd" class="url fn" rel="author">probonopd</a></span><!--
---><span class="path-divider">/</span><!--
---><strong itemprop="name"><a href="/probonopd/AppImageKit" data-pjax="#js-repo-pjax-container">AppImageKit</a></strong>
-
-</h1>
-
-  </div>
-  <div class="container">
-    
-<nav class="reponav js-repo-nav js-sidenav-container-pjax"
-     itemscope
-     itemtype="http://schema.org/BreadcrumbList"
-     role="navigation"
-     data-pjax="#js-repo-pjax-container">
-
-  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
-    <a href="/probonopd/AppImageKit" aria-selected="true" class="js-selected-navigation-item selected reponav-item" data-hotkey="g c" data-selected-links="repo_source repo_downloads repo_commits repo_releases repo_tags repo_branches /probonopd/AppImageKit" itemprop="url">
-      <svg aria-hidden="true" class="octicon octicon-code" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M9.5 3L8 4.5 11.5 8 8 11.5 9.5 13 14 8 9.5 3zm-5 0L0 8l4.5 5L6 11.5 2.5 8 6 4.5 4.5 3z"></path></svg>
-      <span itemprop="name">Code</span>
-      <meta itemprop="position" content="1">
-</a>  </span>
-
-    <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
-      <a href="/probonopd/AppImageKit/issues" class="js-selected-navigation-item reponav-item" data-hotkey="g i" data-selected-links="repo_issues repo_labels repo_milestones /probonopd/AppImageKit/issues" itemprop="url">
-        <svg aria-hidden="true" class="octicon octicon-issue-opened" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M7 2.3c3.14 0 5.7 2.56 5.7 5.7s-2.56 5.7-5.7 5.7A5.71 5.71 0 0 1 1.3 8c0-3.14 2.56-5.7 5.7-5.7zM7 1C3.14 1 0 4.14 0 8s3.14 7 7 7 7-3.14 7-7-3.14-7-7-7zm1 3H6v5h2V4zm0 6H6v2h2v-2z"></path></svg>
-        <span itemprop="name">Issues</span>
-        <span class="counter">90</span>
-        <meta itemprop="position" content="2">
-</a>    </span>
-
-  <span itemscope itemtype="http://schema.org/ListItem" itemprop="itemListElement">
-    <a href="/probonopd/AppImageKit/pulls" class="js-selected-navigation-item reponav-item" data-hotkey="g p" data-selected-links="repo_pulls /probonopd/AppImageKit/pulls" itemprop="url">
-      <svg aria-hidden="true" class="octicon octicon-git-pull-request" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M11 11.28V5c-.03-.78-.34-1.47-.94-2.06C9.46 2.35 8.78 2.03 8 2H7V0L4 3l3 3V4h1c.27.02.48.11.69.31.21.2.3.42.31.69v6.28A1.993 1.993 0 0 0 10 15a1.993 1.993 0 0 0 1-3.72zm-1 2.92c-.66 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2zM4 3c0-1.11-.89-2-2-2a1.993 1.993 0 0 0-1 3.72v6.56A1.993 1.993 0 0 0 2 15a1.993 1.993 0 0 0 1-3.72V4.72c.59-.34 1-.98 1-1.72zm-.8 10c0 .66-.55 1.2-1.2 1.2-.65 0-1.2-.55-1.2-1.2 0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2zM2 4.2C1.34 4.2.8 3.65.8 3c0-.65.55-1.2 1.2-1.2.65 0 1.2.55 1.2 1.2 0 .65-.55 1.2-1.2 1.2z"></path></svg>
-      <span itemprop="name">Pull requests</span>
-      <span class="counter">6</span>
-      <meta itemprop="position" content="3">
-</a>  </span>
-
-  <a href="/probonopd/AppImageKit/projects" class="js-selected-navigation-item reponav-item" data-selected-links="repo_projects new_repo_project repo_project /probonopd/AppImageKit/projects">
-    <svg class="octicon" aria-hidden="true" version="1.1" width="15" height="16" viewBox="0 0 15 16">
-      <path d="M1 15h13V1H1v14zM15 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1a1 1 0 0 1 1-1h13a1 1 0 0 1 1 1zm-4.41 11h1.82c.59 0 .59-.41.59-1V3c0-.59 0-1-.59-1h-1.82C10 2 10 2.41 10 3v8c0 .59 0 1 .59 1zm-4-2h1.82C9 10 9 9.59 9 9V3c0-.59 0-1-.59-1H6.59C6 2 6 2.41 6 3v6c0 .59 0 1 .59 1zM2 13V3c0-.59 0-1 .59-1h1.82C5 2 5 2.41 5 3v10c0 .59 0 1-.59 1H2.59C2 14 2 13.59 2 13z"></path>
-    </svg>
-    Projects
-    <span class="counter">0</span>
-</a>
-    <a href="/probonopd/AppImageKit/wiki" class="js-selected-navigation-item reponav-item" data-hotkey="g w" data-selected-links="repo_wiki /probonopd/AppImageKit/wiki">
-      <svg aria-hidden="true" class="octicon octicon-book" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M3 5h4v1H3V5zm0 3h4V7H3v1zm0 2h4V9H3v1zm11-5h-4v1h4V5zm0 2h-4v1h4V7zm0 2h-4v1h4V9zm2-6v9c0 .55-.45 1-1 1H9.5l-1 1-1-1H2c-.55 0-1-.45-1-1V3c0-.55.45-1 1-1h5.5l1 1 1-1H15c.55 0 1 .45 1 1zm-8 .5L7.5 3H2v9h6V3.5zm7-.5H9.5l-.5.5V12h6V3z"></path></svg>
-      Wiki
-</a>
-
-  <a href="/probonopd/AppImageKit/pulse" class="js-selected-navigation-item reponav-item" data-selected-links="pulse /probonopd/AppImageKit/pulse">
-    <svg aria-hidden="true" class="octicon octicon-pulse" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M11.5 8L8.8 5.4 6.6 8.5 5.5 1.6 2.38 8H0v2h3.6l.9-1.8.9 5.4L9 8.5l1.6 1.5H14V8z"></path></svg>
-    Pulse
-</a>
-  <a href="/probonopd/AppImageKit/graphs" class="js-selected-navigation-item reponav-item" data-selected-links="repo_graphs repo_contributors /probonopd/AppImageKit/graphs">
-    <svg aria-hidden="true" class="octicon octicon-graph" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M16 14v1H0V0h1v14h15zM5 13H3V8h2v5zm4 0H7V3h2v10zm4 0h-2V6h2v7z"></path></svg>
-    Graphs
-</a>
-
-</nav>
-
-  </div>
-</div>
-
-<div class="container new-discussion-timeline experiment-repo-nav">
-  <div class="repository-content">
-
-    
-
-<a href="/probonopd/AppImageKit/blob/d5b64e1c63b53507f78496f60363a75cb1a8622f/artwork/appimage-assistant_alt.svg" class="d-none js-permalink-shortcut" data-hotkey="y">Permalink</a>
-
-<!-- blob contrib key: blob_contributors:v21:3c6417645fede88086e6439c3e4acb8f -->
-
-<div class="file-navigation js-zeroclipboard-container">
-  
-<div class="select-menu branch-select-menu js-menu-container js-select-menu float-left">
-  <button class="btn btn-sm select-menu-button js-menu-target css-truncate" data-hotkey="w"
-    
-    type="button" aria-label="Switch branches or tags" tabindex="0" aria-haspopup="true">
-    <i>Branch:</i>
-    <span class="js-select-button css-truncate-target">master</span>
-  </button>
-
-  <div class="select-menu-modal-holder js-menu-content js-navigation-container" data-pjax aria-hidden="true">
-
-    <div class="select-menu-modal">
-      <div class="select-menu-header">
-        <svg aria-label="Close" class="octicon octicon-x js-menu-close" height="16" role="img" version="1.1" viewBox="0 0 12 16" width="12"><path d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"></path></svg>
-        <span class="select-menu-title">Switch branches/tags</span>
-      </div>
-
-      <div class="select-menu-filters">
-        <div class="select-menu-text-filter">
-          <input type="text" aria-label="Filter branches/tags" id="context-commitish-filter-field" class="form-control js-filterable-field js-navigation-enable" placeholder="Filter branches/tags">
-        </div>
-        <div class="select-menu-tabs">
-          <ul>
-            <li class="select-menu-tab">
-              <a href="#" data-tab-filter="branches" data-filter-placeholder="Filter branches/tags" class="js-select-menu-tab" role="tab">Branches</a>
-            </li>
-            <li class="select-menu-tab">
-              <a href="#" data-tab-filter="tags" data-filter-placeholder="Find a tag…" class="js-select-menu-tab" role="tab">Tags</a>
-            </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="branches" role="menu">
-
-        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
-
-
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/AT_EXECFN/artwork/appimage-assistant_alt.svg"
-               data-name="AT_EXECFN"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                AT_EXECFN
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/experimental/artwork/appimage-assistant_alt.svg"
-               data-name="experimental"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                experimental
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/feature/build_3rd_party_dependencies/artwork/appimage-assistant_alt.svg"
-               data-name="feature/build_3rd_party_dependencies"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                feature/build_3rd_party_dependencies
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/feature/multiarch/artwork/appimage-assistant_alt.svg"
-               data-name="feature/multiarch"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                feature/multiarch
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/feature/remove_thumbnail_extraction_from_runtime/artwork/appimage-assistant_alt.svg"
-               data-name="feature/remove_thumbnail_extraction_from_runtime"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                feature/remove_thumbnail_extraction_from_runtime
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/feature/travis_container_based_infastructure/artwork/appimage-assistant_alt.svg"
-               data-name="feature/travis_container_based_infastructure"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                feature/travis_container_based_infastructure
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/feature/trying_LibcWrapGenerator_2.7/artwork/appimage-assistant_alt.svg"
-               data-name="feature/trying_LibcWrapGenerator_2.7"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                feature/trying_LibcWrapGenerator_2.7
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/feature/trying_LibcWrapGenerator_2.14/artwork/appimage-assistant_alt.svg"
-               data-name="feature/trying_LibcWrapGenerator_2.14"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                feature/trying_LibcWrapGenerator_2.14
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/gh-pages/artwork/appimage-assistant_alt.svg"
-               data-name="gh-pages"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                gh-pages
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/gtk3/artwork/appimage-assistant_alt.svg"
-               data-name="gtk3"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                gtk3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open selected"
-               href="/probonopd/AppImageKit/blob/master/artwork/appimage-assistant_alt.svg"
-               data-name="master"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                master
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-               href="/probonopd/AppImageKit/blob/testing/artwork/appimage-assistant_alt.svg"
-               data-name="testing"
-               data-skip-pjax="true"
-               rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target js-select-menu-filter-text">
-                testing
-              </span>
-            </a>
-        </div>
-
-          <div class="select-menu-no-results">Nothing to show</div>
-      </div>
-
-      <div class="select-menu-list select-menu-tab-bucket js-select-menu-tab-bucket" data-tab-filter="tags">
-        <div data-filterable-for="context-commitish-filter-field" data-filterable-type="substring">
-
-
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/probonopd/AppImageKit/tree/20151218/artwork/appimage-assistant_alt.svg"
-              data-name="20151218"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target" title="20151218">
-                20151218
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/probonopd/AppImageKit/tree/6/artwork/appimage-assistant_alt.svg"
-              data-name="6"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target" title="6">
-                6
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/probonopd/AppImageKit/tree/5/artwork/appimage-assistant_alt.svg"
-              data-name="5"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target" title="5">
-                5
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/probonopd/AppImageKit/tree/4/artwork/appimage-assistant_alt.svg"
-              data-name="4"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target" title="4">
-                4
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/probonopd/AppImageKit/tree/3/artwork/appimage-assistant_alt.svg"
-              data-name="3"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target" title="3">
-                3
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/probonopd/AppImageKit/tree/2/artwork/appimage-assistant_alt.svg"
-              data-name="2"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target" title="2">
-                2
-              </span>
-            </a>
-            <a class="select-menu-item js-navigation-item js-navigation-open "
-              href="/probonopd/AppImageKit/tree/1/artwork/appimage-assistant_alt.svg"
-              data-name="1"
-              data-skip-pjax="true"
-              rel="nofollow">
-              <svg aria-hidden="true" class="octicon octicon-check select-menu-item-icon" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M12 5l-8 8-4-4 1.5-1.5L4 10l6.5-6.5z"></path></svg>
-              <span class="select-menu-item-text css-truncate-target" title="1">
-                1
-              </span>
-            </a>
-        </div>
-
-        <div class="select-menu-no-results">Nothing to show</div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-  <div class="BtnGroup float-right">
-    <a href="/probonopd/AppImageKit/find/master"
-          class="js-pjax-capture-input btn btn-sm BtnGroup-item"
-          data-pjax
-          data-hotkey="t">
-      Find file
-    </a>
-    <button aria-label="Copy file path to clipboard" class="js-zeroclipboard btn btn-sm BtnGroup-item tooltipped tooltipped-s" data-copied-hint="Copied!" type="button">Copy path</button>
-  </div>
-  <div class="breadcrumb js-zeroclipboard-target">
-    <span class="repo-root js-repo-root"><span class="js-path-segment"><a href="/probonopd/AppImageKit"><span>AppImageKit</span></a></span></span><span class="separator">/</span><span class="js-path-segment"><a href="/probonopd/AppImageKit/tree/master/artwork"><span>artwork</span></a></span><span class="separator">/</span><strong class="final-path">appimage-assistant_alt.svg</strong>
-  </div>
-</div>
-
-
-  <div class="commit-tease">
-      <span class="float-right">
-        <a class="commit-tease-sha" href="/probonopd/AppImageKit/commit/6c37b0c6e471560ba79c25e9cfe2d6d86c7fbc55" data-pjax>
-          6c37b0c
-        </a>
-        <relative-time datetime="2013-04-16T21:39:33Z">Apr 16, 2013</relative-time>
-      </span>
-      <div>
-        <img alt="@probonopd" class="avatar" height="20" src="https://avatars0.githubusercontent.com/u/2480569?v=3&amp;s=40" width="20" />
-        <a href="/probonopd" class="user-mention" rel="author">probonopd</a>
-          <a href="/probonopd/AppImageKit/commit/6c37b0c6e471560ba79c25e9cfe2d6d86c7fbc55" class="message" data-pjax="true" title="Changed to CMake">Changed to CMake</a>
-      </div>
-
-    <div class="commit-tease-contributors">
-      <button type="button" class="btn-link muted-link contributors-toggle" data-facebox="#blob_contributors_box">
-        <strong>1</strong>
-         contributor
-      </button>
-      
-    </div>
-
-    <div id="blob_contributors_box" style="display:none">
-      <h2 class="facebox-header" data-facebox-id="facebox-header">Users who have contributed to this file</h2>
-      <ul class="facebox-user-list" data-facebox-id="facebox-description">
-          <li class="facebox-user-list-item">
-            <img alt="@probonopd" height="24" src="https://avatars2.githubusercontent.com/u/2480569?v=3&amp;s=48" width="24" />
-            <a href="/probonopd">probonopd</a>
-          </li>
-      </ul>
-    </div>
-  </div>
-
-<div class="file">
-  <div class="file-header">
-  <div class="file-actions">
-      <div class="BtnGroup">
-        <a class="btn btn-sm BtnGroup-item tooltipped tooltipped tooltipped-n source "
-          href="/probonopd/AppImageKit/blob/master/artwork/appimage-assistant_alt.svg?short_path=83ac565" aria-label="Display the source blob">
-          <svg aria-hidden="true" class="octicon octicon-code" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M9.5 3L8 4.5 11.5 8 8 11.5 9.5 13 14 8 9.5 3zm-5 0L0 8l4.5 5L6 11.5 2.5 8 6 4.5 4.5 3z"></path></svg>
-        </a>
-        <a class="btn btn-sm BtnGroup-item tooltipped tooltipped-n rendered selected"
-          href="/probonopd/AppImageKit/blob/master/artwork/appimage-assistant_alt.svg" aria-label="Display the rendered blob">
-          <svg aria-hidden="true" class="octicon octicon-file-text" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M6 5H2V4h4v1zM2 8h7V7H2v1zm0 2h7V9H2v1zm0 2h7v-1H2v1zm10-7.5V14c0 .55-.45 1-1 1H1c-.55 0-1-.45-1-1V2c0-.55.45-1 1-1h7.5L12 4.5zM11 5L8 2H1v12h10V5z"></path></svg>
-        </a>
-      </div>
-
-    <div class="BtnGroup">
-      <a href="/probonopd/AppImageKit/raw/master/artwork/appimage-assistant_alt.svg" class="btn btn-sm BtnGroup-item" id="raw-url">Raw</a>
-        <a href="/probonopd/AppImageKit/blame/master/artwork/appimage-assistant_alt.svg" class="btn btn-sm js-update-url-with-hash BtnGroup-item">Blame</a>
-      <a href="/probonopd/AppImageKit/commits/master/artwork/appimage-assistant_alt.svg" class="btn btn-sm BtnGroup-item" rel="nofollow">History</a>
-    </div>
-
-
-        <button type="button" class="btn-octicon disabled tooltipped tooltipped-nw"
-          aria-label="You must be signed in to make or propose changes">
-          <svg aria-hidden="true" class="octicon octicon-pencil" height="16" version="1.1" viewBox="0 0 14 16" width="14"><path d="M0 12v3h3l8-8-3-3-8 8zm3 2H1v-2h1v1h1v1zm10.3-9.3L12 6 9 3l1.3-1.3a.996.996 0 0 1 1.41 0l1.59 1.59c.39.39.39 1.02 0 1.41z"></path></svg>
-        </button>
-        <button type="button" class="btn-octicon btn-octicon-danger disabled tooltipped tooltipped-nw"
-          aria-label="You must be signed in to make or propose changes">
-          <svg aria-hidden="true" class="octicon octicon-trashcan" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M11 2H9c0-.55-.45-1-1-1H5c-.55 0-1 .45-1 1H2c-.55 0-1 .45-1 1v1c0 .55.45 1 1 1v9c0 .55.45 1 1 1h7c.55 0 1-.45 1-1V5c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1zm-1 12H3V5h1v8h1V5h1v8h1V5h1v8h1V5h1v9zm1-10H2V3h9v1z"></path></svg>
-        </button>
-  </div>
-
-  <div class="file-info">
-      321 lines (319 sloc)
-      <span class="file-info-divider"></span>
-    21.1 KB
-  </div>
-</div>
-
-  
-
-  <div itemprop="text" class="blob-wrapper data type-svg">
-      
-  <div class="render-wrapper">
-    <div class="render-container is-render-pending js-render-target "
-      data-identity="10623997-60ca-416e-9d92-3399bbf1fe6d"
-      data-host="https://render.githubusercontent.com"
-      data-type="svg">
-      <img alt="" class="octospinner" height="64" src="https://assets-cdn.github.com/images/spinners/octocat-spinner-128.gif" width="64" />
-      <div class="render-viewer-error">Sorry, something went wrong. <a href="https://github.com/probonopd/AppImageKit/blob/master/artwork/appimage-assistant_alt.svg">Reload?</a></div>
-      <div class="render-viewer-fatal">Sorry, we cannot display this file.</div>
-      <div class="render-viewer-invalid">Sorry, this file is invalid so it cannot be displayed.</div>
-      <iframe class="render-viewer" src="https://render.githubusercontent.com/view/svg?commit=d5b64e1c63b53507f78496f60363a75cb1a8622f&amp;enc_url=68747470733a2f2f7261772e67697468756275736572636f6e74656e742e636f6d2f70726f626f6e6f70642f417070496d6167654b69742f643562363465316336336235333530376637383439366636303336336137356362316138363232662f617274776f726b2f617070696d6167652d617373697374616e745f616c742e737667&amp;nwo=probonopd%2FAppImageKit&amp;path=artwork%2Fappimage-assistant_alt.svg&amp;repository_id=9435153#10623997-60ca-416e-9d92-3399bbf1fe6d" sandbox="allow-scripts allow-same-origin allow-top-navigation">Viewer requires iframe.</iframe>
-    </div>
-  </div>
-
-  </div>
-
-</div>
-
-<button type="button" data-facebox="#jump-to-line" data-facebox-class="linejump" data-hotkey="l" class="d-none">Jump to Line</button>
-<div id="jump-to-line" style="display:none">
-  <!-- '"` --><!-- </textarea></xmp> --></option></form><form accept-charset="UTF-8" action="" class="js-jump-to-line-form" method="get"><div style="margin:0;padding:0;display:inline"><input name="utf8" type="hidden" value="&#x2713;" /></div>
-    <input class="form-control linejump-input js-jump-to-line-field" type="text" placeholder="Jump to line&hellip;" aria-label="Jump to line" autofocus>
-    <button type="submit" class="btn">Go</button>
-</form></div>
-
-  </div>
-  <div class="modal-backdrop js-touch-events"></div>
-</div>
-
-
-    </div>
-  </div>
-
-    </div>
-
-        <div class="container site-footer-container">
-  <div class="site-footer" role="contentinfo">
-    <ul class="site-footer-links float-right">
-        <li><a href="https://github.com/contact" data-ga-click="Footer, go to contact, text:contact">Contact GitHub</a></li>
-      <li><a href="https://developer.github.com" data-ga-click="Footer, go to api, text:api">API</a></li>
-      <li><a href="https://training.github.com" data-ga-click="Footer, go to training, text:training">Training</a></li>
-      <li><a href="https://shop.github.com" data-ga-click="Footer, go to shop, text:shop">Shop</a></li>
-        <li><a href="https://github.com/blog" data-ga-click="Footer, go to blog, text:blog">Blog</a></li>
-        <li><a href="https://github.com/about" data-ga-click="Footer, go to about, text:about">About</a></li>
-
-    </ul>
-
-    <a href="https://github.com" aria-label="Homepage" class="site-footer-mark" title="GitHub">
-      <svg aria-hidden="true" class="octicon octicon-mark-github" height="24" version="1.1" viewBox="0 0 16 16" width="24"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path></svg>
-</a>
-    <ul class="site-footer-links">
-      <li>&copy; 2016 <span title="0.05043s from github-fe165-cp1-prd.iad.github.net">GitHub</span>, Inc.</li>
-        <li><a href="https://github.com/site/terms" data-ga-click="Footer, go to terms, text:terms">Terms</a></li>
-        <li><a href="https://github.com/site/privacy" data-ga-click="Footer, go to privacy, text:privacy">Privacy</a></li>
-        <li><a href="https://github.com/security" data-ga-click="Footer, go to security, text:security">Security</a></li>
-        <li><a href="https://status.github.com/" data-ga-click="Footer, go to status, text:status">Status</a></li>
-        <li><a href="https://help.github.com" data-ga-click="Footer, go to help, text:help">Help</a></li>
-    </ul>
-  </div>
-</div>
-
-
-
-    
-
-    <div id="ajax-error-message" class="ajax-error-message flash flash-error">
-      <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"></path></svg>
-      <button type="button" class="flash-close js-flash-close js-ajax-error-dismiss" aria-label="Dismiss error">
-        <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"></path></svg>
-      </button>
-      You can't perform that action at this time.
-    </div>
-
-
-      <script crossorigin="anonymous" src="https://assets-cdn.github.com/assets/compat-30ce4c86c27f88c3d1b4eb03efda59b45d8d7c871880dee0b8f73d5ef1b25fdf.js"></script>
-      <script crossorigin="anonymous" src="https://assets-cdn.github.com/assets/frameworks-d5c772e3789a69946cb5de2b428021f8fa3130d494e455a1d44ad35454759021.js"></script>
-      <script async="async" crossorigin="anonymous" src="https://assets-cdn.github.com/assets/github-45d783687b754c1fa1037add38cedb56653e2b59568cc0a19fd726ece4eab773.js"></script>
-      
-      
-      
-      
-      
-      
-    <div class="js-stale-session-flash stale-session-flash flash flash-warn flash-banner d-none">
-      <svg aria-hidden="true" class="octicon octicon-alert" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path d="M8.865 1.52c-.18-.31-.51-.5-.87-.5s-.69.19-.87.5L.275 13.5c-.18.31-.18.69 0 1 .19.31.52.5.87.5h13.7c.36 0 .69-.19.86-.5.17-.31.18-.69.01-1L8.865 1.52zM8.995 13h-2v-2h2v2zm0-3h-2V6h2v4z"></path></svg>
-      <span class="signed-in-tab-flash">You signed in with another tab or window. <a href="">Reload</a> to refresh your session.</span>
-      <span class="signed-out-tab-flash">You signed out in another tab or window. <a href="">Reload</a> to refresh your session.</span>
-    </div>
-    <div class="facebox" id="facebox" style="display:none;">
-  <div class="facebox-popup">
-    <div class="facebox-content" role="dialog" aria-labelledby="facebox-header" aria-describedby="facebox-description">
-    </div>
-    <button type="button" class="facebox-close js-facebox-close" aria-label="Close modal">
-      <svg aria-hidden="true" class="octicon octicon-x" height="16" version="1.1" viewBox="0 0 12 16" width="12"><path d="M7.48 8l3.75 3.75-1.48 1.48L6 9.48l-3.75 3.75-1.48-1.48L4.52 8 .77 4.25l1.48-1.48L6 6.52l3.75-3.75 1.48 1.48z"></path></svg>
-    </button>
-  </div>
-</div>
-
-  </body>
-</html>
-
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="48px"
+   height="48px"
+   id="svg3832"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="appimage-assistant_alt3.svg">
+  <defs
+     id="defs3834">
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3308-4-6-931-761-0"
+       id="linearGradient2975"
+       gradientUnits="userSpaceOnUse"
+       x1="24.3125"
+       y1="22.96875"
+       x2="24.3125"
+       y2="41.03125" />
+    <linearGradient
+       id="linearGradient3308-4-6-931-761-0">
+      <stop
+         id="stop2919-2"
+         style="stop-color:#ffffff;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop2921-76"
+         style="stop-color:#ffffff;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4222"
+       id="linearGradient2979"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0,0.3704967,-0.3617496,0,33.508315,6.1670925)"
+       x1="7.6485429"
+       y1="26.437023"
+       x2="41.861729"
+       y2="26.437023" />
+    <linearGradient
+       id="linearGradient4222">
+      <stop
+         id="stop4224"
+         style="stop-color:#ffffff;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop4226"
+         style="stop-color:#ffffff;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3308-4-6-931-761"
+       id="linearGradient2982"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(0,0.9999987)"
+       x1="23.99999"
+       y1="4.999989"
+       x2="23.99999"
+       y2="43" />
+    <linearGradient
+       id="linearGradient3308-4-6-931-761">
+      <stop
+         id="stop2919"
+         style="stop-color:#ffffff;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop2921"
+         style="stop-color:#ffffff;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3575"
+       id="radialGradient2985"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0,1.0262008,-1.6561124,9.4072203e-4,-56.097482,-45.332325)"
+       cx="48.42384"
+       cy="-48.027504"
+       fx="48.42384"
+       fy="-48.027504"
+       r="38.212933" />
+    <linearGradient
+       id="linearGradient3575">
+      <stop
+         id="stop3577"
+         style="stop-color:#fafafa;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop3579"
+         style="stop-color:#e6e6e6;stop-opacity:1"
+         offset="1" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3993"
+       id="radialGradient2990"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(0,2.0478765,-2.7410544,-8.6412258e-8,47.161382,-8.837436)"
+       cx="9.3330879"
+       cy="8.4497671"
+       fx="9.3330879"
+       fy="8.4497671"
+       r="19.99999" />
+    <linearGradient
+       id="linearGradient3993">
+      <stop
+         offset="0"
+         style="stop-color:#a3c0d0;stop-opacity:1"
+         id="stop3995" />
+      <stop
+         offset="1"
+         style="stop-color:#427da1;stop-opacity:1"
+         id="stop4001" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient2508"
+       id="linearGradient2992"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="translate(0,0.9674382)"
+       x1="14.048676"
+       y1="44.137306"
+       x2="14.048676"
+       y2="4.0000005" />
+    <linearGradient
+       id="linearGradient2508">
+      <stop
+         offset="0"
+         style="stop-color:#2e4a5a;stop-opacity:1"
+         id="stop2510" />
+      <stop
+         offset="1"
+         style="stop-color:#6e8796;stop-opacity:1"
+         id="stop2512" />
+    </linearGradient>
+    <radialGradient
+       cx="4.9929786"
+       cy="43.5"
+       r="2.5"
+       fx="4.9929786"
+       fy="43.5"
+       id="radialGradient2873-966-168"
+       xlink:href="#linearGradient3688-166-749"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(2.003784,0,0,1.4,27.98813,-17.4)" />
+    <linearGradient
+       id="linearGradient3688-166-749">
+      <stop
+         id="stop2883"
+         style="stop-color:#181818;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop2885"
+         style="stop-color:#181818;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+    <radialGradient
+       cx="4.9929786"
+       cy="43.5"
+       r="2.5"
+       fx="4.9929786"
+       fy="43.5"
+       id="radialGradient2875-742-326"
+       xlink:href="#linearGradient3688-464-309"
+       gradientUnits="userSpaceOnUse"
+       gradientTransform="matrix(2.003784,0,0,1.4,-20.01187,-104.4)" />
+    <linearGradient
+       id="linearGradient3688-464-309">
+      <stop
+         id="stop2889"
+         style="stop-color:#181818;stop-opacity:1"
+         offset="0" />
+      <stop
+         id="stop2891"
+         style="stop-color:#181818;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+    <linearGradient
+       x1="25.058096"
+       y1="47.027729"
+       x2="25.058096"
+       y2="39.999443"
+       id="linearGradient2877-634-617"
+       xlink:href="#linearGradient3702-501-757"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       id="linearGradient3702-501-757">
+      <stop
+         id="stop2895"
+         style="stop-color:#181818;stop-opacity:0"
+         offset="0" />
+      <stop
+         id="stop2897"
+         style="stop-color:#181818;stop-opacity:1"
+         offset="0.5" />
+      <stop
+         id="stop2899"
+         style="stop-color:#181818;stop-opacity:0"
+         offset="1" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="7"
+     inkscape:cx="24"
+     inkscape:cy="24"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:grid-bbox="true"
+     inkscape:document-units="px"
+     inkscape:window-width="603"
+     inkscape:window-height="484"
+     inkscape:window-x="417"
+     inkscape:window-y="162"
+     inkscape:window-maximized="0" />
+  <metadata
+     id="metadata3837">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     id="layer1"
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer">
+    <g
+       style="display:inline"
+       id="g2036"
+       transform="matrix(1.1,0,0,0.4444449,-2.4000022,25.11107)">
+      <g
+         style="opacity:0.4"
+         id="g3712"
+         transform="matrix(1.052632,0,0,1.285713,-1.263158,-13.42854)">
+        <rect
+           style="fill:url(#radialGradient2873-966-168);fill-opacity:1;stroke:none"
+           id="rect2801"
+           y="40"
+           x="38"
+           height="7"
+           width="5" />
+        <rect
+           style="fill:url(#radialGradient2875-742-326);fill-opacity:1;stroke:none"
+           id="rect3696"
+           transform="scale(-1,-1)"
+           y="-47"
+           x="-10"
+           height="7"
+           width="5" />
+        <rect
+           style="fill:url(#linearGradient2877-634-617);fill-opacity:1;stroke:none"
+           id="rect3700"
+           y="40"
+           x="10"
+           height="7.0000005"
+           width="28" />
+      </g>
+    </g>
+    <rect
+       style="fill:url(#radialGradient2990);fill-opacity:1;stroke:url(#linearGradient2992);stroke-width:1;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect5505"
+       y="5.4674392"
+       x="4.5"
+       ry="2.2322156"
+       rx="2.2322156"
+       height="39"
+       width="39" />
+    <path
+       style="opacity:0.05;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.00178742;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path4294-1"
+       d="m 21,6.9687498 a 2.0165107,2.0165107 0 0 0 -2.03125,2.03125 l 0,3.9687502 -1.15625,0 a 2.0165107,2.0165107 0 0 0 -1.5,3.375 l 5.0625,5.75 c -0.06312,0.110777 -0.178724,0.246032 -0.21875,0.34375 -0.195898,0.478256 -0.25,0.83653 -0.25,1.21875 l 0,0.125 L 20.8125,23.6875 C 20.534322,23.409323 20.213169,23.162739 19.71875,22.96875 19.47154,22.87176 19.185456,22.791748 18.75,22.8125 c -0.435456,0.02075 -1.054055,0.210302 -1.46875,0.625 L 15.75,24.96875 c -0.414689,0.414689 -0.604245,1.033294 -0.625,1.46875 -0.02075,0.435456 0.05925,0.721537 0.15625,0.96875 C 15.475241,27.900677 15.721817,28.221821 16,28.5 l 0.09375,0.09375 -0.125,0 c -0.382218,0 -0.740493,0.0541 -1.21875,0.25 -0.239128,0.09795 -0.538285,0.214988 -0.84375,0.53125 -0.305465,0.316262 -0.625,0.914788 -0.625,1.53125 l 0,2.1875 c 0,0.616465 0.319536,1.214989 0.625,1.53125 0.305464,0.316261 0.604622,0.433301 0.84375,0.53125 0.478256,0.195898 0.83653,0.25 1.21875,0.25 l 0.125,0 L 16,35.5 c -0.278175,0.278176 -0.52476,0.599329 -0.71875,1.09375 -0.09699,0.24721 -0.177003,0.533292 -0.15625,0.96875 0.02075,0.435458 0.210304,1.054058 0.625,1.46875 l 1.53125,1.53125 c 0.414691,0.414697 1.033292,0.604245 1.46875,0.625 0.435458,0.02076 0.721537,-0.05926 0.96875,-0.15625 0.494425,-0.19399 0.81557,-0.440568 1.09375,-0.71875 l 0.09375,-0.09375 0,0.125 c 0,0.38222 0.0541,0.740495 0.25,1.21875 0.09795,0.239127 0.214989,0.538285 0.53125,0.84375 0.316261,0.305465 0.914783,0.625 1.53125,0.625 l 2.1875,0 c 0.616466,0 1.214989,-0.319534 1.53125,-0.625 0.316261,-0.305466 0.433302,-0.604622 0.53125,-0.84375 0.195896,-0.478255 0.25,-0.836532 0.25,-1.21875 l 0,-0.125 0.09375,0.09375 c 0.278176,0.278175 0.599329,0.52476 1.09375,0.71875 0.24721,0.09699 0.533292,0.177003 0.96875,0.15625 0.435458,-0.02075 1.054058,-0.210304 1.46875,-0.625 L 32.875,39.03125 C 33.289697,38.616559 33.479245,37.997958 33.5,37.5625 33.52076,37.127042 33.44074,36.840963 33.34375,36.59375 33.14976,36.099325 32.903182,35.77818 32.625,35.5 l -0.09375,-0.09375 0.125,0 c 0.38222,0 0.740494,-0.0541 1.21875,-0.25 0.239128,-0.09795 0.538286,-0.214988 0.84375,-0.53125 0.305464,-0.316262 0.625,-0.914787 0.625,-1.53125 l 0,-2.1875 c 0,-0.61646 -0.319535,-1.214987 -0.625,-1.53125 -0.305465,-0.316263 -0.604621,-0.433301 -0.84375,-0.53125 -0.478257,-0.195898 -0.836532,-0.25 -1.21875,-0.25 l -0.125,0 L 32.625,28.5 c 0.278177,-0.278177 0.52476,-0.599329 0.71875,-1.09375 C 33.44074,27.15904 33.520753,26.872957 33.5,26.4375 33.47925,26.002043 33.289697,25.383443 32.875,24.96875 L 31.34375,23.4375 c -0.414688,-0.414694 -1.03329,-0.604245 -1.46875,-0.625 -0.43546,-0.02076 -0.721537,0.05925 -0.96875,0.15625 -0.494426,0.193991 -0.815572,0.44057 -1.09375,0.71875 l -0.09375,0.09375 0,-0.125 c 0,-0.382218 -0.0541,-0.740493 -0.25,-1.21875 -0.09112,-0.22245 -0.228127,-0.500183 -0.5,-0.78125 l 4.71875,-5.3125 a 2.0165107,2.0165107 0 0 0 -1.5,-3.375 l -1.15625,0 0,-3.9687502 A 2.0165107,2.0165107 0 0 0 27,6.9687498 l -6,0 z M 24.3125,31.25 c 0.427097,0 0.75,0.322904 0.75,0.75 0,0.427096 -0.322903,0.75 -0.75,0.75 -0.427094,0 -0.75,-0.322906 -0.75,-0.75 0,-0.427094 0.322906,-0.75 0.75,-0.75 z" />
+    <path
+       style="opacity:0.05;fill:#000000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.00178742;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path4294"
+       d="m 20.90625,8.0312498 a 0.96385067,0.96385067 0 0 0 -0.875,0.96875 l 0,5.0312502 -2.21875,0 A 0.96385067,0.96385067 0 0 0 17.09375,15.625 l 5.78125,6.53125 c -0.158814,0.0616 -0.341836,0.0951 -0.4375,0.1875 -0.169161,0.163386 -0.252971,0.323419 -0.3125,0.46875 -0.119058,0.290663 -0.15625,0.566746 -0.15625,0.84375 l 0,1.65625 C 21.718163,25.40233 21.485871,25.509772 21.25,25.625 l -1.1875,-1.1875 c -0.199651,-0.19965 -0.421433,-0.352095 -0.71875,-0.46875 -0.148659,-0.05833 -0.329673,-0.104846 -0.5625,-0.09375 -0.232827,0.0111 -0.53583,0.09833 -0.75,0.3125 L 16.5,25.71875 c -0.214168,0.214168 -0.301403,0.517173 -0.3125,0.75 -0.0111,0.232827 0.03542,0.41384 0.09375,0.5625 0.116655,0.297321 0.269096,0.519099 0.46875,0.71875 l 1.1875,1.1875 c -0.115228,0.235871 -0.222668,0.468163 -0.3125,0.71875 l -1.65625,0 c -0.277003,0 -0.553087,0.03719 -0.84375,0.15625 -0.145332,0.05953 -0.305363,0.143338 -0.46875,0.3125 -0.163387,0.169162 -0.3125,0.46403 -0.3125,0.78125 l 0,2.1875 c 0,0.317221 0.149114,0.612089 0.3125,0.78125 0.163386,0.169161 0.323419,0.252971 0.46875,0.3125 0.290663,0.119058 0.566746,0.15625 0.84375,0.15625 l 1.65625,0 c 0.08983,0.250587 0.197272,0.482879 0.3125,0.71875 L 16.75,36.25 c -0.199649,0.19965 -0.352095,0.421432 -0.46875,0.71875 -0.05833,0.148659 -0.104846,0.329672 -0.09375,0.5625 0.0111,0.232828 0.09833,0.535831 0.3125,0.75 l 1.53125,1.53125 c 0.214168,0.214172 0.517172,0.301403 0.75,0.3125 0.232828,0.0111 0.41384,-0.03542 0.5625,-0.09375 0.29732,-0.116655 0.519098,-0.269096 0.71875,-0.46875 L 21.25,38.375 c 0.235871,0.115228 0.468164,0.222668 0.71875,0.3125 l 0,1.65625 c 0,0.277003 0.03719,0.553087 0.15625,0.84375 0.05953,0.145331 0.143339,0.305364 0.3125,0.46875 0.169161,0.163386 0.464028,0.3125 0.78125,0.3125 l 2.1875,0 c 0.317221,0 0.612089,-0.149113 0.78125,-0.3125 0.169161,-0.163387 0.252971,-0.323419 0.3125,-0.46875 0.119057,-0.290663 0.15625,-0.566748 0.15625,-0.84375 l 0,-1.65625 c 0.250586,-0.08983 0.482879,-0.197272 0.71875,-0.3125 l 1.1875,1.1875 c 0.19965,0.199649 0.421432,0.352095 0.71875,0.46875 0.148659,0.05833 0.329672,0.104846 0.5625,0.09375 0.232828,-0.0111 0.535831,-0.09833 0.75,-0.3125 L 32.125,38.28125 c 0.214172,-0.214168 0.301403,-0.517172 0.3125,-0.75 0.0111,-0.232828 -0.03542,-0.41384 -0.09375,-0.5625 C 32.227095,36.67143 32.074654,36.449652 31.875,36.25 L 30.6875,35.0625 C 30.802728,34.82663 30.910168,34.594337 31,34.34375 l 1.65625,0 c 0.277004,0 0.553087,-0.03719 0.84375,-0.15625 0.145332,-0.05953 0.305364,-0.143339 0.46875,-0.3125 0.163386,-0.169161 0.3125,-0.46403 0.3125,-0.78125 l 0,-2.1875 c 0,-0.317219 -0.149114,-0.612088 -0.3125,-0.78125 C 33.805364,29.955838 33.645332,29.872029 33.5,29.8125 33.209336,29.693442 32.933253,29.65625 32.65625,29.65625 l -1.65625,0 C 30.91017,29.405663 30.802728,29.17337 30.6875,28.9375 L 31.875,27.75 c 0.19965,-0.19965 0.352095,-0.421432 0.46875,-0.71875 0.05833,-0.148659 0.104846,-0.329672 0.09375,-0.5625 -0.0111,-0.232828 -0.09833,-0.535831 -0.3125,-0.75 L 30.59375,24.1875 c -0.214167,-0.21417 -0.517171,-0.301403 -0.75,-0.3125 -0.232829,-0.0111 -0.41384,0.03542 -0.5625,0.09375 -0.29732,0.116656 -0.519099,0.269097 -0.71875,0.46875 L 27.375,25.625 c -0.235871,-0.115228 -0.468163,-0.222668 -0.71875,-0.3125 l 0,-1.65625 c 0,-0.277003 -0.03719,-0.553087 -0.15625,-0.84375 -0.05953,-0.145332 -0.143338,-0.305363 -0.3125,-0.46875 -0.169162,-0.163387 -0.46403,-0.3125 -0.78125,-0.3125 l -0.15625,0 5.65625,-6.40625 A 0.96385067,0.96385067 0 0 0 30.1875,14.03125 l -2.21875,0 0,-5.0312502 A 0.96385067,0.96385067 0 0 0 27,8.0312498 l -6,0 a 0.96385067,0.96385067 0 0 0 -0.09375,0 z M 24.3125,30.1875 c 1.002113,0 1.8125,0.810388 1.8125,1.8125 0,1.002112 -0.810387,1.8125 -1.8125,1.8125 C 23.31039,33.8125 22.5,33.002111 22.5,32 c 0,-1.002111 0.81039,-1.8125 1.8125,-1.8125 z" />
+    <path
+       style="fill:url(#radialGradient2985);fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:1.00178742;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path2317"
+       d="M 21,8.9999996 21,15 17.8125,15 24,22 30.1875,15 27,15 l 0,-6.0000004 -6,0 z M 23.21875,23 c -0.172892,0 -0.28125,0.294922 -0.28125,0.65625 l 0,2.28125 C 22.24145,26.095996 21.585954,26.379869 21,26.75 l -1.625,-1.625 c -0.255498,-0.255497 -0.533998,-0.372253 -0.65625,-0.25 l -1.53125,1.53125 c -0.122254,0.122254 -0.0055,0.400753 0.25,0.65625 l 1.625,1.625 c -0.37013,0.585953 -0.654003,1.24145 -0.8125,1.9375 l -2.28125,0 c -0.361328,0 -0.65625,0.108357 -0.65625,0.28125 l 0,2.1875 c 0,0.172892 0.294922,0.28125 0.65625,0.28125 l 2.28125,0 c 0.158497,0.69605 0.44237,1.351546 0.8125,1.9375 l -1.625,1.625 c -0.255497,0.255498 -0.372254,0.533997 -0.25,0.65625 l 1.53125,1.53125 c 0.122252,0.122254 0.400752,0.0055 0.65625,-0.25 L 21,37.25 c 0.585954,0.37013 1.24145,0.654002 1.9375,0.8125 l 0,2.28125 C 22.9375,40.705077 23.045858,41 23.21875,41 l 2.1875,0 c 0.172893,0 0.28125,-0.294924 0.28125,-0.65625 l 0,-2.28125 c 0.69605,-0.158498 1.351546,-0.44237 1.9375,-0.8125 l 1.625,1.625 c 0.255498,0.255497 0.533997,0.372254 0.65625,0.25 l 1.53125,-1.53125 c 0.122254,-0.122252 0.0055,-0.400752 -0.25,-0.65625 l -1.625,-1.625 c 0.370129,-0.585954 0.654003,-1.24145 0.8125,-1.9375 l 2.28125,0 c 0.361329,0 0.65625,-0.108358 0.65625,-0.28125 l 0,-2.1875 c 0,-0.172893 -0.294921,-0.28125 -0.65625,-0.28125 l -2.28125,0 c -0.158497,-0.69605 -0.442371,-1.351547 -0.8125,-1.9375 l 1.625,-1.625 c 0.255497,-0.255497 0.372254,-0.533997 0.25,-0.65625 L 29.90625,24.875 C 29.783997,24.752745 29.505498,24.8695 29.25,25.125 l -1.625,1.625 c -0.585954,-0.370131 -1.24145,-0.654004 -1.9375,-0.8125 l 0,-2.28125 C 25.6875,23.294922 25.579143,23 25.40625,23 l -2.1875,0 z m 1.09375,6.21875 c 1.528616,0 2.78125,1.252635 2.78125,2.78125 0,1.528615 -1.252634,2.78125 -2.78125,2.78125 -1.528614,0 -2.78125,-1.252635 -2.78125,-2.78125 0,-1.528615 1.252636,-2.78125 2.78125,-2.78125 z" />
+    <rect
+       style="opacity:0.4;fill:none;stroke:url(#linearGradient2982);stroke-width:0.99999976;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0"
+       id="rect6741"
+       y="6.4999886"
+       x="5.4999981"
+       ry="1.365193"
+       rx="1.365193"
+       height="37.000011"
+       width="36.999985" />
+    <path
+       style="fill:none;stroke:url(#linearGradient2979);stroke-width:0.99829447;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible"
+       id="path2777"
+       d="M 28.926376,15.466668 24,21.177578 18.963089,15.5 21.5,15.5 l 0,-6.0000004 5,0 0,6.0000004 2.426376,-0.03333 z" />
+    <path
+       style="fill:none;stroke:url(#linearGradient2975);stroke-width:1;stroke-opacity:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path4243"
+       d="m 23.4375,23.46875 c -0.01166,0.05381 -0.03125,0.100205 -0.03125,0.1875 l 0,2.28125 a 0.48185467,0.48185467 0 0 1 -0.375,0.46875 c -0.638467,0.145384 -1.238423,0.407111 -1.78125,0.75 a 0.48185467,0.48185467 0 0 1 -0.59375,-0.0625 l -1.625,-1.625 C 18.9779,25.4154 18.9477,25.40242 18.90625,25.375 l -1.21875,1.21875 c 0.02742,0.04145 0.0404,0.07165 0.09375,0.125 l 1.625,1.625 a 0.48185467,0.48185467 0 0 1 0.0625,0.59375 c -0.342888,0.542826 -0.604615,1.142782 -0.75,1.78125 a 0.48185467,0.48185467 0 0 1 -0.46875,0.375 l -2.28125,0 c -0.08729,0 -0.133695,0.01959 -0.1875,0.03125 l 0,1.75 c 0.05381,0.01166 0.100205,0.03125 0.1875,0.03125 l 2.28125,0 a 0.48185467,0.48185467 0 0 1 0.46875,0.375 c 0.145385,0.638468 0.407112,1.238423 0.75,1.78125 a 0.48185467,0.48185467 0 0 1 -0.0625,0.59375 l -1.625,1.625 c -0.05335,0.05335 -0.06633,0.08355 -0.09375,0.125 l 1.21875,1.21875 c 0.04145,-0.02742 0.07165,-0.0404 0.125,-0.09375 l 1.625,-1.625 A 0.48185467,0.48185467 0 0 1 21.25,36.84375 c 0.542827,0.342888 1.142781,0.604614 1.78125,0.75 a 0.48185467,0.48185467 0 0 1 0.375,0.46875 l 0,2.28125 c 0,0.08729 0.01959,0.133695 0.03125,0.1875 l 1.75,0 c 0.01166,-0.0538 0.03125,-0.100206 0.03125,-0.1875 l 0,-2.28125 a 0.48185467,0.48185467 0 0 1 0.375,-0.46875 c 0.638469,-0.145386 1.238423,-0.407112 1.78125,-0.75 a 0.48185467,0.48185467 0 0 1 0.59375,0.0625 l 1.625,1.625 c 0.05335,0.05335 0.08355,0.06633 0.125,0.09375 l 1.21875,-1.21875 c -0.02742,-0.04145 -0.0404,-0.07165 -0.09375,-0.125 l -1.625,-1.625 a 0.48185467,0.48185467 0 0 1 -0.0625,-0.59375 c 0.342888,-0.542828 0.604615,-1.142783 0.75,-1.78125 a 0.48185467,0.48185467 0 0 1 0.46875,-0.375 l 2.28125,0 c 0.08729,0 0.133695,-0.01959 0.1875,-0.03125 l 0,-1.75 c -0.0538,-0.01166 -0.100204,-0.03125 -0.1875,-0.03125 l -2.28125,0 a 0.48185467,0.48185467 0 0 1 -0.46875,-0.375 c -0.145385,-0.638467 -0.407113,-1.238424 -0.75,-1.78125 a 0.48185467,0.48185467 0 0 1 0.0625,-0.59375 l 1.625,-1.625 c 0.05335,-0.05335 0.06633,-0.08355 0.09375,-0.125 L 29.71875,25.375 c -0.04145,0.02742 -0.07165,0.0404 -0.125,0.09375 l -1.625,1.625 a 0.48185467,0.48185467 0 0 1 -0.59375,0.0625 c -0.542827,-0.342889 -1.142783,-0.604616 -1.78125,-0.75 a 0.48185467,0.48185467 0 0 1 -0.375,-0.46875 l 0,-2.28125 c 0,-0.0873 -0.01959,-0.133695 -0.03125,-0.1875 l -1.75,0 z m 0.875,5.28125 c 1.791829,0 3.25,1.458172 3.25,3.25 0,1.791828 -1.458171,3.25 -3.25,3.25 -1.791827,0 -3.25,-1.458172 -3.25,-3.25 0,-1.791828 1.458173,-3.25 3.25,-3.25 z" />
+  </g>
+</svg>
