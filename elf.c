@@ -70,7 +70,7 @@ static unsigned long read_elf64(int fd)
 	ssize_t ret;
 
 	ret = pread(fd, &ehdr64, sizeof(ehdr64), 0);
-	if (ret < 0 || (size_t)ret != sizeof(ehdr)) {
+	if (ret < 0 || (size_t)ret != sizeof(ehdr64)) {
 		fprintf(stderr, "Read of ELF header from %s failed: %s\n",
 			fname, strerror(errno));
 		exit(10);
@@ -82,7 +82,7 @@ static unsigned long read_elf64(int fd)
 
 	offset = ehdr.e_shoff + (ehdr.e_shentsize * (ehdr.e_shnum - 1));
 	ret = pread(fd, &shdr64, sizeof(shdr64), offset);
-	if (ret < 0 || (size_t)ret != sizeof(ehdr)) {
+	if (ret < 0 || (size_t)ret != sizeof(shdr64)) {
 		fprintf(stderr, "Read of ELF section header from %s failed: %s\n",
 			fname, strerror(errno));
 		exit(10);
