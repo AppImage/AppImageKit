@@ -404,6 +404,10 @@ main (int argc, char *argv[])
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
         /* Check if the Icon file is how it is expected */
         gchar* icon_name = get_desktop_entry(kf, "Icon");
+        if(! icon_name) {
+            fprintf (stderr, "Desktop file must define an icon\n");
+            exit(1);
+        }
         gchar* icon_file_path;
         gchar* icon_file_png;
         gchar* icon_file_svg;
@@ -451,8 +455,8 @@ main (int argc, char *argv[])
                     sprintf (command, "%s appdata-from-desktop %s %s", g_find_program_in_path ("appstream-util"), desktop_file, appdata_path);
                     int ret = system(command);
                     if (ret != 0)
-                        die("Failed to generate a template");
-                    fprintf (stderr, "A template has been generated in in %s, please edit it\n", appdata_path);
+                        die("Failed to generate AppStream template");
+                    fprintf (stderr, "AppStream template has been generated in %s, please edit it\n", appdata_path);
                     exit(1);
                 }
             } else {
