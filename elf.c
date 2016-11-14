@@ -65,12 +65,10 @@ static unsigned long read_elf32(int fd)
 static unsigned long read_elf64(int fd)
 {
 	Elf64_Ehdr ehdr64;
-	Elf64_Shdr shdr64;
-	off_t offset;
 	ssize_t ret;
 
 	ret = pread(fd, &ehdr64, sizeof(ehdr64), 0);
-	if (ret < 0 || (size_t)ret != sizeof(ehdr64)) {
+	if (ret < 0 || (size_t)ret != sizeof(ehdr)) {
 		fprintf(stderr, "Read of ELF header from %s failed: %s\n",
 			fname, strerror(errno));
 		exit(10);
@@ -80,19 +78,11 @@ static unsigned long read_elf64(int fd)
 	ehdr.e_shentsize	= file16_to_cpu(ehdr64.e_shentsize);
 	ehdr.e_shnum		= file16_to_cpu(ehdr64.e_shnum);
 
-	offset = ehdr.e_shoff + (ehdr.e_shentsize * (ehdr.e_shnum - 1));
-	ret = pread(fd, &shdr64, sizeof(shdr64), offset);
-	if (ret < 0 || (size_t)ret != sizeof(shdr64)) {
-		fprintf(stderr, "Read of ELF section header from %s failed: %s\n",
-			fname, strerror(errno));
-		exit(10);
-	}
-
-	return(file64_to_cpu(shdr64.sh_offset) + file64_to_cpu(shdr64.sh_size));
+	return(ehdr.e_shoff + (ehdr.e_shentsize * ehdr.e_shnum));
 }
 
 unsigned long get_elf_size(const char *fname)
-/* TODO, FIXME: With 32 bit runtime, this assumes that the section header table (SHT) is
+/* TODO, FIXME: This assumes that the section header table (SHT) is
 the last part of the ELF. This is usually the case but
 it could also be that the last section is the last part
 of the ELF. This should be checked for.
