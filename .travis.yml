@@ -20,7 +20,7 @@ script:
   - find ./out/appimagetool.AppDir/
   - find ./out/appimaged.AppDir/
   - ( cd out/ ; ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage.zsync" )
-  - ( cd out/ ; ./appimagetool.AppDir/AppRun ./appimaged.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync" )
+  - ( cd out/ ; ./appimagetool-x86_64.AppImage ./appimaged.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync" )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
   - rm -rf out/runtime || true # Not needed, might confuse users
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
