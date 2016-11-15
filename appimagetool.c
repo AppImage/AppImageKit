@@ -53,7 +53,7 @@
 #include "getsection.h"
 
 extern int _binary_runtime_start;
-extern int _binary_runtime_size;
+extern int _binary_runtime_end;
 
 
 static gint repeats = 2;
@@ -481,7 +481,7 @@ main (int argc, char *argv[])
         fprintf (stderr, "Generating squashfs...\n");
         /* runtime is embedded into this executable
         * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
-        int size = (int)&_binary_runtime_size;
+        int size = (int)((void *)&_binary_runtime_end - (void *)&_binary_runtime_start);
         char *data = (char *)&_binary_runtime_start;
         if (verbose)
             printf("Size of the embedded runtime: %d bytes\n", size);
