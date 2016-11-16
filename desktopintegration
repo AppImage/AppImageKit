@@ -113,7 +113,7 @@ yesno()
   if [ -x /usr/bin/zenity ] ; then
     LD_LIBRARY_PATH="" zenity --question --title="$TITLE" --text="$TEXT" 2>/dev/null || exit 0
   elif [ -x /usr/bin/kdialog ] ; then
-    LD_LIBRARY_PATH="" kdialog --caption "Disk auswerfen?" --title "$TITLE" -yesno "$TEXT" || exit 0
+    LD_LIBRARY_PATH="" kdialog --caption "" --title "$TITLE" -yesno "$TEXT" || exit 0
   elif [ -x /usr/bin/Xdialog ] ; then
     LD_LIBRARY_PATH="" Xdialog --title "$TITLE" --clear --yesno "$TEXT" 10 80 || exit 0
   else
@@ -137,7 +137,7 @@ check_prevent "/usr/share/$VENDORPREFIX/no_desktopintegration"
 check_prevent "/etc/$VENDORPREFIX/no_desktopintegration"
 
 # Exit immediately if appimaged is running
-pidof appimaged 2>/dev/null && exit 0
+pidof appimaged >/dev/null 2>&1 && exit 0
 
 # Exit immediately if $DESKTOPINTEGRATION is not empty
 if [ ! -z "$DESKTOPINTEGRATION" ] ; then
@@ -178,17 +178,7 @@ if [ -z "$APPIMAGE" ] ; then
   # Not running from within an AppImage; hence using the AppRun for Exec=
 fi
 
-# Construct path to the icon according to
-# http://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html
-ABS_APPIMAGE=$(readlink -e "$APPIMAGE")
-ICONURL="file://$ABS_APPIMAGE"
-MD5=$(echo -n $ICONURL | md5sum | cut -c -32)
-ICONFILE="$HOME/.cache/thumbnails/normal/$MD5.png"
-if [ ! -f "$ICONFILE" ] ; then
-  echo "$ICONFILE is missing. Probably not running ${THIS} from within an AppImage."
-  echo "Hence falling back to using .DirIcon"
-  ICONFILE="$APPDIR/.DirIcon"
-fi
+ICONFILE="$APPDIR/.DirIcon"
 
 # $XDG_DATA_DIRS contains the default paths /usr/local/share:/usr/share
 # desktop file has to be installed in an applications subdirectory

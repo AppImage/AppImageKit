@@ -56,6 +56,10 @@ More on this [here](https://github.com/probonopd/AppImages/blob/master/README.md
 
 Another hint that something might be broken: https://wiki.debian.org/DontBreakDebian
 
+Yet another hint:
+
+![Only Source for Linux](https://cloud.githubusercontent.com/assets/2480569/19946130/619ea04c-a143-11e6-9c2f-fddc4c12676f.jpg)
+
 AppImage to the rescue. 
 
 While here are more [sophisticated](http://0pointer.net/blog/revisiting-how-we-put-together-linux-systems.html) [approaches](https://wiki.gnome.org/Projects/SandboxedApps) in the works, in the meantime here is something reasonably simple, universal, and robust that works today.

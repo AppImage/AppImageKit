@@ -13,7 +13,7 @@ Volunteers wanted for the following topics. Feel free to send a PR that adds you
 
 * Follow up with upstream projects and/or send PRs
 * file-roller **AUTHOR SILENT**
-* ark **DONE**
+* ark **DONE for type 1, but type 2 missing**
 
 ## Upgrading appimage via right click
 
@@ -24,7 +24,7 @@ Volunteers wanted for the following topics. Feel free to send a PR that adds you
 
 ## Desktop integration
 
-* Resurrect appimaged (probonopd; contact me if you want to take this over) **See [this](https://plus.google.com/105493415534008524873/posts/2coHZgk3TfV)**
+* Resurrect appimaged (probonopd) **[DONE](https://www.youtube.com/watch?v=ckKiDcRXWgE)**
 * Sandbox using firejail (see the sandbox GUI integration experiments in this repository)
 * Test/use GNOME portals
 

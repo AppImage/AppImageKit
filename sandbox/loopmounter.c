@@ -4,6 +4,9 @@ Code review of this file is wanted.
 Please open an issue if you find something insecure.
 This file is intentionally kept short to allow for effective code review.
 
+FIXME: Address privilege escalation:
+https://github.com/probonopd/AppImageKit/issues/210
+
 sudo chown root:root ./a.out
 sudo chmod u+s ./a.out
 ./a.out
