@@ -13,6 +13,19 @@ Copyright: ../LICENSE
 Readme: ../README.md
 # Extra-Files: <comma-separated list of additional files for the doc directory>
 Files: appimaged /usr/bin
+File: /usr/lib/systemd/user/appimaged.service
+ [Unit]
+ Description=AppImage daemon
+ After=basic.target
+ 
+ [Service]
+ ExecStart=/usr/bin/appimaged
+ Restart=always
+ RestartSec=5s
+ StartLimitInterval=0
+ 
+ [Install]
+ WantedBy=graphical.target
 #  <more pairs, if there's more than one file to include. Notice the starting space>
 Description: Optional AppImage daemon for desktop integration
  Integrates AppImages into the desktop, e.g., installs icons and menu entries
