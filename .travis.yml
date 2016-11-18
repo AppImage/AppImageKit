@@ -24,6 +24,7 @@ script:
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
   - rm -rf out/runtime || true # Not needed, might confuse users
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
+  - sudo apt-get install equivs
   - ( cd build ; equivs-build ../appimaged.ctl ; mv *.deb ../out )
   - bash ./upload.sh out/*
 
