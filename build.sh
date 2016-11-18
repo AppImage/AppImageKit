@@ -161,6 +161,9 @@ done
 
 bash -ex "$HERE/build-appdirs.sh"
 
+# Generate a deb for appimaged
+which equivs-build && ( cd build ; equivs-build ../appimaged.ctl ) || true
+
 ls -lh
 
 mkdir -p /out/
