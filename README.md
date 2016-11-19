@@ -70,6 +70,15 @@ Usage in a nutshell:
 ./appimaged-x86_64.AppImage --install
 ```
 
+Or, if you are on a deb-based system:
+
+```
+wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged_1.0_amd64.deb"
+sudo dpkg -i appimaged_*.deb
+systemctl --user enable appimaged
+systemctl --user start appimaged
+```
+
 It will register the AppImages in with your system from the following places:
 * $HOME/Downloads
 * $HOME/.local/bin
