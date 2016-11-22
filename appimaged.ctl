@@ -6,7 +6,7 @@ Standards-Version: 3.9.2
 Package: appimaged
 Version: 1.0
 Maintainer: probonopd <probonopd@users.noreply.github.com>
-# Depends: <comma-separated list of packages>
+Depends: libarchive13, libc6 (>= 2.4), libglib2.0-0, zlib1g
 Architecture: amd64
 Copyright: ../LICENSE
 # Changelog: <changelog file; defaults to a generic changelog>
