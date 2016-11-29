@@ -130,14 +130,14 @@ check_prevent()
   fi
 }
 
+# Exit immediately if appimaged is running
+pidof appimaged >/dev/null 2>&1 && exit 0
+
 # Exit immediately of one of these files is present
 # (e.g., because the desktop environment wants to handle desktop integration itself)
 check_prevent "$HOME/.local/share/$VENDORPREFIX/no_desktopintegration"
 check_prevent "/usr/share/$VENDORPREFIX/no_desktopintegration"
 check_prevent "/etc/$VENDORPREFIX/no_desktopintegration"
-
-# Exit immediately if appimaged is running
-pidof appimaged >/dev/null 2>&1 && exit 0
 
 # Exit immediately if $DESKTOPINTEGRATION is not empty
 if [ ! -z "$DESKTOPINTEGRATION" ] ; then
