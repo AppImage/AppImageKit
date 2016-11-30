@@ -38,6 +38,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/utsname.h>
 
 #include "binreloc.h"
 #ifndef NULL
@@ -312,7 +313,7 @@ main (int argc, char *argv[])
         sfs_ls(remaining_args[0]);
         exit(0);
     }
-    
+  
     /* If the first argument is a directory, then we assume that we should package it */
     if (g_file_test (remaining_args[0], G_FILE_TEST_IS_DIR)){
         char *destination;
@@ -342,36 +343,13 @@ main (int argc, char *argv[])
         }
         
         /* Determine the architecture */
-        gchar* archfile;
-        /* We use the next best .so that we can find to determine the architecture */
-        archfile = find_first_matching_file(source, "*.so.*");
-        if(!archfile)
-        {
-            /* If we found no .so we try to guess the main executable - this might be a script though */
-            // char guessed_bin_path[PATH_MAX];
-            // sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
-            // archfile = guessed_bin_path;
-            archfile = "/proc/self/exe";
-        }
-        if(verbose)
-            fprintf (stderr,"File used for determining architecture: %s\n", archfile);
-        FILE *fp;
-        char line[PATH_MAX];
-        char command[PATH_MAX];
-        sprintf (command, "/usr/bin/file -L -N -b %s", archfile);
-        fp = popen(command, "r");
-        if (fp == NULL)
-            die("Failed to run file command");
-        fgets(line, sizeof(line)-1, fp);
-        gchar* arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
-        replacestr(arch, "-", "_");
-        fprintf (stderr,"Arch: %s\n", arch+1);
-        pclose(fp);
-        
-        if(!arch)
-        {
+        char *arch;
+        struct utsname sys_info;
+        if(uname(&sys_info) != 0) {
             printf("The architecture could not be determined, assuming 'all'\n");
             arch="all";
+        } else {            
+            arch=sys_info.machine;
         }
         
         char app_name_for_filename[PATH_MAX];
@@ -515,6 +493,7 @@ main (int argc, char *argv[])
             }
         }
         
+        FILE *fp = NULL;
         /* If updateinformation was provided, then we check and embed it */
         if(updateinformation != NULL){
             if(!g_str_has_prefix(updateinformation,"zsync|"))
