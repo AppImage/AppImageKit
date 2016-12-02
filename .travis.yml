@@ -5,8 +5,8 @@ services:
   - docker
  
 env:
-# - DOCKER_IMAGE=toopher/centos-i386:centos6 # Pull request welcome that makes this work
-  - DOCKER_IMAGE=library/centos:6.8
+  - ARCH=i686 DOCKER_IMAGE=toopher/centos-i386:centos6
+  - ARCH=x86_64 DOCKER_IMAGE=library/centos:6.8
  
 script:
   - rm -rf data.tar.g* .gnu* || true
@@ -19,8 +19,12 @@ script:
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - find ./out/appimagetool.AppDir/
   - find ./out/appimaged.AppDir/
-  - ( cd out/ ; ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage.zsync" )
-  - ( cd out/ ; ./appimagetool-x86_64.AppImage ./appimaged.AppDir/ -s -v -u "zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage.zsync" )
+  - docker run --cap-add SYS_ADMIN --device /dev/fuse:/dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -c 
+      "yum -y install fuse fuse-libs && 
+      cd /out && 
+      ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-$ARCH.AppImage.zsync\"
+      appimagetool-$ARCH.AppImage &&
+      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-$ARCH.AppImage.zsync\" appimaged-$ARCH.AppImage"
   - sudo apt-get install equivs
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true

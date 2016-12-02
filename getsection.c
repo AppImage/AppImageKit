@@ -11,12 +11,21 @@ int get_elf_section_offset_and_lenghth(char* fname, char* section_name, unsigned
 {
     uint8_t *data;   
     int i;  
-    Elf64_Ehdr *elf;
-    Elf64_Shdr *shdr;
     int fd = open(fname, O_RDONLY);
     data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
+
+#ifdef __i386__
+    Elf32_Ehdr *elf;
+    Elf32_Shdr *shdr;
+    elf = (Elf32_Ehdr *) data;
+    shdr = (Elf32_Shdr *) (data + elf->e_shoff);
+#else // Default to x86_64
+    Elf64_Ehdr *elf;
+    Elf64_Shdr *shdr;
     elf = (Elf64_Ehdr *) data;
     shdr = (Elf64_Shdr *) (data + elf->e_shoff);
+#endif
+
     char *strTab = (char *)(data + shdr[elf->e_shstrndx].sh_offset);
     for(i = 0; i <  elf->e_shnum; i++) {
         if(strcmp(&strTab[shdr[i].sh_name], section_name) == 0) {
