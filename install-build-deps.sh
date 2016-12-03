@@ -1,30 +1,48 @@
 #!/bin/bash
 
+set -e
+
 # Install build dependencies; TODO: Support systems that do not use apt-get (Pull Requests welcome!)
+
+ARCH=$(uname -p)
+if [ "$ARCH" == "i686" ]; then
+  ARCH=i386
+fi
 
 if [ -e /usr/bin/apt-get ] ; then
   apt-get update
   sudo apt-get -y install zsync git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
   liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs
   # libtool-bin might be required in newer distributions but is not available in precise
-  sudo cp resources/liblz4.pc /usr/lib/x86_64-linux-gnu/pkgconfig/
+  sudo cp resources/liblz4.pc /usr/lib/$ARCH-linux-gnu/pkgconfig/
 fi
 
 if [ -e /usr/bin/yum ] ; then
   # Install and enable EPEL and Devtoolset-4 by Software Collections
   # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-4/
-  yum -y install centos-release-scl-rh epel-release
-  yum -y install devtoolset-4-gcc.x86_64
+  if [ "$ARCH" == "x86_64" ]; then
+    yum -y install centos-release-scl-rh epel-release
+    yum -y install devtoolset-4-gcc.$ARCH
+  fi
+
   # Install and enable Autotools by Pavel Raiskup
   # https://www.softwarecollections.org/en/scls/praiskup/autotools/
-  rpm -ivh https://www.softwarecollections.org/en/scls/praiskup/autotools/epel-6-x86_64/download/praiskup-autotools-epel-6-x86_64.noarch.rpm
+  rpm -ivh https://www.softwarecollections.org/en/scls/praiskup/autotools/epel-6-$ARCH/download/praiskup-autotools-epel-6-$ARCH.noarch.rpm
   yum -y install autotools-latest # 19 MB
 
-  rpm -ivh ftp://fr2.rpmfind.net/linux/dag/redhat/el6/en/x86_64/dag/RPMS/zsync-0.6.2-1.el6.rf.x86_64.rpm
+  if [ "$ARCH" == "x86_64" ]; then
+    rpm -ivh ftp://fr2.rpmfind.net/linux/dag/redhat/el6/en/$ARCH/dag/RPMS/zsync-0.6.2-1.el6.rf.$ARCH.rpm
+  fi
+  if [ "$ARCH" == "i386" ]; then
+    rpm -ivh ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home:/uibmz:/opsi:/opsi40-testing/CentOS_CentOS-6/i386/zsync-0.6.1-6.2.i386.rpm
+  fi
 
   yum -y install epel-release
   yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-static openssl-devel vim-common # inotify-tools-devel lz4-devel
-  . /opt/rh/devtoolset-4/enable
+
+  if [ "$ARCH" == "x86_64" ]; then
+    . /opt/rh/devtoolset-4/enable
+  fi
   . /opt/rh/autotools-latest/enable
 
   # Unlike Ubuntu, CentOS does not provide .a, so we need to build it
