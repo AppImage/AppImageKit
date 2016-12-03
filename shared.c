@@ -537,7 +537,7 @@ copy_data(struct archive *ar, struct archive *aw)
 bool appimage_type1_register_in_system(char *path, gboolean verbose)
 {
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
-    gchar *desktop_icon_value_original;
+    gchar *desktop_icon_value_original = "";
     char *md5 = get_md5(path);
     GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
     
