@@ -9,6 +9,8 @@ env:
   - ARCH=x86_64 DOCKER_IMAGE=library/centos:6.8
  
 script:
+  - if [ "$(arch)" == "x86_64" ] ; then sed -i -e 's|%ARCH%|amd64|g' appimaged.ctl; fi
+  - if [ "$(arch)" == "i686" ] ; then sed -i -e 's|%ARCH%|i386|g' appimaged.ctl; fi
   - rm -rf data.tar.g* .gnu* || true
   - wget https://github.com/probonopd/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
   - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
