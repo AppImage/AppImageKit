@@ -138,15 +138,31 @@ int check_appimage_type(char *path, gboolean verbose)
         buffer[4] = 0;
         fclose(f);
         if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x01)){
-            if(verbose)
+            fprintf(stderr, "_________________________\n");
+            if(verbose){
                 fprintf(stderr, "AppImage type 1\n");
+            }
             return 1;
         } else if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x02)){
-            if(verbose)
+            fprintf(stderr, "_________________________\n");
+            if(verbose){
                 fprintf(stderr, "AppImage type 2\n");
+            }
             return 2;
         } else {
-            return -1;
+            if((g_str_has_suffix(path,".AppImage")) || (g_str_has_suffix(path,".appimage"))) {
+                fprintf(stderr, "_________________________\n");
+                fprintf(stderr, "Blindly assuming AppImage type 1\n");
+                fprintf(stderr, "The author of this AppImage should embed the magic bytes, see https://github.com/AppImage/AppImageSpec\n");
+                return 1;
+            } else {
+                if(verbose){
+                    fprintf(stderr, "_________________________\n");
+                    fprintf(stderr, "Unrecognized file '%s'\n", path);
+                }
+                return -1;
+            }
+
         }
     }
 }
@@ -199,8 +215,6 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                 if(verbose)
                     fprintf(stderr, "squash_get_matching_files found: %s\n", trv.path);
                 g_ptr_array_add(array, g_strdup(trv.path));
-                if(verbose)
-                    fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
                 gchar *dest = NULL;
                 gchar *dest_dirname;
                 gchar *dest_basename;
@@ -533,7 +547,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
     struct archive *a;
     struct archive_entry *entry;
     int r;
-   
+    
     a = archive_read_new();
     archive_read_support_format_iso9660(a);
     if ((r = archive_read_open_filename(a, path, 10240))) {
@@ -541,20 +555,21 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
     }
     for (;;) {
         r = archive_read_next_header(a, &entry);
-        if (r == ARCHIVE_EOF)
+        if (r == ARCHIVE_EOF) {
             break;
+        }
         if (r != ARCHIVE_OK) {
-            fprintf(stderr, "%s", archive_error_string(a));
+            fprintf(stderr, "%s\n", archive_error_string(a));
             break;
         }
 
         /* Skip all but regular files; FIXME: Also handle symlinks correctly */
-        if(archive_entry_filetype(entry) != AE_IFREG)
-            break;
-        
+        if(archive_entry_filetype(entry) != AE_IFREG) {
+            continue;
+        }
         gchar *filename;
         filename = replace_str(archive_entry_pathname(entry), "./", "");
-        
+
         /* Get desktop file(s) in the root directory of the AppImage and act on it in one go */
         if((g_str_has_suffix(filename,".desktop") && (NULL == strstr (filename,"/"))))
         {
@@ -585,7 +600,6 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         gchar *dest = NULL;
         gchar *dest_dirname = NULL;
         gchar *dest_basename = NULL;
-        
         /* Get icon file(s) and act on them in one go */
         
         if(g_str_has_prefix (filename, "usr/share/icons/") || g_str_has_prefix (filename, "usr/share/pixmaps/") ||(g_str_has_prefix(filename, "usr/share/mime/")) && (g_str_has_suffix(filename, ".xml"))){
@@ -796,6 +810,7 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     char *md5 = get_md5(path);
     
     /* The file is already gone by now, so we can't determine its type anymore */
+    fprintf(stderr, "_________________________\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "-> UNREGISTER %s\n", path);
     /* Could use gnome_desktop_thumbnail_factory_lookup instead of the next line */

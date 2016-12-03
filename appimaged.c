@@ -160,6 +160,7 @@ void handle_event(struct inotify_event *event)
             struct arg_struct args;
             args.path = absolute_path;
             args.verbose = verbose;
+            g_print("_________________________\n");
             ret = pthread_create(&some_thread, NULL, thread_appimage_register_in_system, &args);
             if (!ret) {
                 pthread_join(some_thread, NULL);
@@ -172,6 +173,7 @@ void handle_event(struct inotify_event *event)
         struct arg_struct args;
         args.path = absolute_path;
         args.verbose = verbose;
+        g_print("_________________________\n");
         ret = pthread_create(&some_thread, NULL, thread_appimage_unregister_in_system, &args);
         if (!ret) {
             pthread_join(some_thread, NULL);
