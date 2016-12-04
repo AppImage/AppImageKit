@@ -129,13 +129,12 @@ char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 int check_appimage_type(char *path, gboolean verbose)
 {
     FILE *f;
-    char buffer[4];
+    char buffer[3];
     if (f = fopen(path, "rt"))
     {
         /* Check magic bytes at offset 8 */
         fseek(f, 8, SEEK_SET);
         fread(buffer, 1, 3, f);
-        buffer[4] = 0;
         fclose(f);
         if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x01)){
             fprintf(stderr, "_________________________\n");
@@ -363,13 +362,12 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
         fprintf(stderr, ".upd_info offset: %lu\n", upd_offset);
         fprintf(stderr, ".upd_info length: %lu\n", upd_length);
         FILE *binary;
-        char buffer[4];
+        char buffer[3];
         if (binary = fopen(appimage_path, "rt"))
         {
             /* Check whether the first three bytes at the offset are not NULL */
             fseek(binary, upd_offset, SEEK_SET);
             fread(buffer, 1, 3, binary);
-            buffer[4] = 0;
             fclose(binary);
             if((buffer[0] != 0x00) && (buffer[1] != 0x00) && (buffer[2] != 0x00)){
                 gchar *appimageupdate_group = "Desktop Action AppImageUpdate";
