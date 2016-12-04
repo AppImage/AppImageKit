@@ -663,6 +663,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
     }
     archive_read_close(a);
     archive_read_finish(a);
+    set_executable(path, verbose);
 }
 
 /* Register a type 2 AppImage in the system */
