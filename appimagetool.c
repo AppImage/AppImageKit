@@ -342,36 +342,41 @@ main (int argc, char *argv[])
         }
         
         /* Determine the architecture */
-        gchar* archfile;
-        /* We use the next best .so that we can find to determine the architecture */
-        archfile = find_first_matching_file(source, "*.so.*");
-        if(!archfile)
-        {
-            /* If we found no .so we try to guess the main executable - this might be a script though */
-            // char guessed_bin_path[PATH_MAX];
-            // sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
-            // archfile = guessed_bin_path;
-            archfile = "/proc/self/exe";
-        }
-        if(verbose)
-            fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+        gchar *arch = getenv("ARCH");
         FILE *fp;
-        char line[PATH_MAX];
-        char command[PATH_MAX];
-        sprintf (command, "/usr/bin/file -L -N -b %s", archfile);
-        fp = popen(command, "r");
-        if (fp == NULL)
-            die("Failed to run file command");
-        fgets(line, sizeof(line)-1, fp);
-        gchar* arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
-        replacestr(arch, "-", "_");
-        fprintf (stderr,"Arch: %s\n", arch+1);
-        pclose(fp);
-        
-        if(!arch)
-        {
-            printf("The architecture could not be determined, assuming 'all'\n");
-            arch="all";
+        /* If no $ARCH variable is set check a file */
+        if (!arch) {
+            gchar *archfile = NULL;
+            /* We use the next best .so that we can find to determine the architecture */
+            archfile = find_first_matching_file(source, "*.so.*");
+            if(!archfile)
+            {
+                /* If we found no .so we try to guess the main executable - this might be a script though */
+                // char guessed_bin_path[PATH_MAX];
+                // sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
+                // archfile = guessed_bin_path;
+                archfile = "/proc/self/exe";
+            }
+            if(verbose)
+                fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+            
+            char line[PATH_MAX];
+            char command[PATH_MAX];
+            sprintf (command, "/usr/bin/file -L -N -b %s", archfile);
+            fp = popen(command, "r");
+            if (fp == NULL)
+                die("Failed to run file command");
+            fgets(line, sizeof(line)-1, fp);
+            arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
+            replacestr(arch, "-", "_");
+            fprintf (stderr,"Arch: %s\n", arch+1);
+            pclose(fp);
+
+            if(!arch)
+            {
+                printf("The architecture could not be determined, assuming 'all'\n");
+                arch="all";
+            }
         }
         
         char app_name_for_filename[PATH_MAX];
