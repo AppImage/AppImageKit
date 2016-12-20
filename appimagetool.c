@@ -453,6 +453,8 @@ main (int argc, char *argv[])
                 fprintf (stderr, "         for more information.\n");
                 /* As a courtesy, generate one to be filled by the user */
                 if(g_find_program_in_path ("appstream-util")) {
+                    gchar *appdata_dir = g_build_filename(source, "/usr/share/metainfo/", NULL);
+                    g_mkdir_with_parents(appdata_dir, 0755);
                     sprintf (command, "%s appdata-from-desktop %s %s", g_find_program_in_path ("appstream-util"), desktop_file, appdata_path);
                     int ret = system(command);
                     if (ret != 0)
