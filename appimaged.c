@@ -288,7 +288,8 @@ int main(int argc, char ** argv) {
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Downloads", NULL));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
     add_dir_to_watch(g_build_filename("/Applications", NULL));
-    add_dir_to_watch(g_build_filename("/isodevice/Applications", NULL));
+    add_dir_to_watch(g_build_filename("/isodevice/Applications", NULL)); // Ubuntu Live media
+    add_dir_to_watch(g_build_filename("/isofrom/Applications", NULL)); // openSUSE Live media
     add_dir_to_watch(g_build_filename("/opt", NULL));
     add_dir_to_watch(g_build_filename("/usr/local/bin", NULL));
     
