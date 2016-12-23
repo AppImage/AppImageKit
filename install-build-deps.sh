@@ -31,7 +31,7 @@ if [ -e /usr/bin/yum ] ; then
   yum -y install autotools-latest # 19 MB
 
   if [ "$ARCH" == "x86_64" ]; then
-    rpm -ivh ftp://fr2.rpmfind.net/linux/dag/redhat/el6/en/$ARCH/dag/RPMS/zsync-0.6.2-1.el6.rf.$ARCH.rpm
+    rpm -ivh http://kikitux.net/zsync/zsync-0.6.2-1.el6.rf.x86_64.rpm
   fi
   if [ "$ARCH" == "i386" ]; then
     rpm -ivh ftp://ftp.pbone.net/mirror/ftp5.gwdg.de/pub/opensuse/repositories/home:/uibmz:/opsi:/opsi40-testing/CentOS_CentOS-6/i386/zsync-0.6.1-6.2.i386.rpm
