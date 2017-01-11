@@ -33,6 +33,8 @@ script:
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
   - rm -rf out/runtime || true # Not needed, might confuse users
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
+  - if [ "$ARCH" == "x86_64" ] ; then sudo mv out/AppRun out/AppRun-x86_64; fi
+  - if [ "$ARCH" == "i686" ] ; then sudo mv out/AppRun out/AppRun-i686; fi
   - bash ./upload.sh out/*
 
 notifications:
