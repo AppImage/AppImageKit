@@ -169,6 +169,7 @@ export LANG="en_EN.UTF-8"
 #dbus-launch $MNT/AppRun || 
 export LIBGL_DEBUG=verbose
 export QT_DEBUG_PLUGINS=1
+export LC_ALL=C.UTF-8
 dbus-uuidgen --ensure ; dbus-launch # Needed for CentOS 6.7 to launch apps that talk to dbus
 if [ -f $MNT/usr/lib/qt5/plugins/platforms/libqxcb.so ] ; then
   export LD_LIBRARY_PATH=$MNT/usr/lib/:$LD_LIBRARY_PATH
