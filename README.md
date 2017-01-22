@@ -85,6 +85,8 @@ It will register the AppImages in with your system from the following places:
 * $HOME/bin
 * /Applications
 * /isodevice/Applications
+* /isofrom/Applications
+* /run/archiso/img_dev/Applications
 * /opt
 * /usr/local/bin
 
