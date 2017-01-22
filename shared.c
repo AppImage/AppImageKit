@@ -136,8 +136,8 @@ char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 
 void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 {
-    // FIXME: This default location is most likely wrong, icons there will be ignored
-    gchar *dest_dir = dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", NULL);;
+    // FIXME: This default location is most likely wrong, but at least the icons with unknown size can go somewhere
+    gchar *dest_dir = dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
     
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
         dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
