@@ -140,7 +140,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
     gchar *dest_dir = dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", NULL);;
     
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
-        dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable", NULL);
+        dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
     }
  
     if((g_str_has_suffix (icon_path, ".png")) || (g_str_has_suffix (icon_path, ".xpm"))) {
@@ -170,7 +170,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
         if((w != h) || ((w != 16) && (w != 24) && (w != 32) && (w != 36) && (w != 48) && (w != 64) && (w != 72) && (w != 96) && (w != 128) && (w != 192) && (w != 256) && (w != 512))){
             fprintf(stderr, "%s has nonstandard size w = %i, h = %i; please fix it\n", icon_path, w, h);
         } else {
-            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), NULL);
+            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps", NULL);
         }
     }
     if(verbose)
