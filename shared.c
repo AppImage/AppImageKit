@@ -56,7 +56,7 @@
 
 #include <regex.h>
 
-#include <cairo.h> // To get the size of icons, determine_icon_destination()
+#include <cairo.h> // To get the size of icons, move_icon_to_destination()
 
 #define FNM_FILE_NAME 2
 
@@ -127,16 +127,17 @@ char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
     return thumbnail_path;
 }
 
-/* Return the path where a given icon can be installed in $HOME.
+/* Move an icon file to the path where a given icon can be installed in $HOME.
  * This is needed because png and xpm icons cannot be installed in a generic
  * location but are only picked up in directories that have the size of 
  * the icon as part of their directory name, as specified in the theme.index
  * See https://github.com/probonopd/AppImageKit/issues/258
  */
 
-gchar* determine_icon_destination(gchar *icon_path)
+void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 {
-    gchar *dest_dir;
+    // FIXME: This default location is most likely wrong, icons there will be ignored
+    gchar *dest_dir = dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", NULL);;
     
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
         dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable", NULL);
@@ -145,36 +146,51 @@ gchar* determine_icon_destination(gchar *icon_path)
     if((g_str_has_suffix (icon_path, ".png")) || (g_str_has_suffix (icon_path, ".xpm"))) {
         
         cairo_surface_t *image;
- 
+
+        int w = 0;
+        int h = 0;
+        
         if(g_str_has_suffix (icon_path, ".xpm")) {
             // TODO: GdkPixbuf has a convenient way to load XPM data. Then you can call
             // gdk_cairo_set_source_pixbuf() to transfer the data to a Cairo surface.
             fprintf(stderr, "XPM size parsing not yet implemented\n");
-            return NULL;
         }
+
 
         if(g_str_has_suffix (icon_path, ".png")) {
             image = cairo_image_surface_create_from_png(icon_path);
+            w = cairo_image_surface_get_width (image);
+            h = cairo_image_surface_get_height (image);
+            cairo_surface_destroy (image);
         }
-        
-        int w = cairo_image_surface_get_width (image);
-        int h = cairo_image_surface_get_height (image);
-        
+                    
         // FIXME: The following sizes are taken from the hicolor icon theme. 
         // Probably the right thing to do would be to figure out at runtime which icon sizes are allowable.
         // Or could we put our own index.theme into .local/share/icons/ and have it observed?
         if((w != h) || ((w != 16) && (w != 24) && (w != 32) && (w != 36) && (w != 48) && (w != 64) && (w != 72) && (w != 96) && (w != 128) && (w != 192) && (w != 256) && (w != 512))){
             fprintf(stderr, "%s has nonstandard size w = %i, h = %i; please fix it\n", icon_path, w, h);
-            return NULL;
+        } else {
+            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), NULL);
         }
-
-        cairo_surface_destroy (image);
-        
-        dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), NULL);
     }
-        
-    return(dest_dir);
-
+    if(verbose)
+        fprintf(stderr, "dest_dir %s\n", dest_dir);
+    
+    gchar* icon_dest_path = g_build_path("/", dest_dir, g_path_get_basename(icon_path), NULL);
+    if(verbose)
+        fprintf(stderr, "Move from %s to %s\n", icon_path, icon_dest_path);
+    if(g_mkdir_with_parents(g_path_get_dirname(dest_dir), 0755))
+        fprintf(stderr, "Could not create directory: %s\n", dest_dir);
+    GError *error = NULL;
+    GFile *icon_file = g_file_new_for_path(icon_path);
+    GFile *target_file = g_file_new_for_path(icon_dest_path);
+    if (!g_file_move (icon_file, target_file, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error)) {
+        fprintf(stderr, "Error moving file: %s\n", error->message);
+        g_error_free (error);
+    }
+    g_object_unref(icon_file); 
+    g_object_unref(target_file);
+    
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
@@ -279,12 +295,12 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                      * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
                     if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){       
                         dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
-                        dest = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", dest_basename, NULL);
+                        dest = g_build_path("/", "/tmp", dest_basename, NULL);
                     }
                     /* Some AppImages only have the icon in their root directory, so we have to get it from there */
                     if((g_str_has_prefix(trv.path, desktop_icon_value_original)) && (! strstr(trv.path, "/")) && ( (g_str_has_suffix(trv.path, ".png")) || (g_str_has_suffix(trv.path, ".xpm")) || (g_str_has_suffix(trv.path, ".svg")) || (g_str_has_suffix(trv.path, ".svgz")))){
                         dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(trv.path));
-                        dest = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", dest_basename, NULL);                      
+                        dest = g_build_path("/", "/tmp", dest_basename, NULL);
                     }
                     
                     if(dest){
@@ -315,6 +331,12 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                         
                         if(verbose)
                             fprintf(stderr, "Installed: %s\n", dest);
+                        
+                        // If we were unsure about the size of an icon, we temporarily installed
+                        // it to /tmp and now move it into the proper place
+                        if(g_str_has_prefix (dest, "/tmp/")) {
+                            move_icon_to_destination(dest, verbose);
+                        } 
                     }
                 }
             }
@@ -660,13 +682,13 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
          * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
         if(g_str_has_prefix (filename, "usr/share/pixmaps/")){
-            dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
+            dest = g_build_path("/", "/tmp", dest_basename, NULL);
         }
         /* Some AppImages only have the icon in their root directory, so we have to get it from there */
         if(desktop_icon_value_original){
             if((g_str_has_prefix(filename, desktop_icon_value_original)) && (! strstr(filename, "/")) && ( (g_str_has_suffix(filename, ".png")) || (g_str_has_suffix(filename, ".xpm")) || (g_str_has_suffix(filename, ".svg")) || (g_str_has_suffix(filename, ".svgz")))){
                 dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
-                dest = g_build_path("/", g_get_home_dir(), ".icons", dest_basename, NULL);                           
+                dest = g_build_path("/", "/tmp", dest_basename, NULL);
             }
         }
                     
@@ -708,7 +730,14 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
 
             
             if(verbose)
-                fprintf(stderr, "Installed: %s\n", dest);   
+                fprintf(stderr, "Installed: %s\n", dest);
+            
+            // If we were unsure about the size of an icon, we temporarily installed
+            // it to /tmp and now move it into the proper place
+            if(g_str_has_prefix (dest, "/tmp/")) {
+                move_icon_to_destination(dest, verbose);
+            } 
+            
         }
     }
     archive_read_close(a);
