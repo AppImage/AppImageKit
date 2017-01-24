@@ -1,19 +1,19 @@
 /**************************************************************************
- * 
+ *
  * Copyright (c) 2004-16 Simon Peter
- * 
+ *
  * All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,23 +21,24 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * 
+ *
  **************************************************************************/
 
 #ident "AppImage by Simon Peter, http://appimage.org/"
 
 /*
- * Optional daempon to watch directories for AppImages 
+ * Optional daempon to watch directories for AppImages
  * and register/unregister them with the system
- * 
+ *
  * TODO (feel free to send pull requests):
  * - Switch to https://developer.gnome.org/gio/stable/GFileMonitor.html (but with subdirectories)
  *   which would drop the dependency on libinotifytools.so.0
- * - Add and remove subdirectories on the fly at runtime - 
+ * - Add and remove subdirectories on the fly at runtime -
  *   see https://github.com/paragone/configure-via-inotify/blob/master/inotify/src/inotifywatch.c
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -75,8 +76,8 @@ static GOptionEntry entries[] =
 #define EXCLUDE_CHUNK 1024
 #define WR_EVENTS (IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF)
 
-/* Run the actual work in treads; 
- * pthread allows to pass only one argument to the thread function, 
+/* Run the actual work in treads;
+ * pthread allows to pass only one argument to the thread function,
  * hence we use a struct as the argument in which the real arguments are */
 struct arg_struct {
     char* path;
@@ -104,12 +105,31 @@ void initially_register(const char *name, int level)
 {
     DIR *dir;
     struct dirent *entry;
-    
-    if (!(dir = opendir(name)))
-        fprintf(stderr, "opendir error\n");
-    if (!(entry = readdir(dir)))
-        fprintf(stderr, "readdir error\n");
-    
+
+    if (!(dir = opendir(name))) {
+        if (verbose) {
+            if (errno == EACCES) {
+                g_print("_________________________\n");
+                g_print("Permission denied on dir '%s'\n", name);
+            }
+            else {
+                g_print("_________________________\n");
+                g_print("Failed to open dir '%s'\n", name);
+            }
+        }
+        closedir(dir);
+        return;
+    }
+
+    if (!(entry = readdir(dir))) {
+        if (verbose) {
+            g_print("_________________________\n");
+            g_print("Invalid directory stream descriptor '%s'\n", name);
+        }
+        closedir(dir);
+        return;
+    }
+
     do {
         if (entry->d_type == DT_DIR) {
             char path[1024];
@@ -143,7 +163,7 @@ int add_dir_to_watch(char *directory)
         if(!inotifytools_watch_recursively(directory, WR_EVENTS) ) {
             fprintf(stderr, "%s\n", strerror(inotifytools_error()));
             exit(1);
-            
+
         }
         initially_register(directory, 0);
     }
@@ -153,7 +173,7 @@ void handle_event(struct inotify_event *event)
 {
     int ret;
     gchar *absolute_path = g_build_path(G_DIR_SEPARATOR_S, inotifytools_filename_from_wd(event->wd), event->name, NULL);
-    
+
     if(event->mask & IN_CLOSE_WRITE | event->mask & IN_MOVED_TO){
         if(g_file_test(absolute_path, G_FILE_TEST_IS_REGULAR)){
             pthread_t some_thread;
@@ -167,7 +187,7 @@ void handle_event(struct inotify_event *event)
             }
         }
     }
-    
+
     if(event->mask & IN_MOVED_FROM | event->mask & IN_DELETE){
         pthread_t some_thread;
         struct arg_struct args;
@@ -179,23 +199,23 @@ void handle_event(struct inotify_event *event)
             pthread_join(some_thread, NULL);
         }
     }
-    
+
     /* Too many FS events were received, some event notifications were potentially lost */
     if (event->mask & IN_Q_OVERFLOW){
         printf ("Warning: AN OVERFLOW EVENT OCCURRED\n");
     }
-    
+
     if(event->mask & IN_IGNORED){
         printf ("Warning: AN IN_IGNORED EVENT OCCURRED\n");
     }
-    
+
 }
 
 int main(int argc, char ** argv) {
-    
+
     GError *error = NULL;
     GOptionContext *context;
-    
+
     context = g_option_context_new ("");
     g_option_context_add_main_entries (context, entries, NULL);
     // g_option_context_add_group (context, gtk_get_option_group (TRUE));
@@ -209,7 +229,7 @@ int main(int argc, char ** argv) {
         fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
         exit(0);
     }
-    
+
     if ( !inotifytools_initialize()){
         fprintf(stderr, "inotifytools_initialize error\n");
         exit(1);
@@ -223,7 +243,7 @@ int main(int argc, char ** argv) {
     gchar *global_systemd_file = "/usr/lib/systemd/user/appimaged.service";
     gchar *partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
     gchar *destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
-    
+
     if(uninstall){
             if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))
                 fprintf(stderr, "* Please delete %s\n", installed_appimaged_location);
@@ -232,8 +252,8 @@ int main(int argc, char ** argv) {
             fprintf(stderr, "* To remove all AppImage desktop integration, run\n");
             fprintf(stderr, "  find ~/.local/share -name 'appimagekit_*' -exec rm {} \\;\n\n");
         exit(0);
-    }    
-    
+    }
+
     if(install != NULL){
         if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
             printf("Running from within %s\n", appimage_location);
@@ -283,7 +303,7 @@ int main(int argc, char ** argv) {
             exit(1);
         }
     }
-    
+
     add_dir_to_watch(user_bin_dir);
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Downloads", NULL));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
@@ -293,15 +313,15 @@ int main(int argc, char ** argv) {
     add_dir_to_watch(g_build_filename("/run/archiso/img_dev/Applications", NULL)); // Antergos Live media
     add_dir_to_watch(g_build_filename("/opt", NULL));
     add_dir_to_watch(g_build_filename("/usr/local/bin", NULL));
-    
+
     struct inotify_event * event = inotifytools_next_event(-1);
     while (event) {
         if(verbose){
             inotifytools_printf(event, "%w%f %e\n");
         }
-        fflush(stdout);        
+        fflush(stdout);
         handle_event(event);
-        fflush(stdout);        
+        fflush(stdout);
         event = inotifytools_next_event(-1);
     }
 }
