@@ -118,7 +118,6 @@ void initially_register(const char *name, int level)
             }
         }
         closedir(dir);
-        exit(0);
         return;
     }
 
