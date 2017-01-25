@@ -22,15 +22,42 @@ git submodule update
 rm -rf build/ || true
 
 # Build inotify-tools; the one from CentOS does not have .a
-
 if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ; then
     wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
     tar xf inotify-tools-3.14.tar.gz
     cd inotify-tools-3.14
-    ./configure --prefix=/usr && make && sudo make install
+    mkdir -p build/lib
+    ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib
+    make
+    make install
     cd -
-    sudo rm /usr/*/libinotifytools.so* /usr/local/lib/libinotifytools.so* 2>/dev/null || true # Don't want the dynamic one
 fi
+
+# Build lzma
+if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
+  wget http://tukaani.org/xz/xz-5.2.3.tar.gz
+  tar xf xz-5.2.3.tar.gz
+  cd xz-5.2.3
+  mkdir -p build/lib
+  ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib --enable-static
+  make && make install
+  cd -
+fi
+
+# Build openssl
+if [ ! -e "./openssl-1.1.0c/build/lib/libssl.a" ] ; then
+  wget https://www.openssl.org/source/openssl-1.1.0c.tar.gz
+  tar xf openssl-1.1.0c.tar.gz
+  cd openssl-1.1.0c
+  mkdir -p build/lib
+  ./config --prefix=`pwd`/build
+  make && make install
+  cd -
+fi
+
+# Patch squashfuse-tools Makefile to link against static llzma
+sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" squashfs-tools/squashfs-tools/Makefile
+sed -i "s|LIBS += -llzma|LIBS += -L../../xz-5.2.3/build/lib -llzma|g" squashfs-tools/squashfs-tools/Makefile
 
 # Patch squashfuse_ll to be a library rather than an executable
 
@@ -48,7 +75,7 @@ if [ ! -e ./Makefile ] ; then
   autoreconf -fi || true # Errors out, but the following succeeds then?
   autoconf
   sed -i '/PKG_CHECK_MODULES.*/,/,:./d' configure # https://github.com/vasi/squashfuse/issues/12
-  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=/usr/lib/
+  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=`pwd`/../xz-5.2.3/build/
 fi
 
 bash --version
@@ -75,7 +102,7 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed .upd_info and .sha256_sig sections
-cc ../elf.c ../notify.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl -o runtime
+cc ../elf.c ../notify.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl -o runtime
 strip runtime
 
 # Test if we can read it back
@@ -97,13 +124,12 @@ ld -r -b binary -o data.o runtime
 
 # Compile and link digest tool
 
-cc -o digest ../getsection.c ../digest.c -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lz -ldl
-# cc -o digest -Wl,-Bdynamic ../digest.c -Wl,-Bstatic -static  -lcrypto -Wl,-Bdynamic -ldl # 1.4 MB
+cc -o digest ../getsection.c ../digest.c -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lz -ldl
 strip digest
 
 # Compile and link validate tool
 
-cc -o validate ../getsection.c ../validate.c -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -ldl
+cc -o validate ../getsection.c ../validate.c -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -ldl
 strip validate
 
 # Test if we can read it back
@@ -121,11 +147,11 @@ ld -r -b binary -o data.o runtime
 
 # Compile appimagetool but do not link - glib version
 
-cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os ../getsection.c  -c ../appimagetool.c
+cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ $(pkg-config --cflags glib-2.0) -g -Os ../getsection.c  -c ../appimagetool.c
 
 # Now statically link against libsquashfuse and liblzma - glib version
 
-cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool # liblz4
+cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool # liblz4
 
 # Version without glib
 # cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetoolnoglib.c
@@ -144,7 +170,7 @@ fi
 rm -f a.out
 
 # appimaged, an optional component
-cc -std=gnu99 -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../getsection.c ../notify.c -Wl,-Bdynamic ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -Wl,-Bstatic -linotifytools -Wl,-Bdynamic -larchive${archive_n} $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags --libs gio-2.0) $(pkg-config --libs --cflags cairo) -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimaged # liblz4
+cc -std=gnu99 -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../getsection.c ../notify.c -Wl,-Bdynamic ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -L../xz-5.2.3/build/lib -I../inotify-tools-3.14/build/include -L../inotify-tools-3.14/build/lib -Wl,-Bstatic -linotifytools -Wl,-Bdynamic -larchive${archive_n} $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) $(pkg-config --libs --cflags cairo) -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimaged # liblz4
 
 cd ..
 
@@ -155,13 +181,13 @@ strip build/* 2>/dev/null
 chmod a+x build/*
 ls -lh build/*
 for FILE in $(ls build/*) ; do
-  echo "build/$FILE"
-  ldd "build/$FILE" || true
+  echo "$FILE"
+  ldd "$FILE" || true
 done
 
 bash -ex "$HERE/build-appdirs.sh"
 
 ls -lh
 
-mkdir -p /out/
-cp -r build/* ./*.AppDir /out/
+mkdir -p out
+cp -r build/* ./*.AppDir out/

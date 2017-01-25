@@ -40,7 +40,7 @@ cp -f build/appimaged appimaged.AppDir/usr/bin
 cp -f build/validate appimaged.AppDir/usr/bin
 
 cp resources/AppRun appimaged.AppDir/
-find /usr/lib -name libarchive.so.3 -exec cp {} appimaged.AppDir/usr/lib/ \;
+find /usr -name "libarchive.so.*.*" -exec cp {} appimaged.AppDir/usr/lib/ \; > /dev/null 2>&1
 
 cp resources/appimaged.desktop appimaged.AppDir/
 cp resources/appimagetool.svg appimaged.AppDir/appimaged.svg
