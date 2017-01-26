@@ -30,28 +30,31 @@ if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ;
     ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib
     make
     make install
+    rm inotify-tools-3.14/build/lib/*.so*
     cd -
 fi
 
 # Build lzma
 if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
-  wget http://tukaani.org/xz/xz-5.2.3.tar.gz
+  wget -c http://tukaani.org/xz/xz-5.2.3.tar.gz
   tar xf xz-5.2.3.tar.gz
   cd xz-5.2.3
   mkdir -p build/lib
   ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib --enable-static
   make && make install
+  rm xz-5.2.3/build/lib/*.so*
   cd -
 fi
 
 # Build openssl
 if [ ! -e "./openssl-1.1.0c/build/lib/libssl.a" ] ; then
-  wget https://www.openssl.org/source/openssl-1.1.0c.tar.gz
+  wget -c https://www.openssl.org/source/openssl-1.1.0c.tar.gz
   tar xf openssl-1.1.0c.tar.gz
   cd openssl-1.1.0c
   mkdir -p build/lib
   ./config --prefix=`pwd`/build
   make && make install
+  rm openssl-1.1.0c/build/lib/*.so*
   cd -
 fi
 
@@ -77,18 +80,31 @@ fi
 # Patch make file to use static lzma
 sed -i "s|XZ_LIBS = -llzma  -L$(pwd)/../xz-5.2.3/build/lib|XZ_LIBS = -Bstatic -llzma  -L$(pwd)/../xz-5.2.3/build/lib|g" Makefile
 
-# Patch squashfuse-tools Makefile to link against static llzma
-sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" ../squashfs-tools/squashfs-tools/Makefile
-sed -i "s|LIBS += -llzma|LIBS += -Bstatic -llzma  -L../../xz-5.2.3/build/lib|g" ../squashfs-tools/squashfs-tools/Makefile
-
 bash --version
 
 make
 
 cd ..
 
+# Build mksquashfs with -offset option to skip n bytes
+# https://github.com/plougher/squashfs-tools/pull/13
+cd squashfs-tools/squashfs-tools
+
+# Patch squashfuse-tools Makefile to link against static llzma
+sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" Makefile
+sed -i "s|LIBS += -llzma|LIBS += -Bstatic -llzma  -L../../xz-5.2.3/build/lib|g" Makefile
+
+make XZ_SUPPORT=1 mksquashfs # LZ4_SUPPORT=1 did not build yet on CentOS 6
+strip mksquashfs
+
+cd ../../
+
+pwd
+
 mkdir build
 cd build
+
+cp ../squashfs-tools/squashfs-tools/mksquashfs .
 
 # Compile runtime but do not link
 
