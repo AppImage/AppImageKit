@@ -30,8 +30,8 @@ if [ ! -e "./inotify-tools-3.14/libinotifytools/src/.libs/libinotifytools.a" ] ;
     ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib
     make
     make install
-    rm inotify-tools-3.14/build/lib/*.so*
     cd -
+    rm inotify-tools-3.14/build/lib/*.so*
 fi
 
 # Build lzma
@@ -42,8 +42,8 @@ if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
   mkdir -p build/lib
   ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib --enable-static
   make && make install
-  rm xz-5.2.3/build/lib/*.so*
   cd -
+  rm xz-5.2.3/build/lib/*.so*
 fi
 
 # Build openssl
@@ -54,8 +54,8 @@ if [ ! -e "./openssl-1.1.0c/build/lib/libssl.a" ] ; then
   mkdir -p build/lib
   ./config --prefix=`pwd`/build
   make && make install
-  rm openssl-1.1.0c/build/lib/*.so*
   cd -
+  rm openssl-1.1.0c/build/lib/*.so*
 fi
 
 # Patch squashfuse_ll to be a library rather than an executable
