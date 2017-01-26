@@ -55,10 +55,6 @@ if [ ! -e "./openssl-1.1.0c/build/lib/libssl.a" ] ; then
   cd -
 fi
 
-# Patch squashfuse-tools Makefile to link against static llzma
-sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" squashfs-tools/squashfs-tools/Makefile
-sed -i "s|LIBS += -llzma|LIBS += -L../../xz-5.2.3/build/lib -llzma|g" squashfs-tools/squashfs-tools/Makefile
-
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
@@ -75,8 +71,15 @@ if [ ! -e ./Makefile ] ; then
   autoreconf -fi || true # Errors out, but the following succeeds then?
   autoconf
   sed -i '/PKG_CHECK_MODULES.*/,/,:./d' configure # https://github.com/vasi/squashfuse/issues/12
-  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=`pwd`/../xz-5.2.3/build/
+  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=`pwd`/../xz-5.2.3/build
 fi
+
+# Patch make file to use static lzma
+sed -i "s|XZ_LIBS = -llzma  -L$(pwd)/../xz-5.2.3/build/lib|XZ_LIBS = -Bstatic -llzma  -L$(pwd)/../xz-5.2.3/build/lib|g" Makefile
+
+# Patch squashfuse-tools Makefile to link against static llzma
+sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" ../squashfs-tools/squashfs-tools/Makefile
+sed -i "s|LIBS += -llzma|LIBS += -Bstatic -llzma  -L../../xz-5.2.3/build/lib|g" ../squashfs-tools/squashfs-tools/Makefile
 
 bash --version
 
