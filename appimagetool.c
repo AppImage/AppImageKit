@@ -433,6 +433,11 @@ main (int argc, char *argv[])
        
         /* Check if .DirIcon is present in source AppDir */
         gchar *diricon_path = g_build_filename(source, ".DirIcon", NULL);
+        
+        if (! g_file_test(diricon_path, G_FILE_TEST_EXISTS)){
+            fprintf (stderr, "Deleting pre-existing .DirIcon\n");
+            g_unlink(diricon_path);
+        }
         if (! g_file_test(diricon_path, G_FILE_TEST_IS_REGULAR)){
             fprintf (stderr, "Creating .DirIcon symlink based on information from desktop file\n");
             int res = symlink(basename(icon_file_path), diricon_path);
