@@ -276,7 +276,7 @@ Exec="$APPIMAGE" --remove-appimage-desktop-integration
 EOF
 
   # Install the icon files for the application; TODO: scalable
-  ICONS=$(find "${APPDIR}/usr/share/icons/" -wholename "*/apps/${APP}.png" 2>/dev/null || true)
+  ICONS=$(find "${APPDIR}/usr/share/icons/" -iwholename "*/apps/${APP}.png" 2>/dev/null || true)
   for ICON in $ICONS ; do
     ICON_SIZE=$(echo "${ICON}" | rev | cut -d "/" -f 3 | rev | cut -d "x" -f 1)
     xdg-icon-resource install --context apps --size ${ICON_SIZE} "${ICON}" "${RESOURCE_NAME}"
@@ -286,7 +286,7 @@ EOF
   find "${APPDIR}/usr/share/mime/" -type f -name *xml -exec xdg-mime install $SYSTEM_WIDE --novendor {} \; 2>/dev/null || true
 
   # Install the icon files for the mime type; TODO: scalable
-  ICONS=$(find "${APPDIR}/usr/share/icons/" -wholename "*/mimetypes/*.png" 2>/dev/null || true)
+  ICONS=$(find "${APPDIR}/usr/share/icons/" -iwholename "*/mimetypes/*.png" 2>/dev/null || true)
   for ICON in $ICONS ; do
     ICON_SIZE=$(echo "${ICON}" | rev | cut -d "/" -f 3 | rev | cut -d "x" -f 1)
     xdg-icon-resource install --context mimetypes --size ${ICON_SIZE} "${ICON}" $(basename $ICON | sed -e 's/.png//g')
