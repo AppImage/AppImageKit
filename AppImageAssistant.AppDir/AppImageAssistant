@@ -50,7 +50,7 @@ import subprocess
 
 def usage():
     print "Usage:"
-    print " ", "<input AppDir>", "<output AppImage>"
+    print " ", "[-p, --package] <input AppDir> <output AppImage>"
     print "     ", "Create an AppImage from an AppDir"
     print " ", "-f, --force"
     print "     ", "Overwrite target if already existing"
@@ -74,6 +74,11 @@ for arg in sys.argv:
 if len(sys.argv) >= 2:
     if (sys.argv[1] in ["-t", "--testappimage"]):
         command = [os.path.dirname(__file__) + "/testappimage"] + sys.argv[2:]
+        print(command)
+        subprocess.call(command)
+        exit(0)
+    elif (sys.argv[1] in ["-p", "--package"]):
+        command = [os.path.dirname(__file__) + "/package"] + sys.argv[2:]
         print(command)
         subprocess.call(command)
         exit(0)
