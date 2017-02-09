@@ -27,6 +27,7 @@
 #ident "AppImage by Simon Peter, http://appimage.org/"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <stdlib.h>
 
 #include <stdio.h>
@@ -41,9 +42,6 @@
 #include <sys/wait.h>
 
 #include "binreloc.h"
-#ifndef NULL
-#define NULL ((void *) 0)
-#endif
 
 #include <libgen.h>
 
@@ -57,8 +55,6 @@ extern int _binary_runtime_start;
 extern int _binary_runtime_end;
 
 
-static gint repeats = 2;
-static gint max_size = 8;
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
 static gboolean version = FALSE;
@@ -107,7 +103,6 @@ int sfs_ls(char* image) {
 /* Generate a squashfs filesystem using mksquashfs on the $PATH 
 * execlp(), execvp(), and execvpe() search on the $PATH */
 int sfs_mksquashfs(char *source, char *destination, int offset) {
-    pid_t parent = getpid();
     pid_t pid = fork();
     
     if (pid == -1) {
@@ -169,17 +164,16 @@ gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
             }
         }
         g_dir_close(dir);
-        return NULL;
     }
     else {
         g_warning("%s: %s", real_path, g_strerror(errno));
     }
+    return NULL;
 }
 
 gchar* find_first_matching_file_nonrecursive(const gchar *real_path, const gchar *pattern) {
     GDir *dir;
     gchar *full_name;
-    gchar *resulting;
     dir = g_dir_open(real_path, 0, NULL);
     if (dir != NULL) {
         const gchar *entry;
@@ -191,11 +185,11 @@ gchar* find_first_matching_file_nonrecursive(const gchar *real_path, const gchar
             }
         }
         g_dir_close(dir);
-        return NULL;
     }
     else { 
         g_warning("%s: %s", real_path, g_strerror(errno));
     }
+    return NULL;
 }
 
 gchar* get_desktop_entry(GKeyFile *kf, char *key) {
@@ -233,15 +227,14 @@ static void replacestr(char *line, const char *search, const char *replace)
 
 static GOptionEntry entries[] =
 {
-    // { "repeats", 'r', 0, G_OPTION_ARG_INT, &repeats, "Average over N repetitions", "N" },
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
-    { "bintray-user", NULL, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
-    { "bintray-repo", NULL, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
-    { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
+    { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
+    { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
+    { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
-    { "comp", NULL, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL }, 
+    { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -579,7 +572,7 @@ main (int argc, char *argv[])
             }
         }
 
-        if(sign != NULL){
+        if(sign){
             /* The user has indicated that he wants to sign */
             gchar *gpg2_path = g_find_program_in_path ("gpg2");
             gchar *sha256sum_path = g_find_program_in_path ("sha256sum");

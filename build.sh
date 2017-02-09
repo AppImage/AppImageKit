@@ -4,6 +4,8 @@
 # and builds AppImage
 #
 
+CC="cc -O2 -Wall -Wno-deprecated-declarations -Wno-unused-result"
+
 STATIC_BUILD=1
 INSTALL_DEPENDENCIES=1
 
@@ -78,7 +80,7 @@ if [ $STATIC_BUILD -eq 1 ]; then
     cd openssl-1.1.0c
     mkdir -p build/lib
     ./config --prefix=`pwd`/build
-    make && make install
+    make && make install PROCESS_PODS=''
     cd -
     rm openssl-1.1.0c/build/lib/*.so*
   fi
@@ -147,7 +149,7 @@ cp ../squashfs-tools/squashfs-tools/mksquashfs .
 
 # Compile runtime but do not link
 
-cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -I../squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
+$CC -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -I../squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
 printf '\0%.0s' {0..1023} > 1024_blank_bytes
@@ -160,7 +162,9 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed .upd_info and .sha256_sig sections
-cc ../elf.c ../notify.c ../getsection.c runtime3.o ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl -o runtime
+$CC -o runtime ../elf.c ../notify.c ../getsection.c runtime3.o \
+    ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
+    -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
 strip runtime
 
 # Test if we can read it back
@@ -195,15 +199,23 @@ ld -r -b binary -o data.o runtime
 
 # Compile appimagetool but do not link - glib version
 
-cc -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ $(pkg-config --cflags glib-2.0) -g -Os ../getsection.c  -c ../appimagetool.c
+$CC -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ \
+    $(pkg-config --cflags glib-2.0) -g -Os ../getsection.c  -c ../appimagetool.c
 
 # Now statically link against libsquashfuse - glib version
 if [ $STATIC_BUILD -eq 1 ]; then
   # statically link against liblzma
-  cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetool # liblz4
+  $CC -o appimagetool data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
+    ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
+    -L../xz-5.2.3/build/lib \
+    -Wl,-Bdynamic -lfuse -lpthread \
+    -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic
 else
   # dinamically link against distro provided liblzma
-  cc data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -llzma -o appimagetool # liblz4
+  $CC -o appimagetool data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
+    ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
+    -Wl,-Bdynamic -lfuse -lpthread \
+    -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -llzma
 fi
 
 # Version without glib
@@ -213,9 +225,10 @@ fi
 # Compile and link digest tool
 
 if [ $STATIC_BUILD -eq 1 ]; then
-  cc -o digest ../getsection.c ../digest.c -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lz -ldl
+  $CC -o digest ../getsection.c ../digest.c -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib \
+    -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lz -ldl
 else
-  cc -o digest ../getsection.c ../digest.c -Wl,-Bdynamic -lssl -lcrypto -lz -ldl
+  $CC -o digest ../getsection.c ../digest.c -Wl,-Bdynamic -lssl -lcrypto -lz -ldl
 fi
 
 strip digest
@@ -223,15 +236,17 @@ strip digest
 # Compile and link validate tool
 
 if [ $STATIC_BUILD -eq 1 ]; then
-  cc -o validate ../getsection.c ../validate.c -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -ldl
+  $CC -o validate ../getsection.c ../validate.c -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib \
+    -Wl,-Bstatic -lssl -lcrypto -Wl,-Bdynamic -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -ldl
 else
-  cc -o validate ../getsection.c ../validate.c -Wl,-Bdynamic -lssl -lcrypto -lglib-2.0 $(pkg-config --cflags glib-2.0) -lz -ldl
+  $CC -o validate ../getsection.c ../validate.c -Wl,-Bdynamic -lssl -lcrypto \
+    -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -ldl
 fi
 
 strip validate
 
 # AppRun
-cc ../AppRun.c -o AppRun
+$CC ../AppRun.c -o AppRun
 
 # check for libarchive name
 have_libarchive3=0
@@ -244,9 +259,26 @@ rm -f a.out
 
 # appimaged, an optional component
 if [ $STATIC_BUILD -eq 1 ]; then
-  cc -std=gnu99 -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../getsection.c ../notify.c -Wl,-Bdynamic ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -L../xz-5.2.3/build/lib -I../inotify-tools-3.14/build/include -L../inotify-tools-3.14/build/lib -Wl,-Bstatic -linotifytools -Wl,-Bdynamic -larchive${archive_n} $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) $(pkg-config --libs --cflags cairo) -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimaged # liblz4
+  $CC -std=gnu99 -o appimaged -I../squashfuse/ ../getsection.c ../notify.c ../elf.c ../appimaged.c \
+    -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
+    ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
+    -L../xz-5.2.3/build/lib -I../inotify-tools-3.14/build/include -L../inotify-tools-3.14/build/lib \
+    -Wl,-Bstatic -linotifytools -Wl,-Bdynamic -larchive${archive_n} \
+    -Wl,--as-needed \
+    $(pkg-config --cflags --libs glib-2.0) \
+    $(pkg-config --cflags --libs gio-2.0) \
+    $(pkg-config --cflags --libs cairo) \
+    -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic
 else
-  cc -std=gnu99 -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" ../getsection.c ../notify.c -Wl,-Bdynamic ../elf.c ../appimaged.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -I../squashfuse/ -Wl,-Bdynamic -linotifytools -larchive${archive_n} $(pkg-config --cflags --libs glib-2.0) $(pkg-config --cflags gio-2.0) $(pkg-config --libs gio-2.0) $(pkg-config --libs --cflags cairo) -ldl -lpthread -lz -llzma -o appimaged # liblz4
+  $CC -std=gnu99 -o appimaged -I../squashfuse/ ../getsection.c ../notify.c ../elf.c ../appimaged.c \
+    -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
+    ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
+    -Wl,-Bdynamic -linotifytools -larchive${archive_n} \
+    -Wl,--as-needed \
+    $(pkg-config --cflags --libs glib-2.0) \
+    $(pkg-config --cflags --libs gio-2.0) \
+    $(pkg-config --cflags --libs cairo) \
+    -ldl -lpthread -lz -llzma
 fi
 
 cd ..
