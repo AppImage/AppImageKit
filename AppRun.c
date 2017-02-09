@@ -53,7 +53,6 @@ int main(int argc, char *argv[])
     if (!appdir)
         die("Could not access /proc/self/exe\n");
     
-    char path[LINE_SIZE];
     int ret;
 
     struct dirent **namelist;
@@ -74,7 +73,7 @@ int main(int argc, char *argv[])
     f = fopen(desktop_file, "r");
 
     char *line = malloc(LINE_SIZE);
-    unsigned int n = LINE_SIZE;
+    size_t n = LINE_SIZE;
     int found = 0;
 
     while (getline(&line, &n, f) != -1)

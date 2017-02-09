@@ -145,9 +145,10 @@ int main(int argc,char **argv)	{
         fprintf(stderr, "offset+length cannot be less than the file size\n");
         exit(1);
     }
-	static unsigned char buffer[65];
-	int res = sha256_file(filename, buffer, skip_offset, skip_length);
-	printf("%s\n", buffer);
+
+    static char buffer[65];
+    sha256_file(filename, buffer, skip_offset, skip_length);
+    printf("%s\n", buffer);
     
 
     FILE *f = fopen(digestfile, "w");
@@ -172,5 +173,5 @@ int main(int argc,char **argv)	{
     int exitcode = WEXITSTATUS(pclose(fp));
     unlink(digestfile);
     unlink(signaturefile);
-	return exitcode;
+    return exitcode;
 }

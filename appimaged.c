@@ -68,7 +68,7 @@ static GOptionEntry entries[] =
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     { "install", 'i', 0, G_OPTION_ARG_NONE, &install, "Install this appimaged instance to $HOME", NULL },
     { "uninstall", 'u', 0, G_OPTION_ARG_NONE, &uninstall, "Uninstall an appimaged instance from $HOME", NULL },
-    { "version", NULL, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
+    { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
 };
@@ -153,11 +153,11 @@ void initially_register(const char *name, int level)
                 }
             }
         }
-    } while (entry = readdir(dir));
+    } while ((entry = readdir(dir)) != NULL);
     closedir(dir);
 }
 
-int add_dir_to_watch(char *directory)
+void add_dir_to_watch(char *directory)
 {
     if (g_file_test (directory, G_FILE_TEST_IS_DIR)){
         if(!inotifytools_watch_recursively(directory, WR_EVENTS) ) {
@@ -174,7 +174,7 @@ void handle_event(struct inotify_event *event)
     int ret;
     gchar *absolute_path = g_build_path(G_DIR_SEPARATOR_S, inotifytools_filename_from_wd(event->wd), event->name, NULL);
 
-    if(event->mask & IN_CLOSE_WRITE | event->mask & IN_MOVED_TO){
+    if((event->mask & IN_CLOSE_WRITE) | (event->mask & IN_MOVED_TO)){
         if(g_file_test(absolute_path, G_FILE_TEST_IS_REGULAR)){
             pthread_t some_thread;
             struct arg_struct args;
@@ -188,7 +188,7 @@ void handle_event(struct inotify_event *event)
         }
     }
 
-    if(event->mask & IN_MOVED_FROM | event->mask & IN_DELETE){
+    if((event->mask & IN_MOVED_FROM) | (event->mask & IN_DELETE)){
         pthread_t some_thread;
         struct arg_struct args;
         args.path = absolute_path;
@@ -237,7 +237,7 @@ int main(int argc, char ** argv) {
 
     gchar *user_bin_dir = g_build_filename(g_get_home_dir(), "/.local/bin", NULL);
     gchar *installed_appimaged_location = g_build_filename(user_bin_dir, "appimaged", NULL);
-    gchar *appimage_location = g_getenv("APPIMAGE");
+    const gchar *appimage_location = g_getenv("APPIMAGE");
     gchar *own_desktop_file_location = g_build_filename(g_getenv("APPDIR"), "/appimaged.desktop", NULL);
     gchar *global_autostart_file = "/etc/xdg/autostart/appimaged.desktop";
     gchar *global_systemd_file = "/usr/lib/systemd/user/appimaged.service";
@@ -254,7 +254,7 @@ int main(int argc, char ** argv) {
         exit(0);
     }
 
-    if(install != NULL){
+    if(install){
         if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
             printf("Running from within %s\n", appimage_location);
             if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && (! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS))){
@@ -297,7 +297,7 @@ int main(int argc, char ** argv) {
         if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && ((! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) || (! g_file_test (destination, G_FILE_TEST_EXISTS))) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
             char *title;
             char *body;
-            title = g_strdup_printf("Not installed\n", argv[0]);
+            title = g_strdup_printf("Not installed\n");
             body = g_strdup_printf("Please run %s --install", argv[0]);
             notify(title, body, 15);
             exit(1);

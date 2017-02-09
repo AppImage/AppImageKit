@@ -101,7 +101,6 @@ gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
 char * get_md5(char *path)
 {
     gchar *uri = g_filename_to_uri (path, NULL, NULL);
-    char *file;
     GChecksum *checksum;
     checksum = g_checksum_new(G_CHECKSUM_MD5);
     guint8 digest[16];
@@ -109,7 +108,7 @@ char * get_md5(char *path)
     g_checksum_update(checksum, (const guchar *) uri, strlen (uri));
     g_checksum_get_digest(checksum, digest, &digest_len);
     g_assert(digest_len == 16);
-    return g_checksum_get_string(checksum);
+    return g_strdup_printf("%s", g_checksum_get_string(checksum));
 }
 
 /* Return the path of the thumbnail regardless whether it already exists; may be useful because
@@ -119,7 +118,6 @@ char * get_md5(char *path)
  */
 char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 {
-    gchar *uri = g_filename_to_uri (path, NULL, NULL);
     char *file;
     file = g_strconcat (get_md5(path), ".png", NULL);
     gchar *thumbnail_path = g_build_filename (g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
@@ -196,9 +194,9 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
 int check_appimage_type(char *path, gboolean verbose)
 {
-    FILE *f;
     char buffer[3];
-    if (f = fopen(path, "rt"))
+    FILE *f = fopen(path, "rt");
+    if (f != NULL)
     {
         /* Check magic bytes at offset 8 */
         fseek(f, 8, SEEK_SET);
@@ -229,9 +227,9 @@ int check_appimage_type(char *path, gboolean verbose)
                 }
                 return -1;
             }
-
         }
     }
+    return -1;
 }
 
 /* Get filename extension */
@@ -262,9 +260,9 @@ static gchar *get_file_extension(const gchar *filename)
  */
 gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_value_original, char *md5, gboolean verbose) {
     GPtrArray *array = g_ptr_array_new();
-    sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
-    if (err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs)))
+    sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
+    if (err!= SQFS_OK)
         fprintf(stderr, "sqfs_traverse_open error\n");
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
@@ -286,7 +284,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                 gchar *dest_dirname;
                 gchar *dest_basename;
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
-                    if(g_str_has_prefix (trv.path, "usr/share/icons/") || g_str_has_prefix (trv.path, "usr/share/pixmaps/") ||(g_str_has_prefix(trv.path, "usr/share/mime/")) && (g_str_has_suffix(trv.path, ".xml"))){
+                    if(g_str_has_prefix(trv.path, "usr/share/icons/") || g_str_has_prefix(trv.path, "usr/share/pixmaps/") || (g_str_has_prefix(trv.path, "usr/share/mime/") && g_str_has_suffix(trv.path, ".xml"))){
                         dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));          
                         dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
                         dest = g_build_path("/", dest_dirname, dest_basename, NULL);
@@ -356,9 +354,9 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
  */
 gboolean g_key_file_load_from_squash(sqfs *fs, char *path, GKeyFile *key_file_structure, gboolean verbose) {
     sqfs_traverse trv;
-    sqfs_err err = SQFS_OK;
-    gboolean success;
-    if (err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs)))
+    gboolean success = true;
+    sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
+    if (err != SQFS_OK)
         fprintf(stderr, "sqfs_traverse_open error\n");
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
@@ -396,7 +394,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
         return;
     }
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, appimage_path);
-    gchar *tryexec_path = replace_str(appimage_path," ", "\\ "); // TryExec does not support blanks
+    //gchar *tryexec_path = replace_str(appimage_path," ", "\\ "); // TryExec does not support blanks
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimage_path);
     
     /* If firejail is on the $PATH, then use it to run AppImages */
@@ -435,9 +433,9 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
         }
         fprintf(stderr, ".upd_info offset: %lu\n", upd_offset);
         fprintf(stderr, ".upd_info length: %lu\n", upd_length);
-        FILE *binary;
         char buffer[3];
-        if (binary = fopen(appimage_path, "rt"))
+        FILE *binary = fopen(appimage_path, "rt");
+        if (binary != NULL)
         {
             /* Check whether the first three bytes at the offset are not NULL */
             fseek(binary, upd_offset, SEEK_SET);
@@ -446,7 +444,6 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
             if((buffer[0] != 0x00) && (buffer[1] != 0x00) && (buffer[2] != 0x00)){
                 gchar *appimageupdate_group = "Desktop Action AppImageUpdate";
                 gchar *appimageupdate_exec = g_strdup_printf("%s %s", "AppImageUpdate", appimage_path);
-                gchar *appimageupdate_tryexec = "AppImageUpdate";
                 g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_NAME, "Update");
                 g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_EXEC, appimageupdate_exec);
                 g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "AppImageUpdate;");
@@ -578,40 +575,12 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     chmod(destination, 0755);
 }
 
-/* From https://github.com/libarchive/libarchive/issues/811 similar to libarchive minitar */ 
-static int
-copy_data(struct archive *ar, struct archive *aw)
-{
-    int r;
-    const void *buff;
-    size_t size;
-    int64_t offset;
-
-    for (;;) {
-        r = archive_read_data_block(ar, &buff, &size, &offset);
-        if (r == ARCHIVE_EOF)
-            return (ARCHIVE_OK);
-        if (r != ARCHIVE_OK) {
-            fprintf(stderr, "%s\n", archive_error_string(ar));
-            return (r);
-        }
-        r = archive_write_data_block(aw, buff, size, offset);
-        if (r != ARCHIVE_OK) {
-            fprintf(stderr, "%s\n", archive_error_string(ar));
-            return (r);
-        }
-    }
-  archive_write_close(aw);
-  archive_write_finish(aw);
-}
-
 /* Register a type 1 AppImage in the system */
 bool appimage_type1_register_in_system(char *path, gboolean verbose)
 {
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
     gchar *desktop_icon_value_original = NULL;
     char *md5 = get_md5(path);
-    GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
     
     if(verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
@@ -654,7 +623,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
             if (r == ARCHIVE_EOF)
                 return (ARCHIVE_OK);
             if (r != ARCHIVE_OK) {
-                fprintf("%s", stderr, archive_error_string(a));
+                fprintf(stderr, "%s", archive_error_string(a));
                 break;
             }
             GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
@@ -674,7 +643,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         gchar *dest_basename = NULL;
         /* Get icon file(s) and act on them in one go */
         
-        if(g_str_has_prefix (filename, "usr/share/icons/") || g_str_has_prefix (filename, "usr/share/pixmaps/") ||(g_str_has_prefix(filename, "usr/share/mime/")) && (g_str_has_suffix(filename, ".xml"))){
+        if(g_str_has_prefix(filename, "usr/share/icons/") || g_str_has_prefix(filename, "usr/share/pixmaps/") || (g_str_has_prefix(filename, "usr/share/mime/") && g_str_has_suffix(filename, ".xml"))){
             dest_dirname = g_path_get_dirname(replace_str(filename, "usr/share", g_get_user_data_dir()));          
             dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(filename));
             dest = g_build_path("/", dest_dirname, dest_basename, NULL);
@@ -737,12 +706,12 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
             if(g_str_has_prefix (dest, "/tmp/")) {
                 move_icon_to_destination(dest, verbose);
             } 
-            
         }
     }
     archive_read_close(a);
     archive_read_finish(a);
     set_executable(path, verbose);
+    return TRUE;
 }
 
 /* Register a type 2 AppImage in the system */
@@ -758,10 +727,9 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     fs_offset = get_elf_size(path);
     if(verbose)
         fprintf(stderr, "fs_offset: %lu\n", fs_offset);
-    sqfs_err err = SQFS_OK;
-    sqfs_traverse trv;
     sqfs fs;
-    if (err = sqfs_open_image(&fs, path, fs_offset)){
+    sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
+    if (err != SQFS_OK){
         fprintf(stderr, "sqfs_open_image error: %s\n", path);
         return FALSE;
     } else {
@@ -777,7 +745,6 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     // gchar **str_array = squash_get_matching_files(&fs, "(^.*?.desktop$)", md5, verbose); // Not only there
     /* Work trough the NULL-terminated array of strings */
     for (int i=0; str_array[i]; ++i) {
-        const char *ch = str_array[i]; 
         fprintf(stderr, "Got root desktop: %s\n", str_array[i]);
         gboolean success = g_key_file_load_from_squash(&fs, str_array[i], key_file_structure, verbose);
         if(success){
@@ -879,7 +846,7 @@ void unregister_using_md5_id(const char *name, int level, char* md5, gboolean ve
                     fprintf(stderr, "deleted: %s\n", path_to_be_deleted);
             }
         }
-    } while (entry = readdir(dir));
+    } while ((entry = readdir(dir)) != NULL);
     closedir(dir);
 }
 

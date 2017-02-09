@@ -92,7 +92,10 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
     return 0;
 }
 
-int main(int argc,char **argv)	{
+int main(int argc,char **argv)
+{
+    int res = 0;
+
         if(argc < 2){
             fprintf(stderr, "Usage: %s file offset length\n", argv[0]);
             fprintf(stderr, "If no offset and length are provided, the ELF section '%s' is skipped\n\n", segment_name);            
@@ -124,8 +127,8 @@ int main(int argc,char **argv)	{
         fprintf(stderr, "offset+length cannot be less than the file size\n");
         exit(1);
     }
-	static unsigned char buffer[65];
-	int res = sha256_file(filename, buffer, skip_offset, skip_length);
+	static char buffer[65];
+	res = sha256_file(filename, buffer, skip_offset, skip_length);
 	printf("%s\n", buffer);
 	return res;
 }
