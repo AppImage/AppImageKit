@@ -279,3 +279,108 @@ https://github.com/libarchive/libarchive/blob/72abdbb8ba51e926432de242f4df5cf632
  #elif defined(ARCHIVE_CRYPTO_SHA512_WIN)
  typedef Digest_CTX archive_sha512_ctx;
  #else
+--- a/libarchive/archive_cryptor.c
++++ b/libarchive/archive_cryptor.c
+@@ -302,6 +302,7 @@
+ static int
+ aes_ctr_init(archive_crypto_ctx *ctx, const uint8_t *key, size_t key_len)
+ {
++	ctx->ctx = EVP_CIPHER_CTX_new();
+ 
+ 	switch (key_len) {
+ 	case 16: ctx->type = EVP_aes_128_ecb(); break;
+@@ -314,7 +315,7 @@
+ 	memcpy(ctx->key, key, key_len);
+ 	memset(ctx->nonce, 0, sizeof(ctx->nonce));
+ 	ctx->encr_pos = AES_BLOCK_SIZE;
+-	EVP_CIPHER_CTX_init(&ctx->ctx);
++	EVP_CIPHER_CTX_init(ctx->ctx);
+ 	return 0;
+ }
+ 
+@@ -324,10 +325,10 @@
+ 	int outl = 0;
+ 	int r;
+ 
+-	r = EVP_EncryptInit_ex(&ctx->ctx, ctx->type, NULL, ctx->key, NULL);
++	r = EVP_EncryptInit_ex(ctx->ctx, ctx->type, NULL, ctx->key, NULL);
+ 	if (r == 0)
+ 		return -1;
+-	r = EVP_EncryptUpdate(&ctx->ctx, ctx->encr_buf, &outl, ctx->nonce,
++	r = EVP_EncryptUpdate(ctx->ctx, ctx->encr_buf, &outl, ctx->nonce,
+ 	    AES_BLOCK_SIZE);
+ 	if (r == 0 || outl != AES_BLOCK_SIZE)
+ 		return -1;
+@@ -337,7 +338,7 @@
+ static int
+ aes_ctr_release(archive_crypto_ctx *ctx)
+ {
+-	EVP_CIPHER_CTX_cleanup(&ctx->ctx);
++	EVP_CIPHER_CTX_free(ctx->ctx);
+ 	memset(ctx->key, 0, ctx->key_len);
+ 	memset(ctx->nonce, 0, sizeof(ctx->nonce));
+ 	return 0;
+--- a/libarchive/archive_cryptor_private.h
++++ b/libarchive/archive_cryptor_private.h
+@@ -104,7 +104,7 @@
+ #define AES_MAX_KEY_SIZE 32
+ 
+ typedef struct {
+-	EVP_CIPHER_CTX	ctx;
++	EVP_CIPHER_CTX	*ctx;
+ 	const EVP_CIPHER *type;
+ 	uint8_t		key[AES_MAX_KEY_SIZE];
+ 	unsigned	key_len;
+--- a/libarchive/archive_hmac.c
++++ b/libarchive/archive_hmac.c
+@@ -176,8 +176,10 @@
+ static int
+ __hmac_sha1_init(archive_hmac_sha1_ctx *ctx, const uint8_t *key, size_t key_len)
+ {
+-	HMAC_CTX_init(ctx);
+-	HMAC_Init(ctx, key, key_len, EVP_sha1());
++	*ctx = HMAC_CTX_new();
++	if (*ctx == NULL)
++		return -1;
++	HMAC_Init_ex(*ctx, key, key_len, EVP_sha1(), NULL);
+ 	return 0;
+ }
+ 
+@@ -185,22 +187,22 @@
+ __hmac_sha1_update(archive_hmac_sha1_ctx *ctx, const uint8_t *data,
+     size_t data_len)
+ {
+-	HMAC_Update(ctx, data, data_len);
++	HMAC_Update(*ctx, data, data_len);
+ }
+ 
+ static void
+ __hmac_sha1_final(archive_hmac_sha1_ctx *ctx, uint8_t *out, size_t *out_len)
+ {
+ 	unsigned int len = (unsigned int)*out_len;
+-	HMAC_Final(ctx, out, &len);
++	HMAC_Final(*ctx, out, &len);
+ 	*out_len = len;
+ }
+ 
+ static void
+ __hmac_sha1_cleanup(archive_hmac_sha1_ctx *ctx)
+ {
+-	HMAC_CTX_cleanup(ctx);
+-	memset(ctx, 0, sizeof(*ctx));
++	HMAC_CTX_free(*ctx);
++	*ctx = NULL;
+ }
+ 
+ #else
+--- a/libarchive/archive_hmac_private.h
++++ b/libarchive/archive_hmac_private.h
+@@ -72,7 +72,7 @@
+ #elif defined(HAVE_LIBCRYPTO)
+ #include <openssl/hmac.h>
+ 
+-typedef	HMAC_CTX archive_hmac_sha1_ctx;
++typedef	HMAC_CTX* archive_hmac_sha1_ctx;
+ 
+ #else
+ 
