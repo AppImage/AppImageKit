@@ -1,0 +1,281 @@
+Fail-to-build fixes
+https://github.com/libarchive/libarchive/commit/89a6ed13be1c8813764c40ea2c42c472ec3aabf9
+https://github.com/libarchive/libarchive/blob/72abdbb8ba51e926432de242f4df5cf632546dc9/libarchive/archive_openssl_evp_private.h
+--- a/libarchive/archive_digest.c
++++ b/libarchive/archive_digest.c
+@@ -207,7 +207,9 @@
+ static int
+ __archive_openssl_md5init(archive_md5_ctx *ctx)
+ {
+-  EVP_DigestInit(ctx, EVP_md5());
++  if ((*ctx = EVP_MD_CTX_new()) == NULL)
++	return (ARCHIVE_FAILED);
++  EVP_DigestInit(*ctx, EVP_md5());
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -215,7 +217,7 @@
+ __archive_openssl_md5update(archive_md5_ctx *ctx, const void *indata,
+     size_t insize)
+ {
+-  EVP_DigestUpdate(ctx, indata, insize);
++  EVP_DigestUpdate(*ctx, indata, insize);
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -226,8 +228,11 @@
+    * this is meant to cope with that. Real fix is probably to fix
+    * archive_write_set_format_xar.c
+    */
+-  if (ctx->digest)
+-    EVP_DigestFinal(ctx, md, NULL);
++  if (*ctx) {
++    EVP_DigestFinal(*ctx, md, NULL);
++    EVP_MD_CTX_free(*ctx);
++    *ctx = NULL;
++  }
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -359,7 +364,9 @@
+ static int
+ __archive_openssl_ripemd160init(archive_rmd160_ctx *ctx)
+ {
+-  EVP_DigestInit(ctx, EVP_ripemd160());
++  if ((*ctx = EVP_MD_CTX_new()) == NULL)
++	return (ARCHIVE_FAILED);
++  EVP_DigestInit(*ctx, EVP_ripemd160());
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -367,14 +374,18 @@
+ __archive_openssl_ripemd160update(archive_rmd160_ctx *ctx, const void *indata,
+     size_t insize)
+ {
+-  EVP_DigestUpdate(ctx, indata, insize);
++  EVP_DigestUpdate(*ctx, indata, insize);
+   return (ARCHIVE_OK);
+ }
+ 
+ static int
+ __archive_openssl_ripemd160final(archive_rmd160_ctx *ctx, void *md)
+ {
+-  EVP_DigestFinal(ctx, md, NULL);
++  if (*ctx) {
++    EVP_DigestFinal(*ctx, md, NULL);
++    EVP_MD_CTX_free(*ctx);
++    *ctx = NULL;
++  }
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -509,7 +520,9 @@
+ static int
+ __archive_openssl_sha1init(archive_sha1_ctx *ctx)
+ {
+-  EVP_DigestInit(ctx, EVP_sha1());
++  if ((*ctx = EVP_MD_CTX_new()) == NULL)
++	return (ARCHIVE_FAILED);
++  EVP_DigestInit(*ctx, EVP_sha1());
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -517,7 +530,7 @@
+ __archive_openssl_sha1update(archive_sha1_ctx *ctx, const void *indata,
+     size_t insize)
+ {
+-  EVP_DigestUpdate(ctx, indata, insize);
++  EVP_DigestUpdate(*ctx, indata, insize);
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -528,8 +541,11 @@
+    * this is meant to cope with that. Real fix is probably to fix
+    * archive_write_set_format_xar.c
+    */
+-  if (ctx->digest)
+-    EVP_DigestFinal(ctx, md, NULL);
++  if (*ctx) {
++    EVP_DigestFinal(*ctx, md, NULL);
++    EVP_MD_CTX_free(*ctx);
++    *ctx = NULL;
++  }
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -733,7 +749,9 @@
+ static int
+ __archive_openssl_sha256init(archive_sha256_ctx *ctx)
+ {
+-  EVP_DigestInit(ctx, EVP_sha256());
++  if ((*ctx = EVP_MD_CTX_new()) == NULL)
++	return (ARCHIVE_FAILED);
++  EVP_DigestInit(*ctx, EVP_sha256());
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -741,14 +759,18 @@
+ __archive_openssl_sha256update(archive_sha256_ctx *ctx, const void *indata,
+     size_t insize)
+ {
+-  EVP_DigestUpdate(ctx, indata, insize);
++  EVP_DigestUpdate(*ctx, indata, insize);
+   return (ARCHIVE_OK);
+ }
+ 
+ static int
+ __archive_openssl_sha256final(archive_sha256_ctx *ctx, void *md)
+ {
+-  EVP_DigestFinal(ctx, md, NULL);
++  if (*ctx) {
++    EVP_DigestFinal(*ctx, md, NULL);
++    EVP_MD_CTX_free(*ctx);
++    *ctx = NULL;
++  }
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -928,7 +950,9 @@
+ static int
+ __archive_openssl_sha384init(archive_sha384_ctx *ctx)
+ {
+-  EVP_DigestInit(ctx, EVP_sha384());
++  if ((*ctx = EVP_MD_CTX_new()) == NULL)
++	return (ARCHIVE_FAILED);
++  EVP_DigestInit(*ctx, EVP_sha384());
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -936,14 +960,18 @@
+ __archive_openssl_sha384update(archive_sha384_ctx *ctx, const void *indata,
+     size_t insize)
+ {
+-  EVP_DigestUpdate(ctx, indata, insize);
++  EVP_DigestUpdate(*ctx, indata, insize);
+   return (ARCHIVE_OK);
+ }
+ 
+ static int
+ __archive_openssl_sha384final(archive_sha384_ctx *ctx, void *md)
+ {
+-  EVP_DigestFinal(ctx, md, NULL);
++  if (*ctx) {
++    EVP_DigestFinal(*ctx, md, NULL);
++    EVP_MD_CTX_free(*ctx);
++    *ctx = NULL;
++  }
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -1147,7 +1175,9 @@
+ static int
+ __archive_openssl_sha512init(archive_sha512_ctx *ctx)
+ {
+-  EVP_DigestInit(ctx, EVP_sha512());
++  if ((*ctx = EVP_MD_CTX_new()) == NULL)
++	return (ARCHIVE_FAILED);
++  EVP_DigestInit(*ctx, EVP_sha512());
+   return (ARCHIVE_OK);
+ }
+ 
+@@ -1155,14 +1185,18 @@
+ __archive_openssl_sha512update(archive_sha512_ctx *ctx, const void *indata,
+     size_t insize)
+ {
+-  EVP_DigestUpdate(ctx, indata, insize);
++  EVP_DigestUpdate(*ctx, indata, insize);
+   return (ARCHIVE_OK);
+ }
+ 
+ static int
+ __archive_openssl_sha512final(archive_sha512_ctx *ctx, void *md)
+ {
+-  EVP_DigestFinal(ctx, md, NULL);
++  if (*ctx) {
++    EVP_DigestFinal(*ctx, md, NULL);
++    EVP_MD_CTX_free(*ctx);
++    *ctx = NULL;
++  }
+   return (ARCHIVE_OK);
+ }
+ 
+--- a/libarchive/archive_digest_private.h
++++ b/libarchive/archive_digest_private.h
+@@ -135,6 +135,23 @@
+   defined(ARCHIVE_CRYPTO_SHA512_OPENSSL)
+ #define	ARCHIVE_CRYPTO_OPENSSL 1
+ #include <openssl/evp.h>
++#include <openssl/opensslv.h>
++#if OPENSSL_VERSION_NUMBER < 0x10100000L
++#include <stdlib.h> /* malloc, free */
++#include <string.h> /* memset */
++static inline EVP_MD_CTX *EVP_MD_CTX_new(void)
++{
++	EVP_MD_CTX *ctx = (EVP_MD_CTX *)calloc(1, sizeof(EVP_MD_CTX));
++	return ctx;
++}
++
++static inline void EVP_MD_CTX_free(EVP_MD_CTX *ctx)
++{
++	EVP_MD_CTX_cleanup(ctx);
++	memset(ctx, 0, sizeof(*ctx));
++	free(ctx);
++}
++#endif
+ #endif
+ 
+ /* Windows crypto headers */
+@@ -161,7 +178,7 @@
+ #elif defined(ARCHIVE_CRYPTO_MD5_NETTLE)
+ typedef struct md5_ctx archive_md5_ctx;
+ #elif defined(ARCHIVE_CRYPTO_MD5_OPENSSL)
+-typedef EVP_MD_CTX archive_md5_ctx;
++typedef EVP_MD_CTX *archive_md5_ctx;
+ #elif defined(ARCHIVE_CRYPTO_MD5_WIN)
+ typedef Digest_CTX archive_md5_ctx;
+ #else
+@@ -175,7 +192,7 @@
+ #elif defined(ARCHIVE_CRYPTO_RMD160_NETTLE)
+ typedef struct ripemd160_ctx archive_rmd160_ctx;
+ #elif defined(ARCHIVE_CRYPTO_RMD160_OPENSSL)
+-typedef EVP_MD_CTX archive_rmd160_ctx;
++typedef EVP_MD_CTX *archive_rmd160_ctx;
+ #else
+ typedef unsigned char archive_rmd160_ctx;
+ #endif
+@@ -189,7 +206,7 @@
+ #elif defined(ARCHIVE_CRYPTO_SHA1_NETTLE)
+ typedef struct sha1_ctx archive_sha1_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA1_OPENSSL)
+-typedef EVP_MD_CTX archive_sha1_ctx;
++typedef EVP_MD_CTX *archive_sha1_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA1_WIN)
+ typedef Digest_CTX archive_sha1_ctx;
+ #else
+@@ -209,7 +226,7 @@
+ #elif defined(ARCHIVE_CRYPTO_SHA256_NETTLE)
+ typedef struct sha256_ctx archive_sha256_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA256_OPENSSL)
+-typedef EVP_MD_CTX archive_sha256_ctx;
++typedef EVP_MD_CTX *archive_sha256_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA256_WIN)
+ typedef Digest_CTX archive_sha256_ctx;
+ #else
+@@ -227,7 +244,7 @@
+ #elif defined(ARCHIVE_CRYPTO_SHA384_NETTLE)
+ typedef struct sha384_ctx archive_sha384_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA384_OPENSSL)
+-typedef EVP_MD_CTX archive_sha384_ctx;
++typedef EVP_MD_CTX *archive_sha384_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA384_WIN)
+ typedef Digest_CTX archive_sha384_ctx;
+ #else
+@@ -247,7 +264,7 @@
+ #elif defined(ARCHIVE_CRYPTO_SHA512_NETTLE)
+ typedef struct sha512_ctx archive_sha512_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA512_OPENSSL)
+-typedef EVP_MD_CTX archive_sha512_ctx;
++typedef EVP_MD_CTX *archive_sha512_ctx;
+ #elif defined(ARCHIVE_CRYPTO_SHA512_WIN)
+ typedef Digest_CTX archive_sha512_ctx;
+ #else

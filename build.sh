@@ -4,7 +4,7 @@
 # and builds AppImage
 #
 
-CC="cc -O2 -Wall -Wno-deprecated-declarations -Wno-unused-result"
+CC="cc -O2 -Wall -Wno-unused-result"
 
 STATIC_BUILD=1
 INSTALL_DEPENDENCIES=1
@@ -97,6 +97,35 @@ if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
   make && make install
   cd -
   rm xz-5.2.3/build/lib/*.so*
+fi
+
+# Build libarchive
+if [ $STATIC_BUILD -eq 1 ] && [ ! -e "./libarchive-3.2.2/.libs/libarchive.a" ] ; then
+  wget -c http://www.libarchive.org/downloads/libarchive-3.2.2.tar.gz
+  tar xf libarchive-3.2.2.tar.gz
+  cd libarchive-3.2.2
+  mkdir -p build/lib
+  patch -p1 --backup < ../libarchive.patch
+  CFLAGS="$CFLAGS -I`pwd`/../openssl-1.1.0c/build/include/ \
+    -I`pwd`/../openssl-1.1.0c/build/include/openssl \
+    -I`pwd`/../xz-5.2.3/build/include" \
+  ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib --disable-shared \
+      --disable-bsdtar --disable-bsdcat --disable-bsdcpio
+  cat <<EOL>> config.h
+// hack
+#define ARCHIVE_CRYPTO_OPENSSL 1
+#define ARCHIVE_CRYPTO_MD5_OPENSSL 1
+#define ARCHIVE_CRYPTO_RMD160_OPENSSL 1
+#define ARCHIVE_CRYPTO_SHA1_OPENSSL 1
+#define ARCHIVE_CRYPTO_SHA256_OPENSSL 1
+#define ARCHIVE_CRYPTO_SHA384_OPENSSL 1
+#define ARCHIVE_CRYPTO_SHA512_OPENSSL 1
+#define HAVE_OPENSSL_EVP_H 1
+#define HAVE_LIBLZMA 1
+#define HAVE_LZMA_H 1
+EOL
+  make && make install
+  cd -
 fi
 
 # Patch squashfuse_ll to be a library rather than an executable
@@ -260,10 +289,12 @@ rm -f a.out
 # appimaged, an optional component
 if [ $STATIC_BUILD -eq 1 ]; then
   $CC -std=gnu99 -o appimaged -I../squashfuse/ ../getsection.c ../notify.c ../elf.c ../appimaged.c \
-    -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
+    -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=0 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
     ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
+    -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib -Wl,-Bstatic -lssl -lcrypto \
+    -I../libarchive-3.2.2/libarchive ../libarchive-3.2.2/.libs/libarchive.a \
     -L../xz-5.2.3/build/lib -I../inotify-tools-3.14/build/include -L../inotify-tools-3.14/build/lib \
-    -Wl,-Bstatic -linotifytools -Wl,-Bdynamic -larchive${archive_n} \
+    -Wl,-Bstatic -linotifytools -Wl,-Bdynamic \
     -Wl,--as-needed \
     $(pkg-config --cflags --libs glib-2.0) \
     $(pkg-config --cflags --libs gio-2.0) \
