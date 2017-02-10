@@ -204,7 +204,7 @@ gchar* get_desktop_entry(GKeyFile *kf, char *key) {
 * line is large enough to hold the resulting string*/
 static void replacestr(char *line, const char *search, const char *replace)
 {
-    char *sp;
+    char *sp = NULL;
     
     if ((sp = strstr(line, search)) == NULL) {
         return;
@@ -236,8 +236,8 @@ static GOptionEntry entries[] =
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
-    { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
-    { NULL }
+    { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
+    { 0,0,0,0,0,0,0 }
 };
 
 int
@@ -400,7 +400,7 @@ main (int argc, char *argv[])
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
         /* Check if the Icon file is how it is expected */
         gchar* icon_name = get_desktop_entry(kf, "Icon");
-        gchar* icon_file_path;
+        gchar* icon_file_path = NULL;
         gchar* icon_file_png;
         gchar* icon_file_svg;
         gchar* icon_file_svgz;
@@ -409,15 +409,15 @@ main (int argc, char *argv[])
         icon_file_svg = g_strdup_printf("%s/%s.svg", source, icon_name);
         icon_file_svgz = g_strdup_printf("%s/%s.svgz", source, icon_name);
         icon_file_xpm = g_strdup_printf("%s/%s.xpm", source, icon_name);
-        if(g_file_test(icon_file_png, G_FILE_TEST_IS_REGULAR))
+        if (g_file_test(icon_file_png, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_png;
-        if(g_file_test(icon_file_svg, G_FILE_TEST_IS_REGULAR))
+        } else if(g_file_test(icon_file_svg, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_svg;
-        if(g_file_test(icon_file_svgz, G_FILE_TEST_IS_REGULAR))
+        } else if(g_file_test(icon_file_svgz, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_svgz;
-        if(g_file_test(icon_file_xpm, G_FILE_TEST_IS_REGULAR))
+        } else if(g_file_test(icon_file_xpm, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_xpm;
-        if (! g_file_test(icon_file_path, G_FILE_TEST_IS_REGULAR)){
+        } else {
             fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} not present but defined in desktop file\n", icon_name);
             exit(1);
         }
@@ -548,10 +548,10 @@ main (int argc, char *argv[])
             unsigned long ui_offset = 0;
             unsigned long ui_length = 0;
             get_elf_section_offset_and_lenghth(destination, ".upd_info", &ui_offset, &ui_length);
-            if(verbose)
+            if(verbose) {
                 printf("ui_offset: %lu\n", ui_offset);
-            if(verbose)
                 printf("ui_length: %lu\n", ui_length);
+            }
             if(ui_offset == 0) {
                 die("Could not determine offset for updateinformation");
             } else {
@@ -617,10 +617,10 @@ main (int argc, char *argv[])
                     unsigned long sig_offset = 0;
                     unsigned long sig_length = 0;
                     get_elf_section_offset_and_lenghth(destination, ".sha256_sig", &sig_offset, &sig_length);
-                    if(verbose)
+                    if(verbose) {
                         printf("sig_offset: %lu\n", sig_offset);
-                    if(verbose)
                         printf("sig_length: %lu\n", sig_length);
+                    }
                     if(sig_offset == 0) {
                         die("Could not determine offset for signature");
                     } else {
