@@ -113,6 +113,11 @@ if [ $STATIC_BUILD -eq 1 ] && [ ! -e "./libarchive-3.2.2/.libs/libarchive.a" ] ;
       --disable-bsdtar --disable-bsdcat --disable-bsdcpio
   cat <<EOL>> config.h
 // hack
+#undef ARCHIVE_CRYPTO_MD5_LIBMD
+#undef ARCHIVE_CRYPTO_RMD160_LIBMD
+#undef ARCHIVE_CRYPTO_SHA1_LIBMD
+#undef ARCHIVE_CRYPTO_SHA256_LIBMD
+#undef ARCHIVE_CRYPTO_SHA512_LIBMD
 #define ARCHIVE_CRYPTO_OPENSSL 1
 #define ARCHIVE_CRYPTO_MD5_OPENSSL 1
 #define ARCHIVE_CRYPTO_RMD160_OPENSSL 1
