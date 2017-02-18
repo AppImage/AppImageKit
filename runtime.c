@@ -289,7 +289,8 @@ main (int argc, char *argv[])
                         fclose(f);
                         chmod (prefixed_path_to_extract, st.st_mode);
                     } else if(inode.base.inode_type == SQUASHFS_SYMLINK_TYPE){
-                        size_t size = strlen(trv.path)+1;
+                        size_t size;
+                        sqfs_readlink(&fs, &inode, NULL, &size);
                         char buf[size];
                         int ret = sqfs_readlink(&fs, &inode, buf, &size);
                         if (ret != 0)
