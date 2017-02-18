@@ -454,8 +454,8 @@ main (int argc, char *argv[])
                     sprintf (command, "%s appdata-from-desktop %s %s", g_find_program_in_path ("appstream-util"), desktop_file, appdata_path);
                     int ret = system(command);
                     if (ret != 0)
-                        die("Failed to generate a template");
-                    fprintf (stderr, "A template has been generated in in %s, please edit it\n", appdata_path);
+                        die("Failed to generate AppStream template");
+                    fprintf (stderr, "AppStream template has been generated in in %s, please edit it\n", appdata_path);
                     exit(1);
                 }
             } else {
