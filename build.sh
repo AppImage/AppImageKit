@@ -164,7 +164,7 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 # and embed .upd_info and .sha256_sig sections
 $CC -o runtime ../elf.c ../notify.c ../getsection.c runtime3.o \
     ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
-    -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
+    -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lpthread -lz -Wl,-Bstatic -lfuse -llzma -Wl,-Bdynamic -ldl
 strip runtime
 
 # Test if we can read it back
