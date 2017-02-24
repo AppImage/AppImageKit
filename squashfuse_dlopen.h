@@ -25,13 +25,15 @@
 
 void *libhandle;
 int have_libloaded;
+const char *load_library_errmsg;
 
 #define CLOSE_LIBRARY dlclose(libhandle);
 
 #define LOAD_LIBRARY \
 if (have_libloaded != 1) { \
   if (!(libhandle = dlopen(LIBNAME, RTLD_LAZY))) { \
-    fprintf(stderr, "dlopen(): error loading " LIBNAME "\n" ); exit(1); \
+    fprintf(stderr, "dlopen(): error loading " LIBNAME "\n%s\n", load_library_errmsg ); \
+    exit(1); \
   } else { \
     have_libloaded = 1; \
   } \
@@ -43,8 +45,9 @@ LOAD_LIBRARY; \
 type (*dl_##x) param; \
 *(void **) (&dl_##x) = dlsym(libhandle, STRINGIFY(x)); \
 if (dlerror()) { \
-  fprintf(stderr, "dlsym(): error loading symbol from " LIBNAME "\n" ); \
-  CLOSE_LIBRARY; exit(1); \
+  fprintf(stderr, "dlsym(): error loading symbol from " LIBNAME "\n%s\n", load_library_errmsg ); \
+  CLOSE_LIBRARY; \
+  exit(1); \
 }
 
 
