@@ -107,7 +107,16 @@ fi
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
-if [ ! -e ./ll.c.orig ]; then patch -p1 --backup < ../squashfuse.patch ; fi
+if [ ! -e ./ll.c.orig ]; then
+  patch -p1 --backup < ../squashfuse.patch
+  patch -p1 --backup < ../squashfuse_dlopen.patch
+fi
+if [ ! -e ./squashfuse_dlopen.c ]; then
+  cp ../squashfuse_dlopen.c .
+fi
+if [ ! -e ./squashfuse_dlopen.h ]; then
+  cp ../squashfuse_dlopen.h .
+fi
 
 # Build libsquashfuse_ll library
 
@@ -169,7 +178,7 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 # and embed .upd_info and .sha256_sig sections
 $CC -o runtime ../elf.c ../notify.c ../getsection.c runtime3.o \
     ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
-    -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
+    -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
 $STRIP runtime
 
 # Test if we can read it back
@@ -213,19 +222,19 @@ if [ $STATIC_BUILD -eq 1 ]; then
   $CC -o appimagetool data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
     ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
     -L../xz-5.2.3/build/lib \
-    -Wl,-Bdynamic -lfuse -lpthread \
+    -Wl,-Bdynamic -ldl -lpthread \
     -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic
 else
   # dinamically link against distro provided liblzma
   $CC -o appimagetool data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
     ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
-    -Wl,-Bdynamic -lfuse -lpthread \
+    -Wl,-Bdynamic -ldl -lpthread \
     -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -llzma
 fi
 
 # Version without glib
 # cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetoolnoglib.c
-# cc data.o appimagetoolnoglib.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -lfuse -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetoolnoglib
+# cc data.o appimagetoolnoglib.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetoolnoglib
 
 # Compile and link digest tool
 
