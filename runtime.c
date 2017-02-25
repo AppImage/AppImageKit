@@ -237,8 +237,10 @@ main (int argc, char *argv[])
             }
         }
         
-        if(argc == 3)
+        if(argc == 3){
             pattern = argv[2];
+	    if (pattern[0] == '/') pattern++; // Remove leading '/'
+	}
         
         if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
             exit(1);
