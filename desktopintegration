@@ -49,7 +49,7 @@ find-up () {
   while [[ "$path" != "" && ! -e "$path/$1" ]]; do
     path=${path%/*}
   done
-  # echo "$path"
+  echo -n "$path" # Needs to return something
 }
 
 if [ -z $APPDIR ] ; then
