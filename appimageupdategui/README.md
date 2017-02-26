@@ -1,7 +1,8 @@
 # appimageupdategui
 
 First run build.sh
-Change the ```/path_to_the_executable_app_image``` to your executable ```appimageupdategui``` 
+
+Change the ```/path_to_the_executable_app_image``` to your executable ```appimageupdategui``` in `com.appimageupdate.policy`
 
 Then copy the ```com.appimageupdate.policy``` to ```/usr/share/polkit-1/actions```
 
