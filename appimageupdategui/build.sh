@@ -11,5 +11,11 @@ if [ "$(which yum)" != "" ] ; then
   sudo yum -y install gtk3-devel vala clang cmake vala-devel
 fi
 
+
+# Below command creates a executable appimageupdategui
 valac --pkg 'gtk+-3.0' --pkg 'gmodule-2.0' --pkg posix main.vala progress.vala -o appimageupdategui -v
+
+#creates a executable which needs root password inorder to open the appimageupdate
+valac -o executable root.vala -v
+
 strip appimageupdategui
