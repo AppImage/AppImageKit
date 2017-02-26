@@ -27,12 +27,10 @@ void *libhandle;
 int have_libloaded;
 const char *load_library_errmsg;
 
-#define CLOSE_LIBRARY dlclose(libhandle);
-
 #define LOAD_LIBRARY \
 if (have_libloaded != 1) { \
   if (!(libhandle = dlopen(LIBNAME, RTLD_LAZY))) { \
-    fprintf(stderr, "dlopen(): error loading " LIBNAME "\n%s\n", load_library_errmsg ); \
+    fprintf(stderr, "dlopen(): error loading " LIBNAME "\n\n%s", load_library_errmsg ); \
     exit(1); \
   } else { \
     have_libloaded = 1; \
@@ -40,15 +38,18 @@ if (have_libloaded != 1) { \
 }
 
 #define STRINGIFY(x) #x
+
 #define LOAD_SYMBOL(type,x,param) \
-LOAD_LIBRARY; \
 type (*dl_##x) param; \
 *(void **) (&dl_##x) = dlsym(libhandle, STRINGIFY(x)); \
 if (dlerror()) { \
-  fprintf(stderr, "dlsym(): error loading symbol from " LIBNAME "\n%s\n", load_library_errmsg ); \
+  fprintf(stderr, "dlsym(): error loading symbol from " LIBNAME "\n\n%s", load_library_errmsg ); \
   CLOSE_LIBRARY; \
   exit(1); \
 }
+
+#define DL(x) dl_##x
+#define CLOSE_LIBRARY dlclose(libhandle);
 
 
 /*** libfuse stuff ***/
@@ -250,7 +251,9 @@ struct fuse_lowlevel_ops {
 
 #else  /* !ENABLE_DLOPEN */
 
+#define LOAD_LIBRARY
 #define LOAD_SYMBOL(x)
+#define DL(x)
 #define CLOSE_LIBRARY
 
 #endif  /* !ENABLE_DLOPEN */

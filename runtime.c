@@ -49,6 +49,11 @@
 #include "elf.h"
 #include "getsection.h"
 
+#ifndef ENABLE_DLOPEN
+#define ENABLE_DLOPEN
+#endif
+#include "squashfuse_dlopen.h"
+
 #include <fnmatch.h>
 
 //#include "notify.c"
@@ -343,7 +348,9 @@ main (int argc, char *argv[])
         print_binary(appimage_path, offset, length);
         exit(0);
     }
-    
+
+    LOAD_LIBRARY; /* exit if libfuse is missing */
+
     int dir_fd, res;
     char mount_dir[] = "/tmp/.mount_XXXXXX";  /* create mountpoint */
     char filename[100]; /* enough for mount_dir + "/AppRun" */
@@ -409,8 +416,6 @@ main (int argc, char *argv[])
         dir_fd = open (mount_dir, O_RDONLY);
         if (dir_fd == -1) {
             perror ("open dir error");
-            /* TODO: dlopen() libfuse and be nice if it is not there, e.g., offer
-             * to extract the files to a temp location and run AppRun */
             exit (1);
         }
         
