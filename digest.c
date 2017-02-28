@@ -109,6 +109,12 @@ int main(int argc,char **argv)
         unsigned long skip_length = 0;
         char *filename = argv[1];   
         
+    struct stat st;
+    if (stat(filename, &st) < 0) {
+        fprintf(stderr, "not existing file: %s\n", filename);
+        exit(1);
+    }
+
         if(argc < 4){
             get_elf_section_offset_and_lenghth(filename, ".sha256_sig", &skip_offset, &skip_length);
             if(skip_length > 0)
@@ -120,8 +126,6 @@ int main(int argc,char **argv)
             exit(1);
         }
 
-    struct stat st;
-    stat(filename, &st);
     int size = st.st_size;
     if(size < skip_offset+skip_length){
         fprintf(stderr, "offset+length cannot be less than the file size\n");
