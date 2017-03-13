@@ -274,7 +274,7 @@ main (int argc, char *argv[])
                                 exit(EXIT_FAILURE);
                             }
                         }
-                    } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.node_type == SQUASHFS_LREG_TYPE){
+                    } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
                         // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
                         if(private_sqfs_stat(&fs, &inode, &st) != 0)
                             die("private_sqfs_stat error");
