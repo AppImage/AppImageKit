@@ -265,7 +265,7 @@ main (int argc, char *argv[])
                     strcpy(prefixed_path_to_extract, "");
                     strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
 		    fprintf(stderr, "%s\n", prefixed_path_to_extract);
-                    if(inode.base.inode_type == SQUASHFS_DIR_TYPE){
+                    if(inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE){
                         // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
                         // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
                         if(access(prefixed_path_to_extract, F_OK ) == -1 ) {
