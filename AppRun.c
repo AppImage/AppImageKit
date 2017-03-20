@@ -112,6 +112,7 @@ int main(int argc, char *argv[])
     char new_env5[length+1];
     char new_env6[length+1];
     char new_env7[length+1];
+    char new_envp[length+1];
     
     old_env = getenv("PATH") ?: "";
     snprintf(new_env1, length, "PATH=%s/usr/bin/:%s/usr/sbin/:%s/usr/games/:%s/bin/:%s/sbin/:%s", appdir, appdir, appdir, appdir, appdir, old_env);
