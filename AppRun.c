@@ -125,6 +125,10 @@ int main(int argc, char *argv[])
     snprintf(new_env3, length, "PYTHONPATH=%s/usr/share/pyshared/:%s", appdir, old_env);
     putenv(new_env3);
 
+    /* https://docs.python.org/2/using/cmdline.html#envvar-PYTHONHOME */
+    snprintf(new_envp, length, "PYTHONHOME=%s/usr/", appdir);
+    putenv(new_envp);
+    
     old_env = getenv("XDG_DATA_DIRS") ?: "";
     snprintf(new_env4, length, "XDG_DATA_DIRS=%s/usr/share/:%s", appdir, old_env);
     putenv(new_env4);
