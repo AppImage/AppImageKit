@@ -8,6 +8,23 @@ static HeaderBar header_bar; // Too new to assume it is there?
 
 static string selected_file;
 
+static string root(){
+	 
+	var a = Posix.system("pkexec --disable-internal-agent echo hello to appimages");
+	if (a == 32256){
+	return "false";
+	}
+	else{
+	return "true";
+	}
+
+}
+static void root_run(){
+	if(root() == "false"){
+	Posix.exit(0);
+	}
+}
+
 /* Open file */
 static void open_file(string filename) {
     selected_file = filename;
@@ -46,6 +63,7 @@ static void on_about_clicked() {
 }
 
 static void main (string[] args) {
+	root_run();
 	init (ref args);
   if(args.length > 1){
     open_file(args[1]);

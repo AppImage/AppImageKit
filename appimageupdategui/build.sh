@@ -11,5 +11,6 @@ if [ "$(which yum)" != "" ] ; then
   sudo yum -y install gtk3-devel vala clang cmake vala-devel
 fi
 
+
 valac --pkg 'gtk+-3.0' --pkg 'gmodule-2.0' --pkg posix main.vala progress.vala -o appimageupdategui -v
 strip appimageupdategui
