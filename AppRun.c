@@ -127,13 +127,9 @@ int main(int argc, char *argv[]) {
                     }
                     break;
                 case 'i':
-                    fprintf(stderr, "WARNING: Desktop file field code %%i is not currently supported\n");
-                    break;
                 case 'c':
-                    fprintf(stderr, "WARNING: Desktop file field code %%c is not currently supported\n");
-                    break;
                 case 'k':
-                    fprintf(stderr, "WARNING: Desktop file field code %%k is not currently supported\n");
+                    fprintf(stderr, "WARNING: Desktop file field code %%%c is not currently supported\n", code);
                     break;
                 default:
                     fprintf(stderr, "WARNING: Invalid desktop file field code %%%c\n", code);
