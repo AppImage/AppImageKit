@@ -56,6 +56,17 @@ fi
 
 # Install dependencies for Arch Linux
 if [ -e /usr/bin/pacman ] ; then
-  echo "Please submit a pull request if you would like to see Arch Linux support."
-  exit 1
+  echo "Checking arch package provides and installed packages"
+  declare -a arr=("zsync" "git" "libarchive" "autoconf" "libtool" "make"
+    "libtool" "fuse2" "xz" "glib2" "openssl" "inotify-tools" "lz4" "gcc")
+  for i in "${arr[@]}"
+  do
+      if [ ! "$(package-query -Q $i || package-query --qprovides $i -Q)" ]; then
+          TO_INSTALL="$TO_INSTALL $i"
+      fi
+  done
+  if [ "$TO_INSTALL" ]; then
+      echo "Found the following missing packages:$TO_INSTALL, installing now"
+      sudo pacman -S --needed $TO_INSTALL
+  fi
 fi
