@@ -46,8 +46,6 @@ static pthread_mutex_t fd_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int isofs_check_rr(struct iso_directory_record *root_record);
 static int isofs_read_raw_block(int block, char *buf);
 
-extern char* iocharset;
-
 // locally implement g_strv_length, this is missing in glib2 for rhel3/rhel4
 // -- Chandan Dutta Chowdhury 2007-07-06
 guint local_g_strv_length (gchar **str_array) {
@@ -600,6 +598,7 @@ static char *isofs_fix_entry(char *entry, size_t len) {
         
         return entry;
     } else {
+	char *iocharset;
         // initialize iconv descriptor
         iconv_t cd = iconv_open(iocharset, "UCS-2BE");
         if(cd < 0) {
