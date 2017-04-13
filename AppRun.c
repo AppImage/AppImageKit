@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include <libgen.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 #define die(...)                                    \
     do {                                            \
@@ -50,62 +51,35 @@ int filter(const struct dirent *dir) {
     return p && !strcmp(p, ".desktop");
 }
 
-int main(int argc, char *argv[]) {
-    char *appdir = dirname(realpath("/proc/self/exe", NULL));
-    if (!appdir)
-        die("Could not access /proc/self/exe\n");
-
-    int ret;
-    struct dirent **namelist;
-    ret = scandir(appdir, &namelist, filter, NULL);
-
-    if (ret == 0) {
-        die("No .desktop files found\n");
-    } else if(ret == -1) {
-        die("Could not scan directory %s\n", appdir);
-    }
-
-    /* Extract executable from .desktop file */
-    char *desktop_file = malloc(LINE_SIZE);
-    snprintf(desktop_file, LINE_SIZE-1, "%s/%s", appdir, namelist[0]->d_name);
-    FILE *f     = fopen(desktop_file, "r");
-    char *line  = malloc(LINE_SIZE);
-    char *exe   = line+5;
-    size_t n    = LINE_SIZE;
-
-    do {
-        if (getline(&line, &n, f) == -1)
-            die("Executable not found, make sure there is a line starting with 'Exec='\n");
-    } while(strncmp(line, "Exec=", 5));
-    fclose(f);
-
+char** assemble_args(int argc, char* argv[], const char* appdir, struct dirent** namelist, char *execline) {
     // parse arguments
     bool in_quotes = 0;
+    int n;
     for (n = 0; n < LINE_SIZE; n++) {
-        if (!line[n])         // end of string
+        if (!execline[n])         // end of string
             break;
-        else if (line[n] == 10 || line[n] == 13) {
-            line[n] = '\0';
-            line[n+1] = '\0';
-            line[n+2] = '\0';
+        else if (execline[n] == 10 || execline[n] == 13) {
+            execline[n] = '\0';
+            execline[n+1] = '\0';
+            execline[n+2] = '\0';
             break;
-        } else if (line[n] == '"') {
+        } else if (execline[n] == '"') {
             in_quotes = !in_quotes;
-        } else if (line[n] == ' ' && !in_quotes)
-            line[n] = '\0';
+        } else if (execline[n] == ' ' && !in_quotes)
+            execline[n] = '\0';
     }
 
     // count arguments
-    char*   arg         = exe;
+    char*   arg         = execline;
     int     argcount    = 0;
     while ((arg += (strlen(arg)+1)) && *arg)
         argcount += 1;
 
     // merge args
-    char*   outargptrs[argcount + argc + 1];
-    outargptrs[0] = exe;
+    char**  outargptrs = malloc(argcount + argc + 1);
+    outargptrs[0] = execline;
     int     outargindex = 1;
-    arg                 = exe;
+    arg           = execline;
     int     argc_       = argc - 1;     // argv[0] is the filename
     char**  argv_       = argv + 1;
     while ((arg += (strlen(arg)+1)) && *arg) {
@@ -144,18 +118,13 @@ int main(int argc, char *argv[]) {
         argc_--;
     }
     outargptrs[outargindex] = '\0';     // trailing null argument required by execvp()
+    return outargptrs;
+}
 
-    // change directory
-    char usr_in_appdir[1024];
-    sprintf(usr_in_appdir, "%s/usr", appdir);
-    ret = chdir(usr_in_appdir);
-    if (ret != 0)
-        die("Could not cd into %s\n", usr_in_appdir);
-
-    // set environment variables
-    char *old_env;
-    const LENGTH = 2047;
-    char new_env[8][LENGTH+1];
+void set_env_vars(const char* appdir) {
+    char*   old_env;
+    const   LENGTH = 2047;
+    char    new_env[8][LENGTH+1];
 
     /* https://docs.python.org/2/using/cmdline.html#envvar-PYTHONHOME */
     snprintf(new_env[0], LENGTH, "PYTHONHOME=%s/usr/", appdir);
@@ -183,16 +152,86 @@ int main(int argc, char *argv[]) {
     old_env = getenv("QT_PLUGIN_PATH") ?: "";
     snprintf(new_env[7], LENGTH, "QT_PLUGIN_PATH=%s/usr/lib/qt4/plugins/:%s/usr/lib/i386-linux-gnu/qt4/plugins/:%s/usr/lib/x86_64-linux-gnu/qt4/plugins/:%s/usr/lib32/qt4/plugins/:%s/usr/lib64/qt4/plugins/:%s/usr/lib/qt5/plugins/:%s/usr/lib/i386-linux-gnu/qt5/plugins/:%s/usr/lib/x86_64-linux-gnu/qt5/plugins/:%s/usr/lib32/qt5/plugins/:%s/usr/lib64/qt5/plugins/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
 
+    int n;
     for (n = 0; n < 8; n++)
         putenv(new_env[n]);
+}
+
+void trim_lf(char *s) {
+    int n;
+    int len = strlen(s);
+    for (n = 0; n < len; n++)
+        switch(s[n]) {
+            case '\n':
+            case '\r':
+                s[n] = '\0';
+        }
+}
+
+int main(int argc, char* argv[]) {
+    char *appdir = dirname(realpath("/proc/self/exe", NULL));
+    if (!appdir)
+        die("Could not access /proc/self/exe\n");
+
+    struct dirent** namelist;
+    int ret = scandir(appdir, &namelist, filter, NULL);
+
+    if (ret == 0) {
+        die("No .desktop files found\n");
+    } else if (ret == -1) {
+        die("Could not scan directory %s\n", appdir);
+    }
+
+    /* Extract properties from .desktop file */
+    char* desktop_file = malloc(LINE_SIZE);
+    snprintf(desktop_file, LINE_SIZE-1, "%s/%s", appdir, namelist[0]->d_name);
+    FILE* f         = fopen(desktop_file, "r");
+    char* execline  = malloc(LINE_SIZE);
+    char* pathline  = malloc(LINE_SIZE);
+    size_t n        = LINE_SIZE;
+
+    strcpy(pathline, "usr");        // default path
+
+    // do {
+    //     if (getline(&line, &n, f) == -1)
+    //         die("Executable not found, make sure there is a line starting with 'Exec='\n");
+    // } while(strncmp(line, "Exec=", 5));
+    char* line      = malloc(LINE_SIZE);
+    while (getline(&line, &n, f) != -1) {
+        if (!strncmp(line, "Exec=", 5))
+            strcpy(execline, line+5);
+        if (!strncmp(line, "Path=", 5))
+            strcpy(pathline, line+5);
+    }
+    fclose(f);
+    free(line);
+    trim_lf(execline);
+    trim_lf(pathline);
+    if (strlen(execline) == 0)
+        die("Executable not found, make sure there is a line starting with 'Exec='\n");
+
+    char** outargptrs = assemble_args(argc, argv, appdir, namelist, execline);
+
+    // change directory
+    // char usr_in_appdir[1024];
+    // sprintf(usr_in_appdir, "%s/usr", appdir);
+    char path[1024];
+    sprintf(path, "%s/%s", appdir, pathline);        // default path
+    ret = chdir(path);
+    if (ret != 0)
+        die("%d: Could not cd into %s\n", errno, path);
+
+    set_env_vars(appdir);
 
     /* Run */
-    ret = execvp(exe, outargptrs);
+    ret = execvp(execline, outargptrs);
 
     if (ret == -1)
-        die("Error executing '%s'; return code: %d\n", exe, ret);
+        die("Error executing '%s'; return code: %d\n", execline, ret);
 
-    free(line);
+    free(execline);
+    free(pathline);
     free(desktop_file);
+    free(outargptrs);
     return 0;
 }
