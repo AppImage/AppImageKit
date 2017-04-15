@@ -67,8 +67,15 @@ rm -rf build/ || true
 if [ $STATIC_BUILD -eq 1 ]; then
   # Build inotify-tools
   if [ ! -e "./inotify-tools-3.14/build/lib/libinotifytools.a" ] ; then
-    wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
-    tar xf inotify-tools-3.14.tar.gz
+    if [ ! -e "./inotify-tools-3.14/src" ] ; then
+      wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
+      tar xf inotify-tools-3.14.tar.gz
+      # Pull the latest `configure` scripts to handle newer platforms.
+      wget "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" \
+           --output-document=inotify-tools-3.14/config.guess
+      wget "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
+             --output-document=inotify-tools-3.14/config.sub
+    fi
     cd inotify-tools-3.14
     mkdir -p build/lib
     ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib
