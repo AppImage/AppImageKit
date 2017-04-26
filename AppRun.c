@@ -154,13 +154,12 @@ int main(int argc, char *argv[]) {
 
     // set environment variables
     char *old_env;
-    const LENGTH = 2047;
+    const int LENGTH = 2047;
     char new_env[8][LENGTH+1];
 
     /* https://docs.python.org/2/using/cmdline.html#envvar-PYTHONHOME */
     snprintf(new_env[0], LENGTH, "PYTHONHOME=%s/usr/", appdir);
 
-    int a,b;
     old_env = getenv("PATH") ?: "";
     snprintf(new_env[1], LENGTH, "PATH=%s/usr/bin/:%s/usr/sbin/:%s/usr/games/:%s/bin/:%s/sbin/:%s", appdir, appdir, appdir, appdir, appdir, old_env);
 
