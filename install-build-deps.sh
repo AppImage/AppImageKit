@@ -10,7 +10,7 @@ if [ "$ARCH" == "i686" ]; then
 fi
 
 if [ -e /usr/bin/apt-get ] ; then
-  apt-get update
+  sudo apt-get update
   sudo apt-get -y install zsync git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
   liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs libcairo-dev
   # libtool-bin might be required in newer distributions but is not available in precise
