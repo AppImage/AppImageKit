@@ -63,6 +63,58 @@ git submodule update
 # Clean up from previous run
 rm -rf build/ || true
 
+# readelf
+if [ ! -e "./elftoolchain-0.7.1/readelf/readelf" ] ; then
+  #wget -c https://sourceforge.net/projects/elftoolchain/files/Sources/elftoolchain-0.7.1/elftoolchain-0.7.1.tar.bz2
+  #tar xf elftoolchain-0.7.1.tar.bz2
+  wget -c https://ftp.heanet.ie/mirrors/OpenBSD/distfiles/elftoolchain-0.7.1.tgz
+  tar xf elftoolchain-0.7.1.tgz
+  cd elftoolchain-0.7.1
+
+  (cd common && ./native-elf-format > native-elf-format.h)
+
+  etc_CFLAGS="-Os -Wall -ffunction-sections -fdata-sections"
+  etc_LDFLAGS="-s -Wl,--gc-sections"
+
+  # libelf
+  cd libelf
+  for l in fsize msize convert ; do
+    m4 -DSRCDIR=. libelf_${l}.m4 > libelf_${l}.c
+  done
+  for c in *.c ; do
+    cc $etc_CFLAGS -I. -I../common -c $c
+  done
+  ar cr libelf.a *.o && ranlib libelf.a
+  cd -
+
+  # libdwarf
+  cd libdwarf
+  for l in pubnames pubtypes weaks funcs vars types pro_pubnames pro_weaks pro_funcs pro_types pro_vars ; do
+    m4 -DSRCDIR=. dwarf_${l}.m4 > dwarf_${l}.c
+  done
+  for c in *.c ; do
+    cc $etc_CFLAGS -I. -I../common -I../libelf -c $c
+  done
+  ar cr libdwarf.a *.o && ranlib libdwarf.a
+  cd -
+
+  # libelftc
+  cd libelftc
+  echo "const char *elftc_version(){ return \"elftoolchain 0.7.1\"; }" > elftc_version.c
+  for c in *.c ; do
+    cc $etc_CFLAGS -D_GNU_SOURCE -I. -I../common -I../libelf -c $c
+  done
+  ar cr libelftc.a *.o && ranlib libelftc.a
+  cd -
+
+  # readelf
+  cc $etc_CFLAGS $etc_LDFLAGS -I. -I./readelf -I./common -I./libdwarf -I./libelf -I./libelftc \
+    -o readelf/readelf  readelf/readelf.c \
+    -L./libdwarf -ldwarf  -L./libelftc -lelftc  -L./libelf -lelf
+
+  cd ..
+fi
+
 # Build static libraries
 if [ $STATIC_BUILD -eq 1 ]; then
   # Build inotify-tools
@@ -166,7 +218,13 @@ pwd
 mkdir build
 cd build
 
-cp ../squashfs-tools/squashfs-tools/mksquashfs .
+cp ../squashfs-tools/squashfs-tools/mksquashfs ../elftoolchain-0.7.1/readelf/readelf .
+
+# testrt
+echo "int fakelib(){return 0;}" | cc -O0 -shared -Wl,-soname,libstdc++.so.6 -o libfake.so -xc -
+# link against libstdc++.so.6 without libstdc++ development packages being installed
+echo "int main(){return 0;}" | cc -Os -s -o testrt -xc - -Wl,--no-as-needed -lgcc_s -L. -lfake
+rm libfake.so
 
 # Compile runtime but do not link
 
@@ -306,7 +364,7 @@ cd ..
 
 # Strip and check size and dependencies
 
-rm build/*.o build/1024_blank_bytes
+rm build/*.o  build/1024_blank_bytes
 $STRIP build/* 2>/dev/null
 chmod a+x build/*
 ls -lh build/*
@@ -320,4 +378,5 @@ bash -ex "$HERE/build-appdirs.sh"
 ls -lh
 
 mkdir -p out
-cp -r build/* ./*.AppDir out/
+chmod a+x testrt.sh
+cp -r build/* ./*.AppDir testrt.sh out/

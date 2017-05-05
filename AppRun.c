@@ -31,6 +31,8 @@ THE SOFTWARE.
 #include <libgen.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 #define die(...)                                    \
     do {                                            \
@@ -146,11 +148,39 @@ int main(int argc, char *argv[]) {
     outargptrs[outargindex] = '\0';     // trailing null argument required by execvp()
 
     // change directory
-    char usr_in_appdir[1024];
+    const int PATH_LENGTH = 1024;
+    char usr_in_appdir[PATH_LENGTH];
     sprintf(usr_in_appdir, "%s/usr", appdir);
     ret = chdir(usr_in_appdir);
     if (ret != 0)
         die("Could not cd into %s\n", usr_in_appdir);
+
+    // check if newer GCC runtimes are required
+    char optional[PATH_LENGTH];
+    sprintf(optional, "%s", "");
+    if (access("./optional/testrt.sh", F_OK) == 0) {
+        pid_t pid;
+        if ((pid = fork()) == 0)
+            execl("/bin/sh", "sh", "./optional/testrt.sh", NULL);
+        if (pid > 0) {
+            int status;
+            if (waitpid(pid, &status, 0) > 0 && WIFEXITED(status)) {
+                switch (WEXITSTATUS(status)) {
+                    case 1:
+                        sprintf(optional, "%s/usr/optional/libstdc++/:", appdir);
+                        break;
+                    case 2:
+                        sprintf(optional, "%s/usr/optional/libgcc_s/:", appdir);
+                        break;
+                    case 3:
+                        sprintf(optional, "%s/usr/optional/libgcc_s/:%s/usr/optional/libstdc++/:", appdir, appdir);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+    }
 
     // set environment variables
     char *old_env;
@@ -164,7 +194,7 @@ int main(int argc, char *argv[]) {
     snprintf(new_env[1], LENGTH, "PATH=%s/usr/bin/:%s/usr/sbin/:%s/usr/games/:%s/bin/:%s/sbin/:%s", appdir, appdir, appdir, appdir, appdir, old_env);
 
     old_env = getenv("LD_LIBRARY_PATH") ?: "";
-    snprintf(new_env[2], LENGTH, "LD_LIBRARY_PATH=%s/usr/lib/:%s/usr/lib/i386-linux-gnu/:%s/usr/lib/x86_64-linux-gnu/:%s/usr/lib32/:%s/usr/lib64/:%s/lib/:%s/lib/i386-linux-gnu/:%s/lib/x86_64-linux-gnu/:%s/lib32/:%s/lib64/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
+    snprintf(new_env[2], LENGTH, "LD_LIBRARY_PATH=%s%s/usr/lib/:%s/usr/lib/i386-linux-gnu/:%s/usr/lib/x86_64-linux-gnu/:%s/usr/lib32/:%s/usr/lib64/:%s/lib/:%s/lib/i386-linux-gnu/:%s/lib/x86_64-linux-gnu/:%s/lib32/:%s/lib64/:%s", optional, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
 
     old_env = getenv("PYTHONPATH") ?: "";
     snprintf(new_env[3], LENGTH, "PYTHONPATH=%s/usr/share/pyshared/:%s", appdir, old_env);
