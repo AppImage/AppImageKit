@@ -529,22 +529,8 @@ main (int argc, char *argv[])
             if(verbose)
                 printf("updateinformation type: %s\n", ui_type[0]);
             /* TODO: Further checking of the updateinformation */
-
-            /* As a courtesy, we also generate the zsync file */
-            gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
-            if(!zsyncmake_path){
-                fprintf (stderr, "zsyncmake is not installed, skipping\n");
-            } else {
-                fprintf (stderr, "zsyncmake is installed and updateinformation is provided, "
-                "hence generating zsync file\n");
-                sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
-                if(verbose)
-                    fprintf (stderr, "%s\n", command);
-                fp = popen(command, "r");
-                if (fp == NULL)
-                    die("Failed to run zsyncmake command");            
-            }
             
+          
             unsigned long ui_offset = 0;
             unsigned long ui_length = 0;
             get_elf_section_offset_and_lenghth(destination, ".upd_info", &ui_offset, &ui_length);
@@ -649,7 +635,25 @@ main (int argc, char *argv[])
                         unlink(digestfile);
                 }
             }
-        }     
+        }
+        
+        /* If updateinformation was provided, then we also generate the zsync file (after having signed the AppImage) */
+        if(updateinformation != NULL){
+            gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+            if(!zsyncmake_path){
+                fprintf (stderr, "zsyncmake is not installed, skipping\n");
+            } else {
+                fprintf (stderr, "zsyncmake is installed and updateinformation is provided, "
+                "hence generating zsync file\n");
+                sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
+                if(verbose)
+                    fprintf (stderr, "%s\n", command);
+                fp = popen(command, "r");
+                if (fp == NULL)
+                    die("Failed to run zsyncmake command");            
+            }
+         } 
+         
         fprintf (stderr, "Success\n");
         }
     
