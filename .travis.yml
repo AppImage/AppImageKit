@@ -27,7 +27,7 @@ script:
       cd /out && 
       ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-$ARCH.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&
-      ./appimagetool.AppDir/AppRun ./appimaged.AppDir/ -s -v -u \"zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-$ARCH.AppImage.zsync\" appimaged-$ARCH.AppImage"
+      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-$ARCH.AppImage.zsync\" appimaged-$ARCH.AppImage"
   - sudo apt-get install equivs
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
