@@ -14,7 +14,9 @@ int get_elf_section_offset_and_lenghth(char* fname, char* section_name, unsigned
     int fd = open(fname, O_RDONLY);
     data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
 
-#ifdef __i386__
+// optionally add more architectures for 32-bit builds so that it doesn't fall back to Elf64_*
+// see e.g. https://sourceforge.net/p/predef/wiki/Architectures/ for more predefined macro names
+#if defined(__i386__) || defined(__arm__)
     Elf32_Ehdr *elf;
     Elf32_Shdr *shdr;
     elf = (Elf32_Ehdr *) data;
