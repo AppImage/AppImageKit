@@ -153,7 +153,7 @@ char* getArg(int argc, char *argv[],char chr)
         return NULL;
 }
 
-/* mkdir -p implemented in C, needed for https://github.com/probonopd/AppImageKit/issues/333
+/* mkdir -p implemented in C, needed for https://github.com/AppImage/AppImageKit/issues/333
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
 int
 mkdir_p(const char *path)
@@ -398,7 +398,7 @@ main (int argc, char *argv[])
             title = "Cannot mount AppImage, please check your FUSE setup.";
             body = "You might still be able to extract the contents of this AppImage \n"
             "if you run it with the --appimage-extract option. \n"
-            "See https://github.com/probonopd/AppImageKit/wiki/FUSE \n"
+            "See https://github.com/AppImage/AppImageKit/wiki/FUSE \n"
             "for more information";
 	    notify(title, body, 0); // 3 seconds timeout
         };
