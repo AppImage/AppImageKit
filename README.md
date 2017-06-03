@@ -1,4 +1,4 @@
-# AppImageKit [![Build Status](https://travis-ci.org/probonopd/AppImageKit.svg?branch=appimagetool/master)](https://travis-ci.org/probonopd/AppImageKit) [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
+# AppImageKit [![Build Status](https://travis-ci.org/AppImage/AppImageKit.svg?branch=appimagetool/master)](https://travis-ci.org/AppImage/AppImageKit) [![discourse](https://img.shields.io/badge/forum-discourse-orange.svg)](http://discourse.appimage.org) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
 
 Copyright (c) 2004-17 Simon Peter <probono@puredarwin.org> and contributors.
 
@@ -18,7 +18,7 @@ __AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and
 A precompiled version can be found in the last successful Travis CI build, you can get it with:
 
 ```
-wget "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
 chmod a+x appimagetool-x86_64.AppImage
 ```
 Usage in a nutshell, assuming that you already have an [AppDir](https://github.com/AppImage/AppImageSpec/blob/master/draft.md#appdir) in place:
@@ -60,7 +60,7 @@ chmod a+x Your.AppImage
 A precompiled version can be found in the last successful Travis CI build, you can get it with:
 
 ```
-wget "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage"
+wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimaged-x86_64.AppImage"
 chmod a+x appimaged-x86_64.AppImage
 ```
 
@@ -73,7 +73,7 @@ Usage in a nutshell:
 Or, if you are on a deb-based system:
 
 ```
-wget -c "https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged_1.0_amd64.deb"
+wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimaged_1.0_amd64.deb"
 sudo dpkg -i appimaged_*.deb
 systemctl --user enable appimaged
 systemctl --user start appimaged
@@ -126,12 +126,12 @@ sudo mv "$APP" /usr/local/bin/
 
 ## Building
 
-__NOTE:__ The AppImage project supplies [binaries](https://github.com/probonopd/AppImageKit/releases/tag/continuous) that application developers can use. These binaries are built using the CentOS 6 Docker on Travis CI build system in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to AppImageKit, when needing another architecture than `x86_64`, or when trying to reproduce our binaries.
+__NOTE:__ The AppImage project supplies [binaries](https://github.com/AppImage/AppImageKit/releases/tag/continuous) that application developers can use. These binaries are built using the CentOS 6 Docker on Travis CI build system in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to AppImageKit, when needing another architecture than `x86_64`, or when trying to reproduce our binaries.
 
 On a not too recent Ubuntu:
 
 ```
-git clone -b appimagetool/master --single-branch --recursive https://github.com/probonopd/AppImageKit
+git clone -b appimagetool/master --single-branch --recursive https://github.com/AppImage/AppImageKit
 cd AppImageKit/
 sudo bash -ex install-build-deps.sh
 bash -ex build.sh
