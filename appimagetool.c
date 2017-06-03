@@ -225,6 +225,16 @@ static void replacestr(char *line, const char *search, const char *replace)
 
 // #####################################################################
 
+/* If called without arguments, then show usage statement */
+if(argc <= 1)
+{
+  argc++;
+  char *argv_[2];
+  argv_[0] = argv[0];
+  argv_[1] = "-h";
+  argv = argv_;
+}
+
 static GOptionEntry entries[] =
 {
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
