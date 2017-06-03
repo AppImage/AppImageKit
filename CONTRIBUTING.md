@@ -19,7 +19,7 @@ Make your change. Build again to be sure you didn't break anything. Run the resu
 
 Push to your fork and [submit a pull request][pr].
 
-[pr]: https://github.com/probonopd/AppImageKit/compare/appimagetool/master
+[pr]: https://github.com/AppImage/AppImageKit/compare/appimagetool/master
 
 At this point you're waiting on us. We like to at least comment on pull requests
 within three business days (and, typically, one business day). We may suggest
