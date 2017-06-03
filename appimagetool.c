@@ -225,16 +225,6 @@ static void replacestr(char *line, const char *search, const char *replace)
 
 // #####################################################################
 
-/* If called without arguments, then show usage statement */
-if(argc <= 1)
-{
-  argc++;
-  char *argv_[2];
-  argv_[0] = argv[0];
-  argv_[1] = "-h";
-  argv = argv_;
-}
-
 static GOptionEntry entries[] =
 {
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
@@ -258,6 +248,16 @@ main (int argc, char *argv[])
     char* version_env;
     version_env = getenv("VERSION");
 
+    /* If called without arguments, then show usage statement */
+    if(argc <= 1)
+    {
+      argc++;
+      char *argv_[2];
+      argv_[0] = argv[0];
+      argv_[1] = "-h";
+      argv = argv_;
+    }	
+	
     /* Parse OWD environment variable.
      * If it is available then cd there. It is the original CWD prior to running AppRun */
     char* owd_env = NULL;
