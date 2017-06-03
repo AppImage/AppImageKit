@@ -129,7 +129,7 @@ char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
  * This is needed because png and xpm icons cannot be installed in a generic
  * location but are only picked up in directories that have the size of 
  * the icon as part of their directory name, as specified in the theme.index
- * See https://github.com/probonopd/AppImageKit/issues/258
+ * See https://github.com/AppImage/AppImageKit/issues/258
  */
 
 void move_icon_to_destination(gchar *icon_path, gboolean verbose)
