@@ -252,9 +252,10 @@ main (int argc, char *argv[])
     if(argc <= 1)
     {
       argc++;
-      char *argv_[2];
+      char *argv_[3];
       argv_[0] = argv[0];
       argv_[1] = "-h";
+      argv_[2] = "DUMMYARG";
       argv = argv_;
     }	
 	
