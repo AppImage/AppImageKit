@@ -58,3 +58,5 @@ notifications:
 branches:
   only:
     - appimagetool/master
+    - feature/usage
+    
