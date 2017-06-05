@@ -13,9 +13,9 @@ Number of section headers	e_shnum		29
 e_shoff + ( e_shentsize * e_shnum ) =	126584
 */
 
-#ifndef __ELFSIZE_H__
-#define __ELFSIZE_H__
+#ifndef ELFSIZE_H
+#define ELFSIZE_H
 
 unsigned long get_elf_size(const char *fname);
 
-#endif /* __ELFSIZE_H__ */
+#endif /* ELFSIZE_H */
