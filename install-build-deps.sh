@@ -45,13 +45,6 @@ if [ -e /usr/bin/yum ] ; then
   fi
   . /opt/rh/autotools-latest/enable
 
-  # Unlike Ubuntu, CentOS does not provide .a, so we need to build it
-  #wget http://tukaani.org/xz/xz-5.2.2.tar.gz
-  #tar xzfv xz-5.2.2.tar.gz
-  #cd xz-5.2.2
-  #./configure --enable-static && make && make install
-  #rm /usr/local/lib/liblzma.so* /usr/*/liblzma.so || true # Don't want the dynamic one
-  #cd -
 fi
 
 # Install dependencies for Arch Linux
