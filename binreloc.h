@@ -10,12 +10,12 @@
  * more information and how to use this.
  */
 
-#ifndef __BINRELOC_H__
-#define __BINRELOC_H__
+#ifndef BINRELOC_H
+#define BINRELOC_H
 
-#ifdef __cplusplus
+#ifdef cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif /* cplusplus */
 
 
 /** These error codes can be returned by br_init(), br_init_lib(), gbr_init() or gbr_init_lib(). */
@@ -73,8 +73,8 @@ char *br_build_path (const char *dir, const char *file);
 char *br_dirname (const char *path);
 
 
-#ifdef __cplusplus
+#ifdef cplusplus
 }
-#endif /* __cplusplus */
+#endif /* cplusplus */
 
-#endif /* __BINRELOC_H__ */
+#endif /* BINRELOC_H */
