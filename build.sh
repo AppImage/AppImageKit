@@ -78,7 +78,7 @@ if [ $STATIC_BUILD -eq 1 ]; then
     fi
     cd inotify-tools-3.14
     mkdir -p build/lib
-    ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib
+    ./configure --prefix=$(pwd)/build --libdir=$(pwd)/build/lib
     make
     make install
     cd -
@@ -91,7 +91,7 @@ if [ $STATIC_BUILD -eq 1 ]; then
     tar xf openssl-1.1.0c.tar.gz
     cd openssl-1.1.0c
     mkdir -p build/lib
-    ./config --prefix=`pwd`/build
+    ./config --prefix=$(pwd)/build
     make && make install PROCESS_PODS=''
     cd -
     rm openssl-1.1.0c/build/lib/*.so*
@@ -105,7 +105,7 @@ if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
   tar xf xz-5.2.3.tar.gz
   cd xz-5.2.3
   mkdir -p build/lib
-  ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib --enable-static
+  ./configure --prefix=$(pwd)/build --libdir=$(pwd)/build/lib --enable-static
   make && make install
   cd -
   rm xz-5.2.3/build/lib/*.so*
@@ -136,7 +136,7 @@ if [ ! -e ./Makefile ] ; then
   autoreconf -fi || true # Errors out, but the following succeeds then?
   autoconf
   sed -i '/PKG_CHECK_MODULES.*/,/,:./d' configure # https://github.com/vasi/squashfuse/issues/12
-  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=`pwd`/../xz-5.2.3/build
+  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=$(pwd)/../xz-5.2.3/build
 
   # Patch Makefile to use static lzma
   sed -i "s|XZ_LIBS = -llzma  -L$(pwd)/../xz-5.2.3/build/lib|XZ_LIBS = -Bstatic -llzma  -L$(pwd)/../xz-5.2.3/build/lib|g" Makefile
