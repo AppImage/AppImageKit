@@ -465,30 +465,27 @@ main (int argc, char *argv[])
         setenv( "APPIMAGE", fullpath, 1 );
         setenv( "APPDIR", mount_dir, 1 );
 
-        char portable_dir[2048];
+        char portable_home_dir[2048];
+        char portable_config_dir[2048];
         
         /* If there is a directory with the same name as the AppImage plus ".home", then export $HOME */
-        strcpy (portable_dir, fullpath);
-        strcat (portable_dir, ".home");        
-        if(is_writable_directory(portable_dir)){
-            printf("Setting portable $HOME to '%s'\n", portable_dir);
-            char *old_env;
-            char new_env[1][2048];
-            old_env = getenv("HOME") ?: "";
-            snprintf(new_env[0], length, "HOME=%s", portable_dir);
-            putenv(new_env[0]);
+        strcpy (portable_home_dir, fullpath);
+        strcat (portable_home_dir, ".home");        
+        if(is_writable_directory(portable_home_dir)){
+            printf("Setting portable $HOME to '%s'\n", portable_home_dir);
+            char new_env[2048];
+            snprintf(new_env, 2047, "HOME=%s", portable_home_dir);
+            putenv(new_env);
         }
 
         /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
-        strcpy (portable_dir, fullpath);
-        strcat (portable_dir, ".config");        
-        if(is_writable_directory(portable_dir)){
-            printf("Setting portable $XDG_CONFIG_HOME to '%s'\n", portable_dir);
-            char *old_env;
-            char new_env[1][2048];
-            old_env = getenv("XDG_CONFIG_HOME") ?: "";
-            snprintf(new_env[0], length, "XDG_CONFIG_HOME=%s", portable_dir);
-            putenv(new_env[0]);
+        strcpy (portable_config_dir, fullpath);
+        strcat (portable_config_dir, ".config");        
+        if(is_writable_directory(portable_config_dir)){
+            printf("Setting portable $XDG_CONFIG_HOME to '%s'\n", portable_config_dir);
+            char new_env[2048];
+            snprintf(new_env, 2047, "XDG_CONFIG_HOME=%s", portable_config_dir);
+            putenv(new_env);
         }
         
         /* Original working directory */
