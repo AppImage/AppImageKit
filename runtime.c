@@ -68,6 +68,15 @@ static void die(const char *msg) {
     exit(1);
 }
 
+/* Check whether directory is writable */
+bool is_writable_directory(char* str) {
+    if(access(str, W_OK) == 0) {
+        return true;
+    } else {
+        return false;   
+    }
+}
+
 bool startsWith(const char *pre, const char *str)
 {
     size_t lenpre = strlen(pre),
@@ -455,6 +464,30 @@ main (int argc, char *argv[])
         /* Setting some environment variables that the app "inside" might use */
         setenv( "APPIMAGE", fullpath, 1 );
         setenv( "APPDIR", mount_dir, 1 );
+
+        char portable_dir[2048];
+        
+        /* If there is a directory with the same name as the AppImage plus ".home", then export $HOME */
+        strcpy (portable_dir, fullpath);
+        strcat (portable_dir, ".home");        
+        if(is_writable_directory(portable_dir)){
+            printf("Setting portable $HOME to '%s'\n", portable_dir);
+            char *old_env;
+            char new_env[8][2048];
+            old_env = getenv("HOME") ?: "";
+            snprintf(new_env[0], length, "HOME=%s", portable_dir);
+        }
+
+        /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
+        strcpy (portable_dir, fullpath);
+        strcat (portable_dir, ".config");        
+        if(is_writable_directory(portable_dir)){
+            printf("Setting portable $XDG_CONFIG_HOME to '%s'\n", portable_dir);
+            char *old_env;
+            char new_env[8][2048];
+            old_env = getenv("XDG_CONFIG_HOME") ?: "";
+            snprintf(new_env[0], length, "XDG_CONFIG_HOME=%s", portable_dir);
+        }
         
         /* Original working directory */
         char cwd[1024];
