@@ -472,20 +472,16 @@ main (int argc, char *argv[])
         strcpy (portable_home_dir, fullpath);
         strcat (portable_home_dir, ".home");        
         if(is_writable_directory(portable_home_dir)){
-            char new_env[2048];
-            snprintf(new_env, 2047, "HOME=%s", portable_home_dir);
-            printf("Setting %s\n", new_env);
-            putenv(new_env);
+            printf("Setting $HOME to %s\n", portable_home_dir);
+            setenv("HOME",portable_home_dir,1); 
         }
 
         /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
         strcpy (portable_config_dir, fullpath);
         strcat (portable_config_dir, ".config");        
         if(is_writable_directory(portable_config_dir)){
-            char new_env[2048];
-            snprintf(new_env, 2047, "XDG_CONFIG_HOME=%s", portable_config_dir);
-            printf("Setting %s\n", new_env);
-            putenv(new_env);
+            printf("Setting $XDG_CONFIG_HOME to %s\n", portable_config_dir);
+            setenv("XDG_CONFIG_HOME",portable_config_dir,1); 
         }
         
         /* Original working directory */
