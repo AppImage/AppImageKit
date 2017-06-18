@@ -473,9 +473,10 @@ main (int argc, char *argv[])
         if(is_writable_directory(portable_dir)){
             printf("Setting portable $HOME to '%s'\n", portable_dir);
             char *old_env;
-            char new_env[8][2048];
+            char new_env[1][2048];
             old_env = getenv("HOME") ?: "";
             snprintf(new_env[0], length, "HOME=%s", portable_dir);
+            putenv(new_env[0]);
         }
 
         /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
@@ -484,9 +485,10 @@ main (int argc, char *argv[])
         if(is_writable_directory(portable_dir)){
             printf("Setting portable $XDG_CONFIG_HOME to '%s'\n", portable_dir);
             char *old_env;
-            char new_env[8][2048];
+            char new_env[1][2048];
             old_env = getenv("XDG_CONFIG_HOME") ?: "";
             snprintf(new_env[0], length, "XDG_CONFIG_HOME=%s", portable_dir);
+            putenv(new_env[0]);
         }
         
         /* Original working directory */
