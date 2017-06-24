@@ -361,7 +361,17 @@ main (int argc, char *argv[])
     LOAD_LIBRARY; /* exit if libfuse is missing */
 
     int dir_fd, res;
-    char mount_dir[] = "/tmp/.mount_XXXXXX";  /* create mountpoint */
+
+    char mount_dir[64];
+    int namelen = strlen(basename(argv[0]));
+    if(namelen>6){
+        namelen=6;
+    }
+    strncpy(mount_dir, "/tmp/.mount_", 12);
+    strncpy(mount_dir+12, basename(argv[0]), namelen);
+    strncpy(mount_dir+12+namelen, "XXXXXX", 6);
+    mount_dir[12+namelen+6] = 0; // null terminate destination
+    
     char filename[100]; /* enough for mount_dir + "/AppRun" */
     pid_t pid;
     char **real_argv;
