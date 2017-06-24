@@ -54,6 +54,7 @@
 extern int _binary_runtime_start;
 extern int _binary_runtime_end;
 
+static gchar const APPIMAGEIGNORE[] = ".appimageignore";
 
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
@@ -65,6 +66,7 @@ gchar *updateinformation = NULL;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
+gchar *exclude_file = NULL;
 
 // #####################################################################
 
@@ -113,17 +115,61 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         waitpid(pid, &status, 0);
     } else {
         // we are the child
-	gchar *offset_string;
-	offset_string = g_strdup_printf("%i", offset);
-        if(0==strcmp("xz", sqfs_comp))
-        {
+        gchar *offset_string;
+        offset_string = g_strdup_printf("%i", offset);
+
+        char* args[32];
+        bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
+
+        int i = 0;
+        args[i++] = "mksquashfs";
+        args[i++] = source;
+        args[i++] = destination;
+        args[i++] = "-offset";
+        args[i++] = offset_string;
+        args[i++] = "-comp";
+
+        if(use_xz)
+            args[i++] = "xz";
+        else
+            args[i++] = sqfs_comp;
+
+        args[i++] = "-root-owned";
+        args[i++] = "-noappend";
+
+        // check if exclude file can be used
+        GString* ef = 0;
+
+        // explicitly passed exclude file always overrides defaults
+        // if an empty string is passed, the default exclude file is ignored
+        if(exclude_file != 0)
+            if(strlen(exclude_file) > 0)
+                ef = g_string_new(exclude_file);
+            else
+                printf("WARNING: %s is ignored", APPIMAGEIGNORE);
+        else if(access(APPIMAGEIGNORE, F_OK) != -1)
+            ef = g_string_new(APPIMAGEIGNORE);
+
+        if(use_xz) {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
-            execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset_string, "-comp", "xz", "-root-owned", "-noappend", "-Xdict-size", "100%", "-b", "16384", "-no-xattrs", "-root-owned", NULL);
-        } else {
-        execlp("mksquashfs", "mksquashfs", source, destination, "-offset", offset_string, "-comp", sqfs_comp, "-root-owned", "-noappend", "-no-xattrs", "-root-owned", NULL);
+            args[i++] = "-Xdict-size";
+            args[i++] = "100%";
+            args[i++] = "-b";
+            args[i++] = "16384";
         }
-        perror("execlp");   // execlp() returns only on error
+
+        if(ef != 0 && ef->len > 0) {
+            args[i++] = "-wildcards";
+            args[i++] = "-ef";
+            args[i++] = ef->str;
+        }
+
+        args[i++] = 0;
+
+        execvp("mksquashfs", args);
+
+        perror("execlp");   // exec*() returns only on error
         return(-1); // exec never returns
     }
     return(0);
@@ -236,6 +282,7 @@ static GOptionEntry entries[] =
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
+    { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, "Uses given file as exclude file for mksquashfs. By default, if .appimageignore exists, it will be used. Feature can be disabled completely by setting this option to an empty string.", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
 };
