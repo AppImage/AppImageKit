@@ -104,3 +104,8 @@ target_compile_definitions(appimagetool
     PRIVATE -DVERSION_NUMBER="${GIT_VERSION}"
     PRIVATE -DENABLE_BINRELOC
 )
+
+enable_testing()
+add_test(test_appimagetool
+    bash ${CMAKE_CURRENT_SOURCE_DIR}/test-appimagetool.sh ${CMAKE_CURRENT_BINARY_DIR}/appimagetool
+)
