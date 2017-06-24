@@ -17,7 +17,7 @@ script:
   - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
   - ( tar xf data.tar.gz ; sudo chown -R $USER .gnu* ; rm -rf $HOME/.gnu* ; mv .gnu* $HOME/ ) || true
   - mkdir -p ./out/
-  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh; sudo ./test-appimage.sh appimagetool"
+  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh; sudo ./test-appimagetool.sh appimagetool"
   - ls -lh out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - find ./out/appimagetool.AppDir/
