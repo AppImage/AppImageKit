@@ -53,7 +53,7 @@ HERE="$(dirname "$(readlink -f "${0}")")"
 
 # Install dependencies if enabled
 if [ $INSTALL_DEPENDENCIES -eq 1 ]; then
-  which git 2>&1 >/dev/null || . "$HERE/install-build-deps.sh"
+  . "$HERE/install-build-deps.sh"
 fi
 
 # Fetch git submodules
