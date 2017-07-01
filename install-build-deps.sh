@@ -9,6 +9,16 @@ if [ "$ARCH" == "i686" ]; then
   ARCH=i386
 fi
 
+
+# Install dependencies for openSUSE
+if [ -e /usr/bin/zypper ] ; then
+    sudo zypper up -y
+    sudo zypper in -y build git-core gcc wget make glibc-devel glib2-devel libarchive-devel \
+        fuse fuse-devel zlib-devel patch cairo-devel zsync
+    #for some reason openSUSE Tumbleweed have apt-get.
+    return
+fi
+
 if [ -e /usr/bin/apt-get ] ; then
   sudo apt-get update
   sudo apt-get -y install zsync git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
