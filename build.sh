@@ -296,7 +296,7 @@ if [ $STATIC_BUILD -eq 1 ]; then
     -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=0 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
     ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
     -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib -Wl,-Bstatic -lssl -lcrypto \
-    -I../libarchive-3.2.2/libarchive ../libarchive-3.2.2/.libs/libarchive.a \
+    -I../libarchive-3.3.1/libarchive ../libarchive-3.3.1/.libs/libarchive.a \
     -L../xz-5.2.3/build/lib -I../inotify-tools-3.14/build/include -L../inotify-tools-3.14/build/lib \
     -Wl,-Bstatic -linotifytools -Wl,-Bdynamic \
     -Wl,--as-needed \
