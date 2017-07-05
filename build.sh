@@ -100,16 +100,15 @@ if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
 fi
 
 # Build libarchive
-if [ $STATIC_BUILD -eq 1 ] && [ ! -e "./libarchive-3.2.2/.libs/libarchive.a" ] ; then
-  wget -c http://www.libarchive.org/downloads/libarchive-3.2.2.tar.gz
-  tar xf libarchive-3.2.2.tar.gz
-  cd libarchive-3.2.2
+if [ $STATIC_BUILD -eq 1 ] && [ ! -e "./libarchive-3.3.1/.libs/libarchive.a" ] ; then
+  wget -c http://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
+  tar xf libarchive-3.3.1.tar.gz
+  cd libarchive-3.3.1
   mkdir -p build/lib
-  patch -p1 --backup < ../libarchive.patch
-  CFLAGS="$CFLAGS -I`pwd`/../openssl-1.1.0c/build/include/ \
-    -I`pwd`/../openssl-1.1.0c/build/include/openssl \
-    -I`pwd`/../xz-5.2.3/build/include" \
-  ./configure --prefix=`pwd`/build --libdir=`pwd`/build/lib --disable-shared \
+  CFLAGS="$CFLAGS -I$PWD/../openssl-1.1.0c/build/include/ \
+    -I$PWD/../openssl-1.1.0c/build/include/openssl \
+    -I$PWD/../xz-5.2.3/build/include" \
+  ./configure --prefix=$PWD/build --libdir=$PWD/build/lib --disable-shared \
       --disable-bsdtar --disable-bsdcat --disable-bsdcpio
   cat <<EOL>> config.h
 // hack
