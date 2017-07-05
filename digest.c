@@ -91,6 +91,8 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
         sprintf(outputBuffer + (i * 2), "%02x", hash[i]);
     }
     outputBuffer[64] = 0;
+
+    fclose(file);
     
     return 0;
 }
