@@ -26,7 +26,10 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
     const int bufSize = 1024*1024;
     byte *buffer = malloc(bufSize);
     int bytesRead = 0;
-    if(!buffer) return ENOMEM;
+    if(!buffer) {
+        fclose(file);
+        return ENOMEM;
+    }
 
     int totalBytesRead = 0;
     if(skip_offset <= bufSize){
