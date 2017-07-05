@@ -93,6 +93,7 @@ int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_len
     outputBuffer[64] = 0;
 
     fclose(file);
+    free(buffer);
     
     return 0;
 }
