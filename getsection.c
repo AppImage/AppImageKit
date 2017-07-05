@@ -16,16 +16,18 @@ int get_elf_section_offset_and_lenghth(char* fname, char* section_name, unsigned
 
 // optionally add more architectures for 32-bit builds so that it doesn't fall back to Elf64_*
 // see e.g. https://sourceforge.net/p/predef/wiki/Architectures/ for more predefined macro names
-#if defined(__i386__) || defined(__arm__)
+#if __SIZEOF_POINTER__ == 4
     Elf32_Ehdr *elf;
     Elf32_Shdr *shdr;
     elf = (Elf32_Ehdr *) data;
     shdr = (Elf32_Shdr *) (data + elf->e_shoff);
-#else // Default to x86_64
+#elif __SIZEOF_POINTER__ == 8
     Elf64_Ehdr *elf;
     Elf64_Shdr *shdr;
     elf = (Elf64_Ehdr *) data;
     shdr = (Elf64_Shdr *) (data + elf->e_shoff);
+#else
+    #error Platforms other than 32-bit/64-bit are currently not supported!
 #endif
 
     char *strTab = (char *)(data + shdr[elf->e_shstrndx].sh_offset);
