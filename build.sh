@@ -105,29 +105,10 @@ if [ $STATIC_BUILD -eq 1 ] && [ ! -e "./libarchive-3.3.1/.libs/libarchive.a" ] ;
   tar xf libarchive-3.3.1.tar.gz
   cd libarchive-3.3.1
   mkdir -p build/lib
-  CFLAGS="$CFLAGS -I$PWD/../openssl-1.1.0c/build/include/ \
-    -I$PWD/../openssl-1.1.0c/build/include/openssl \
-    -I$PWD/../xz-5.2.3/build/include" \
-  ./configure --prefix=$PWD/build --libdir=$PWD/build/lib --disable-shared \
-      --disable-bsdtar --disable-bsdcat --disable-bsdcpio
-  cat <<EOL>> config.h
-// hack
-#undef ARCHIVE_CRYPTO_MD5_LIBMD
-#undef ARCHIVE_CRYPTO_RMD160_LIBMD
-#undef ARCHIVE_CRYPTO_SHA1_LIBMD
-#undef ARCHIVE_CRYPTO_SHA256_LIBMD
-#undef ARCHIVE_CRYPTO_SHA512_LIBMD
-#define ARCHIVE_CRYPTO_OPENSSL 1
-#define ARCHIVE_CRYPTO_MD5_OPENSSL 1
-#define ARCHIVE_CRYPTO_RMD160_OPENSSL 1
-#define ARCHIVE_CRYPTO_SHA1_OPENSSL 1
-#define ARCHIVE_CRYPTO_SHA256_OPENSSL 1
-#define ARCHIVE_CRYPTO_SHA384_OPENSSL 1
-#define ARCHIVE_CRYPTO_SHA512_OPENSSL 1
-#define HAVE_OPENSSL_EVP_H 1
-#define HAVE_LIBLZMA 1
-#define HAVE_LZMA_H 1
-EOL
+  ./configure --prefix=$PWD/build --libdir=$PWD/build/lib --disable-shared --enable-static \
+      --disable-bsdtar --disable-bsdcat --disable-bsdcpio \
+      --without-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma \
+      --with-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat
   make && make install
   cd -
 fi
