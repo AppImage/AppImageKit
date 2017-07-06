@@ -4,11 +4,14 @@
 # and builds AppImage
 #
 
+small_FLAGS="-Os -ffunction-sections -fdata-sections"
+small_LDFLAGS="-s -Wl,--gc-sections"
 CC="cc -O2 -Wall -Wno-deprecated-declarations -Wno-unused-result"
 
 STRIP="strip"
 INSTALL_DEPENDENCIES=1
 STATIC_BUILD=1
+JOBS=$(nproc)
 
 while [ $1 ]; do
   case $1 in
@@ -50,10 +53,11 @@ set -e
 set -x
 
 HERE="$(dirname "$(readlink -f "${0}")")"
+cd "$HERE"
 
 # Install dependencies if enabled
 if [ $INSTALL_DEPENDENCIES -eq 1 ]; then
-  . "$HERE/install-build-deps.sh"
+  . ./install-build-deps.sh
 fi
 
 # Fetch git submodules
@@ -78,11 +82,10 @@ if [ $STATIC_BUILD -eq 1 ]; then
     fi
     cd inotify-tools-3.14
     mkdir -p build/lib
-    ./configure --prefix=$(pwd)/build --libdir=$(pwd)/build/lib
-    make
+    ./configure --prefix=$(pwd)/build --libdir=$(pwd)/build/lib --enable-shared --enable-static  # disabling shared leads to linking errors?
+    make -j$JOBS
     make install
     cd -
-    rm inotify-tools-3.14/build/lib/*.so*
   fi
 
   # Build openssl
@@ -91,10 +94,9 @@ if [ $STATIC_BUILD -eq 1 ]; then
     tar xf openssl-1.1.0c.tar.gz
     cd openssl-1.1.0c
     mkdir -p build/lib
-    ./config --prefix=$(pwd)/build
-    make && make install PROCESS_PODS=''
+    ./config --prefix=$(pwd)/build no-shared
+    make -j$JOBS && make install PROCESS_PODS=''
     cd -
-    rm openssl-1.1.0c/build/lib/*.so*
   fi
 fi
 
@@ -105,10 +107,9 @@ if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
   tar xf xz-5.2.3.tar.gz
   cd xz-5.2.3
   mkdir -p build/lib
-  ./configure --prefix=$(pwd)/build --libdir=$(pwd)/build/lib --enable-static
-  make && make install
+  CFLAGS="-Wall $small_FLAGS" ./configure --prefix=$(pwd)/build --libdir=$(pwd)/build/lib --enable-static --disable-shared
+  make -j$JOBS && make install
   cd -
-  rm xz-5.2.3/build/lib/*.so*
 fi
 
 # Patch squashfuse_ll to be a library rather than an executable
@@ -136,7 +137,7 @@ if [ ! -e ./Makefile ] ; then
   autoreconf -fi || true # Errors out, but the following succeeds then?
   autoconf
   sed -i '/PKG_CHECK_MODULES.*/,/,:./d' configure # https://github.com/vasi/squashfuse/issues/12
-  ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=$(pwd)/../xz-5.2.3/build
+  CFLAGS="-Wall $small_FLAGS" ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --with-xz=$(pwd)/../xz-5.2.3/build
 
   # Patch Makefile to use static lzma
   sed -i "s|XZ_LIBS = -llzma  -L$(pwd)/../xz-5.2.3/build/lib|XZ_LIBS = -Bstatic -llzma  -L$(pwd)/../xz-5.2.3/build/lib|g" Makefile
@@ -144,7 +145,7 @@ fi
 
 bash --version
 
-make
+make -j$JOBS
 
 cd ..
 
@@ -156,7 +157,7 @@ cd squashfs-tools/squashfs-tools
 sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" Makefile
 sed -i "s|LIBS += -llzma|LIBS += -Bstatic -llzma  -L../../xz-5.2.3/build/lib|g" Makefile
 
-make XZ_SUPPORT=1 mksquashfs # LZ4_SUPPORT=1 did not build yet on CentOS 6
+make -j$JOBS XZ_SUPPORT=1 mksquashfs # LZ4_SUPPORT=1 did not build yet on CentOS 6
 $STRIP mksquashfs
 
 cd ../../
@@ -170,7 +171,7 @@ cp ../squashfs-tools/squashfs-tools/mksquashfs .
 
 # Compile runtime but do not link
 
-$CC -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -I../squashfuse/ -D_FILE_OFFSET_BITS=64 -g -Os -c ../runtime.c
+$CC -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -I../squashfuse/ -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c ../runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
 printf '\0%.0s' {0..1023} > 1024_blank_bytes
@@ -183,7 +184,7 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed .upd_info and .sha256_sig sections
-$CC -o runtime ../elf.c ../notify.c ../getsection.c runtime3.o \
+$CC $small_FLAGS $small_LDFLAGS -o runtime ../elf.c ../notify.c ../getsection.c runtime3.o \
     ../squashfuse/.libs/libsquashfuse_ll.a ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
     -L../xz-5.2.3/build/lib -Wl,-Bdynamic -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
 $STRIP runtime
@@ -267,7 +268,7 @@ fi
 $STRIP validate
 
 # AppRun
-$CC ../AppRun.c -o AppRun
+$CC $small_FLAGS $small_LDFLAGS ../AppRun.c -o AppRun
 
 # check for libarchive name
 have_libarchive3=0
