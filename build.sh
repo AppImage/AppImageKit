@@ -11,7 +11,7 @@ CC="cc -O2 -Wall -Wno-deprecated-declarations -Wno-unused-result"
 STRIP="strip"
 INSTALL_DEPENDENCIES=1
 STATIC_BUILD=1
-JOBS=$(nproc)
+JOBS=${JOBS:-1}
 
 while [ $1 ]; do
   case $1 in
