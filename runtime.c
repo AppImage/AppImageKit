@@ -1,6 +1,6 @@
 /**************************************************************************
  * 
- * Copyright (c) 2004-16 Simon Peter
+ * Copyright (c) 2004-17 Simon Peter
  * Portions Copyright (c) 2007 Alexander Larsson
  * 
  * All Rights Reserved.
@@ -49,6 +49,11 @@
 #include "elf.h"
 #include "getsection.h"
 
+#ifndef ENABLE_DLOPEN
+#define ENABLE_DLOPEN
+#endif
+#include "squashfuse_dlopen.h"
+
 #include <fnmatch.h>
 
 //#include "notify.c"
@@ -61,6 +66,15 @@ static long unsigned int fs_offset; // The offset at which a filesystem image is
 static void die(const char *msg) {
     fprintf(stderr, "%s\n", msg);
     exit(1);
+}
+
+/* Check whether directory is writable */
+bool is_writable_directory(char* str) {
+    if(access(str, W_OK) == 0) {
+        return true;
+    } else {
+        return false;   
+    }
 }
 
 bool startsWith(const char *pre, const char *str)
@@ -148,7 +162,7 @@ char* getArg(int argc, char *argv[],char chr)
         return NULL;
 }
 
-/* mkdir -p implemented in C, needed for https://github.com/probonopd/AppImageKit/issues/333
+/* mkdir -p implemented in C, needed for https://github.com/AppImage/AppImageKit/issues/333
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
 int
 mkdir_p(const char *path)
@@ -237,8 +251,10 @@ main (int argc, char *argv[])
             }
         }
         
-        if(argc == 3)
+        if(argc == 3){
             pattern = argv[2];
+	    if (pattern[0] == '/') pattern++; // Remove leading '/'
+	}
         
         if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
             exit(1);
@@ -248,26 +264,27 @@ main (int argc, char *argv[])
         while (sqfs_traverse_next(&trv, &err)) {
             if (!trv.dir_end) {
                 if((argc != 3) || (fnmatch (pattern, trv.path, FNM_FILE_NAME) == 0)){
-                    fprintf(stderr, "trv.path: %s\n", trv.path);
-                    fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
+                    // fprintf(stderr, "trv.path: %s\n", trv.path);
+                    // fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
                     sqfs_inode inode;
                     if (sqfs_inode_get(&fs, &inode, trv.entry.inode))
                         die("sqfs_inode_get error");
-                    fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
-                    fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
+                    // fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
+                    // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
                     strcpy(prefixed_path_to_extract, "");
                     strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
-                    if(inode.base.inode_type == SQUASHFS_DIR_TYPE){
-                        fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
-                        fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
+		    fprintf(stderr, "%s\n", prefixed_path_to_extract);
+                    if(inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE){
+                        // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
+                        // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
                         if(access(prefixed_path_to_extract, F_OK ) == -1 ) {
                             if (mkdir_p(prefixed_path_to_extract) == -1) {
                                 perror("mkdir_p error");
                                 exit(EXIT_FAILURE);
                             }
                         }
-                    } else if(inode.base.inode_type == SQUASHFS_REG_TYPE){
-                        fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
+                    } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
+                        // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
                         if(private_sqfs_stat(&fs, &inode, &st) != 0)
                             die("private_sqfs_stat error");
                         // Read the file in chunks
@@ -289,12 +306,13 @@ main (int argc, char *argv[])
                         fclose(f);
                         chmod (prefixed_path_to_extract, st.st_mode);
                     } else if(inode.base.inode_type == SQUASHFS_SYMLINK_TYPE){
-                        size_t size = strlen(trv.path)+1;
+                        size_t size;
+                        sqfs_readlink(&fs, &inode, NULL, &size);
                         char buf[size];
                         int ret = sqfs_readlink(&fs, &inode, buf, &size);
                         if (ret != 0)
                             die("symlink error");
-                        fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
+                        // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
                         unlink(prefixed_path_to_extract);
                         ret = symlink(buf, prefixed_path_to_extract);
                         if (ret != 0)
@@ -302,7 +320,7 @@ main (int argc, char *argv[])
                     } else {
                         fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
                     }
-                    fprintf(stderr, "\n");
+                    // fprintf(stderr, "\n");
                 }
             }
         }
@@ -339,9 +357,21 @@ main (int argc, char *argv[])
         print_binary(appimage_path, offset, length);
         exit(0);
     }
-    
+
+    LOAD_LIBRARY; /* exit if libfuse is missing */
+
     int dir_fd, res;
-    char mount_dir[] = "/tmp/.mount_XXXXXX";  /* create mountpoint */
+
+    char mount_dir[64];
+    int namelen = strlen(basename(argv[0]));
+    if(namelen>6){
+        namelen=6;
+    }
+    strncpy(mount_dir, "/tmp/.mount_", 12);
+    strncpy(mount_dir+12, basename(argv[0]), namelen);
+    strncpy(mount_dir+12+namelen, "XXXXXX", 6);
+    mount_dir[12+namelen+6] = 0; // null terminate destination
+    
     char filename[100]; /* enough for mount_dir + "/AppRun" */
     pid_t pid;
     char **real_argv;
@@ -387,7 +417,7 @@ main (int argc, char *argv[])
             title = "Cannot mount AppImage, please check your FUSE setup.";
             body = "You might still be able to extract the contents of this AppImage \n"
             "if you run it with the --appimage-extract option. \n"
-            "See https://github.com/probonopd/AppImageKit/wiki/FUSE \n"
+            "See https://github.com/AppImage/AppImageKit/wiki/FUSE \n"
             "for more information";
 	    notify(title, body, 0); // 3 seconds timeout
         };
@@ -405,8 +435,6 @@ main (int argc, char *argv[])
         dir_fd = open (mount_dir, O_RDONLY);
         if (dir_fd == -1) {
             perror ("open dir error");
-            /* TODO: dlopen() libfuse and be nice if it is not there, e.g., offer
-             * to extract the files to a temp location and run AppRun */
             exit (1);
         }
         
@@ -446,6 +474,25 @@ main (int argc, char *argv[])
         /* Setting some environment variables that the app "inside" might use */
         setenv( "APPIMAGE", fullpath, 1 );
         setenv( "APPDIR", mount_dir, 1 );
+
+        char portable_home_dir[2048];
+        char portable_config_dir[2048];
+        
+        /* If there is a directory with the same name as the AppImage plus ".home", then export $HOME */
+        strcpy (portable_home_dir, fullpath);
+        strcat (portable_home_dir, ".home");        
+        if(is_writable_directory(portable_home_dir)){
+            printf("Setting $HOME to %s\n", portable_home_dir);
+            setenv("HOME",portable_home_dir,1); 
+        }
+
+        /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
+        strcpy (portable_config_dir, fullpath);
+        strcat (portable_config_dir, ".config");        
+        if(is_writable_directory(portable_config_dir)){
+            printf("Setting $XDG_CONFIG_HOME to %s\n", portable_config_dir);
+            setenv("XDG_CONFIG_HOME",portable_config_dir,1); 
+        }
         
         /* Original working directory */
         char cwd[1024];

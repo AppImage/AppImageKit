@@ -9,8 +9,18 @@ if [ "$ARCH" == "i686" ]; then
   ARCH=i386
 fi
 
+
+# Install dependencies for openSUSE
+if [ -e /usr/bin/zypper ] ; then
+    sudo zypper up -y
+    sudo zypper in -y build git-core gcc wget make glibc-devel glib2-devel libarchive-devel \
+        fuse fuse-devel zlib-devel patch cairo-devel zsync
+    #for some reason openSUSE Tumbleweed have apt-get.
+    return
+fi
+
 if [ -e /usr/bin/apt-get ] ; then
-  apt-get update
+  sudo apt-get update
   sudo apt-get -y install zsync git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
   liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs libcairo-dev
   # libtool-bin might be required in newer distributions but is not available in precise
@@ -45,17 +55,21 @@ if [ -e /usr/bin/yum ] ; then
   fi
   . /opt/rh/autotools-latest/enable
 
-  # Unlike Ubuntu, CentOS does not provide .a, so we need to build it
-  #wget http://tukaani.org/xz/xz-5.2.2.tar.gz
-  #tar xzfv xz-5.2.2.tar.gz
-  #cd xz-5.2.2
-  #./configure --enable-static && make && make install
-  #rm /usr/local/lib/liblzma.so* /usr/*/liblzma.so || true # Don't want the dynamic one
-  #cd -
 fi
 
 # Install dependencies for Arch Linux
 if [ -e /usr/bin/pacman ] ; then
-  echo "Please submit a pull request if you would like to see Arch Linux support."
-  exit 1
+  echo "Checking arch package provides and installed packages"
+  declare -a arr=("zsync" "git" "libarchive" "autoconf" "libtool" "make"
+    "libtool" "fuse2" "xz" "glib2" "openssl" "inotify-tools" "lz4" "gcc")
+  for i in "${arr[@]}"
+  do
+      if [ ! "$(package-query -Q $i || package-query --qprovides $i -Q)" ]; then
+          TO_INSTALL="$TO_INSTALL $i"
+      fi
+  done
+  if [ "$TO_INSTALL" ]; then
+      echo "Found the following missing packages:$TO_INSTALL, installing now"
+      sudo pacman -S --needed $TO_INSTALL
+  fi
 fi

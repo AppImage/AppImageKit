@@ -10,8 +10,8 @@
  * more information and how to use this.
  */
 
-#ifndef __BINRELOC_C__
-#define __BINRELOC_C__
+#ifndef BINRELOC_C
+#define BINRELOC_C
 
 #ifdef ENABLE_BINRELOC
 	#include <sys/types.h>
@@ -763,4 +763,4 @@ br_dirname (const char *path)
 }
 #endif /* __cplusplus */
 
-#endif /* __BINRELOC_C__ */
+#endif /* BINRELOC_C */

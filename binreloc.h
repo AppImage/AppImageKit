@@ -10,8 +10,8 @@
  * more information and how to use this.
  */
 
-#ifndef __BINRELOC_H__
-#define __BINRELOC_H__
+#ifndef BINRELOC_H
+#define BINRELOC_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -77,4 +77,4 @@ char *br_dirname (const char *path);
 }
 #endif /* __cplusplus */
 
-#endif /* __BINRELOC_H__ */
+#endif /* BINRELOC_H */

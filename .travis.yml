@@ -13,11 +13,11 @@ script:
   - if [ "$ARCH" == "i686" ] ; then sed -i -e 's|%ARCH%|i386|g' appimaged.ctl && sleep 60 ; fi # Slep so as not to overwrite during uploading (FIXME)
   - grep Architecture appimaged.ctl
   - rm -rf data.tar.g* .gnu* || true
-  - wget https://github.com/probonopd/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
+  - wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
   - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
   - ( tar xf data.tar.gz ; sudo chown -R $USER .gnu* ; rm -rf $HOME/.gnu* ; mv .gnu* $HOME/ ) || true
   - mkdir -p ./out/
-  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh"
+  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh; sudo ./test-appimagetool.sh build/appimagetool"
   - ls -lh out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - find ./out/appimagetool.AppDir/
@@ -25,9 +25,9 @@ script:
   - docker run --cap-add SYS_ADMIN --device /dev/fuse:/dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -c 
       "yum -y install fuse fuse-libs && 
       cd /out && 
-      ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimagetool-$ARCH.AppImage.zsync\"
+      ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"zsync|https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-$ARCH.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&
-      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"zsync|https://github.com/probonopd/AppImageKit/releases/download/continuous/appimaged-$ARCH.AppImage.zsync\" appimaged-$ARCH.AppImage"
+      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"zsync|https://github.com/AppImage/AppImageKit/releases/download/continuous/appimaged-$ARCH.AppImage.zsync\" appimaged-$ARCH.AppImage"
   - sudo apt-get install equivs
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
@@ -58,3 +58,4 @@ notifications:
 branches:
   only:
     - appimagetool/master
+    - feature/usage
