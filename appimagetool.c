@@ -440,9 +440,6 @@ main (int argc, char *argv[])
             
             destination = dest_path;
             replacestr(destination, " ", "_");
-            
-            // destination = basename(br_strcat(source, ".AppImage"));
-            fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
         }
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
         /* Check if the Icon file is how it is expected */
