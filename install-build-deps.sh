@@ -4,7 +4,7 @@ set -e
 
 # Install build dependencies; TODO: Support systems that do not use apt-get (Pull Requests welcome!)
 
-ARCH=$(uname -p)
+ARCH=$(uname -m)
 if [ "$ARCH" == "i686" ]; then
   ARCH=i386
 fi
@@ -20,11 +20,16 @@ if [ -e /usr/bin/zypper ] ; then
 fi
 
 if [ -e /usr/bin/apt-get ] ; then
-  sudo apt-get update
-  sudo apt-get -y install zsync git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
-  liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs libcairo-dev
-  # libtool-bin might be required in newer distributions but is not available in precise
-  sudo cp resources/liblz4.pc /usr/lib/$ARCH-linux-gnu/pkgconfig/
+    if [ $EUID -ne 0 ]; then 
+      echo "you must have root privileges for install (su or sudo su )"
+      exit 1
+    fi
+    apt-get update
+    pkglibtoolbin=$(apt-cache --generate pkgnames libtool-bin)
+    apt-get -y install zsync git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
+                       liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev \
+                       equivs libcairo2-dev $pkglibtoolbin
+    cp resources/liblz4.pc /usr/lib/$ARCH-linux-gnu/pkgconfig/
 fi
 
 if [ -e /usr/bin/yum ] ; then
