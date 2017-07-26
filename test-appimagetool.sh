@@ -21,29 +21,37 @@ trap cleanup EXIT
 
 cd "$tempdir"
 
-# create a sample AppDir
-mkdir appimagetool.AppDir
-cp -R "$thisdir"/resources/{appimagetool.*,AppRun} appimagetool.AppDir/
-cp -R "$appimagetool" appimagetool.AppDir/
+log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
 
-# create a file that should be ignored
+log "create a sample AppDir"
+mkdir -p appimagetool.AppDir/usr/share/metainfo/
+cp "$thisdir"/resources/{appimagetool.*,AppRun} appimagetool.AppDir/
+cp "$thisdir"/resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
+cp "$appimagetool" appimagetool.AppDir/
+mkdir -p appimagetool.AppDir/usr/share/applications
+cp appimagetool.AppDir/appimagetool.desktop appimagetool.AppDir/usr/share/applications
+
+log "create a file that should be ignored"
 touch appimagetool.AppDir/to-be-ignored
 
-# create an AppImage without an ignore file to make sure it is bundled
-$appimagetool appimagetool.AppDir appimagetool.AppImage
+log "create an AppImage without an ignore file to make sure it is bundled"
+$appimagetool appimagetool.AppDir appimagetool.AppImage || exit $?
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || exit 1
 
-# now set up the ignore file, and check that the file is properly ignored
+log "now set up the ignore file, and check that the file is properly ignored"
 echo "to-be-ignored" > .appimageignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
 
-# check if disabling the ignore file feature works by passing an empty string as argument
-$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ""
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || exit 1
-
-# remove the default ignore file, and check if an explicitly passed one works, too
+log "remove the default ignore file, and check if an explicitly passed one works, too"
 rm .appimageignore
 echo "to-be-ignored" > ignore
-$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
+$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || exit $?
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
+
+log "check whether files in both .appimageignore and the explicitly passed file work"
+touch appimagetool.AppDir/to-be-ignored-too
+echo "to-be-ignored-too" > .appimageignore
+$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || exit $?
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored-too && exit 1 || true
