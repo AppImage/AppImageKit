@@ -151,7 +151,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         }
 
         // check if ignore file exists and use it if possible
-        if(access(APPIMAGEIGNORE, F_OK) != -1) {
+        if(access(APPIMAGEIGNORE, F_OK) >= 0) {
             printf("Including %s", APPIMAGEIGNORE);
             args[i++] = "-wildcards";
             args[i++] = "-ef";
@@ -164,14 +164,14 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         // if an exclude file has been passed on the command line, should be used, too
         if(exclude_file != 0 && strlen(exclude_file) > 0) {
-            if(!access(exclude_file, F_OK) != -1) {
+            if(access(exclude_file, F_OK) < 0) {
                 printf("WARNING: exclude file %s not found!", exclude_file);
                 return -1;
-            } else {
-                args[i++] = "-wildcards";
-                args[i++] = "-ef";
-                args[i++] = exclude_file;
             }
+
+            args[i++] = "-wildcards";
+            args[i++] = "-ef";
+            args[i++] = exclude_file;
         }
 
         args[i++] = 0;
