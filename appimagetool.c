@@ -138,9 +138,6 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = "-root-owned";
         args[i++] = "-noappend";
 
-        // check if exclude file can be used
-        GString* ef = 0;
-
         if(use_xz) {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
