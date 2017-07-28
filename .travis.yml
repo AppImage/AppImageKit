@@ -17,13 +17,13 @@ script:
   - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
   - ( tar xf data.tar.gz ; sudo chown -R $USER .gnu* ; rm -rf $HOME/.gnu* ; mv .gnu* $HOME/ ) || true
   - mkdir -p ./out/
-  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh; sudo ./test-appimagetool.sh build/appimagetool"
+  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo zlib-static ; sudo ./build.sh; sudo ./test-appimagetool.sh build/appimagetool"
   - ls -lh out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - find ./out/appimagetool.AppDir/
   - find ./out/appimaged.AppDir/
   - docker run --cap-add SYS_ADMIN --device /dev/fuse:/dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -c 
-      "yum -y install fuse fuse-libs zlib-static &&
+      "yum -y install fuse fuse-libs &&
       cd /out && 
       ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"zsync|https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-$ARCH.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&
