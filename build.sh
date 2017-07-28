@@ -156,7 +156,7 @@ cd squashfs-tools/squashfs-tools
 # Patch squashfuse-tools Makefile to link against static llzma and lz
 sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" Makefile
 sed -i "s|LIBS += -llzma|LIBS += -Bstatic -llzma  -L../../xz-5.2.3/build/lib|g" Makefile
-sed -i "s|LIBS += -lz|LIBS += -lz  -L$(ls -1 usr/lib/libz.a || ls usr/lib64/libz.a)|g" Makefile
+sed -i "s|LIBS += -lz|LIBS += -lz  -L$(ls -1 /usr/lib/libz.a || ls /usr/lib64/libz.a)|g" Makefile
 
 make -j$JOBS XZ_SUPPORT=1 mksquashfs # LZ4_SUPPORT=1 did not build yet on CentOS 6
 $STRIP mksquashfs
