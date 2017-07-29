@@ -165,14 +165,14 @@ int launcher(const char *title)
   win->callback(close_cb, RET_CLOSE_WINDOW);
   {
     { Fl_Button *o = new Fl_Button(40, 40, 180, 180, msg_launch);
-      o->image(new Fl_PNG_Image(NULL, LAUNCH_ICON, LAUNCH_ICON_LEN));
+      o->image(new Fl_PNG_Image(NULL, oxygen_launch_96x96_png, (int)oxygen_launch_96x96_png_len));
       o->box(FL_GLEAM_THIN_UP_BOX);
       o->down_box(FL_GLEAM_THIN_DOWN_BOX);
       o->clear_visible_focus();
       o->callback(launch_cb, RET_LAUNCH_APP); }
 
     { Fl_Button *o = new Fl_Button(260, 40, 180, 180, msg_menu);
-      o->image(new Fl_PNG_Image(NULL, MENU_ICON, MENU_ICON_LEN));
+      o->image(new Fl_PNG_Image(NULL, alacarte_96x96_png, (int)alacarte_96x96_png_len));
       o->box(FL_GLEAM_THIN_UP_BOX);
       o->down_box(FL_GLEAM_THIN_DOWN_BOX);
       o->clear_visible_focus();
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
   Fl::set_font(FL_HELVETICA, font.c_str());
 
   Fl::get_system_colors();
-  Fl_Window::default_icon(new Fl_PNG_Image(NULL, WINDOW_ICON, WINDOW_ICON_LEN));
+  Fl_Window::default_icon(new Fl_PNG_Image(NULL, appimagetool_48x48_png, (int)appimagetool_48x48_png_len));
 
   return launcher(title);
 }

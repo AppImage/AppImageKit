@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# needs: cmake libx11-dev libxft-dev libfontconfig1-dev
+# needs: cmake libx11-dev libxft-dev libfontconfig1-dev librsvg2-bin
 
 common_FLAGS="-fstack-protector -ffunction-sections -fdata-sections -D_FORTIFY_SOURCE=2"
 CFLAGS="-Os $common_FLAGS"
@@ -39,8 +39,17 @@ if [ ! -e "./libdesktopenvironments/build/src/libdesktopenvironment.a" ]; then
   cd -
 fi
 
+cd build
+rsvg-convert -f png -o appimagetool-48x48.png -w 48 -h 48 ../resources/appimagetool.svg
+rsvg-convert -f png -o alacarte-96x96.png -w 96 -h 96 ../resources/alacarte.svg
+rsvg-convert -f png -o oxygen-launch-96x96.png -w 96 -h 96 ../resources/oxygen-launch.svg
+xxd -i appimagetool-48x48.png > dialog_images.h
+xxd -i alacarte-96x96.png >> dialog_images.h
+xxd -i oxygen-launch-96x96.png >> dialog_images.h
+cd -
+
 $CXX dialog.cpp -o ./build/dialog \
-  -I./libdesktopenvironments/include -I. \
+  -I./libdesktopenvironments/include -I. -I./build \
   $(./fltk/fltk-config --use-images --cxxflags) \
   $(./fltk/fltk-config --use-images --ldflags | sed 's|-lfltk_jpeg||g') \
   ./libdesktopenvironments/build/src/libdesktopenvironment.a
