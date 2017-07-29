@@ -118,7 +118,6 @@ void get_system_font(std::string &font)
   if (last == "Bold" || last == "Light" || last == "Medium" || last == "Demi-Bold" || last == "Black")
   {
     splitted.pop_back();
-    last = splitted.back();
   }
 
   std::copy(splitted.begin(), splitted.end()-1, std::ostream_iterator<std::string>(newFont, " "));
