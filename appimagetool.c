@@ -575,7 +575,8 @@ main (int argc, char *argv[])
         if(updateinformation != NULL){
             if(!g_str_has_prefix(updateinformation,"zsync|"))
                 if(!g_str_has_prefix(updateinformation,"bintray-zsync|"))
-                    die("The provided updateinformation is not in a recognized format");
+                    if(!g_str_has_prefix(updateinformation,"github-releases-zsync|"))
+                        die("The provided updateinformation is not in a recognized format");
                 
             gchar **ui_type = g_strsplit_set(updateinformation, "|", -1);
                         
