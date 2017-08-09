@@ -184,6 +184,9 @@ int main(int argc, char *argv[]) {
 
     for (n = 0; n < 8; n++)
         putenv(new_env[n]);
+    
+   /* Otherwise may get errors because Python cannot write __pycache__ bytecode cache */
+    putenv("PYTHONDONTWRITEBYTECODE=1");
 
     /* Run */
     ret = execvp(exe, outargptrs);

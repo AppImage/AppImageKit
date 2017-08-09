@@ -55,6 +55,7 @@ extern int _binary_runtime_start;
 extern int _binary_runtime_end;
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
+static char _exclude_file_desc[256];
 
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
@@ -137,19 +138,6 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = "-root-owned";
         args[i++] = "-noappend";
 
-        // check if exclude file can be used
-        GString* ef = 0;
-
-        // explicitly passed exclude file always overrides defaults
-        // if an empty string is passed, the default exclude file is ignored
-        if(exclude_file != 0)
-            if(strlen(exclude_file) > 0)
-                ef = g_string_new(exclude_file);
-            else
-                printf("WARNING: %s is ignored", APPIMAGEIGNORE);
-        else if(access(APPIMAGEIGNORE, F_OK) != -1)
-            ef = g_string_new(APPIMAGEIGNORE);
-
         if(use_xz) {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
@@ -159,10 +147,28 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
             args[i++] = "16384";
         }
 
-        if(ef != 0 && ef->len > 0) {
+        // check if ignore file exists and use it if possible
+        if(access(APPIMAGEIGNORE, F_OK) >= 0) {
+            printf("Including %s", APPIMAGEIGNORE);
             args[i++] = "-wildcards";
             args[i++] = "-ef";
-            args[i++] = ef->str;
+
+            // avoid warning: assignment discards ‘const’ qualifier
+            char buf[256];
+            strcpy(buf, APPIMAGEIGNORE);
+            args[i++] = buf;
+        }
+
+        // if an exclude file has been passed on the command line, should be used, too
+        if(exclude_file != 0 && strlen(exclude_file) > 0) {
+            if(access(exclude_file, F_OK) < 0) {
+                printf("WARNING: exclude file %s not found!", exclude_file);
+                return -1;
+            }
+
+            args[i++] = "-wildcards";
+            args[i++] = "-ef";
+            args[i++] = exclude_file;
         }
 
         args[i++] = 0;
@@ -170,9 +176,9 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         execvp("mksquashfs", args);
 
         perror("execlp");   // exec*() returns only on error
-        return(-1); // exec never returns
+        return -1; // exec never returns
     }
-    return(0);
+    return 0;
 }
 
 /* Generate a squashfs filesystem
@@ -282,7 +288,7 @@ static GOptionEntry entries[] =
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
-    { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, "Uses given file as exclude file for mksquashfs. By default, if .appimageignore exists, it will be used. Feature can be disabled completely by setting this option to an empty string.", NULL },
+    { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
 };
@@ -312,6 +318,9 @@ main (int argc, char *argv[])
     GError *error = NULL;
     GOptionContext *context;
     char command[PATH_MAX];
+
+    // initialize help text of argument
+    sprintf(_exclude_file_desc, "Uses given file as exclude file for mksquashfs, in addition to %s.", APPIMAGEIGNORE);
     
     context = g_option_context_new ("SOURCE [DESTINATION] - Generate, extract, and inspect AppImages");
     g_option_context_add_main_entries (context, entries, NULL);
@@ -440,9 +449,6 @@ main (int argc, char *argv[])
             
             destination = dest_path;
             replacestr(destination, " ", "_");
-            
-            // destination = basename(br_strcat(source, ".AppImage"));
-            fprintf (stdout, "DESTINATION not specified, so assuming %s\n", destination);
         }
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
         /* Check if the Icon file is how it is expected */
@@ -569,7 +575,8 @@ main (int argc, char *argv[])
         if(updateinformation != NULL){
             if(!g_str_has_prefix(updateinformation,"zsync|"))
                 if(!g_str_has_prefix(updateinformation,"bintray-zsync|"))
-                    die("The provided updateinformation is not in a recognized format");
+                    if(!g_str_has_prefix(updateinformation,"gh-releases-zsync|"))
+                        die("The provided updateinformation is not in a recognized format");
                 
             gchar **ui_type = g_strsplit_set(updateinformation, "|", -1);
                         
