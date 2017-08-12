@@ -3,7 +3,7 @@
 	url = https://github.com/vasi/squashfuse.git
 [submodule "squashfs-tools"]
 	path = squashfs-tools
-	url = https://github.com/AppImage/squashfs-tools.git
+	url = https://github.com/plougher/squashfs-tools.git
 [submodule "fltk"]
 	path = fltk
 	url = https://github.com/darealshinji/fltk-1.3.4
