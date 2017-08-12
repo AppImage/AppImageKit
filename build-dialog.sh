@@ -17,8 +17,8 @@ HERE="$(dirname "$(readlink -f "${0}")")"
 cd "$HERE"
 
 # Fetch git submodules
-git submodule init
-git submodule update
+#git submodule init
+#git submodule update
 
 mkdir -p build
 
@@ -56,5 +56,4 @@ $CXX dialog.cpp -o ./build/dialog \
 $STRIP ./build/dialog
 (objdump -p ./build/dialog | grep NEEDED) || true
 ldd ./build/dialog || true
-
 
