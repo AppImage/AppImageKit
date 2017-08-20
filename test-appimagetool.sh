@@ -26,7 +26,7 @@ log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
 log "create a sample AppDir"
 mkdir -p appimagetool.AppDir/usr/share/metainfo/
 cp "$thisdir"/resources/{appimagetool.*,AppRun} appimagetool.AppDir/
-cp "$thisdir"/resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
+cp "$thisdir"/resources/usr/share/metainfo/appimagetool.metainfo.xml appimagetool.AppDir/usr/share/metainfo/
 cp "$appimagetool" appimagetool.AppDir/
 mkdir -p appimagetool.AppDir/usr/share/applications
 cp appimagetool.AppDir/appimagetool.desktop appimagetool.AppDir/usr/share/applications
