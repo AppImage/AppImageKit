@@ -21,6 +21,8 @@ cp $(which zsyncmake) appimagetool.AppDir/usr/bin/
 cp resources/appimagetool.desktop appimagetool.AppDir/
 cp resources/appimagetool.svg appimagetool.AppDir/appimagetool.svg
 ( cd appimagetool.AppDir/ ; ln -s appimagetool.svg .DirIcon )
+mkdir -p appimagetool.AppDir/usr/share/metainfo
+cp resources/usr/share/metainfo/appimagetool.metainfo.xml appimagetool.AppDir/usr/share/metainfo/
 
 #######################################################################
 
@@ -31,6 +33,8 @@ mkdir -p appimaged.AppDir/usr/bin
 mkdir -p appimaged.AppDir/usr/lib
 cp -f build/appimaged appimaged.AppDir/usr/bin
 cp -f build/validate appimaged.AppDir/usr/bin
+mkdir -p appimaged.AppDir/usr/share/metainfo
+cp resources/usr/share/metainfo/appimaged.metainfo.xml appimaged.AppDir/usr/share/metainfo/
 
 cp resources/AppRun appimaged.AppDir/
 find /usr -name "libarchive.so.*.*" -exec cp {} appimaged.AppDir/usr/lib/ \; > /dev/null 2>&1
