@@ -421,11 +421,14 @@ main (int argc, char *argv[])
             archfile = find_first_matching_file(source, "*.so.*");
             if(!archfile)
             {
+                fprintf(stderr, "Unable to guess the architecture of the AppDir source directory \"%s\"\n", remaining_args[0]);
+                fprintf(stderr, "A valid architecture with the ARCH environmental variable should be provided\ne.g. ARCH=x86_64 %s", argv[0]),
+                die(" ...");
                 /* If we found no .so we try to guess the main executable - this might be a script though */
                 // char guessed_bin_path[PATH_MAX];
                 // sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
                 // archfile = guessed_bin_path;
-                archfile = "/proc/self/exe";
+                // archfile = "/proc/self/exe";
             }
             if(verbose)
                 fprintf (stderr,"File used for determining architecture: %s\n", archfile);
