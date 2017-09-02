@@ -1,5 +1,10 @@
-#include <elf.h>
-#include <byteswap.h>
+#ifdef __APPLE__
+    #include "osx_elf.h"
+    #include "light_byteswap.h"
+#else
+    #include <elf.h>
+    #include <byteswap.h>
+#endif
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>

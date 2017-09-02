@@ -51,8 +51,11 @@
 #include "elf.h"
 #include "getsection.h"
 
+#ifdef __linux__
+#define HAVE_BINARY_RUNTIME
 extern int _binary_runtime_start;
 extern int _binary_runtime_end;
+#endif
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
 static char _exclude_file_desc[256];
@@ -68,6 +71,7 @@ gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
 gchar *exclude_file = NULL;
+gchar *runtime_file = NULL;
 
 // #####################################################################
 
@@ -275,6 +279,24 @@ static void replacestr(char *line, const char *search, const char *replace)
     }
 }
 
+char* readFile(char* filename, int* size) {
+    FILE* f = fopen(filename, "rb");
+    if (f==NULL) {
+        *size = 0;
+        return 0;
+    }
+
+    fseek(f, 0, SEEK_END);
+    long fsize = ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    char *buffer = malloc(fsize);
+    fread(buffer, fsize, 1, f);
+    fclose(f);
+    *size = (int)fsize;
+    return buffer;
+}
+
 // #####################################################################
 
 static GOptionEntry entries[] =
@@ -289,6 +311,7 @@ static GOptionEntry entries[] =
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
+    { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
 };
@@ -535,10 +558,22 @@ main (int argc, char *argv[])
         * should hopefully change that. */
 
         fprintf (stderr, "Generating squashfs...\n");
-        /* runtime is embedded into this executable
-        * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
-        int size = (int)((void *)&_binary_runtime_end - (void *)&_binary_runtime_start);
-        char *data = (char *)&_binary_runtime_start;
+        int size = 0;
+        char* data;
+        if (runtime_file) {
+            data = readFile(runtime_file, &size);
+            if (!data)
+                die("Unable to load provided runtime file");
+        } else {
+#ifdef HAVE_BINARY_RUNTIME
+            /* runtime is embedded into this executable
+            * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
+            size = 0(int)((void *)&_binary_runtime_end - (void *)&_binary_runtime_start);
+            data = (char *)&_binary_runtime_start;
+#else
+            die("No runtime file was provided");
+#endif
+        }
         if (verbose)
             printf("Size of the embedded runtime: %d bytes\n", size);
         
@@ -555,6 +590,8 @@ main (int argc, char *argv[])
         fseek(fpdst, 0, SEEK_SET);
         fwrite(data, size, 1, fpdst);
         fclose(fpdst);
+        if(runtime_file)
+            free(data);
 
         fprintf (stderr, "Marking the AppImage as executable...\n");
         if (chmod (destination, 0755) < 0) {
@@ -643,7 +680,8 @@ main (int argc, char *argv[])
                     fputs(g_strsplit_set(output, " ", -1)[0], fpx);
                     fclose(fpx);
                 }
-                if(WEXITSTATUS(pclose(fp)) != 0)
+                int exit_status = pclose(fp);
+                if(WEXITSTATUS(exit_status) != 0)
                     die("sha256sum command did not succeed");
                 if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
@@ -651,7 +689,8 @@ main (int argc, char *argv[])
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
-                if(WEXITSTATUS(pclose(fp)) != 0) { 
+                exit_status = pclose(fp);
+                if(WEXITSTATUS(exit_status) != 0) { 
                     fprintf (stderr, "ERROR: gpg2 command did not succeed, could not sign, continuing\n");
                 } else {
                     unsigned long sig_offset = 0;

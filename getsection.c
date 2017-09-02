@@ -1,4 +1,9 @@
-#include <elf.h>
+#ifdef __APPLE__
+    #include "osx_elf.h"
+#else
+    #include <elf.h>
+#endif
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
