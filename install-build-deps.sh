@@ -14,7 +14,7 @@ fi
 if [ -e /usr/bin/zypper ] ; then
     sudo zypper up -y
     sudo zypper in -y build git-core gcc wget make glibc-devel glib2-devel libarchive-devel \
-        fuse fuse-devel zlib-devel patch cairo-devel zsync
+        fuse fuse-devel zlib-devel patch cairo-devel zsync desktop-file-utils
     #for some reason openSUSE Tumbleweed have apt-get.
     return
 fi
@@ -22,7 +22,7 @@ fi
 if [ -e /usr/bin/apt-get ] ; then
   sudo apt-get update
   sudo apt-get -y install zsync git libarchive-dev autoconf libtool make gcc libtool libfuse-dev \
-  liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs libcairo-dev
+  liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs libcairo-dev desktop-file-utils
   # libtool-bin might be required in newer distributions but is not available in precise
   sudo cp resources/liblz4.pc /usr/lib/$ARCH-linux-gnu/pkgconfig/
 fi
@@ -32,7 +32,7 @@ if [ -e /usr/bin/yum ] ; then
   # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-4/
   if [ "$ARCH" == "x86_64" ]; then
     yum -y install centos-release-scl-rh epel-release
-    yum -y install devtoolset-4-gcc.$ARCH
+    yum -y install devtoolset-4-gcc.$ARCH desktop-file-utils
   fi
 
   # Install and enable Autotools by Pavel Raiskup
