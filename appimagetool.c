@@ -269,12 +269,12 @@ void guess_arch(const gchar *archfile, struct ARCH* arch) {
     if (g_ascii_strncasecmp("i386", found_arch, 20)==0) {
         (*arch).i386 = 1;
         if(verbose)
-            fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+            fprintf (stderr,"File used for determining architecture i386: %s\n", archfile);
     }
     else if (g_ascii_strncasecmp("x86_64", found_arch, 20)==0) {
         (*arch).x86_64 = 1;
             if(verbose)
-                fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+                fprintf (stderr,"File used for determining architecture x86_64: %s\n", archfile);
     }
 }
 
@@ -481,14 +481,10 @@ main (int argc, char *argv[])
             int countArchs = 0;
             if (guessed_arch.i386) {
                 arch = "i386";
-                if(verbose)
-                    fprintf (stderr,"Found ARCH i386\n");
                 countArchs++;
             }
             if (guessed_arch.x86_64) {
                 arch = "x86_64";
-                if(verbose)
-                    fprintf (stderr,"Found ARCH x86_64\n");
                 countArchs++;
             }
             if (countArchs!=1) {
@@ -500,6 +496,8 @@ main (int argc, char *argv[])
                 die(" ...");
             }
         }
+        if (verbose)
+            fprintf(stderr, "Using architecture %s\n", arch);
         
         char app_name_for_filename[PATH_MAX];
         sprintf(app_name_for_filename, "%s", get_desktop_entry(kf, "Name"));
