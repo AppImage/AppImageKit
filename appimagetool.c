@@ -264,8 +264,6 @@ void guess_arch(const gchar *archfile, char* archs) {
         die("Failed to run file command");
     fgets(line, sizeof (line) - 1, fp);
     pclose(fp);
-    if (verbose)
-        fprintf(stderr, "The output of file command is: %s", line);
     carch = g_strsplit_set(line, ",", -1)[1];
     if (carch) {
         carch = g_strstrip(carch);
