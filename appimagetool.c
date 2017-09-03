@@ -47,6 +47,7 @@
 
 #include <unistd.h>
 #include <string.h>
+#include <limits.h>
 
 #include "elf.h"
 #include "getsection.h"
@@ -200,23 +201,70 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 * }
 */
 
-gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
+/* in-place modification of the string, and assuming the buffer pointed to by
+* line is large enough to hold the resulting string*/
+static void replacestr(char *line, const char *search, const char *replace)
+{
+    char *sp = NULL;
+    
+    if ((sp = strstr(line, search)) == NULL) {
+        return;
+    }
+    int search_len = strlen(search);
+    int replace_len = strlen(replace);
+    int tail_len = strlen(sp+search_len);
+    
+    memmove(sp+replace_len,sp+search_len,tail_len+1);
+    memcpy(sp, replace, replace_len);
+    
+    /* Do it recursively again until no more work to do */
+    
+    if ((sp = strstr(line, search))) {
+        replacestr(line, search, replace);
+    }
+}
+
+typedef struct ARCH {
+   char i386   : 1;
+   char x86_64 : 1;
+} ARCH;
+
+void guess_arch(const gchar *archfile, struct ARCH* arch) {
+    gchar *found_arch;
+    char line[PATH_MAX];
+    char command[PATH_MAX];
+    sprintf(command, "/usr/bin/file -L -N -b %s", archfile);
+    FILE* fp = popen(command, "r");
+    if (fp == NULL)
+        die("Failed to run file command");
+    fgets(line, sizeof (line) - 1, fp);
+    found_arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
+    replacestr(found_arch, "-", "_");
+    pclose(fp);
+    if (g_ascii_strncasecmp("i386", found_arch, 20)==0) {
+        (*arch).i386 = 1;
+        if(verbose)
+            fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+    }
+    else if (g_ascii_strncasecmp("x86_64", found_arch, 20)==0) {
+        (*arch).x86_64 = 1;
+            if(verbose)
+                fprintf (stderr,"File used for determining architecture: %s\n", archfile);
+    }
+}
+
+void find_arch(const gchar *real_path, const gchar *pattern, ARCH* arch) {
     GDir *dir;
     gchar *full_name;
-    gchar *resulting;
     dir = g_dir_open(real_path, 0, NULL);
     if (dir != NULL) {
         const gchar *entry;
         while ((entry = g_dir_read_name(dir)) != NULL) {
             full_name = g_build_filename(real_path, entry, NULL);
-            if (! g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
-                if(g_pattern_match_simple(pattern, entry))
-                    return(full_name);
-            }
-            else {
-                resulting = find_first_matching_file(full_name, pattern);
-                if(resulting)
-                    return(resulting);
+            if (g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
+                find_arch(full_name, pattern, arch);
+            } else if (g_file_test(full_name, G_FILE_TEST_IS_EXECUTABLE) || g_pattern_match_simple(pattern, entry) ) {
+                guess_arch(full_name, arch);
             }
         }
         g_dir_close(dir);
@@ -224,7 +272,6 @@ gchar* find_first_matching_file(const gchar *real_path, const gchar *pattern) {
     else {
         g_warning("%s: %s", real_path, g_strerror(errno));
     }
-    return NULL;
 }
 
 gchar* find_first_matching_file_nonrecursive(const gchar *real_path, const gchar *pattern) {
@@ -254,29 +301,6 @@ gchar* get_desktop_entry(GKeyFile *kf, char *key) {
         fprintf(stderr, "%s entry not found in desktop file\n", key);
     }
     return value;
-}
-
-/* in-place modification of the string, and assuming the buffer pointed to by
-* line is large enough to hold the resulting string*/
-static void replacestr(char *line, const char *search, const char *replace)
-{
-    char *sp = NULL;
-    
-    if ((sp = strstr(line, search)) == NULL) {
-        return;
-    }
-    int search_len = strlen(search);
-    int replace_len = strlen(replace);
-    int tail_len = strlen(sp+search_len);
-    
-    memmove(sp+replace_len,sp+search_len,tail_len+1);
-    memcpy(sp, replace, replace_len);
-    
-    /* Do it recursively again until no more work to do */
-    
-    if ((sp = strstr(line, search))) {
-        replacestr(line, search, replace);
-    }
 }
 
 char* readFile(char* filename, int* size) {
@@ -416,39 +440,29 @@ main (int argc, char *argv[])
         FILE *fp;
         /* If no $ARCH variable is set check a file */
         if (!arch) {
-            gchar *archfile = NULL;
             /* We use the next best .so that we can find to determine the architecture */
-            archfile = find_first_matching_file(source, "*.so.*");
-            if(!archfile)
-            {
-                fprintf(stderr, "Unable to guess the architecture of the AppDir source directory \"%s\"\n", remaining_args[0]);
+            ARCH guessed_arch  = {};
+            find_arch(source, "*.so.*", &guessed_arch);
+            int countArchs = 0;
+            if (guessed_arch.i386) {
+                arch = "i386";
+                if(verbose)
+                    fprintf (stderr,"Found ARCH i386\n");
+                countArchs++;
+            }
+            if (guessed_arch.x86_64) {
+                arch = "x86_64";
+                if(verbose)
+                    fprintf (stderr,"Found ARCH x86_64\n");
+                countArchs++;
+            }
+            if (countArchs!=1) {
+                if (countArchs<1)
+                    fprintf(stderr, "Unable to guess the architecture of the AppDir source directory \"%s\"\n", remaining_args[0]);
+                else
+                    fprintf(stderr, "More than one architectures were found of the AppDir source directory \"%s\"\n", remaining_args[0]);
                 fprintf(stderr, "A valid architecture with the ARCH environmental variable should be provided\ne.g. ARCH=x86_64 %s", argv[0]),
                 die(" ...");
-                /* If we found no .so we try to guess the main executable - this might be a script though */
-                // char guessed_bin_path[PATH_MAX];
-                // sprintf (guessed_bin_path, "%s/usr/bin/%s", source,  g_strsplit_set(get_desktop_entry(kf, "Exec"), " ", -1)[0]);
-                // archfile = guessed_bin_path;
-                // archfile = "/proc/self/exe";
-            }
-            if(verbose)
-                fprintf (stderr,"File used for determining architecture: %s\n", archfile);
-            
-            char line[PATH_MAX];
-            char command[PATH_MAX];
-            sprintf (command, "/usr/bin/file -L -N -b %s", archfile);
-            fp = popen(command, "r");
-            if (fp == NULL)
-                die("Failed to run file command");
-            fgets(line, sizeof(line)-1, fp);
-            arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
-            replacestr(arch, "-", "_");
-            fprintf (stderr,"Arch: %s\n", arch+1);
-            pclose(fp);
-
-            if(!arch)
-            {
-                printf("The architecture could not be determined, assuming 'all'\n");
-                arch="all";
             }
         }
         
