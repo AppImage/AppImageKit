@@ -60,6 +60,8 @@ extern int _binary_runtime_end;
 
 #define fARCH_i386   0
 #define fARCH_x86_64 1
+#define fARCH_arm   2
+#define fARCH_aarch64 3
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
 static char _exclude_file_desc[256];
@@ -253,7 +255,7 @@ static void replacestr(char *line, const char *search, const char *replace)
 }
 
 void guess_arch(const gchar *archfile, char* archs) {
-    gchar *found_arch;
+    gchar *carch;
     char line[PATH_MAX];
     char command[PATH_MAX];
     sprintf(command, "/usr/bin/file -L -N -b %s", archfile);
@@ -261,18 +263,32 @@ void guess_arch(const gchar *archfile, char* archs) {
     if (fp == NULL)
         die("Failed to run file command");
     fgets(line, sizeof (line) - 1, fp);
-    found_arch = g_strstrip(g_strsplit_set(line, ",", -1)[1]);
-    replacestr(found_arch, "-", "_");
     pclose(fp);
-    if (g_ascii_strncasecmp("i386", found_arch, 20)==0) {
-        archs[fARCH_i386] = 1;
-        if(verbose)
-            fprintf (stderr,"File used for determining architecture i386: %s\n", archfile);
-    }
-    else if (g_ascii_strncasecmp("x86_64", found_arch, 20)==0) {
-        archs[fARCH_x86_64] = 1;
-            if(verbose)
-                fprintf (stderr,"File used for determining architecture x86_64: %s\n", archfile);
+    fprintf(stderr, "file output: %s", line);
+    carch = g_strsplit_set(line, ",", -1)[1];
+    if (carch) {
+        carch = g_strstrip(carch);
+        if (carch) {
+            replacestr(carch, "-", "_");
+            replacestr(carch, " ", "_");
+            if (g_ascii_strncasecmp("i386", carch, 20) == 0) {
+                archs[fARCH_i386] = 1;
+                if (verbose)
+                    fprintf(stderr, "File used for determining architecture i386: %s\n", archfile);
+            } else if (g_ascii_strncasecmp("x86_64", carch, 20) == 0) {
+                archs[fARCH_x86_64] = 1;
+                if (verbose)
+                    fprintf(stderr, "File used for determining architecture x86_64: %s\n", archfile);
+            } else if (g_ascii_strncasecmp("arm", carch, 20) == 0) {
+                archs[fARCH_arm] = 1;
+                if (verbose)
+                    fprintf(stderr, "File used for determining architecture ARM: %s\n", archfile);
+            } else if (g_ascii_strncasecmp("arm_aarch64", carch, 20) == 0) {
+                archs[fARCH_aarch64] = 1;
+                if (verbose)
+                    fprintf(stderr, "File used for determining architecture ARM aarch64: %s\n", archfile);
+            }
+        }
     }
 }
 
@@ -474,7 +490,7 @@ main (int argc, char *argv[])
         /* If no $ARCH variable is set check a file */
         if (!arch) {
             /* We use the next best .so that we can find to determine the architecture */
-            char archs[2];
+            char archs[4];
             find_arch(source, "*.so.*", archs);
             int countArchs = 0;
             if (archs[fARCH_i386]) {
@@ -483,6 +499,14 @@ main (int argc, char *argv[])
             }
             if (archs[fARCH_x86_64]) {
                 arch = "x86_64";
+                countArchs++;
+            }
+            if (archs[fARCH_arm]) {
+                arch = "ARM";
+                countArchs++;
+            }
+            if (archs[fARCH_aarch64]) {
+                arch = "ARM aarch64";
                 countArchs++;
             }
             if (countArchs!=1) {
