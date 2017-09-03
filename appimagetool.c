@@ -249,12 +249,12 @@ static void replacestr(char *line, const char *search, const char *replace)
     }
 }
 
-typedef struct ARCH {
-   char i386   : 1;
-   char x86_64 : 1;
+typedef struct ARCHs {
+   char i386;
+   char x86_64;
 } ARCH;
 
-void guess_arch(const gchar *archfile, struct ARCH* arch) {
+void guess_arch(const gchar *archfile, ARCH* arch) {
     gchar *found_arch;
     char line[PATH_MAX];
     char command[PATH_MAX];
