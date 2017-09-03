@@ -15,7 +15,7 @@ cp -f build/appimagetool appimagetool.AppDir/usr/bin
 cp resources/AppRun appimagetool.AppDir/
 cp build/appimagetool appimagetool.AppDir/usr/bin/
 cp build/mksquashfs appimagetool.AppDir/usr/bin/
-
+cp $(which desktop-file-validate) appimagetool.AppDir/usr/bin/
 cp $(which zsyncmake) appimagetool.AppDir/usr/bin/
 
 cp resources/appimagetool.desktop appimagetool.AppDir/
