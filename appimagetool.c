@@ -264,14 +264,23 @@ void guess_arch(const gchar *archfile, char* archs) {
         die("Failed to run file command");
     fgets(line, sizeof (line) - 1, fp);
     pclose(fp);
-    fprintf(stderr, "file output: %s", line);
+    if (verbose)
+        fprintf(stderr, "The output of file command is: %s", line);
     carch = g_strsplit_set(line, ",", -1)[1];
     if (carch) {
         carch = g_strstrip(carch);
         if (carch) {
             replacestr(carch, "-", "_");
             replacestr(carch, " ", "_");
-            if (g_ascii_strncasecmp("i386", carch, 20) == 0) {
+            if (g_ascii_strncasecmp("i386", carch, 20) == 0
+                    || g_ascii_strncasecmp("i486", carch, 20) == 0
+                    || g_ascii_strncasecmp("i586", carch, 20) == 0
+                    || g_ascii_strncasecmp("i686", carch, 20) == 0
+                    || g_ascii_strncasecmp("intel_80386", carch, 20) == 0
+                    || g_ascii_strncasecmp("intel_80486", carch, 20) == 0
+                    || g_ascii_strncasecmp("intel_80586", carch, 20) == 0
+                    || g_ascii_strncasecmp("intel_80686", carch, 20) == 0
+                    ) {
                 archs[fARCH_i386] = 1;
                 if (verbose)
                     fprintf(stderr, "File used for determining architecture i386: %s\n", archfile);
