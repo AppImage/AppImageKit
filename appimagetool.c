@@ -249,14 +249,12 @@ static void replacestr(char *line, const char *search, const char *replace)
     }
 }
 
-struct REQ_ARCH_s {
+struct REQ_ARCH {
     char i386;
     char x86_64;
 };
 
-typedef struct REQ_ARCH_s REQ_ARCH;
-
-void guess_arch(const gchar *archfile, REQ_ARCH* arch) {
+void guess_arch(const gchar *archfile, struct REQ_ARCH* arch) {
     gchar *found_arch;
     char line[PATH_MAX];
     char command[PATH_MAX];
@@ -280,7 +278,7 @@ void guess_arch(const gchar *archfile, REQ_ARCH* arch) {
     }
 }
 
-void find_arch(const gchar *real_path, const gchar *pattern, REQ_ARCH* arch) {
+void find_arch(const gchar *real_path, const gchar *pattern, struct REQ_ARCH* arch) {
     GDir *dir;
     gchar *full_name;
     dir = g_dir_open(real_path, 0, NULL);
@@ -478,7 +476,7 @@ main (int argc, char *argv[])
         /* If no $ARCH variable is set check a file */
         if (!arch) {
             /* We use the next best .so that we can find to determine the architecture */
-            REQ_ARCH guessed_arch  = {};
+            struct REQ_ARCH guessed_arch  = {};
             find_arch(source, "*.so.*", &guessed_arch);
             int countArchs = 0;
             if (guessed_arch.i386) {
