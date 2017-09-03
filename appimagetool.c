@@ -186,6 +186,31 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
     return 0;
 }
 
+/* Validate desktop file using desktop-file-validate on the $PATH
+* execlp(), execvp(), and execvpe() search on the $PATH */
+int validate_desktop_file(char *file) {
+    int number, statval;
+    int child_pid;
+    child_pid = fork();
+    if(child_pid == -1)
+    {
+        printf("could not fork! \n");
+        return 1;
+    }
+    else if(child_pid == 0)
+    {
+        execlp("desktop-file-validate", "desktop-file-validate", file, NULL);
+    }
+    else
+    {
+        waitpid(child_pid, &statval, WUNTRACED | WCONTINUED);
+        if(WIFEXITED(statval)){
+            return(WEXITSTATUS(statval));
+        }
+    }
+    return -1;
+}
+
 /* Generate a squashfs filesystem
 * The following would work if we link to mksquashfs.o after we renamed 
 * main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
@@ -388,6 +413,8 @@ main (int argc, char *argv[])
     /* Check for dependencies here. Better fail early if they are not present. */
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs is missing but required, please install it");
+    if(! g_find_program_in_path ("desktop-file-validate"))
+        g_print("WARNING: desktop-file-validate is missing, please install it so that desktop files can be checked for potential errors\n");
     if(! g_find_program_in_path ("zsyncmake"))
         g_print("WARNING: zsyncmake is missing, please install it if you want to use binary delta updates\n");
     if(! no_appstream)
@@ -416,11 +443,19 @@ main (int argc, char *argv[])
         /* Check if *.desktop file is present in source AppDir */
         gchar *desktop_file = find_first_matching_file_nonrecursive(source, "*.desktop");
         if(desktop_file == NULL){
-            die("$ID.desktop file not found");
+            die("Desktop file not found, aborting");
         }
         if(verbose)
             fprintf (stdout, "Desktop file: %s\n", desktop_file);
-        
+
+        if(g_find_program_in_path ("desktop-file-validate")) {
+            if(validate_desktop_file(desktop_file) != 0){
+                fprintf(stderr, "ERROR: Desktop file contains errors. Please fix them. Please see\n");
+                fprintf(stderr, "       https://standards.freedesktop.org/desktop-entry-spec/latest/\n");
+                die("       for more information.");
+            }
+        }
+
         /* Read information from .desktop file */
         GKeyFile *kf = g_key_file_new ();
         if (!g_key_file_load_from_file (kf, desktop_file, 0, NULL))
