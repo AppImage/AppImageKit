@@ -21,7 +21,8 @@ trap cleanup EXIT
 
 cd "$tempdir"
 
-log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
+# Does not work on Travis CI
+# log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
 
 log "create a sample AppDir"
 mkdir -p appimagetool.AppDir/usr/share/metainfo/
