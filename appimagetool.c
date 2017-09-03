@@ -58,6 +58,9 @@ extern int _binary_runtime_start;
 extern int _binary_runtime_end;
 #endif
 
+#define fARCH_i386   0
+#define fARCH_x86_64 1
+
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
 static char _exclude_file_desc[256];
 
@@ -249,12 +252,7 @@ static void replacestr(char *line, const char *search, const char *replace)
     }
 }
 
-struct REQ_ARCH {
-    char i386;
-    char x86_64;
-};
-
-void guess_arch(const gchar *archfile, struct REQ_ARCH* arch) {
+void guess_arch(const gchar *archfile, char* archs) {
     gchar *found_arch;
     char line[PATH_MAX];
     char command[PATH_MAX];
@@ -267,18 +265,18 @@ void guess_arch(const gchar *archfile, struct REQ_ARCH* arch) {
     replacestr(found_arch, "-", "_");
     pclose(fp);
     if (g_ascii_strncasecmp("i386", found_arch, 20)==0) {
-        (*arch).i386 = 1;
+        archs[fARCH_i386] = 1;
         if(verbose)
             fprintf (stderr,"File used for determining architecture i386: %s\n", archfile);
     }
     else if (g_ascii_strncasecmp("x86_64", found_arch, 20)==0) {
-        (*arch).x86_64 = 1;
+        archs[fARCH_x86_64] = 1;
             if(verbose)
                 fprintf (stderr,"File used for determining architecture x86_64: %s\n", archfile);
     }
 }
 
-void find_arch(const gchar *real_path, const gchar *pattern, struct REQ_ARCH* arch) {
+void find_arch(const gchar *real_path, const gchar *pattern, char* archs) {
     GDir *dir;
     gchar *full_name;
     dir = g_dir_open(real_path, 0, NULL);
@@ -287,9 +285,9 @@ void find_arch(const gchar *real_path, const gchar *pattern, struct REQ_ARCH* ar
         while ((entry = g_dir_read_name(dir)) != NULL) {
             full_name = g_build_filename(real_path, entry, NULL);
             if (g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
-                find_arch(full_name, pattern, arch);
+                find_arch(full_name, pattern, archs);
             } else if (g_file_test(full_name, G_FILE_TEST_IS_EXECUTABLE) || g_pattern_match_simple(pattern, entry) ) {
-                guess_arch(full_name, arch);
+                guess_arch(full_name, archs);
             }
         }
         g_dir_close(dir);
@@ -476,14 +474,14 @@ main (int argc, char *argv[])
         /* If no $ARCH variable is set check a file */
         if (!arch) {
             /* We use the next best .so that we can find to determine the architecture */
-            struct REQ_ARCH guessed_arch  = {};
-            find_arch(source, "*.so.*", &guessed_arch);
+            char archs[2];
+            find_arch(source, "*.so.*", archs);
             int countArchs = 0;
-            if (guessed_arch.i386) {
+            if (archs[fARCH_i386]) {
                 arch = "i386";
                 countArchs++;
             }
-            if (guessed_arch.x86_64) {
+            if (archs[fARCH_x86_64]) {
                 arch = "x86_64";
                 countArchs++;
             }
