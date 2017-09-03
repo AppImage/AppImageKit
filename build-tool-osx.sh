@@ -77,7 +77,9 @@ cd ..
 # Build mksquashfs with -offset option to skip n bytes
 # https://github.com/plougher/squashfs-tools/pull/13
 cd squashfs-tools
-patch -p1 --backup < ../squashfs_osx.patch
+if [ ! -e squashfs-tools/action.c.orig ] ; then
+    patch -p1 --backup < ../squashfs_osx.patch
+fi
 cd squashfs-tools
 
 # Patch squashfuse-tools Makefile to link against static llzma
