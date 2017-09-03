@@ -307,7 +307,7 @@ static GOptionEntry entries[] =
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
-    { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg2", NULL },
+    { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
@@ -369,10 +369,10 @@ main (int argc, char *argv[])
     if(! no_appstream)
         if(! g_find_program_in_path ("appstreamcli"))
             g_print("WARNING: appstreamcli is missing, please install it if you want to use AppStream metadata\n");
-    if(! g_find_program_in_path ("gpg2"))
-        g_print("WARNING: gpg2 is missing, please install it if you want to create digital signatures\n");
-    if(! g_find_program_in_path ("sha256sum"))
-        g_print("WARNING: sha256sum is missing, please install it if you want to create digital signatures\n");
+    if(! g_find_program_in_path ("gpg2") && ! g_find_program_in_path ("gpg"))
+        g_print("WARNING: gpg[2] is missing, please install it if you want to create digital signatures\n");
+    if(! g_find_program_in_path ("sha256sum") && ! g_find_program_in_path ("shasum"))
+        g_print("WARNING: sha[256]sum is missing, please install it if you want to create digital signatures\n");
     
     if(!&remaining_args[0])
         die("SOURCE is missing");
@@ -652,14 +652,21 @@ main (int argc, char *argv[])
         if(sign){
             /* The user has indicated that he wants to sign */
             gchar *gpg2_path = g_find_program_in_path ("gpg2");
+            if (!gpg2_path)
+                gpg2_path = g_find_program_in_path ("gpg");
             gchar *sha256sum_path = g_find_program_in_path ("sha256sum");
+            int req_shasum = 0;
+            if (!sha256sum_path) {
+                sha256sum_path = g_find_program_in_path ("shasum");
+                req_shasum = 1;
+            }
             if(!gpg2_path){
-                fprintf (stderr, "gpg2 is not installed, cannot sign\n");
+                fprintf (stderr, "gpg[2] is not installed, cannot sign\n");
             }
             else if(!sha256sum_path){
-                fprintf (stderr, "sha256sum is not installed, cannot sign\n");
+                fprintf (stderr, "sha[256]sum is not installed, cannot sign\n");
             } else {
-                fprintf (stderr, "gpg2 and sha256sum are installed and user requested to sign, "
+                fprintf (stderr, "gpg[2] and sha[256]sum are installed and user requested to sign, "
                 "hence signing\n");
                 char *digestfile;
                 digestfile = br_strcat(destination, ".digest");
@@ -667,16 +674,19 @@ main (int argc, char *argv[])
                 ascfile = br_strcat(destination, ".digest.asc");
                 if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
                     unlink(digestfile);
-                sprintf (command, "%s %s", sha256sum_path, destination);
+                if (req_shasum)
+                    sprintf (command, "%s -a256 %s", sha256sum_path, destination);
+                else
+                    sprintf (command, "%s %s", sha256sum_path, destination);
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if (fp == NULL)
-                    die("sha256sum command did not succeed");
+                    die("sha[256]sum command did not succeed");
                 char output[1024];
                 fgets(output, sizeof(output)-1, fp);
                 if(verbose)
-                    printf("sha256sum: %s\n", g_strsplit_set(output, " ", -1)[0]);
+                    printf("sha[256]sum: %s\n", g_strsplit_set(output, " ", -1)[0]);
                 FILE *fpx = fopen(digestfile, "w");
                 if (fpx != NULL)
                 {
@@ -685,7 +695,7 @@ main (int argc, char *argv[])
                 }
                 int exit_status = pclose(fp);
                 if(WEXITSTATUS(exit_status) != 0)
-                    die("sha256sum command did not succeed");
+                    die("sha[256]sum command did not succeed");
                 if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
                 sprintf (command, "%s --detach-sign --armor %s", gpg2_path, digestfile);
@@ -694,7 +704,7 @@ main (int argc, char *argv[])
                 fp = popen(command, "r");
                 exit_status = pclose(fp);
                 if(WEXITSTATUS(exit_status) != 0) { 
-                    fprintf (stderr, "ERROR: gpg2 command did not succeed, could not sign, continuing\n");
+                    fprintf (stderr, "ERROR: gpg[2] command did not succeed, could not sign, continuing\n");
                 } else {
                     unsigned long sig_offset = 0;
                     unsigned long sig_length = 0;
