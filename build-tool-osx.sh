@@ -5,7 +5,6 @@
 #
 
 small_FLAGS="-Os -ffunction-sections -fdata-sections"
-small_LDFLAGS="-s -Wl,--gc-sections"
 CC="cc -O2 -Wall -Wno-deprecated-declarations -Wno-unused-result"
 
 STRIP="strip"
@@ -85,8 +84,8 @@ cd squashfs-tools
 sed -i "" "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I../../xz-5.2.3/build/include|g" Makefile
 sed -i "" "s|LIBS += -llzma|LIBS += -Bstatic -llzma  -L../../xz-5.2.3/build/lib|g" Makefile
 
-#make -j$JOBS XZ_SUPPORT=1 mksquashfs # LZ4_SUPPORT=1 did not build yet on CentOS 6
-#$STRIP mksquashfs
+make -j$JOBS XZ_SUPPORT=1 mksquashfs # LZ4_SUPPORT=1 did not build yet on CentOS 6
+$STRIP mksquashfs
 
 cd ../../
 
