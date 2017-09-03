@@ -444,7 +444,7 @@ main (int argc, char *argv[])
             
             char line[PATH_MAX];
             char command[PATH_MAX];
-            sprintf (command, "/usr/bin/file -L -N -b %s", archfile);
+            sprintf (command, "/usr/bin/file -N -b %s", archfile);
             fp = popen(command, "r");
             if (fp == NULL)
                 die("Failed to run file command");
