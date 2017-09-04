@@ -48,6 +48,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <limits.h>
+#include <stdbool.h>
 
 #include "elf.h"
 #include "getsection.h"
@@ -58,10 +59,12 @@ extern int _binary_runtime_start;
 extern int _binary_runtime_end;
 #endif
 
-#define fARCH_i386   0
-#define fARCH_x86_64 1
-#define fARCH_arm   2
-#define fARCH_aarch64 3
+enum fARCH { 
+    fARCH_i386,
+    fARCH_x86_64,
+    fARCH_arm,
+    fARCH_aarch64
+};
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
 static char _exclude_file_desc[256];
@@ -254,8 +257,65 @@ static void replacestr(char *line, const char *search, const char *replace)
     }
 }
 
-void guess_arch(const gchar *archfile, char* archs) {
-    gchar *carch;
+int count_archs(bool* archs) {
+    int countArchs = 0;
+    int i;
+    for (i = 0; i < 4; i++) {
+        countArchs += archs[i];
+    }
+    return countArchs;
+}
+
+gchar* getArchName(bool* archs) {
+    if (archs[fARCH_i386])
+        return "i386";
+    else if (archs[fARCH_x86_64])
+        return "x86_64";
+    else if (archs[fARCH_arm])
+        return "ARM";
+    else if (archs[fARCH_aarch64])
+        return "ARM_aarch64";
+    else
+        return "all";
+}
+
+void extract_arch_from_text(gchar *archname, const gchar* sourcename, bool* archs) {
+    if (archname) {
+        archname = g_strstrip(archname);
+        if (archname) {
+            replacestr(archname, "-", "_");
+            replacestr(archname, " ", "_");
+            if (g_ascii_strncasecmp("i386", archname, 20) == 0
+                    || g_ascii_strncasecmp("i486", archname, 20) == 0
+                    || g_ascii_strncasecmp("i586", archname, 20) == 0
+                    || g_ascii_strncasecmp("i686", archname, 20) == 0
+                    || g_ascii_strncasecmp("intel_80386", archname, 20) == 0
+                    || g_ascii_strncasecmp("intel_80486", archname, 20) == 0
+                    || g_ascii_strncasecmp("intel_80586", archname, 20) == 0
+                    || g_ascii_strncasecmp("intel_80686", archname, 20) == 0
+                    ) {
+                archs[fARCH_i386] = 1;
+                if (verbose)
+                    fprintf(stderr, "%s used for determining architecture i386\n", sourcename);
+            } else if (g_ascii_strncasecmp("x86_64", archname, 20) == 0) {
+                archs[fARCH_x86_64] = 1;
+                if (verbose)
+                    fprintf(stderr, "%s used for determining architecture x86_64\n", sourcename);
+            } else if (g_ascii_strncasecmp("arm", archname, 20) == 0) {
+                archs[fARCH_arm] = 1;
+                if (verbose)
+                    fprintf(stderr, "%s used for determining architecture ARM\n", sourcename);
+            } else if (g_ascii_strncasecmp("arm_aarch64", archname, 20) == 0) {
+                archs[fARCH_aarch64] = 1;
+                if (verbose)
+                    fprintf(stderr, "%s used for determining architecture ARM aarch64\n", sourcename);
+            }
+            fprintf(stderr, "End of checks\n");
+        }
+    }
+}
+
+void guess_arch_of_file(const gchar *archfile, bool* archs) {
     char line[PATH_MAX];
     char command[PATH_MAX];
     sprintf(command, "/usr/bin/file -L -N -b %s", archfile);
@@ -264,42 +324,10 @@ void guess_arch(const gchar *archfile, char* archs) {
         die("Failed to run file command");
     fgets(line, sizeof (line) - 1, fp);
     pclose(fp);
-    carch = g_strsplit_set(line, ",", -1)[1];
-    if (carch) {
-        carch = g_strstrip(carch);
-        if (carch) {
-            replacestr(carch, "-", "_");
-            replacestr(carch, " ", "_");
-            if (g_ascii_strncasecmp("i386", carch, 20) == 0
-                    || g_ascii_strncasecmp("i486", carch, 20) == 0
-                    || g_ascii_strncasecmp("i586", carch, 20) == 0
-                    || g_ascii_strncasecmp("i686", carch, 20) == 0
-                    || g_ascii_strncasecmp("intel_80386", carch, 20) == 0
-                    || g_ascii_strncasecmp("intel_80486", carch, 20) == 0
-                    || g_ascii_strncasecmp("intel_80586", carch, 20) == 0
-                    || g_ascii_strncasecmp("intel_80686", carch, 20) == 0
-                    ) {
-                archs[fARCH_i386] = 1;
-                if (verbose)
-                    fprintf(stderr, "File used for determining architecture i386: %s\n", archfile);
-            } else if (g_ascii_strncasecmp("x86_64", carch, 20) == 0) {
-                archs[fARCH_x86_64] = 1;
-                if (verbose)
-                    fprintf(stderr, "File used for determining architecture x86_64: %s\n", archfile);
-            } else if (g_ascii_strncasecmp("arm", carch, 20) == 0) {
-                archs[fARCH_arm] = 1;
-                if (verbose)
-                    fprintf(stderr, "File used for determining architecture ARM: %s\n", archfile);
-            } else if (g_ascii_strncasecmp("arm_aarch64", carch, 20) == 0) {
-                archs[fARCH_aarch64] = 1;
-                if (verbose)
-                    fprintf(stderr, "File used for determining architecture ARM aarch64: %s\n", archfile);
-            }
-        }
-    }
+    extract_arch_from_text(g_strsplit_set(line, ",", -1)[1], archfile, archs);
 }
 
-void find_arch(const gchar *real_path, const gchar *pattern, char* archs) {
+void find_arch(const gchar *real_path, const gchar *pattern, bool* archs) {
     GDir *dir;
     gchar *full_name;
     dir = g_dir_open(real_path, 0, NULL);
@@ -310,7 +338,7 @@ void find_arch(const gchar *real_path, const gchar *pattern, char* archs) {
             if (g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
                 find_arch(full_name, pattern, archs);
             } else if (g_file_test(full_name, G_FILE_TEST_IS_EXECUTABLE) || g_pattern_match_simple(pattern, entry) ) {
-                guess_arch(full_name, archs);
+                guess_arch_of_file(full_name, archs);
             }
         }
         g_dir_close(dir);
@@ -349,22 +377,24 @@ gchar* get_desktop_entry(GKeyFile *kf, char *key) {
     return value;
 }
 
-char* readFile(char* filename, int* size) {
+bool readFile(char* filename, int* size, char** buffer) {
     FILE* f = fopen(filename, "rb");
     if (f==NULL) {
+        *buffer = 0;
         *size = 0;
-        return 0;
+        return false;
     }
 
     fseek(f, 0, SEEK_END);
     long fsize = ftell(f);
     fseek(f, 0, SEEK_SET);
 
-    char *buffer = malloc(fsize);
-    fread(buffer, fsize, 1, f);
+    char *indata = malloc(fsize);
+    fread(indata, fsize, 1, f);
     fclose(f);
     *size = (int)fsize;
-    return buffer;
+    *buffer = indata; 
+    return TRUE;
 }
 
 // #####################################################################
@@ -442,9 +472,9 @@ main (int argc, char *argv[])
         if(! g_find_program_in_path ("appstreamcli"))
             g_print("WARNING: appstreamcli is missing, please install it if you want to use AppStream metadata\n");
     if(! g_find_program_in_path ("gpg2") && ! g_find_program_in_path ("gpg"))
-        g_print("WARNING: gpg[2] is missing, please install it if you want to create digital signatures\n");
+        g_print("WARNING: gpg2 or gpg is missing, please install it if you want to create digital signatures\n");
     if(! g_find_program_in_path ("sha256sum") && ! g_find_program_in_path ("shasum"))
-        g_print("WARNING: sha[256]sum is missing, please install it if you want to create digital signatures\n");
+        g_print("WARNING: sha256sum or shasum is missing, please install it if you want to create digital signatures\n");
     
     if(!&remaining_args[0])
         die("SOURCE is missing");
@@ -490,44 +520,28 @@ main (int argc, char *argv[])
             fprintf (stderr,"Type: %s\n", get_desktop_entry(kf, "Type"));
             fprintf (stderr,"Categories: %s\n", get_desktop_entry(kf, "Categories"));
         }
-        
+
         /* Determine the architecture */
-        gchar *arch = getenv("ARCH");
-        FILE *fp;
-        /* If no $ARCH variable is set check a file */
-        if (!arch) {
+        bool archs[4] = {0, 0, 0, 0};
+        extract_arch_from_text(getenv("ARCH"), "Environmental variable ARCH", archs);
+        if (count_archs(archs) != 1) {
+            /* If no $ARCH variable is set check a file */
             /* We use the next best .so that we can find to determine the architecture */
-            char archs[4];
             find_arch(source, "*.so.*", archs);
-            int countArchs = 0;
-            if (archs[fARCH_i386]) {
-                arch = "i386";
-                countArchs++;
-            }
-            if (archs[fARCH_x86_64]) {
-                arch = "x86_64";
-                countArchs++;
-            }
-            if (archs[fARCH_arm]) {
-                arch = "ARM";
-                countArchs++;
-            }
-            if (archs[fARCH_aarch64]) {
-                arch = "ARM aarch64";
-                countArchs++;
-            }
-            if (countArchs!=1) {
-                if (countArchs<1)
+            int countArchs = count_archs(archs);
+            if (countArchs != 1) {
+                if (countArchs < 1)
                     fprintf(stderr, "Unable to guess the architecture of the AppDir source directory \"%s\"\n", remaining_args[0]);
                 else
                     fprintf(stderr, "More than one architectures were found of the AppDir source directory \"%s\"\n", remaining_args[0]);
                 fprintf(stderr, "A valid architecture with the ARCH environmental variable should be provided\ne.g. ARCH=x86_64 %s", argv[0]),
-                die(" ...");
+                        die(" ...");
             }
         }
-        if (verbose)
-            fprintf(stderr, "Using architecture %s\n", arch);
-        
+        gchar* arch = getArchName(archs);
+        fprintf(stderr, "Using architecture %s\n", arch);
+
+        FILE *fp;
         char app_name_for_filename[PATH_MAX];
         sprintf(app_name_for_filename, "%s", get_desktop_entry(kf, "Name"));
         replacestr(app_name_for_filename, " ", "_");
@@ -638,11 +652,12 @@ main (int argc, char *argv[])
 
         fprintf (stderr, "Generating squashfs...\n");
         int size = 0;
-        char* data;
-        if (runtime_file) {
-            data = readFile(runtime_file, &size);
-            if (!data)
+        char* data = NULL;
+        bool using_external_data = false;
+        if (runtime_file != NULL) {
+            if (!readFile(runtime_file, &size, &data))
                 die("Unable to load provided runtime file");
+            using_external_data = true;
         } else {
 #ifdef HAVE_BINARY_RUNTIME
             /* runtime is embedded into this executable
@@ -669,7 +684,7 @@ main (int argc, char *argv[])
         fseek(fpdst, 0, SEEK_SET);
         fwrite(data, size, 1, fpdst);
         fclose(fpdst);
-        if(runtime_file)
+        if (using_external_data)
             free(data);
 
         fprintf (stderr, "Marking the AppImage as executable...\n");
@@ -726,31 +741,35 @@ main (int argc, char *argv[])
         }
 
         if(sign){
+            bool using_gpg = FALSE;
+            bool using_shasum = FALSE;
             /* The user has indicated that he wants to sign */
             gchar *gpg2_path = g_find_program_in_path ("gpg2");
-            if (!gpg2_path)
+            if (!gpg2_path) {
                 gpg2_path = g_find_program_in_path ("gpg");
+                using_gpg = TRUE;
+            }
             gchar *sha256sum_path = g_find_program_in_path ("sha256sum");
-            int req_shasum = 0;
             if (!sha256sum_path) {
                 sha256sum_path = g_find_program_in_path ("shasum");
-                req_shasum = 1;
+                using_shasum = 1;
             }
             if(!gpg2_path){
-                fprintf (stderr, "gpg[2] is not installed, cannot sign\n");
+                fprintf (stderr, "gpg2 or gpg is not installed, cannot sign\n");
             }
-            else if(!sha256sum_path){
-                fprintf (stderr, "sha[256]sum is not installed, cannot sign\n");
+            else if(!sha256sum_path) {
+                fprintf(stderr, "sha256sum or shasum is not installed, cannot sign\n");
             } else {
-                fprintf (stderr, "gpg[2] and sha[256]sum are installed and user requested to sign, "
-                "hence signing\n");
+                fprintf(stderr, "%s and %s are installed and user requested to sign, "
+                        "hence signing\n", using_gpg ? "gpg" : "gpg2",
+                        using_shasum ? "shasum" : "sha256sum");
                 char *digestfile;
                 digestfile = br_strcat(destination, ".digest");
                 char *ascfile;
                 ascfile = br_strcat(destination, ".digest.asc");
                 if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
                     unlink(digestfile);
-                if (req_shasum)
+                if (using_shasum)
                     sprintf (command, "%s -a256 %s", sha256sum_path, destination);
                 else
                     sprintf (command, "%s %s", sha256sum_path, destination);
@@ -758,29 +777,30 @@ main (int argc, char *argv[])
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if (fp == NULL)
-                    die("sha[256]sum command did not succeed");
+                    die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
                 char output[1024];
-                fgets(output, sizeof(output)-1, fp);
-                if(verbose)
-                    printf("sha[256]sum: %s\n", g_strsplit_set(output, " ", -1)[0]);
+                fgets(output, sizeof (output) - 1, fp);
+                if (verbose)
+                    printf("%s: %s\n", using_shasum ? "shasum" : "sha256sum",
+                        g_strsplit_set(output, " ", -1)[0]);
                 FILE *fpx = fopen(digestfile, "w");
                 if (fpx != NULL)
                 {
                     fputs(g_strsplit_set(output, " ", -1)[0], fpx);
                     fclose(fpx);
                 }
-                int exit_status = pclose(fp);
-                if(WEXITSTATUS(exit_status) != 0)
-                    die("sha[256]sum command did not succeed");
+                int shasum_exit_status = pclose(fp);
+                if(WEXITSTATUS(shasum_exit_status) != 0)
+                    die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
                 if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
                 sprintf (command, "%s --detach-sign --armor %s", gpg2_path, digestfile);
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
-                exit_status = pclose(fp);
-                if(WEXITSTATUS(exit_status) != 0) { 
-                    fprintf (stderr, "ERROR: gpg[2] command did not succeed, could not sign, continuing\n");
+                int gpg_exit_status = pclose(fp);
+                if(WEXITSTATUS(gpg_exit_status) != 0) { 
+                    fprintf (stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
                 } else {
                     unsigned long sig_offset = 0;
                     unsigned long sig_length = 0;
