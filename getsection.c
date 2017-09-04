@@ -1,15 +1,10 @@
-#ifdef __APPLE__
-    #include "osx_elf.h"
-#else
-    #include <elf.h>
-#endif
-
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
 #include <string.h>
 #include <unistd.h>
+#include "light_elf.h"
 
 /* Return the offset, and the length of an ELF section with a given name in a given ELF file */
 int get_elf_section_offset_and_lenghth(char* fname, char* section_name, unsigned long *offset, unsigned long *length)
