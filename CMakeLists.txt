@@ -28,7 +28,7 @@ ExternalProject_Get_Property(libxz SOURCE_DIR)
 set(xz_SOURCE_DIR ${SOURCE_DIR})
 
 add_custom_target(patch_squashfuse ALL
-    COMMAND bash patch.sh
+    COMMAND bash cmake/patch.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
@@ -63,12 +63,12 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 include_directories(squashfuse)
 
 add_custom_command(OUTPUT runtime
-    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build-runtime.sh
+    COMMAND bash cmake/build-runtime.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 add_custom_command(OUTPUT runtime-embed.c
-    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build-embeddable-runtime.sh
+    COMMAND bash cmake/build-embeddable-runtime.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS runtime
 )
@@ -114,5 +114,5 @@ target_compile_definitions(appimagetool
 
 enable_testing()
 add_test(test_appimagetool
-    bash ${CMAKE_CURRENT_SOURCE_DIR}/test-appimagetool.sh ${CMAKE_CURRENT_BINARY_DIR}/appimagetool
+    bash cmake/test-appimagetool.sh ${CMAKE_CURRENT_BINARY_DIR}/appimagetool
 )
