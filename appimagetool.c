@@ -51,8 +51,8 @@
 #include "elf.h"
 #include "getsection.h"
 
-extern int _binary_runtime_start;
-extern int _binary_runtime_end;
+#include "runtime-embed.h"
+
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
 static char _exclude_file_desc[256];
@@ -572,12 +572,10 @@ main (int argc, char *argv[])
         fprintf (stderr, "Generating squashfs...\n");
         /* runtime is embedded into this executable
         * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
-        int size = (int)((void *)&_binary_runtime_end - (void *)&_binary_runtime_start);
-        char *data = (char *)&_binary_runtime_start;
         if (verbose)
-            printf("Size of the embedded runtime: %d bytes\n", size);
+            printf("Size of the embedded runtime: %d bytes\n", runtime_len);
         
-        int result = sfs_mksquashfs(source, destination, size);
+        int result = sfs_mksquashfs(source, destination, runtime_len);
         if(result != 0)
             die("sfs_mksquashfs error");
         
@@ -588,7 +586,7 @@ main (int argc, char *argv[])
         }
 
         fseek(fpdst, 0, SEEK_SET);
-        fwrite(data, size, 1, fpdst);
+        fwrite(runtime, runtime_len, 1, fpdst);
         fclose(fpdst);
 
         fprintf (stderr, "Marking the AppImage as executable...\n");

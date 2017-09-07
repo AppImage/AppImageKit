@@ -62,17 +62,24 @@ include_directories(${xz_SOURCE_DIR}/)
 include_directories(${ZLIB_INCLUDE_DIRS})
 include_directories(squashfuse)
 
-add_custom_command(OUTPUT data.o
+add_custom_command(OUTPUT runtime
     COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build-runtime.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
+
+add_custom_command(OUTPUT runtime-embed.c
+    COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build-embeddable-runtime.sh
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS runtime
+)
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 add_executable(appimagetool
     appimagetool.c
     getsection.c
     binreloc.c
     elf.c
-    data.o
+    runtime-embed.c
 )
 
 add_dependencies(squashfuse patch_squashfuse)
