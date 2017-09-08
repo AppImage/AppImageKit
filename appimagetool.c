@@ -852,7 +852,10 @@ main (int argc, char *argv[])
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if (fp == NULL)
-                    die("Failed to run zsyncmake command");            
+                    die("Failed to run zsyncmake command");
+                int exitstatus = pclose(fp);
+                if (WEXITSTATUS(exitstatus) != 0)
+                    die("zsyncmake command did not succeed");
             }
          } 
          
