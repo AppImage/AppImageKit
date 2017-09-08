@@ -202,7 +202,7 @@ dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH
 printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
 # convert to embeddable file
-bash build-embeddable-runtime.sh
+bash cmake/build-embeddable-runtime.sh
 
 # compile appimagetool but do not link - glib version
 $CC -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ \
