@@ -220,7 +220,7 @@ main (int argc, char *argv[])
         sprintf(appimage_path, "/proc/self/exe");
     } else {
         sprintf(appimage_path, "%s", getenv("TARGET_APPIMAGE"));
-        printf("Using TARGET_APPIMAGE %s\n", appimage_path);
+        fprintf(stderr, "Using TARGET_APPIMAGE %s\n", appimage_path);
     }
     
     fs_offset = get_elf_size(appimage_path);
