@@ -678,7 +678,8 @@ main (int argc, char *argv[])
                     fputs(g_strsplit_set(output, " ", -1)[0], fpx);
                     fclose(fpx);
                 }
-                if(WEXITSTATUS(pclose(fp)) != 0)
+                int exitstatus = pclose(fp);
+                if(WEXITSTATUS(exitstatus) != 0)
                     die("sha256sum command did not succeed");
                 if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
@@ -686,7 +687,8 @@ main (int argc, char *argv[])
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
-                if(WEXITSTATUS(pclose(fp)) != 0) { 
+                exitstatus = pclose(fp);
+                if(WEXITSTATUS(exitstatus) != 0) { 
                     fprintf (stderr, "ERROR: gpg2 command did not succeed, could not sign, continuing\n");
                 } else {
                     unsigned long sig_offset = 0;
@@ -739,7 +741,10 @@ main (int argc, char *argv[])
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 if (fp == NULL)
-                    die("Failed to run zsyncmake command");            
+                    die("Failed to run zsyncmake command");
+                int exitstatus = pclose(fp);
+                if (WEXITSTATUS(exitstatus) != 0)
+                    die("zsyncmake command did not succeed");
             }
          } 
          
