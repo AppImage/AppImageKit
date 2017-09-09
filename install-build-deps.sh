@@ -49,7 +49,8 @@ if [ -e /usr/bin/yum ] ; then
   fi
 
   yum -y install epel-release
-  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-static openssl-devel vim-common cairo-devel desktop-file-utils # inotify-tools-devel lz4-devel
+  yum -y install git wget cmake make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch \
+    libXft-devel openssl-static openssl-devel vim-common cairo-devel librsvg2-tools desktop-file-utils # inotify-tools-devel lz4-devel
 
   if [ "$ARCH" == "x86_64" ]; then
     . /opt/rh/devtoolset-4/enable
