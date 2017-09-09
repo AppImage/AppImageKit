@@ -171,7 +171,6 @@ cd ../../
 
 pwd
 
-mkdir build
 cd build
 
 cp ../squashfs-tools/squashfs-tools/mksquashfs .
