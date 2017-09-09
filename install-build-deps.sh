@@ -33,7 +33,7 @@ if [ -e /usr/bin/yum ] ; then
   # https://www.softwarecollections.org/en/scls/rhscl/devtoolset-4/
   if [ "$ARCH" == "x86_64" ]; then
     yum -y install centos-release-scl-rh epel-release
-    yum -y install devtoolset-4-gcc.$ARCH
+    yum -y install devtoolset-4-gcc.$ARCH devtoolset-4-gcc-c++.$ARCH
   fi
 
   # Install and enable Autotools by Pavel Raiskup
