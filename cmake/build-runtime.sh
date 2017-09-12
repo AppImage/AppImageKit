@@ -59,21 +59,5 @@ dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH
 
 printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
-# Convert runtime into a data object that can be embedded into appimagetool
-
-ld -r -b binary -o data.o runtime
-
-# Test if we can read it back
-readelf -x .upd_info runtime # hexdump
-readelf -p .upd_info runtime || true # string
-
-# The raw updateinformation data can be read out manually like this:
-HEXOFFSET=$(objdump -h runtime | grep .upd_info | awk '{print $6}')
-HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
-dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
-
-# Convert runtime into a data object that can be embedded into appimagetool
-
-ld -r -b binary -o data.o runtime
-
-cp data.o "$orig_cwd"/
+# Copy built runtime back to build directory
+cp runtime "$orig_cwd"/

@@ -198,43 +198,27 @@ HEXOFFSET=$(objdump -h runtime | grep .upd_info | awk '{print $6}')
 HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
 dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
 
-# Insert AppImage magic bytes
-
+# insert AppImage magic bytes
 printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
-# Convert runtime into a data object that can be embedded into appimagetool
+# convert to embeddable file
+bash cmake/build-embeddable-runtime.sh
 
-ld -r -b binary -o data.o runtime
-
-# Test if we can read it back
-readelf -x .upd_info runtime # hexdump
-readelf -p .upd_info runtime || true # string
-
-# The raw updateinformation data can be read out manually like this:
-HEXOFFSET=$(objdump -h runtime | grep .upd_info | awk '{print $6}')
-HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
-dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
-
-# Convert runtime into a data object that can be embedded into appimagetool
-
-ld -r -b binary -o data.o runtime
-
-# Compile appimagetool but do not link - glib version
-
+# compile appimagetool but do not link - glib version
 $CC -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ \
     $(pkg-config --cflags glib-2.0) -g -Os ../getsection.c  -c ../appimagetool.c
 
 # Now statically link against libsquashfuse - glib version
 if [ $STATIC_BUILD -eq 1 ]; then
   # statically link against liblzma
-  $CC -o appimagetool data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
+  $CC -o appimagetool runtime-embed.c appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
     ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
     -L../xz-5.2.3/build/lib \
     -Wl,-Bdynamic -ldl -lpthread \
     -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic
 else
   # dinamically link against distro provided liblzma
-  $CC -o appimagetool data.o appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
+  $CC -o appimagetool runtime-embed.c appimagetool.o ../elf.c ../getsection.c -DENABLE_BINRELOC ../binreloc.c \
     ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
     -Wl,-Bdynamic -ldl -lpthread \
     -Wl,--as-needed $(pkg-config --cflags --libs glib-2.0) -lz -llzma
@@ -242,7 +226,7 @@ fi
 
 # Version without glib
 # cc -D_FILE_OFFSET_BITS=64 -I ../squashfuse -I/usr/lib/x86_64-linux-gnu/glib-2.0/include -g -Os -c ../appimagetoolnoglib.c
-# cc data.o appimagetoolnoglib.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetoolnoglib
+# cc runtime-embed.c appimagetoolnoglib.o -DENABLE_BINRELOC ../binreloc.c ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a -Wl,-Bdynamic -ldl -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -o appimagetoolnoglib
 
 # Compile and link digest tool
 
