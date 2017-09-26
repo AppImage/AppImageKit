@@ -12,7 +12,7 @@ fi
 
 # Install dependencies for openSUSE
 if [ -e /usr/bin/zypper ] ; then
-    sudo zypper up -y
+    sudo zypper refresh
     sudo zypper in -y build git-core gcc wget make glibc-devel glib2-devel libarchive-devel \
         fuse fuse-devel zlib-devel patch cairo-devel zsync desktop-file-utils
     #for some reason openSUSE Tumbleweed have apt-get.
