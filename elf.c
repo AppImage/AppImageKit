@@ -1,5 +1,3 @@
-#include <elf.h>
-#include <byteswap.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <errno.h>
@@ -7,6 +5,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include "light_elf.h"
+#include "light_byteswap.h"
 
 
 typedef Elf32_Nhdr Elf_Nhdr;
