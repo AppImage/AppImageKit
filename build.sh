@@ -112,6 +112,20 @@ if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
   cd -
 fi
 
+# Build libarchive
+if [ $STATIC_BUILD -eq 1 ] && [ ! -e "./libarchive-3.3.1/.libs/libarchive.a" ] ; then
+  wget -c http://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
+  tar xf libarchive-3.3.1.tar.gz
+  cd libarchive-3.3.1
+  mkdir -p build/lib
+  ./configure --prefix=$PWD/build --libdir=$PWD/build/lib --disable-shared --enable-static \
+      --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib \
+      --without-bz2lib --without-iconv --without-lz4 --without-lzma \
+      --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat
+  make && make install
+  cd -
+fi
+
 # Patch squashfuse_ll to be a library rather than an executable
 
 cd squashfuse
@@ -282,10 +296,12 @@ rm -f a.out
 # appimaged, an optional component
 if [ $STATIC_BUILD -eq 1 ]; then
   $CC -std=gnu99 -o appimaged -I../squashfuse/ ../getsection.c ../notify.c ../elf.c ../appimaged.c \
-    -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=$have_libarchive3 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
+    -D_FILE_OFFSET_BITS=64 -DHAVE_LIBARCHIVE3=0 -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
     ../squashfuse/.libs/libsquashfuse.a ../squashfuse/.libs/libfuseprivate.a \
+    -I../openssl-1.1.0c/build/include -L../openssl-1.1.0c/build/lib -Wl,-Bstatic -lssl -lcrypto \
+    -I../libarchive-3.3.1/libarchive ../libarchive-3.3.1/.libs/libarchive.a \
     -L../xz-5.2.3/build/lib -I../inotify-tools-3.14/build/include -L../inotify-tools-3.14/build/lib \
-    -Wl,-Bstatic -linotifytools -Wl,-Bdynamic -larchive${archive_n} \
+    -Wl,-Bstatic -linotifytools -Wl,-Bdynamic \
     -Wl,--as-needed \
     $(pkg-config --cflags --libs glib-2.0) \
     $(pkg-config --cflags --libs gio-2.0) \
