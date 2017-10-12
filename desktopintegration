@@ -44,6 +44,10 @@ NUMBER_OF_ARGS="$#"
 # such as desktop integration daemons
 VENDORPREFIX=appimagekit
 
+log () {
+  echo "$@" 1>&2
+}
+
 find-up () {
   path="$(dirname "$(readlink -f "${THIS}")")"
   while [[ "$path" != "" && ! -e "$path/$1" ]]; do
@@ -76,13 +80,13 @@ fi
 RETURN="yes"
 
 if [[ "$FILENAME" != *.wrapper ]] ; then
-  echo "${THIS} is not named correctly. It should be named \$Exec.wrapper"
+  log "${THIS} is not named correctly. It should be named \$Exec.wrapper"
   exit 0
 fi
 
 BIN=$(echo "$FILENAME" | sed -e 's|.wrapper||g')
 if [[ ! -f "$BIN" ]] ; then
-  echo "$BIN not found"
+  log "$BIN not found"
   exit 0
 fi
 
@@ -112,7 +116,7 @@ error()
   elif [ -x /usr/bin/Xdialog ] ; then
     LD_LIBRARY_PATH="" Xdialog --msgbox "${1}" 2>/dev/null
   else
-    echo "${1}"
+    log "${1}"
   fi
   exit 1
 }
@@ -128,7 +132,7 @@ yesno()
   elif [ -x /usr/bin/Xdialog ] ; then
     LD_LIBRARY_PATH="" Xdialog --title "$TITLE" --clear --yesno "$TEXT" 10 80 && RETURN="yes" || RETURN="no"
   else
-    echo "zenity, kdialog, Xdialog missing. Skipping ${THIS}."
+    log "zenity, kdialog, Xdialog missing. Skipping ${THIS}."
     exit 0
   fi
 }
@@ -144,8 +148,8 @@ check_prevent()
 check_dep()
 {
   DEP=$1
-  if [ -z $(which $DEP) ] ; then
-    echo "$DEP is missing. Skipping ${THIS}."
+  if [ -z $(which $DEP 2>&1 1>/dev/null) ] ; then
+    log "$DEP is missing. Skipping ${THIS}."
     exit 0
   fi
 }
@@ -200,7 +204,7 @@ check_prevent "/usr/share/$VENDORPREFIX/${APP}_no_desktopintegration"
 check_prevent "/etc/$VENDORPREFIX/${APP}_no_desktopintegration"
 
 if [ ! -f "$DESKTOPFILE" ] ; then
-  echo "Desktop file is missing. Please run ${THIS} from within an AppImage."
+  log "Desktop file is missing. Please run ${THIS} from within an AppImage."
   exit 0
 fi
 
@@ -215,7 +219,7 @@ ICONFILE="$APPDIR/.DirIcon"
 # desktop file has to be installed in an applications subdirectory
 # of one of the $XDG_DATA_DIRS components
 if [ -z "$XDG_DATA_DIRS" ] ; then
-  echo "\$XDG_DATA_DIRS is missing. Please run ${THIS} from within an AppImage."
+  log "\$XDG_DATA_DIRS is missing. Please run ${THIS} from within an AppImage."
   exit 0
 fi
 
