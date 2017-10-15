@@ -21,10 +21,14 @@ trap cleanup EXIT
 
 cd "$tempdir"
 
-# Does not work on Travis CI
-# log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
+if [ "$TRAVIS" == true ]; then
+  # TODO: find way to get colored log on Travis
+  log() { echo "$*"; }
+else
+  log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
+fi
 
-echo "create a sample AppDir"
+log "create a sample AppDir"
 mkdir -p appimagetool.AppDir/usr/share/metainfo/
 cp "$thisdir"/resources/{appimagetool.*,AppRun} appimagetool.AppDir/
 cp "$thisdir"/resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
@@ -32,25 +36,25 @@ cp "$appimagetool" appimagetool.AppDir/
 mkdir -p appimagetool.AppDir/usr/share/applications
 cp appimagetool.AppDir/appimagetool.desktop appimagetool.AppDir/usr/share/applications
 
-echo "create a file that should be ignored"
+log "create a file that should be ignored"
 touch appimagetool.AppDir/to-be-ignored
 
-echo "create an AppImage without an ignore file to make sure it is bundled"
+log "create an AppImage without an ignore file to make sure it is bundled"
 $appimagetool appimagetool.AppDir appimagetool.AppImage || exit $?
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || exit 1
 
-echo "now set up the ignore file, and check that the file is properly ignored"
+log "now set up the ignore file, and check that the file is properly ignored"
 echo "to-be-ignored" > .appimageignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
 
-echo "remove the default ignore file, and check if an explicitly passed one works, too"
+log "remove the default ignore file, and check if an explicitly passed one works, too"
 rm .appimageignore
-echo "to-be-ignored" > ignore
+log "to-be-ignored" > ignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || exit $?
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
 
-echo "check whether files in both .appimageignore and the explicitly passed file work"
+log "check whether files in both .appimageignore and the explicitly passed file work"
 touch appimagetool.AppDir/to-be-ignored-too
 echo "to-be-ignored-too" > .appimageignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || exit $?
