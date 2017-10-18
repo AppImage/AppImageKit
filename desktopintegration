@@ -147,13 +147,10 @@ check_prevent()
 
 check_dep()
 {
-  set +e
-  which $1 &>/dev/null
-  if [ $? -ne 0 ]; then
+  if [ -z "$(command -v $1)" ]; then
     log "$1 is missing. Skipping ${THIS}."
     exit 
   fi
-  set -e
 }
 
 # Determine where the desktop file should be installed
