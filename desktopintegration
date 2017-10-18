@@ -147,10 +147,9 @@ check_prevent()
 
 check_dep()
 {
-  DEP=$1
-  if [ -z $(which $DEP 2>&1 1>/dev/null) ] ; then
-    log "$DEP is missing. Skipping ${THIS}."
-    exit 0
+  if [ -z "$(command -v $1)" ]; then
+    log "$1 is missing. Skipping ${THIS}."
+    exit 
   fi
 }
 
