@@ -40,7 +40,7 @@ THE SOFTWARE.
 #define SET_NEW_ENV(str,len,fmt,...)                \
     format = fmt;                                   \
     length = strlen(format) + (len);                \
-    char *str = malloc(length);                     \
+    char *str = calloc(length);                     \
     snprintf(str, length-1, format, __VA_ARGS__);   \
     putenv(str);
 #define MAX(a,b)    (a > b ? a : b)
