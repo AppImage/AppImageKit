@@ -40,8 +40,8 @@ THE SOFTWARE.
 #define SET_NEW_ENV(str,len,fmt,...)                \
     format = fmt;                                   \
     length = strlen(format) + (len);                \
-    char *str = calloc(length, sizeof(char *));     \
-    snprintf(str, length-1, format, __VA_ARGS__);   \
+    char *str = calloc(length, sizeof(char));     \
+    snprintf(str, length, format, __VA_ARGS__);   \
     putenv(str);
 #define MAX(a,b)    (a > b ? a : b)
 #define bool int
@@ -72,8 +72,8 @@ int main(int argc, char *argv[]) {
     }
 
     /* Extract executable from .desktop file */
-    char *desktop_file = malloc(LINE_SIZE);
-    snprintf(desktop_file, LINE_SIZE-1, "%s/%s", appdir, namelist[0]->d_name);
+    char *desktop_file = calloc(LINE_SIZE, sizeof(char));
+    snprintf(desktop_file, LINE_SIZE, "%s/%s", appdir, namelist[0]->d_name);
     FILE *f     = fopen(desktop_file, "r");
     char *line  = malloc(LINE_SIZE);
     char *exe   = line+5;
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
     // change directory
     size_t appdir_s = strlen(appdir);
     char *usr_in_appdir = malloc(appdir_s + 5);
-    snprintf(usr_in_appdir, appdir_s + 4, "%s/usr", appdir);
+    snprintf(usr_in_appdir, appdir_s + 5, "%s/usr", appdir);
     ret = chdir(usr_in_appdir);
     if (ret != 0)
         die("Could not cd into %s\n", usr_in_appdir);
