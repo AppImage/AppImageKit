@@ -796,7 +796,7 @@ main (int argc, char *argv[])
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
                 if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
-                sprintf (command, "%s --detach-sign --armor %s %s", gpg2_path, sign_args ? sign_args : "\0", digestfile);
+                sprintf (command, "%s --detach-sign --armor %s %s", gpg2_path, sign_args ? sign_args : "", digestfile);
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
