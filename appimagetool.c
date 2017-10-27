@@ -81,6 +81,7 @@ gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
+gchar *sign_args = NULL;
 
 // #####################################################################
 
@@ -412,6 +413,7 @@ static GOptionEntry entries[] =
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
+    { "sign-args", 0, 0, G_OPTION_ARG_STRING, &sign_args, "Extra arguments to use when signing with gpg[2]", NULL},
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
 };
@@ -794,7 +796,7 @@ main (int argc, char *argv[])
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
                 if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
-                sprintf (command, "%s --detach-sign --armor %s", gpg2_path, digestfile);
+                sprintf (command, "%s --detach-sign --armor %s %s", gpg2_path, sign_args ? sign_args : "", digestfile);
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
