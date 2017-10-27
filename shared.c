@@ -709,7 +709,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         }
     }
     archive_read_close(a);
-    archive_read_finish(a);
+    archive_read_free(a);
     set_executable(path, verbose);
     return TRUE;
 }
