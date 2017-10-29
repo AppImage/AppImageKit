@@ -311,7 +311,6 @@ void extract_arch_from_text(gchar *archname, const gchar* sourcename, bool* arch
                 if (verbose)
                     fprintf(stderr, "%s used for determining architecture ARM aarch64\n", sourcename);
             }
-            fprintf(stderr, "End of checks\n");
         }
     }
 }
