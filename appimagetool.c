@@ -721,7 +721,7 @@ main (int argc, char *argv[])
         if(updateinformation == NULL){
             if(travis_repo_slug != NULL){
                 char buf[1024];
-                gchar **parts = g_strsplit (travis_repo_slug, ",", 2);
+                gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
                 /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
                  * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
                 sprintf(buf, "gh-releases-zsync|%s|%s|latest|%s-_*-%s.AppImage.zsync", parts[0], parts[1], app_name_for_filename, arch);
