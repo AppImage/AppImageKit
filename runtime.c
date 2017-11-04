@@ -361,6 +361,11 @@ main (int argc, char *argv[])
         exit(0);
     }
 
+    if(arg && strncmp(arg, "appimage", 8) == 0) {
+        fprintf(stderr,"Not yet implemented in version %s\n", VERSION_NUMBER);
+        exit(1);
+    }
+
     LOAD_LIBRARY; /* exit if libfuse is missing */
 
     int dir_fd, res;
