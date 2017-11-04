@@ -728,7 +728,7 @@ main (int argc, char *argv[])
                      * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
                     gchar *channel = "continuous";
                         if(travis_tag != NULL){
-                            if(strcmp(travis_tag, "continuous") != 0) {
+                            if((strcmp(travis_tag, "") != 0) && (strcmp(travis_tag, "continuous") != 0)) {
                                 channel = "latest";
                             }
                         }
