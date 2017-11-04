@@ -727,7 +727,7 @@ main (int argc, char *argv[])
                     /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
                      * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
                     gchar *channel = "continuous";
-                        if((travis_tag != NULL) && (travis_tag != "continuous")) {
+                        if((travis_tag != NULL) && (strcmp(travis_tag, "continuous") != 0)) {
                             channel = "latest";
                         }                    
                     sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s-_*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
