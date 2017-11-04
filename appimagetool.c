@@ -715,7 +715,7 @@ main (int argc, char *argv[])
             }
         }
         
-        /* If the user has not procided update information but we know this is a Travis CI build,
+        /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
         if(updateinformation == NULL){
             if(travis_repo_slug != NULL){
