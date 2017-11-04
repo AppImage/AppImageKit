@@ -425,6 +425,19 @@ main (int argc, char *argv[])
     char* version_env;
     version_env = getenv("VERSION");
 
+    /* Parse Travis CI environment variables. 
+     * https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+     * TRAVIS_COMMIT: The commit that the current build is testing.
+     * TRAVIS_REPO_SLUG: The slug (in form: owner_name/repo_name) of the repository currently being built.
+     * TRAVIS_TAG: If the current build is for a git tag, this variable is set to the tag’s name.
+     * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6 */
+    char* travis_commit;
+    travis_commit = getenv("TRAVIS_COMMIT");
+    char* travis_repo_slug;
+    travis_repo_slug = getenv("TRAVIS_REPO_SLUG");
+    char* travis_tag;
+    travis_tag = getenv("TRAVIS_TAG");
+    
     /* Parse OWD environment variable.
      * If it is available then cd there. It is the original CWD prior to running AppRun */
     char* owd_env = NULL;
@@ -699,6 +712,21 @@ main (int argc, char *argv[])
                 char buf[1024];
                 sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
                 updateinformation = buf;
+                printf("%s\n", updateinformation);
+            }
+        }
+        
+        /* If the user has not provided update information but we know this is a Travis CI build,
+         * then fill in update information based on TRAVIS_REPO_SLUG */
+        if(updateinformation == NULL){
+            if(travis_repo_slug != NULL){
+                char buf[1024];
+                gchar **parts = g_strsplit (travis_repo_slug, ",", 2);
+                /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
+                 * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
+                sprintf(buf, "gh-releases-zsync|%s|%s|latest|%s-_*-%s.AppImage.zsync", parts[0], parts[1], app_name_for_filename, arch);
+                updateinformation = buf;
+                printf("As a courtesy, automatically embedding update information based on $TRAVIS_REPO_SLUG=%s\n", travis_repo_slug);
                 printf("%s\n", updateinformation);
             }
         }
