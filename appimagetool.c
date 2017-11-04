@@ -726,7 +726,11 @@ main (int argc, char *argv[])
                     gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
                     /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
                      * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
-                    sprintf(buf, "gh-releases-zsync|%s|%s|latest|%s-_*-%s.AppImage.zsync", parts[0], parts[1], app_name_for_filename, arch);
+                    gchar *channel = "continuous";
+                        if(travis_tag != NULL) {
+                            channel = "latest";
+                        }                    
+                    sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s-_*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                     updateinformation = buf;
                     printf("As a courtesy, automatically embedding update information based on $TRAVIS_REPO_SLUG=%s\n", travis_repo_slug);
                     printf("%s\n", updateinformation);
