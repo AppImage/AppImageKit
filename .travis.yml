@@ -27,7 +27,7 @@ script:
       cd /out &&
       ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v
       appimagetool-$ARCH.AppImage &&
-      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v
+      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v"
   - sudo apt-get install equivs
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
