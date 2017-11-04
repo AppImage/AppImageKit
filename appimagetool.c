@@ -425,7 +425,8 @@ main (int argc, char *argv[])
     char* version_env;
     version_env = getenv("VERSION");
 
-    /* Parse Travis CI environment variables.
+    /* Parse Travis CI environment variables. 
+     * https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
      * TRAVIS_COMMIT: The commit that the current build is testing.
      * TRAVIS_REPO_SLUG: The slug (in form: owner_name/repo_name) of the repository currently being built.
      * TRAVIS_TAG: If the current build is for a git tag, this variable is set to the tag’s name.
