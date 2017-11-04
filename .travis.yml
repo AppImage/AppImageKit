@@ -25,9 +25,9 @@ script:
   - docker run --cap-add SYS_ADMIN --device /dev/fuse:/dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -c
       "yum -y install fuse fuse-libs &&
       cd /out &&
-      ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v
+      ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|latest|appimagetool-x86_64.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&
-      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v"
+      ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|latest|appimaged-x86_64.AppImage.zsync\" appimaged-$ARCH.AppImage"
   - sudo apt-get install equivs
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
