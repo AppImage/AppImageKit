@@ -844,9 +844,9 @@ main (int argc, char *argv[])
         if(updateinformation != NULL){
             gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
             if(!zsyncmake_path){
-                fprintf (stderr, "zsyncmake is not installed, skipping\n");
+                fprintf (stderr, "zsyncmake is not installed/bundled, skipping\n");
             } else {
-                fprintf (stderr, "zsyncmake is installed and updateinformation is provided, "
+                fprintf (stderr, "zsyncmake is bundled and updateinformation is provided, "
                 "hence generating zsync file\n");
                 sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
                 if(verbose)
