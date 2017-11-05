@@ -721,8 +721,8 @@ main (int argc, char *argv[])
         /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
         if(updateinformation == NULL){
-            if(travis_repo_slug != NULL){
-                if(github_token != NULL){
+            if((travis_repo_slug != NULL) && (strcmp(travis_repo_slug, "") != 0)){
+                if((github_token != NULL) && (strcmp(github_token, "") != 0)){
                     gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
                     if(zsyncmake_path){
                         char buf[1024];
