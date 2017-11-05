@@ -883,7 +883,7 @@ main (int argc, char *argv[])
             if(!zsyncmake_path){
                 fprintf (stderr, "zsyncmake is not installed/bundled, skipping\n");
             } else {
-                fprintf (stderr, "zsyncmake is bundled and updateinformation is provided, "
+                fprintf (stderr, "zsyncmake is available and updateinformation is provided, "
                 "hence generating zsync file\n");
                 sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
                 if(verbose)
