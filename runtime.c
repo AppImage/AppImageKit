@@ -362,7 +362,7 @@ main (int argc, char *argv[])
     }
 
     if(arg && strncmp(arg, "appimage-", 8) == 0) {
-        fprintf(stderr,"Not yet implemented in version %s\n", VERSION_NUMBER);
+        fprintf(stderr,"%s is not yet implemented in version %s\n", arg, VERSION_NUMBER);
         exit(1);
     }
 
