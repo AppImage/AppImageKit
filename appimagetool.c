@@ -441,7 +441,7 @@ main (int argc, char *argv[])
     travis_tag = getenv("TRAVIS_TAG");
     /* https://github.com/probonopd/uploadtool */
     char* github_token;
-    travis_tag = getenv("GITHUB_TOKEN");
+    github_token = getenv("GITHUB_TOKEN");
     
     /* Parse OWD environment variable.
      * If it is available then cd there. It is the original CWD prior to running AppRun */
