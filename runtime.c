@@ -361,8 +361,10 @@ main (int argc, char *argv[])
         exit(0);
     }
 
-    if(arg && strncmp(arg, "appimage-", 8) == 0) {
-        fprintf(stderr,"%s is not yet implemented in version %s\n", arg, VERSION_NUMBER);
+    // If there is an argument starting with appimage- (but not appimage-mount which is handled further down)
+    // then stop here and print an error message
+    if((arg && strncmp(arg, "appimage-", 8) == 0) && (arg && strcmp(arg,"appimage-mount")!=0)) {
+        fprintf(stderr,"--%s is not yet implemented in version %s\n", arg, VERSION_NUMBER);
         exit(1);
     }
 
