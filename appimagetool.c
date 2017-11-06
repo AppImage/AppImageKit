@@ -76,6 +76,7 @@ static gboolean sign = FALSE;
 static gboolean no_appstream = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
+static gboolean guessupdateinformation = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
@@ -403,6 +404,7 @@ static GOptionEntry entries[] =
 {
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
+    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI environment variables", NULL },
     { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
@@ -720,27 +722,29 @@ main (int argc, char *argv[])
         
         /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
-        if(updateinformation == NULL){
+        if(guessupdateinformation != NULL){
             if(travis_repo_slug != NULL){
-                if(github_token != NULL){
-                    gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
-                    if(zsyncmake_path){
-                        char buf[1024];
-                        gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
-                        /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
-                         * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
-                        gchar *channel = "continuous";
-                            if(travis_tag != NULL){
-                                if((strcmp(travis_tag, "") != 0) && (strcmp(travis_tag, "continuous") != 0)) {
-                                    channel = "latest";
-                                }
+                gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+                if(zsyncmake_path){
+                    char buf[1024];
+                    gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
+                    /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
+                     * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
+                    gchar *channel = "continuous";
+                        if(travis_tag != NULL){
+                            if((strcmp(travis_tag, "") != 0) && (strcmp(travis_tag, "continuous") != 0)) {
+                                channel = "latest";
                             }
-                        sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s-_*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
-                        updateinformation = buf;
-                        printf("As a courtesy, automatically embedding update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
-                        printf("%s\n", updateinformation);
-                    }
+                        }
+                    sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s-_*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                    updateinformation = buf;
+                    printf("Guessing update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
+                    printf("%s\n", updateinformation);
+                } else {
+                    printf("Will not guess update information since zsyncmake is missing\n");
                 }
+            } else {
+                printf("Cannot guess update information since $TRAVIS_REPO_SLUG is missing\n");
             }
         }
         
