@@ -736,7 +736,7 @@ main (int argc, char *argv[])
                                 channel = "latest";
                             }
                         }
-                    sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s-_*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                    sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                     updateinformation = buf;
                     printf("Guessing update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
                     printf("%s\n", updateinformation);
