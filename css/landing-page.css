@@ -937,8 +937,13 @@ vertical-align: middle;
     margin-top: 30px;
    }
 
-   .landing-page .section-presentation img{
-    height: 460px;
+   .landing-page .section-presentation img {
+    width: 100%;
+    max-width: 500px;
+    display: block;
+    margin-top: 50px;
+    margin-left: auto;
+    margin-right: auto;
    }
 
    .landing-page .section-presentation{
@@ -1436,6 +1441,8 @@ ul.banner-social-buttons li {
 .picture-copyright {
     color: #9a9a9a;
     font-size: 85%;
+    text-align: center;
+    display: block;
 }
 
 @media(max-width:767px) {
@@ -1447,3 +1454,4 @@ ul.banner-social-buttons li {
     margin-bottom: 0;
 
   }
+}
