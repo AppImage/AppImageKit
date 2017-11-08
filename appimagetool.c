@@ -199,7 +199,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 /* Validate desktop file using desktop-file-validate on the $PATH
 * execlp(), execvp(), and execvpe() search on the $PATH */
 int validate_desktop_file(char *file) {
-    int number, statval;
+    int statval;
     int child_pid;
     child_pid = fork();
     if(child_pid == -1)
@@ -433,12 +433,14 @@ main (int argc, char *argv[])
      * TRAVIS_REPO_SLUG: The slug (in form: owner_name/repo_name) of the repository currently being built.
      * TRAVIS_TAG: If the current build is for a git tag, this variable is set to the tag’s name.
      * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6 */
-    char* travis_commit;
-    travis_commit = getenv("TRAVIS_COMMIT");
+    // char* travis_commit;
+    // travis_commit = getenv("TRAVIS_COMMIT");
     char* travis_repo_slug;
     travis_repo_slug = getenv("TRAVIS_REPO_SLUG");
     char* travis_tag;
     travis_tag = getenv("TRAVIS_TAG");
+    char* travis_pull_request;
+    travis_pull_request = getenv("TRAVIS_PULL_REQUEST");
     /* https://github.com/probonopd/uploadtool */
     char* github_token;
     github_token = getenv("GITHUB_TOKEN");
@@ -726,14 +728,24 @@ main (int argc, char *argv[])
         
         /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
-        if(guessupdateinformation != NULL){
-            if(travis_repo_slug != NULL){
+        if(guessupdateinformation){
+            if(!travis_repo_slug){
+                printf("Cannot guess update information since $TRAVIS_REPO_SLUG is missing\n");
+            } else if(!github_token) {
+                printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
+                if(0 != strcmp(travis_pull_request, "false")){
+                    printf("please set it in the Travis CI Repository Settings for this project.\n");
+                    printf("You can get one from https://github.com/settings/tokens\n");
+                } else {
+                    printf(", which is expected since this is a pull request\n");
+                }
+            } else {
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
                 if(zsyncmake_path){
                     char buf[1024];
                     gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
                     /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
-                     * gh-releases-zsync|probono|AppImages|latest|Subsurface-*-x86_64.AppImage.zsync */
+                     * gh-releases-zsync|probono|AppImages|latest|Subsurface*-x86_64.AppImage.zsync */
                     gchar *channel = "continuous";
                         if(travis_tag != NULL){
                             if((strcmp(travis_tag, "") != 0) && (strcmp(travis_tag, "continuous") != 0)) {
@@ -747,8 +759,6 @@ main (int argc, char *argv[])
                 } else {
                     printf("Will not guess update information since zsyncmake is missing\n");
                 }
-            } else {
-                printf("Cannot guess update information since $TRAVIS_REPO_SLUG is missing\n");
             }
         }
         
