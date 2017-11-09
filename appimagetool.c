@@ -737,7 +737,7 @@ main (int argc, char *argv[])
                     printf("please set it in the Travis CI Repository Settings for this project.\n");
                     printf("You can get one from https://github.com/settings/tokens\n");
                 } else {
-                    printf(", which is expected since this is a pull request\n");
+                    printf("which is expected since this is a pull request\n");
                 }
             } else {
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
