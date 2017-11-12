@@ -208,6 +208,7 @@ int
 main (int argc, char *argv[])
 {
     char appimage_path[PATH_MAX];
+    char argv0_path[PATH_MAX];
     char * arg;
     
     /* We might want to operate on a target appimage rather than this file itself,
@@ -222,7 +223,9 @@ main (int argc, char *argv[])
         sprintf(appimage_path, "%s", getenv("TARGET_APPIMAGE"));
         fprintf(stderr, "Using TARGET_APPIMAGE %s\n", appimage_path);
     }
-    
+	
+    sprintf(argv0_path, argv[0]);
+
     fs_offset = get_elf_size(appimage_path);
     
     /* Just print the offset and then exit */
@@ -358,6 +361,13 @@ main (int argc, char *argv[])
         exit(0);
     }
 
+    // If there is an argument starting with appimage- (but not appimage-mount which is handled further down)
+    // then stop here and print an error message
+    if((arg && strncmp(arg, "appimage-", 8) == 0) && (arg && strcmp(arg,"appimage-mount")!=0)) {
+        fprintf(stderr,"--%s is not yet implemented in version %s\n", arg, VERSION_NUMBER);
+        exit(1);
+    }
+
     LOAD_LIBRARY; /* exit if libfuse is missing */
 
     int dir_fd, res;
@@ -473,6 +483,7 @@ main (int argc, char *argv[])
                 
         /* Setting some environment variables that the app "inside" might use */
         setenv( "APPIMAGE", fullpath, 1 );
+	setenv( "ARGV0", argv0_path, 1 );
         setenv( "APPDIR", mount_dir, 1 );
 
         char portable_home_dir[2048];

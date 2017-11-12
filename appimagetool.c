@@ -76,6 +76,7 @@ static gboolean sign = FALSE;
 static gboolean no_appstream = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
+static gboolean guessupdateinformation = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
@@ -198,7 +199,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 /* Validate desktop file using desktop-file-validate on the $PATH
 * execlp(), execvp(), and execvpe() search on the $PATH */
 int validate_desktop_file(char *file) {
-    int number, statval;
+    int statval;
     int child_pid;
     child_pid = fork();
     if(child_pid == -1)
@@ -311,7 +312,6 @@ void extract_arch_from_text(gchar *archname, const gchar* sourcename, bool* arch
                 if (verbose)
                     fprintf(stderr, "%s used for determining architecture ARM aarch64\n", sourcename);
             }
-            fprintf(stderr, "End of checks\n");
         }
     }
 }
@@ -404,6 +404,7 @@ static GOptionEntry entries[] =
 {
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
+    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI environment variables", NULL },
     { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
@@ -426,6 +427,24 @@ main (int argc, char *argv[])
     char* version_env;
     version_env = getenv("VERSION");
 
+    /* Parse Travis CI environment variables. 
+     * https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+     * TRAVIS_COMMIT: The commit that the current build is testing.
+     * TRAVIS_REPO_SLUG: The slug (in form: owner_name/repo_name) of the repository currently being built.
+     * TRAVIS_TAG: If the current build is for a git tag, this variable is set to the tag’s name.
+     * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6 */
+    // char* travis_commit;
+    // travis_commit = getenv("TRAVIS_COMMIT");
+    char* travis_repo_slug;
+    travis_repo_slug = getenv("TRAVIS_REPO_SLUG");
+    char* travis_tag;
+    travis_tag = getenv("TRAVIS_TAG");
+    char* travis_pull_request;
+    travis_pull_request = getenv("TRAVIS_PULL_REQUEST");
+    /* https://github.com/probonopd/uploadtool */
+    char* github_token;
+    github_token = getenv("GITHUB_TOKEN");
+    
     /* Parse OWD environment variable.
      * If it is available then cd there. It is the original CWD prior to running AppRun */
     char* owd_env = NULL;
@@ -436,7 +455,6 @@ main (int argc, char *argv[])
         if (ret != 0){
             fprintf(stderr, "Could not cd into %s\n", owd_env);
             exit(1);
-            
         }
     }
         
@@ -589,7 +607,11 @@ main (int argc, char *argv[])
         } else if(g_file_test(icon_file_xpm, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_xpm;
         } else {
-            fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} not present but defined in desktop file\n", icon_name);
+            fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} defined in desktop file but not found\n", icon_name);
+            fprintf (stderr, "For example, you could put a 256x256 pixel png into\n");
+            gchar *icon_name_with_png = g_strconcat(icon_name, ".png", NULL);
+            gchar *example_path = g_build_filename(source, "/usr/share/icons/hicolor/256x256/apps/", icon_name_with_png, NULL);
+            fprintf (stderr, "%s\n", example_path);
             exit(1);
         }
        
@@ -701,6 +723,42 @@ main (int argc, char *argv[])
                 sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
                 updateinformation = buf;
                 printf("%s\n", updateinformation);
+            }
+        }
+        
+        /* If the user has not provided update information but we know this is a Travis CI build,
+         * then fill in update information based on TRAVIS_REPO_SLUG */
+        if(guessupdateinformation){
+            if(!travis_repo_slug){
+                printf("Cannot guess update information since $TRAVIS_REPO_SLUG is missing\n");
+            } else if(!github_token) {
+                printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
+                if(0 != strcmp(travis_pull_request, "false")){
+                    printf("please set it in the Travis CI Repository Settings for this project.\n");
+                    printf("You can get one from https://github.com/settings/tokens\n");
+                } else {
+                    printf("which is expected since this is a pull request\n");
+                }
+            } else {
+                gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+                if(zsyncmake_path){
+                    char buf[1024];
+                    gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
+                    /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
+                     * gh-releases-zsync|probono|AppImages|latest|Subsurface*-x86_64.AppImage.zsync */
+                    gchar *channel = "continuous";
+                        if(travis_tag != NULL){
+                            if((strcmp(travis_tag, "") != 0) && (strcmp(travis_tag, "continuous") != 0)) {
+                                channel = "latest";
+                            }
+                        }
+                    sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                    updateinformation = buf;
+                    printf("Guessing update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
+                    printf("%s\n", updateinformation);
+                } else {
+                    printf("Will not guess update information since zsyncmake is missing\n");
+                }
             }
         }
         
@@ -845,9 +903,9 @@ main (int argc, char *argv[])
         if(updateinformation != NULL){
             gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
             if(!zsyncmake_path){
-                fprintf (stderr, "zsyncmake is not installed, skipping\n");
+                fprintf (stderr, "zsyncmake is not installed/bundled, skipping\n");
             } else {
-                fprintf (stderr, "zsyncmake is installed and updateinformation is provided, "
+                fprintf (stderr, "zsyncmake is available and updateinformation is provided, "
                 "hence generating zsync file\n");
                 sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
                 if(verbose)
@@ -861,7 +919,10 @@ main (int argc, char *argv[])
             }
          } 
          
-        fprintf (stderr, "Success\n");
+        fprintf (stderr, "Success\n\n");
+        fprintf (stderr, "Please consider submitting your AppImage to AppImageHub, the crowd-sourced\n");
+        fprintf (stderr, "central directory of available AppImages, by opening a pull request\n");
+        fprintf (stderr, "at https://github.com/AppImage/appimage.github.io\n");
         }
     
     /* If the first argument is a regular file, then we assume that we should unpack it */
