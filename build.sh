@@ -70,9 +70,9 @@ git submodule update
 rm -rf build/ || true
 
 # Build the dialog tool
-if [ ! -e "./build/dialog" ]; then
-  ./build-dialog.sh
-fi
+#if [ ! -e "./build/dialog" ]; then
+#  ./build-dialog.sh
+#fi
 
 # Build static libraries
 if [ $STATIC_BUILD -eq 1 ]; then
