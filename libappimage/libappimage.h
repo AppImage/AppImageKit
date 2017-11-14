@@ -11,7 +11,7 @@ extern "C" {
     char *get_md5(char const *path);
 
     /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
-    int check_appimage_type(char *path, gboolean verbose);
+    int check_appimage_type( const char *path, gboolean verbose);
 
     /* Register a type 1 AppImage in the system */
     bool appimage_type1_register_in_system(char *path, gboolean verbose);

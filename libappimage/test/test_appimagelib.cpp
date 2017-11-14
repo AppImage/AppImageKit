@@ -1,13 +1,23 @@
-#include "libappimage.h"
+#include "../libappimage.h"
 
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <glib/gprintf.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
-#include <cstring>
-#include <string>
+#include <unistd.h>
 
 #include <gtest/gtest.h>
+
+#include <squashfuse.h>
+#include <squashfs_fs.h>
+
+#include <cstdio>
+#include <string>
+#include <cstring>
+#include <cstdlib>
+#include <iostream>
 
 namespace AppImageTests
 {
@@ -16,13 +26,12 @@ class AppImageTest : public testing::Test
 {
   protected:
     char tests_dir[250];
-    bool tests_dir_created;
+    bool tests_dir_created = false;
     std::string test_file_content;
 
     virtual void SetUp()
     {
-        tests_dir_created = false;
-        test_file_content = "Hello World\n";
+        test_file_content  = "Hello World\n";
         createTestsDir();
     }
 
@@ -51,6 +60,7 @@ class AppImageTest : public testing::Test
 
     void mk_file(std::string path)
     {
+        
         g_file_set_contents(path.c_str(),
                             test_file_content.c_str(),
                             test_file_content.size(),
@@ -63,16 +73,36 @@ class AppImageTest : public testing::Test
     }
 };
 
+TEST_F(AppImageTest, check_appimage_type_invalid)
+{
+    int t = check_appimage_type("/tmp", 0);
+    ASSERT_EQ(-1, t);
+}
+
+TEST_F(AppImageTest, check_appimage_type_1)
+{
+    std::string file = std::string(TEST_DATA_DIR) + "/AppImageExtract_6-x86_64.AppImage";
+    int t = check_appimage_type(file.c_str(), 0);
+    ASSERT_EQ(1, t);
+}
+
+TEST_F(AppImageTest, check_appimage_type_2)
+{
+    std::string file = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
+    int t = check_appimage_type(file.c_str(), 0);
+    ASSERT_EQ(2, t);
+}
+
 TEST_F(AppImageTest, get_md5)
 {
-    char text[] = "Hello World\n";
-    // generated using md5sum
-    std::string expected = "f0ef7081e1539ac00ef5b761b4fb01b3";
-
-    gchar *sum = get_md5(text);
-
-    int res = g_strcmp0(expected.c_str(), sum);
-    ASSERT_TRUE(res == 0);
+    // // generated using md5sum
+    // std::string expected = "f0ef7081e1539ac00ef5b761b4fb01b3";
+    
+    // gchar * sum = get_md5(test_file_content.c_str());
+    
+    // std::cout << sum;
+    // int res = g_strcmp0(expected.c_str(), sum);
+    // ASSERT_TRUE(res == 0);
 }
 
 } // namespace
