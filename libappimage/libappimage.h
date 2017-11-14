@@ -19,7 +19,7 @@
 #include <squashfs_fs.h>
 
 extern "C" {
-    void set_executable(char *path, gboolean verbose);
+    void set_executable(char const *path, gboolean verbose);
 
     /* Search and replace on a string, this really should be in Glib
     * https://mail.gnome.org/archives/gtk-list/2012-February/msg00005.html */

@@ -1,17 +1,3 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <errno.h>
-
-#include <glib.h>
-#include <glib/gprintf.h>
-#include <glib/gstdio.h>
-#include <gio/gio.h>
-
 #include "libappimage.h"
 
 #include <sys/stat.h>
@@ -72,7 +58,18 @@ class AppImageTest : public testing::Test
     }
 };
 
+TEST_F(AppImageTest, set_executable)
+{
+    std::string path = AppImageTest::build_test_file_path("tmp_file");
+    mk_file(path);
 
+    set_executable(path.c_str(), 0);
+
+    int isExecutable = g_file_test(path.c_str(), G_FILE_TEST_IS_EXECUTABLE);
+    ASSERT_TRUE(isExecutable);
+    
+    rm_file(path);
+}
 } // namespace
 
 int main(int argc, char **argv)
