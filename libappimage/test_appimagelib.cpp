@@ -14,9 +14,11 @@ class AppImageTest : public testing::Test
   protected:
     char tests_dir[250];
     bool tests_dir_created = false;
+    std::string test_file_content;
 
     virtual void SetUp()
     {
+        test_file_content  = "Hello World\n";
         createTestsDir();
     }
 
@@ -45,10 +47,10 @@ class AppImageTest : public testing::Test
 
     void mk_file(std::string path)
     {
-        std::string content = "Hello World\n";
+        
         g_file_set_contents(path.c_str(),
-                            content.c_str(),
-                            content.size(),
+                            test_file_content.c_str(),
+                            test_file_content.size(),
                             0);
     }
 
@@ -79,6 +81,19 @@ TEST_F(AppImageTest, replace_str) {
     int res = g_strcmp0(s2.c_str(), result);
     ASSERT_TRUE(res == 0);
 }
+
+TEST_F(AppImageTest, get_md5)
+{
+    // generated using md5sum
+    std::string expected = "f0ef7081e1539ac00ef5b761b4fb01b3";
+    
+    gchar * sum = get_md5(test_file_content.c_str());
+    
+    std::cout << sum;
+    int res = g_strcmp0(expected.c_str(), sum);
+    ASSERT_TRUE(res == 0);
+}
+
 } // namespace
 
 int main(int argc, char **argv)

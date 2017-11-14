@@ -28,7 +28,7 @@ extern "C" {
     /* Return the md5 hash constructed according to
     * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#THUMBSAVE
     * This can be used to identify files that are related to a given AppImage at a given location */
-    char *get_md5(char *path);
+    char *get_md5(char const *path);
 
     /* Return the path of the thumbnail regardless whether it already exists; may be useful because
     * G*_FILE_ATTRIBUTE_THUMBNAIL_PATH only exists if the thumbnail is already there.
