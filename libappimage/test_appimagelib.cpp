@@ -70,6 +70,15 @@ TEST_F(AppImageTest, set_executable)
     
     rm_file(path);
 }
+
+TEST_F(AppImageTest, replace_str) {
+    std::string s1 = "hello sad world";
+    std::string s2 = "hello world";
+    
+    gchar *result = replace_str(s1.c_str(), " sad", "");
+    int res = g_strcmp0(s2.c_str(), result);
+    ASSERT_TRUE(res == 0);
+}
 } // namespace
 
 int main(int argc, char **argv)
