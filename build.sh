@@ -321,6 +321,13 @@ fi
 
 cd ..
 
+## Lib AppImage optional
+
+mkdir -p libappimage/build
+pushd libappimage/build
+cmake .. && make all && ctest 
+popd
+
 # Strip and check size and dependencies
 
 rm build/*.o build/1024_blank_bytes
