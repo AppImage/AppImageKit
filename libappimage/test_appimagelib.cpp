@@ -2,9 +2,20 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <glib/gprintf.h>
+#include <glib/gstdio.h>
+#include <gio/gio.h>
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 #include <string>
 #include <gtest/gtest.h>
+
+#include <squashfuse.h>
+#include <squashfs_fs.h>
 
 namespace AppImageTests
 {

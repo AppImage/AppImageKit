@@ -1,22 +1,9 @@
 #ifndef AppImage
 #define AppImage
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <errno.h>
 
 #include <glib.h>
-#include <glib/gprintf.h>
-#include <glib/gstdio.h>
-#include <gio/gio.h>
-
-#include "squashfuse.h"
-#include <squashfs_fs.h>
+#include <squashfuse.h>
 
 extern "C" {
     void set_executable(char const *path, gboolean verbose);
