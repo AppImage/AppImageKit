@@ -14,20 +14,16 @@ extern "C" {
     int check_appimage_type( const char *path, gboolean verbose);
 
     /* Register a type 1 AppImage in the system */
-    bool appimage_type1_register_in_system(char *path, gboolean verbose);
+    bool appimage_type1_register_in_system(const char *path, gboolean verbose);
 
     /* Register a type 2 AppImage in the system */
-    bool appimage_type2_register_in_system(char *path, gboolean verbose);
+    bool appimage_type2_register_in_system(const char *path, gboolean verbose);
 
     /* Register an AppImage in the system */
-    int appimage_register_in_system(char *path, gboolean verbose);
-
-    /* Recursively delete files in path and subdirectories that contain the given md5
-    */
-    void unregister_using_md5_id(const char *name, int level, char *md5, gboolean verbose);
+    int appimage_register_in_system(const char *path, gboolean verbose);
 
     /* Unregister an AppImage in the system */
-    int appimage_unregister_in_system(char *path, gboolean verbose);
+    int appimage_unregister_in_system(const char *path, gboolean verbose);
 }
 
 #endif // !AppImage

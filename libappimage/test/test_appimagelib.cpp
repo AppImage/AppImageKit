@@ -2,9 +2,11 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <glib/gprintf.h>
+#include <glib.h>
 #include <glib/gstdio.h>
-#include <gio/gio.h>
+#include <glib/gprintf.h>
+#include <stdio.h>
+#include <gnu/libc-version.h>
 
 #include <unistd.h>
 
@@ -28,11 +30,16 @@ class AppImageTest : public testing::Test
     char tests_dir[250];
     bool tests_dir_created = false;
     std::string test_file_content;
+    std::string appImage_type_1_file_path;
+    std::string appImage_type_2_file_path;
 
     virtual void SetUp()
     {
-        test_file_content  = "Hello World\n";
+        test_file_content = "Hello World\n";
         createTestsDir();
+
+        appImage_type_1_file_path = std::string(TEST_DATA_DIR) + "/AppImageExtract_6-x86_64.AppImage";
+        appImage_type_2_file_path = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
     }
 
     virtual void TearDown()
@@ -60,7 +67,7 @@ class AppImageTest : public testing::Test
 
     void mk_file(std::string path)
     {
-        
+
         g_file_set_contents(path.c_str(),
                             test_file_content.c_str(),
                             test_file_content.size(),
@@ -70,6 +77,30 @@ class AppImageTest : public testing::Test
     void rm_file(std::string path)
     {
         g_remove(path.c_str());
+    }
+
+    bool areIntegrationFilesDeployed(const std::string path)
+    {
+        gchar *sum = get_md5(path.c_str());
+
+        GDir *dir;
+        GError *error;
+        const gchar *filename;
+
+        char *apps_path = g_strconcat(g_get_user_data_dir(), "/applications/", NULL);
+
+        bool found = false;
+        dir = g_dir_open(apps_path, 0, &error);
+        while ((filename = g_dir_read_name(dir)))
+        {
+            gchar *m = g_strrstr(filename, sum);
+
+            if (m != NULL)
+                found = true;
+        }
+        g_free(apps_path);
+
+        return found;
     }
 };
 
@@ -81,29 +112,79 @@ TEST_F(AppImageTest, check_appimage_type_invalid)
 
 TEST_F(AppImageTest, check_appimage_type_1)
 {
-    std::string file = std::string(TEST_DATA_DIR) + "/AppImageExtract_6-x86_64.AppImage";
-    int t = check_appimage_type(file.c_str(), 0);
+    int t = check_appimage_type(appImage_type_1_file_path.c_str(), 0);
     ASSERT_EQ(1, t);
 }
 
 TEST_F(AppImageTest, check_appimage_type_2)
 {
-    std::string file = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
-    int t = check_appimage_type(file.c_str(), 0);
+    int t = check_appimage_type(appImage_type_2_file_path.c_str(), 0);
     ASSERT_EQ(2, t);
+}
+
+TEST_F(AppImageTest, appimage_register_in_system_with_type1)
+{
+    int r = appimage_register_in_system(appImage_type_1_file_path.c_str(), true);
+    ASSERT_EQ(0, r);
+
+    ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
+    
+    appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
+}
+
+TEST_F(AppImageTest, appimage_register_in_system_with_type2)
+{
+    int r = appimage_register_in_system(appImage_type_2_file_path.c_str(), true);
+    ASSERT_EQ(0, r);
+
+    ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
+
+    appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
+}
+
+TEST_F(AppImageTest, appimage_type1_register_in_system)
+{
+    bool r = appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false);
+    ASSERT_EQ(true, r);
+
+    ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
+
+    appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
+}
+
+TEST_F(AppImageTest, appimage_type2_register_in_system)
+{
+    bool r = appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false);
+    ASSERT_EQ(true, r);
+
+    ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
+    appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
+}
+
+TEST_F(AppImageTest, appimage_unregister_in_system) {
+    ASSERT_FALSE(areIntegrationFilesDeployed(appImage_type_1_file_path));
+    ASSERT_FALSE(areIntegrationFilesDeployed(appImage_type_2_file_path));
 }
 
 TEST_F(AppImageTest, get_md5)
 {
-    // // generated using md5sum
-    // std::string expected = "f0ef7081e1539ac00ef5b761b4fb01b3";
-    
-    // gchar * sum = get_md5(test_file_content.c_str());
-    
-    // std::cout << sum;
-    // int res = g_strcmp0(expected.c_str(), sum);
-    // ASSERT_TRUE(res == 0);
+    std::string expected = "128e476a7794288cad0eb2542f7c995b";
+    gchar * sum = get_md5("/tmp/testfile");
+
+    std::cout << sum;
+    int res = g_strcmp0(expected.c_str(), sum);
+    ASSERT_TRUE(res == 0);
 }
+
+TEST_F(AppImageTest, get_md5_invalid_file_path)
+{
+    std::string expected = "";
+    gchar * sum = get_md5("");
+
+    int res = g_strcmp0(expected.c_str(), sum);
+    ASSERT_TRUE(res == 0);
+}
+
 
 } // namespace
 
