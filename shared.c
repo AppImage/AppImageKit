@@ -101,14 +101,19 @@ gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
 char * get_md5(char *path)
 {
     gchar *uri = g_filename_to_uri (path, NULL, NULL);
-    GChecksum *checksum;
-    checksum = g_checksum_new(G_CHECKSUM_MD5);
-    guint8 digest[16];
-    gsize digest_len = sizeof (digest);
-    g_checksum_update(checksum, (const guchar *) uri, strlen (uri));
-    g_checksum_get_digest(checksum, digest, &digest_len);
-    g_assert(digest_len == 16);
-    return g_strdup_printf("%s", g_checksum_get_string(checksum));
+    if (uri != NULL)
+    {
+        GChecksum *checksum;
+        checksum = g_checksum_new(G_CHECKSUM_MD5);
+        guint8 digest[16];
+        gsize digest_len = sizeof (digest);
+        g_checksum_update(checksum, (const guchar *) uri, strlen (uri));
+        g_checksum_get_digest(checksum, digest, &digest_len);
+        g_assert(digest_len == 16);
+        return g_strdup_printf("%s", g_checksum_get_string(checksum));
+    } else {
+        return "";
+    }
 }
 
 /* Return the path of the thumbnail regardless whether it already exists; may be useful because
