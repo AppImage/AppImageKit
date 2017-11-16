@@ -28,9 +28,10 @@ script:
       ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-x86_64.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&
       ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimaged-x86_64.AppImage.zsync\" appimaged-$ARCH.AppImage"
-  - sudo apt-get install equivs
+  - sudo apt-get install equivs xxd
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
+  - xxd out/runtime | head -n 1
   - mv out/runtime out/runtime-$ARCH
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
   - if [ "$ARCH" == "x86_64" ] ; then sudo mv out/AppRun out/AppRun-x86_64; fi
