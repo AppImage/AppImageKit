@@ -28,7 +28,7 @@ script:
       ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-x86_64.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&
       ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimaged-x86_64.AppImage.zsync\" appimaged-$ARCH.AppImage"
-  - sudo apt-get install equivs xxd
+  - sudo apt-get install equivs vim-common # vim-common contains xxd
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
   - xxd out/runtime | head -n 1
