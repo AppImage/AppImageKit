@@ -26,6 +26,10 @@
 
 #ident "AppImage by Simon Peter, http://appimage.org/"
 
+#ifndef RELEASE_NAME
+    #define RELEASE_NAME "continuous build"
+#endif
+
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <stdlib.h>
@@ -71,7 +75,7 @@ static char _exclude_file_desc[256];
 
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
-static gboolean version = FALSE;
+static gboolean showVersionOnly = FALSE;
 static gboolean sign = FALSE;
 static gboolean no_appstream = FALSE;
 gchar **remaining_args = NULL;
@@ -407,7 +411,7 @@ static GOptionEntry entries[] =
     { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI environment variables", NULL },
     { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
-    { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
+    { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
@@ -474,10 +478,14 @@ main (int argc, char *argv[])
         exit(1);
     }
 
-    if(version){
-        fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
+    fprintf(
+        stderr,"appimagetool, %s (commit %s), build %s built on %s\n",
+        RELEASE_NAME, GIT_COMMIT, BUILD_NUMBER, BUILD_DATE
+    );
+
+    // always show version, but exit immediately if only the version number was requested
+    if (showVersionOnly)
         exit(0);
-    }
 
     if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
         die("Only gzip (faster execution, larger files) and xz (slower execution, smaller files) compression is supported at the moment. Let us know if there are reasons for more, should be easy to add. You could help the project by doing some systematic size/performance measurements. Watch for size, execution speed, and zsync delta size.");
