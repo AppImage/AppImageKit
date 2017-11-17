@@ -10,6 +10,8 @@
 set -e
 # set -x
 
+xhost + # Workaround for: QXcbConnection: Could not connect to display :0
+
 HERE=$(dirname $(readlink -f "${0}"))
 export PATH=$HERE:$HERE/usr/bin:$PATH
 
