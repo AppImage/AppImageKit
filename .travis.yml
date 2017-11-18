@@ -31,8 +31,8 @@ script:
   - sudo apt-get install equivs vim-common # vim-common contains xxd
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
-  - xxd out/runtime | head -n 1
-  - mv out/runtime out/runtime-$ARCH
+  - xxd out/runtime_with_magic | head -n 1
+  - mv out/runtime_with_magic out/runtime-$ARCH
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
   - if [ "$ARCH" == "x86_64" ] ; then sudo mv out/AppRun out/AppRun-x86_64; fi
   - if [ "$ARCH" == "i686" ] ; then sudo mv out/AppRun out/AppRun-i686; fi
