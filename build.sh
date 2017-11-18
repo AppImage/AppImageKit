@@ -230,6 +230,7 @@ dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH
 ld -r -b binary -o data.o runtime
 
 xxd runtime | head -n 1
+mv runtime runtime_with_magic
 
 # Compile appimagetool but do not link - glib version
 
