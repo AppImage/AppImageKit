@@ -330,7 +330,7 @@ popd
 # Strip and check size and dependencies
 
 rm build/*.o build/1024_blank_bytes
-$STRIP build/* 2>/dev/null
+$STRIP build/AppRun build/appimaged build/appimagetool build/digest build/mksquashfs build/validate 2>/dev/null # Do NOT strip build/runtime_with_magic
 chmod a+x build/*
 ls -lh build/*
 for FILE in $(ls build/*) ; do
