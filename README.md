@@ -74,8 +74,8 @@ If you invoke an AppImage built with a recent version of AppImageKit with one of
 
 Normally the application contained inside an AppImage will store its configuration files whereever it normally stores them (most frequently somewhere inside `$HOME`). If you invoke an AppImage built with a recent version of AppImageKit and have one of these special directories in place, then the configuration files will be stored alongside the AppImage. This can be useful for portable use cases, e.g., carrying an AppImage on a USB stick, along with its data.
 
-- If there is a directory with the same name as the AppImage plus `.home`, then export `$HOME`.
-- If there is a directory with the same name as the AppImage plus `.config`, then export `$XDG_CONFIG_HOME`.
+- If there is a directory with the same name as the AppImage plus `.home`, then `$HOME` will automatically be set to it before executing the payload application
+- If there is a directory with the same name as the AppImage plus `.config`, then `$XDG_CONFIG_HOME` will automatically be set to it before executing the payload application
 
 ## appimaged usage
 
