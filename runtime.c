@@ -212,7 +212,7 @@ print_help()
            "--appimage-extract              Extract content from embedded filesystem image\n"
            "--appimage-help                 Print this help\n"
            "--appimage-mount                Mount embedded filesystem image and\n"
-           "                                print mount point, then wait for kill with Ctrl-C\n"
+           "                                print mount point and wait for kill with Ctrl-C\n"
            "--appimage-offset               Print byte offset to start of\n"
            "                                embedded filesystem image\n"
            "--appimage-signature            Print digital signature embedded in AppImage\n"
