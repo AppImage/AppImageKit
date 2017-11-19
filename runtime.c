@@ -207,15 +207,15 @@ mkdir_p(const char *path)
 void
 print_help()
 {
-    printf("AppImage Options:\n\n"
+// TODO:   "--appimage-list                 List content from embedded filesystem image\n"
+    printf("AppImage options:\n\n"
+           "--appimage-extract              Extract content from embedded filesystem image\n"
            "--appimage-help                 Print this help\n"
-           "--appimage-version              Print version of AppImageKit\n"
-           "--appimage-offset               Print byte offset of start of embedded filesystem image\n"
-           "--appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
-           "--appimage-signature            Print digital signature embedded in AppImage\n"
-           "--appimage-list                 List content from embedded filesystem image   [Not yet implemented]\n"
-           "--appimage-extract              Extract content from embedded filesystem image into sub-dir\n"
            "--appimage-mount                Mount embedded filesystem image, print mount point, then wait for kill ['^C']\n"
+           "--appimage-offset               Print byte offset of start of embedded filesystem image\n"
+           "--appimage-signature            Print digital signature embedded in AppImage\n"
+           "--appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
+           "--appimage-version              Print version of AppImageKit\n"
            );
 }
 
