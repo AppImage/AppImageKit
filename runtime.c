@@ -208,13 +208,14 @@ void
 print_help()
 {
     printf("AppImage Options:\n\n"
-           "--appimage-help                 Prints this help\n"
-           "--appimage-offset               Prints the offset at which the embedded filesystem image starts, and then exits\n"
-           "--appimage-extract              Extracts the contents from the embedded filesystem image, then exit\n"
-           "--appimage-mount                Mounts the embedded filesystem image and prints the mount point, then waits until it is killed\n"
-           "--appimage-version              Prints the version of AppImageKit, then exits\n"
-           "--appimage-updateinformation    Prints the update information embedded into the AppImage, then exits\n"
-           "--appimage-signature            Prints the digital signature embedded into the AppImage, then exits\n"
+           "--appimage-help                 Print this help\n"
+           "--appimage-version              Print version of AppImageKit\n"
+           "--appimage-offset               Print byte offset of start of embedded filesystem image\n"
+           "--appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
+           "--appimage-signature            Print digital signature embedded in AppImage\n"
+           "--appimage-list                 List content from embedded filesystem image   [Not yet implemented]\n"
+           "--appimage-extract              Extract content from embedded filesystem image into sub-dir\n"
+           "--appimage-mount                Mount embedded filesystem image, print mount point, then wait for kill ['^C']\n"
            );
 }
 
@@ -360,7 +361,7 @@ main (int argc, char *argv[])
         exit(0);
     }
     
-    if(arg && strcmp(arg,"appimage-updateinformation")==0) {
+    if(arg && (strcmp(arg,"appimage-updateinformation")==0 || strcmp(arg,"appimage-updateinfo")==0)) {
         unsigned long offset = 0;
         unsigned long length = 0;
         get_elf_section_offset_and_lenghth(appimage_path, ".upd_info", &offset, &length);
