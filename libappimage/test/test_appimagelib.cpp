@@ -60,12 +60,12 @@ class AppImageTest : public testing::Test
         rmdir(tests_dir);
     }
 
-    std::string build_test_file_path(std::string name)
+    std::string build_test_file_path(const std::string& name)
     {
         return tests_dir + name;
     }
 
-    void mk_file(std::string path)
+    void mk_file(const std::string& path)
     {
 
         g_file_set_contents(path.c_str(),
@@ -74,12 +74,12 @@ class AppImageTest : public testing::Test
                             0);
     }
 
-    void rm_file(std::string path)
+    void rm_file(const std::string& path)
     {
         g_remove(path.c_str());
     }
 
-    bool areIntegrationFilesDeployed(const std::string path)
+    bool areIntegrationFilesDeployed(const std::string& path)
     {
         gchar *sum = get_md5(path.c_str());
 
