@@ -393,7 +393,7 @@ main (int argc, char *argv[])
     }
 
     if (arg && strcmp(arg,"appimage-portable-home")==0) {
-        char portable_home[2048];
+        char portable_home[PATH_MAX];
         int mkdir_ret;
 
         sprintf(portable_home, "%s.home", appimage_path);
@@ -415,7 +415,7 @@ main (int argc, char *argv[])
     }
 
     if (arg && strcmp(arg,"appimage-portable-config")==0) {
-        char portable_config[2048];
+        char portable_config[PATH_MAX];
         int mkdir_ret;
 
         sprintf(portable_config, "%s.config", appimage_path);
@@ -561,8 +561,8 @@ main (int argc, char *argv[])
 	setenv( "ARGV0", argv0_path, 1 );
         setenv( "APPDIR", mount_dir, 1 );
 
-        char portable_home_dir[2048];
-        char portable_config_dir[2048];
+        char portable_home_dir[PATH_MAX];
+        char portable_config_dir[PATH_MAX];
         
         /* If there is a directory with the same name as the AppImage plus ".home", then export $HOME */
         strcpy (portable_home_dir, fullpath);
