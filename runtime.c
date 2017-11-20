@@ -222,7 +222,7 @@ print_help()
            "  --appimage-version              Print version of AppImageKit\n\n"
            "Portable options:\n\n"
            "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
-           "  use the --appimage-portable options or create the following folders manually:\n\n"
+           "  use the --appimage-portable options or create the following directories manually:\n\n"
            "    My.AppImage.home will be used as $HOME\n"
            "    My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
            );
@@ -398,12 +398,18 @@ main (int argc, char *argv[])
 
         sprintf(portable_home, "%s.home", appimage_path);
         mkdir_ret = mkdir(portable_home, S_IRWXU);
-        if (mkdir_ret == 0)
-            printf("Portable home folder created at %s\n", portable_home);
-        else if (mkdir_ret == EEXIST)
-            printf("Portable home folder %s already exists\n", portable_home);
-        else
-            printf("Error creating portable home folder at %s: %s\n", portable_home, strerror(errno));
+
+        switch (mkdir_ret) {
+            case 0:
+                printf("Portable home directory created at %s\n", portable_home);
+                break;
+            case EEXIST:
+                printf("Portable home directory %s already exists\n", portable_home);
+                break;
+            default:
+                printf("Error creating portable home directory at %s: %s\n", portable_home, strerror(errno));
+                break;
+        }
 
         exit(0);
     }
@@ -414,12 +420,18 @@ main (int argc, char *argv[])
 
         sprintf(portable_config, "%s.config", appimage_path);
         mkdir_ret = mkdir(portable_config, S_IRWXU);
-        if (mkdir_ret == 0)
-            printf("Portable config folder created at %s\n", portable_config);
-        else if (mkdir_ret == EEXIST)
-            printf("Portable config folder %s already exists\n", portable_config);
-        else
-            printf("Error creating portable config folder at %s: %s\n", portable_config, strerror(errno));
+
+        switch (mkdir_ret) {
+            case 0:
+                printf("Portable config directory created at %s\n", portable_config);
+                break;
+            case EEXIST:
+                printf("Portable config directory %s already exists\n", portable_config);
+                break;
+            default:
+                printf("Error creating portable config directory at %s: %s\n", portable_config, strerror(errno));
+                break;
+        }
 
         exit(0);
     }
