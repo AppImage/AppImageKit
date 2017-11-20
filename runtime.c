@@ -220,11 +220,13 @@ print_help()
            "  --appimage-signature            Print digital signature embedded in AppImage\n"
            "  --appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
            "  --appimage-version              Print version of AppImageKit\n\n"
+           ""
            "Portable options:\n\n"
            "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
            "  use the --appimage-portable options or create the following directories manually:\n\n"
-           "    My.AppImage.home will be used as $HOME\n"
-           "    My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
+           ""
+           "  My.AppImage.home will be used as $HOME\n"
+           "  My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
            );
 }
 
@@ -394,12 +396,9 @@ main (int argc, char *argv[])
 
     if (arg && strcmp(arg,"appimage-portable-home")==0) {
         char portable_home[PATH_MAX];
-        int mkdir_ret;
 
         sprintf(portable_home, "%s.home", appimage_path);
-        mkdir_ret = mkdir(portable_home, S_IRWXU);
-
-        switch (mkdir_ret) {
+        switch (mkdir(portable_home, S_IRWXU)) {
             case 0:
                 printf("Portable home directory created at %s\n", portable_home);
                 break;
@@ -410,18 +409,14 @@ main (int argc, char *argv[])
                 printf("Error creating portable home directory at %s: %s\n", portable_home, strerror(errno));
                 break;
         }
-
         exit(0);
     }
 
     if (arg && strcmp(arg,"appimage-portable-config")==0) {
         char portable_config[PATH_MAX];
-        int mkdir_ret;
 
         sprintf(portable_config, "%s.config", appimage_path);
-        mkdir_ret = mkdir(portable_config, S_IRWXU);
-
-        switch (mkdir_ret) {
+        switch (mkdir(portable_config, S_IRWXU)) {
             case 0:
                 printf("Portable config directory created at %s\n", portable_config);
                 break;
@@ -432,7 +427,6 @@ main (int argc, char *argv[])
                 printf("Error creating portable config directory at %s: %s\n", portable_config, strerror(errno));
                 break;
         }
-
         exit(0);
     }
 
