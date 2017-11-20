@@ -209,15 +209,22 @@ print_help()
 {
 // TODO:   "--appimage-list                 List content from embedded filesystem image\n"
     printf("AppImage options:\n\n"
-           "--appimage-extract              Extract content from embedded filesystem image\n"
-           "--appimage-help                 Print this help\n"
-           "--appimage-mount                Mount embedded filesystem image and\n"
-           "                                print mount point and wait for kill with Ctrl-C\n"
-           "--appimage-offset               Print byte offset to start of\n"
-           "                                embedded filesystem image\n"
-           "--appimage-signature            Print digital signature embedded in AppImage\n"
-           "--appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
-           "--appimage-version              Print version of AppImageKit\n"
+           "  --appimage-extract              Extract content from embedded filesystem image\n"
+           "  --appimage-help                 Print this help\n"
+           "  --appimage-mount                Mount embedded filesystem image and\n"
+           "                                  print mount point and wait for kill with Ctrl-C\n"
+           "  --appimage-offset               Print byte offset to start of\n"
+           "                                  embedded filesystem image\n"
+           "  --appimage-portable-home        Create a portable home folder to use as $HOME\n"
+           "  --appimage-portable-config      Create a portable config folder to use as $XDG_CONFIG_HOME\n"
+           "  --appimage-signature            Print digital signature embedded in AppImage\n"
+           "  --appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
+           "  --appimage-version              Print version of AppImageKit\n\n"
+           "Portable options:\n\n"
+           "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
+           "  use the --appimage-portable options or create the following folders manually:\n\n"
+           "    My.AppImage.home will be used as $HOME\n"
+           "    My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
            );
 }
 
@@ -382,6 +389,38 @@ main (int argc, char *argv[])
         // printf("length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
         print_binary(appimage_path, offset, length);
+        exit(0);
+    }
+
+    if (arg && strcmp(arg,"appimage-portable-home")==0) {
+        char portable_home[2048];
+        int mkdir_ret;
+
+        sprintf(portable_home, "%s.home", appimage_path);
+        mkdir_ret = mkdir(portable_home, S_IRWXU);
+        if (mkdir_ret == 0)
+            printf("Portable home folder created at %s\n", portable_home);
+        else if (mkdir_ret == EEXIST)
+            printf("Portable home folder %s already exists\n", portable_home);
+        else
+            printf("Error creating portable home folder at %s: %s\n", portable_home, strerror(errno));
+
+        exit(0);
+    }
+
+    if (arg && strcmp(arg,"appimage-portable-config")==0) {
+        char portable_config[2048];
+        int mkdir_ret;
+
+        sprintf(portable_config, "%s.config", appimage_path);
+        mkdir_ret = mkdir(portable_config, S_IRWXU);
+        if (mkdir_ret == 0)
+            printf("Portable config folder created at %s\n", portable_config);
+        else if (mkdir_ret == EEXIST)
+            printf("Portable config folder %s already exists\n", portable_config);
+        else
+            printf("Error creating portable config folder at %s: %s\n", portable_config, strerror(errno));
+
         exit(0);
     }
 
