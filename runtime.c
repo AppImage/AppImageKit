@@ -208,26 +208,28 @@ void
 print_help()
 {
 // TODO:   "--appimage-list                 List content from embedded filesystem image\n"
-    printf("AppImage options:\n\n"
-           "  --appimage-extract              Extract content from embedded filesystem image\n"
-           "  --appimage-help                 Print this help\n"
-           "  --appimage-mount                Mount embedded filesystem image and\n"
-           "                                  print mount point and wait for kill with Ctrl-C\n"
-           "  --appimage-offset               Print byte offset to start of\n"
-           "                                  embedded filesystem image\n"
-           "  --appimage-portable-home        Create a portable home folder to use as $HOME\n"
-           "  --appimage-portable-config      Create a portable config folder to use as $XDG_CONFIG_HOME\n"
-           "  --appimage-signature            Print digital signature embedded in AppImage\n"
-           "  --appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
-           "  --appimage-version              Print version of AppImageKit\n\n"
-           ""
-           "Portable options:\n\n"
-           "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
-           "  use the --appimage-portable options or create the following directories manually:\n"
-           "\n"
-           "  My.AppImage.home will be used as $HOME\n"
-           "  My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
-           );
+    printf(
+        "AppImage options:\n\n"
+        "  --appimage-extract              Extract content from embedded filesystem image\n"
+        "  --appimage-help                 Print this help\n"
+        "  --appimage-mount                Mount embedded filesystem image and\n"
+        "                                  print mount point and wait for kill with Ctrl-C\n"
+        "  --appimage-offset               Print byte offset to start of\n"
+        "                                  embedded filesystem image\n"
+        "  --appimage-portable-home        Create a portable home folder to use as $HOME\n"
+        "  --appimage-portable-config      Create a portable config folder to use as $XDG_CONFIG_HOME\n"
+        "  --appimage-signature            Print digital signature embedded in AppImage\n"
+        "  --appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
+        "  --appimage-version              Print version of AppImageKit\n"
+        "\n"
+        "Portable options:\n"
+	"\n"
+        "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
+        "  use the --appimage-portable options or create the following directories manually:\n"
+        "\n"
+        "  My.AppImage.home will be used as $HOME\n"
+        "  My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
+    );
 }
 
 int
