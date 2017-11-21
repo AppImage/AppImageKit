@@ -205,7 +205,7 @@ mkdir_p(const char *path)
 }
 
 void
-print_help()
+print_help(const char *appimage_name)
 {
     // TODO: "--appimage-list                 List content from embedded filesystem image\n"
     printf(
@@ -225,16 +225,14 @@ print_help()
         "\n"
         "Portable options:\n"
         "\n"
-        "There is support to have a portable $HOME and $XDG_CONFIG_HOME for a specific\n"
-        "AppImage. To do so, you can either create a directory as follows:\n"
-        "\n"
-        "  My.AppImage.home will be used as $HOME\n"
-        "  My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
-        "\n"
-        "Or you can use --appimage-portable-home to create a portable $HOME directory\n"
-        "or --appimage-portable-config for a portable $XDG_CONFIG_HOME. These options\n"
-        "cannot be used at the same time"
-    );
+        "If you would like the application contained inside this AppImage to store its\n"
+        "data alongside this AppImage rather than in your home directory, then you can\n"
+        "place a directory named \"%s.home\". Or invoke this AppImage with the\n"
+        "--appimage-portable-home option, which will create this directory for you.\n"
+        "As long as the directory exists and is neither moved nor renamed, the\n"
+        "application contained inside this AppImage to store its data in this directory\n"
+        "rather than in your home directory\n"
+    , appimage_name);
 }
 
 void
@@ -252,10 +250,9 @@ portable_option(const char *arg, const char *appimage_path, const char *name)
             printf("Error getting realpath for %s\n", appimage_path);
             exit(EXIT_FAILURE);
         }
-
         fullpath[length] = '\0';
-        sprintf(portable_dir, "%s.%s", fullpath, name);
 
+        sprintf(portable_dir, "%s.%s", fullpath, name);
         if (!mkdir(portable_dir, S_IRWXU))
             printf("Portable %s directory created at %s\n", name, portable_dir);
         else
@@ -293,7 +290,16 @@ main (int argc, char *argv[])
 
     /* Print the help and then exit */
     if(arg && strcmp(arg,"appimage-help")==0) {
-        print_help();
+        char fullpath[PATH_MAX];
+
+        ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
+        if (length < 0) {
+            printf("Error getting realpath for %s\n", appimage_path);
+            exit(EXIT_FAILURE);
+        }
+        fullpath[length] = '\0';
+
+        print_help(basename(fullpath));
         exit(0);
     }
 
