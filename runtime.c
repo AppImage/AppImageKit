@@ -223,8 +223,8 @@ print_help()
            ""
            "Portable options:\n\n"
            "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
-           "  use the --appimage-portable options or create the following directories manually:\n\n"
-           ""
+           "  use the --appimage-portable options or create the following directories manually:\n"
+           "\n"
            "  My.AppImage.home will be used as $HOME\n"
            "  My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
            );
