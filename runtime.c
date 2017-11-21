@@ -247,7 +247,13 @@ portable_option(const char *arg, const char *appimage_path, const char *name)
         char portable_dir[PATH_MAX];
         char fullpath[PATH_MAX];
 
-        readlink(appimage_path, fullpath, sizeof(fullpath));
+        ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
+        if (length < 0) {
+            printf("Error getting realpath for %s\n", appimage_path);
+            exit(EXIT_FAILURE);
+        }
+
+        fullpath[length] = '\0';
         sprintf(portable_dir, "%s.%s", fullpath, name);
 
         if (!mkdir(portable_dir, S_IRWXU))
