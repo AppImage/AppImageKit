@@ -207,7 +207,7 @@ mkdir_p(const char *path)
 void
 print_help()
 {
-// TODO:   "--appimage-list                 List content from embedded filesystem image\n"
+    // TODO: "--appimage-list                 List content from embedded filesystem image\n"
     printf(
         "AppImage options:\n\n"
         "  --appimage-extract              Extract content from embedded filesystem image\n"
@@ -223,7 +223,7 @@ print_help()
         "  --appimage-version              Print version of AppImageKit\n"
         "\n"
         "Portable options:\n"
-	"\n"
+        "\n"
         "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
         "  use the --appimage-portable options or create the following directories manually:\n"
         "\n"
