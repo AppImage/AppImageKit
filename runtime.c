@@ -205,7 +205,7 @@ mkdir_p(const char *path)
 }
 
 void
-print_help(const char *appimage_name)
+print_help(const char *appimage_path)
 {
     // TODO: "--appimage-list                 List content from embedded filesystem image\n"
     printf(
@@ -225,15 +225,16 @@ print_help(const char *appimage_name)
         "\n"
         "Portable home:\n"
         "\n"
-        "If you would like the application contained inside this AppImage to store its\n"
-        "data alongside this AppImage rather than in your home directory, then you can\n"
-        "create a directory named \n\n%s.home\n\n"
-        "Alternatively, you can invoke this AppImage with the\n"
-        "--appimage-portable-home option, which will create this directory for you.\n"
-        "As long as the directory exists and is neither moved nor renamed, the\n"
-        "application contained inside this AppImage to store its data in this directory\n"
-        "rather than in your home directory\n"
-    , appimage_name);
+        "  If you would like the application contained inside this AppImage to store its\n"
+        "  data alongside this AppImage rather than in your home directory, then you can\n"
+        "  place a directory named\n"
+        "  \"%s.home\".\n"
+        "  Or you can invoke this AppImage with the --appimage-portable-home option,\n"
+        "  which will create this directory for you. As long as the directory exists\n"
+        "  and is neither moved nor renamed, the application contained inside this\n"
+        "  AppImage to store its data in this directory rather than in your home\n"
+        "  directory\n"
+    , appimage_path);
 }
 
 void
@@ -300,7 +301,7 @@ main (int argc, char *argv[])
         }
         fullpath[length] = '\0';
 
-        print_help(basename(fullpath));
+        print_help(fullpath);
         exit(0);
     }
 
