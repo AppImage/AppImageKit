@@ -1,25 +1,10 @@
-#include "../libappimage.h"
+#include <appimage/deployment.h>
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <glib.h>
+#include <string>
+
 #include <glib/gstdio.h>
-#include <glib/gprintf.h>
-#include <stdio.h>
-#include <gnu/libc-version.h>
-
-#include <unistd.h>
 
 #include <gtest/gtest.h>
-
-#include <squashfuse.h>
-#include <squashfs_fs.h>
-
-#include <cstdio>
-#include <string>
-#include <cstring>
-#include <cstdlib>
-#include <iostream>
 
 namespace AppImageTests
 {
@@ -28,13 +13,14 @@ class AppImageTest : public testing::Test
 {
   protected:
     char tests_dir[250];
-    bool tests_dir_created = false;
+    bool tests_dir_created;
     std::string test_file_content;
     std::string appImage_type_1_file_path;
     std::string appImage_type_2_file_path;
 
     virtual void SetUp()
     {
+        tests_dir_created = false;
         test_file_content = "Hello World\n";
         createTestsDir();
 
