@@ -204,6 +204,21 @@ mkdir_p(const char *path)
     return 0;
 }
 
+void
+print_help()
+{
+// TODO:   "--appimage-list                 List content from embedded filesystem image\n"
+    printf("AppImage options:\n\n"
+           "--appimage-extract              Extract content from embedded filesystem image\n"
+           "--appimage-help                 Print this help\n"
+           "--appimage-mount                Mount embedded filesystem image, print mount point, then wait for kill ['^C']\n"
+           "--appimage-offset               Print byte offset of start of embedded filesystem image\n"
+           "--appimage-signature            Print digital signature embedded in AppImage\n"
+           "--appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
+           "--appimage-version              Print version of AppImageKit\n"
+           );
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -228,8 +243,15 @@ main (int argc, char *argv[])
 
     fs_offset = get_elf_size(appimage_path);
     
-    /* Just print the offset and then exit */
     arg=getArg(argc,argv,'-');
+
+    /* Print the help and then exit */
+    if(arg && strcmp(arg,"appimage-help")==0) {
+        print_help();
+        exit(0);
+    }
+
+    /* Just print the offset and then exit */
     if(arg && strcmp(arg,"appimage-offset")==0) {
         printf("%lu\n", fs_offset);
         exit(0);
@@ -339,7 +361,7 @@ main (int argc, char *argv[])
         exit(0);
     }
     
-    if(arg && strcmp(arg,"appimage-updateinformation")==0) {
+    if(arg && (strcmp(arg,"appimage-updateinformation")==0 || strcmp(arg,"appimage-updateinfo")==0)) {
         unsigned long offset = 0;
         unsigned long length = 0;
         get_elf_section_offset_and_lenghth(appimage_path, ".upd_info", &offset, &length);

@@ -28,10 +28,11 @@ script:
       ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-x86_64.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&
       ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimaged-x86_64.AppImage.zsync\" appimaged-$ARCH.AppImage"
-  - sudo apt-get install equivs
+  - sudo apt-get install equivs vim-common # vim-common contains xxd
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
-  - mv out/runtime out/runtime-$ARCH
+  - xxd out/runtime_with_magic | head -n 1
+  - mv out/runtime_with_magic out/runtime-$ARCH
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
   - if [ "$ARCH" == "x86_64" ] ; then sudo mv out/AppRun out/AppRun-x86_64; fi
   - if [ "$ARCH" == "i686" ] ; then sudo mv out/AppRun out/AppRun-i686; fi
