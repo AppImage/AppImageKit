@@ -205,31 +205,65 @@ mkdir_p(const char *path)
 }
 
 void
-print_help()
+print_help(const char *appimage_path)
 {
     // TODO: "--appimage-list                 List content from embedded filesystem image\n"
     printf(
         "AppImage options:\n\n"
         "  --appimage-extract              Extract content from embedded filesystem image\n"
         "  --appimage-help                 Print this help\n"
-        "  --appimage-mount                Mount embedded filesystem image and\n"
-        "                                  print mount point and wait for kill with Ctrl-C\n"
-        "  --appimage-offset               Print byte offset to start of\n"
-        "                                  embedded filesystem image\n"
+        "  --appimage-mount                Mount embedded filesystem image and print\n"
+        "                                  mount point and wait for kill with Ctrl-C\n"
+        "  --appimage-offset               Print byte offset to start of embedded\n"
+        "                                  filesystem image\n"
         "  --appimage-portable-home        Create a portable home folder to use as $HOME\n"
-        "  --appimage-portable-config      Create a portable config folder to use as $XDG_CONFIG_HOME\n"
+        "  --appimage-portable-config      Create a portable config folder to use as\n"
+        "                                  $XDG_CONFIG_HOME\n"
         "  --appimage-signature            Print digital signature embedded in AppImage\n"
         "  --appimage-updateinfo[rmation]  Print update info embedded in AppImage\n"
         "  --appimage-version              Print version of AppImageKit\n"
         "\n"
-        "Portable options:\n"
+        "Portable home:\n"
         "\n"
-        "  If you want the AppImage to use a portable $HOME or $XDG_CONFIG_HOME, you can\n"
-        "  use the --appimage-portable options or create the following directories manually:\n"
+        "  If you would like the application contained inside this AppImage to store its\n"
+        "  data alongside this AppImage rather than in your home directory, then you can\n"
+        "  place a directory named\n"
         "\n"
-        "  My.AppImage.home will be used as $HOME\n"
-        "  My.AppImage.config will be used as $XDG_CONFIG_HOME\n"
-    );
+        "  %s.home\n"
+        "\n"
+        "  Or you can invoke this AppImage with the --appimage-portable-home option,\n"
+        "  which will create this directory for you. As long as the directory exists\n"
+        "  and is neither moved nor renamed, the application contained inside this\n"
+        "  AppImage to store its data in this directory rather than in your home\n"
+        "  directory\n"
+    , appimage_path);
+}
+
+void
+portable_option(const char *arg, const char *appimage_path, const char *name)
+{
+    char option[32];
+    sprintf(option, "appimage-portable-%s", name);
+
+    if (arg && strcmp(arg, option)==0) {
+        char portable_dir[PATH_MAX];
+        char fullpath[PATH_MAX];
+
+        ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
+        if (length < 0) {
+            printf("Error getting realpath for %s\n", appimage_path);
+            exit(EXIT_FAILURE);
+        }
+        fullpath[length] = '\0';
+
+        sprintf(portable_dir, "%s.%s", fullpath, name);
+        if (!mkdir(portable_dir, S_IRWXU))
+            printf("Portable %s directory created at %s\n", name, portable_dir);
+        else
+            printf("Error creating portable %s directory at %s: %s\n", name, portable_dir, strerror(errno));
+
+        exit(0);
+    }
 }
 
 int
@@ -260,7 +294,16 @@ main (int argc, char *argv[])
 
     /* Print the help and then exit */
     if(arg && strcmp(arg,"appimage-help")==0) {
-        print_help();
+        char fullpath[PATH_MAX];
+
+        ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
+        if (length < 0) {
+            printf("Error getting realpath for %s\n", appimage_path);
+            exit(EXIT_FAILURE);
+        }
+        fullpath[length] = '\0';
+
+        print_help(fullpath);
         exit(0);
     }
 
@@ -396,41 +439,8 @@ main (int argc, char *argv[])
         exit(0);
     }
 
-    if (arg && strcmp(arg,"appimage-portable-home")==0) {
-        char portable_home[PATH_MAX];
-
-        sprintf(portable_home, "%s.home", appimage_path);
-        switch (mkdir(portable_home, S_IRWXU)) {
-            case 0:
-                printf("Portable home directory created at %s\n", portable_home);
-                break;
-            case EEXIST:
-                printf("Portable home directory %s already exists\n", portable_home);
-                break;
-            default:
-                printf("Error creating portable home directory at %s: %s\n", portable_home, strerror(errno));
-                break;
-        }
-        exit(0);
-    }
-
-    if (arg && strcmp(arg,"appimage-portable-config")==0) {
-        char portable_config[PATH_MAX];
-
-        sprintf(portable_config, "%s.config", appimage_path);
-        switch (mkdir(portable_config, S_IRWXU)) {
-            case 0:
-                printf("Portable config directory created at %s\n", portable_config);
-                break;
-            case EEXIST:
-                printf("Portable config directory %s already exists\n", portable_config);
-                break;
-            default:
-                printf("Error creating portable config directory at %s: %s\n", portable_config, strerror(errno));
-                break;
-        }
-        exit(0);
-    }
+    portable_option(arg, appimage_path, "home");
+    portable_option(arg, appimage_path, "config");
 
     // If there is an argument starting with appimage- (but not appimage-mount which is handled further down)
     // then stop here and print an error message
