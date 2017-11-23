@@ -7,17 +7,10 @@ include(../cmake/cmake_import_manual_targets.cmake)
 find_package(PkgConfig)
 
 pkg_check_modules(GLIB REQUIRED glib-2.0)
-include_directories(${GLIB_INCLUDE_DIRS})
-
 pkg_check_modules(GIO REQUIRED gio-2.0)
-include_directories(${GIO_INCLUDE_DIRS})
-
 pkg_check_modules(CAIRO REQUIRED cairo)
-include_directories(${CAIRO_INCLUDE_DIRS})
 
 
-include_directories("../../squashfuse/")
-include_directories("../../libarchive-3.3.1/libarchive")
 
 SET(LIBAPPIMAGE_DEPLOYMENT_SRC
     appimage.h
@@ -33,6 +26,17 @@ add_library(appimage SHARED ${LIBAPPIMAGE_DEPLOYMENT_SRC})
 set_target_properties(appimage PROPERTIES 
     VERSION ${APPIMAGE_VERSION}
     PUBLIC_HEADER "appimage.h"
+)
+
+target_include_directories(appimage PUBLIC
+    ${GLIB_INCLUDE_DIRS}
+)
+
+target_include_directories(appimage PRIVATE
+    ${GIO_INCLUDE_DIRS}
+    ${CAIRO_INCLUDE_DIRS}
+    "../../squashfuse/"
+    "../../libarchive-3.3.1/libarchive"
 )
 
 target_compile_definitions(appimage

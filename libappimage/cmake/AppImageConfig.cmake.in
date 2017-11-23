@@ -2,9 +2,6 @@
 # It defines the following variables
 #  APPIMAGE_INCLUDE_DIRS - include directories for AppImage
 #  APPIMAGE_LIBRARIES    - libraries to link against
- 
-find_package(PkgConfig)
-pkg_check_modules(GLIB REQUIRED glib-2.0)
 
 # Compute paths
 get_filename_component(APPIMAGE_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
@@ -16,5 +13,4 @@ include("${APPIMAGE_CMAKE_DIR}/AppImageTargets.cmake")
 # These are IMPORTED targets created by AppImageTargets.cmake
 set(APPIMAGE_LIBRARIES
   appimage
-  ${GLIB_LIBRARIES}
 )
