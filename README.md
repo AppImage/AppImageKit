@@ -13,6 +13,25 @@ __AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and
 
 `appimagetool` converts an AppDir into a self-mounting filesystem image. `appimaged` is a daemon that handles registering and unregistering AppImages with the system (e.g., menu entries, icons, MIME types, binary delta updates, and such).
 
+Providing an [AppImage](http://appimage.org/) for distributing application has, among others, these advantages:
+- Applications packaged as an AppImage can run on many distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
+- One app = one file = super simple for users: just download one AppImage file, [make it executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80), and run
+- No unpacking or installation necessary
+- No root needed
+- No system libraries changed
+- Works out of the box, no installation of runtimes needed
+- Optional desktop integration with `appimaged`
+- Optional binary delta updates, e.g., for continuous builds (only download the binary diff) using AppImageUpdate
+- Can optionally GPG2-sign your AppImages (inside the file)
+- Works on Live ISOs
+- Can use the same AppImages when dual-booting multiple distributions
+- Can be listed in the [AppImageHub](https://appimage.github.io/apps) central directory of available AppImages
+- Can double as a self-extracting compressed archive with the `--appimage-extract` parameter
+
+[Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
+
+If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
+
 ## Motivation
 
 Linus addresses some core issues of Linux on the desktop in his [DebConf 14_ QA with Linus Torvalds talk](https://www.youtube.com/watch?v=5PmHRSeA2c8). At 05:40 Linus highlights application packaging: 
