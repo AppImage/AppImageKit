@@ -82,18 +82,7 @@ There is a [way around this](https://blogs.gnome.org/tvb/2013/12/14/application-
 
 > So that's my rant. And that's what I really fundamentally think needs to change for Linux to work on the desktop because you can't have applications writers to do fifteen billion different versions.
 
-AppImage to the rescue. The AppImage format is a standardized format for packaging applications in a way that allows them to run on target systems without further modification. The AppImage format (which basically is an ISO that gets mounted when you run the application) has been created with specific objectives in mind, which are explained in more detail in the [AppImageKit README](https://github.com/probonopd/AppImageKit/blob/master/README.md):
-
-1. Be Simple
-2. Maintain binary compatibility 
-3. Be distribution-agnostic 
-4. Remove the need for installation
-5. Keep apps compressed all the time
-6. Allow to put apps anywhere
-7. Make applications read-only
-8. Do not require recompilation (not always desired or possible)
-9. Keep base operating system untouched
-10. Do not require root
+AppImage to the rescue!
 
 ## appimagetool usage
 
