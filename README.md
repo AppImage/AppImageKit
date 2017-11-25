@@ -211,14 +211,11 @@ If you have `AppImageUpdate` on your `$PATH`, then it can also do this neat tric
 
 ![screenshot from 2016-10-15 16-37-05](https://cloud.githubusercontent.com/assets/2480569/19410850/0390fe9c-92f6-11e6-9882-3ca6d360a190.jpg)
 
-Here is an easy way to get the latest AppImageUpdate onto your `$PATH`:
+Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases/download/continuous/ and put on your `$PATH`:
 
 ```
-APP=AppImageUpdate
-nodeFileName=$(wget -q "https://bintray.com/package/files/probono/AppImages/$APP?order=desc&sort=fileLastModified&basePath=&tab=files" -O - | grep -e '-x86_64.AppImage">' | cut -d '"' -f 6 | head -n 1)
-wget -c "https://bintray.com/$nodeFileName" -O "$APP"
-chmod a+x "$APP"
-sudo mv "$APP" /usr/local/bin/
+sudo mv "Downloads/AppImageUpdate-*.AppImage" /usr/local/bin/AppImageUpdate
+chmod a+x /usr/local/bin/AppImageUpdate
 ```
 
 ## Building
