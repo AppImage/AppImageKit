@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
     old_env = getenv("PYTHONPATH") ?: "";
     SET_NEW_ENV(new_pythonpath, appdir_s + strlen(old_env), "PYTHONPATH=%s/usr/share/pyshared/:%s", appdir, old_env);
 
-    old_env = getenv("XDG_DATA_DIRS") ?: "";
+    old_env = getenv("XDG_DATA_DIRS") ?: "/usr/local/share/:/usr/share/";
     SET_NEW_ENV(new_xdg_data_dirs, appdir_s + strlen(old_env), "XDG_DATA_DIRS=%s/usr/share/:%s", appdir, old_env);
 
     old_env = getenv("PERLLIB") ?: "";
