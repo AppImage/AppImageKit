@@ -222,7 +222,7 @@ chmod a+x /usr/local/bin/AppImageUpdate
 
 __NOTE:__ The AppImage project supplies [binaries](https://github.com/AppImage/AppImageKit/releases/tag/continuous) that application developers can use. These binaries are built using the CentOS 6 Docker on Travis CI build system in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to AppImageKit, when needing another architecture than `x86_64`, or when trying to reproduce our binaries.
 
-On a not too recent Ubuntu:
+On the oldest still-supported Ubuntu LTS release (at this point, 14.04):
 
 ```
 git clone -b appimagetool/master --single-branch --recursive https://github.com/AppImage/AppImageKit
