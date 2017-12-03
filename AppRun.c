@@ -31,6 +31,9 @@ THE SOFTWARE.
 #include <libgen.h>
 #include <dirent.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <errno.h>
 
 #define die(...)                                    \
     do {                                            \
@@ -193,10 +196,14 @@ int main(int argc, char *argv[]) {
     putenv("PYTHONDONTWRITEBYTECODE=1");
 
     /* Run */
+    int errsv, status;
     ret = execvp(exe, outargptrs);
+    errsv = errno;
 
     if (ret == -1)
-        die("Error executing '%s'; return code: %d\n", exe, ret);
+        die("Error executing '%s'; return code: %d\n%s\n", exe, errsv, strerror(errsv));
+    else if (pid > 0 && waitpid(pid, &status, 0) > 0 && WIFEXITED(status) == 1)
+        ret = WEXITSTATUS(status);
 
     free(line);
     free(desktop_file);
@@ -209,5 +216,5 @@ int main(int argc, char *argv[]) {
     free(new_perllib);
     free(new_gsettings_schema_dir);
     free(new_qt_plugin_path);
-    return 0;
+    return ret;
 }
