@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include <libgen.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 #define die(...)                                    \
     do {                                            \
@@ -194,9 +195,11 @@ int main(int argc, char *argv[]) {
 
     /* Run */
     ret = execvp(exe, outargptrs);
+    
+    int error = errno;
 
     if (ret == -1)
-        die("Error executing '%s'; return code: %d\n", exe, ret);
+        die("Error executing '%s': %s\n", exe, strerror(error));
 
     free(line);
     free(desktop_file);
