@@ -65,6 +65,7 @@ include_directories(squashfuse)
 add_custom_command(OUTPUT data.o
     COMMAND bash ${CMAKE_CURRENT_SOURCE_DIR}/build-runtime.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    MAIN_DEPENDENCY runtime.c
 )
 
 add_executable(appimagetool
