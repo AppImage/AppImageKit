@@ -4,3 +4,6 @@
 [submodule "squashfs-tools"]
 	path = squashfs-tools
 	url = https://github.com/plougher/squashfs-tools.git
+[submodule "libappimage/externals/sanitizers-cmake"]
+	path = libappimage/externals/sanitizers-cmake
+	url = git://github.com/arsenm/sanitizers-cmake.git

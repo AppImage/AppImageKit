@@ -2,6 +2,7 @@ project(AppImage)
 cmake_minimum_required(VERSION 3.5)
 
 ########## Configure Project #############
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/externals/sanitizers-cmake/cmake" ${CMAKE_MODULE_PATH})
 
 execute_process(
     COMMAND git describe --tags --always --abbrev=7

@@ -1,6 +1,8 @@
 # Locate GTest
 find_package(GTest REQUIRED)
 
+find_package(Sanitizers)
+
 find_package(PkgConfig)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
 
@@ -8,6 +10,8 @@ pkg_check_modules(GLIB REQUIRED glib-2.0)
 add_executable(test_libappimage
     test_libappimage.cpp
 )
+
+add_sanitizers(test_libappimage)
 
 target_compile_definitions(test_libappimage
     PRIVATE TEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/"

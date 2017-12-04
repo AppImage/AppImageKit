@@ -4,6 +4,7 @@
 
 include(../cmake/cmake_import_manual_targets.cmake)
 
+find_package(Sanitizers)
 find_package(PkgConfig)
 
 pkg_check_modules(GLIB REQUIRED glib-2.0)
@@ -22,6 +23,7 @@ SET(LIBAPPIMAGE_DEPLOYMENT_SRC
 )
 
 add_library(appimage SHARED ${LIBAPPIMAGE_DEPLOYMENT_SRC})
+add_sanitizers(appimage)
 
 set_target_properties(appimage PROPERTIES 
     VERSION ${APPIMAGE_VERSION}
