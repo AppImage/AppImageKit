@@ -1,83 +1,78 @@
-project(appimagelib)
+project(AppImage)
 cmake_minimum_required(VERSION 3.5)
 
-set(APPIMAGE_MAJOR_VERSION 0)
-set(APPIMAGE_MINOR_VERSION 1)
-set(APPIMAGE_PATCH_VERSION 0)
-set(APPIMAGE_VERSION
-  ${APPIMAGE_MAJOR_VERSION}.${APPIMAGE_MINOR_VERSION}.${APPIMAGE_PATCH_VERSION})
-  
-SET (STATIC_BUILD NO CACHE PATH "Link against static libs.")
-
-include(cmake/ImportedTargets.cmake)
-
-
-###
-# Looking for dependencies
-###
-find_package(PkgConfig)
+########## Configure Project #############
 
 execute_process(
     COMMAND git describe --tags --always --abbrev=7
     OUTPUT_VARIABLE VERSION_NUMBER
 )
-string(STRIP ${VERSION_NUMBER} VERSION_NUMBER)
+string(STRIP ${VERSION_NUMBER} APPIMAGE_VERSION)
 
-pkg_check_modules(GLIB REQUIRED glib-2.0)
-include_directories(${GLIB_INCLUDE_DIRS})
+# Offer the user the choice of overriding the installation directories
+set(INSTALL_LIB_DIR lib CACHE PATH "Installation directory for libraries")
+set(INSTALL_BIN_DIR bin CACHE PATH "Installation directory for executables")
+set(INSTALL_INCLUDE_DIR include CACHE PATH
+  "Installation directory for header files")
 
-pkg_check_modules(GIO REQUIRED gio-2.0)
-include_directories(${GIO_INCLUDE_DIRS})
+set(DEF_INSTALL_CMAKE_DIR lib/cmake/${PROJECT_NAME})
+set(INSTALL_CMAKE_DIR ${DEF_INSTALL_CMAKE_DIR} CACHE PATH 
+    "Installation directory for CMake files")
+  
+include(cmake/cmake_make_absolute_paths.cmake)
 
+################# SETUP TARGETS ######################
 
-pkg_check_modules(CAIRO REQUIRED cairo)
-include_directories(${CAIRO_INCLUDE_DIRS})
+add_subdirectory(src)
 
-###
-# Sources
-###
-include_directories("../squashfuse/")
-include_directories("../libarchive-3.3.1/libarchive")
+############# Configure CMake Module #################
 
-SET(LIBAPPIMAGE_SRC
-    libappimage.h
+# Add all targets to the build-tree export set
+export(TARGETS appimage
+FILE "${PROJECT_BINARY_DIR}/AppImageTargets.cmake")
 
-    ../shared.c
-    ../getsection.c
-    ../notify.c
-    ../elf.c
-)
+# Export the package for use from the build-tree
+# (this registers the build-tree with a global CMake-registry)
+export(PACKAGE AppImage)
 
-###
-# Build
-###
-add_library(appimage ${LIBAPPIMAGE_SRC})
-target_compile_definitions(appimage
-    PRIVATE _FILE_OFFSET_BITS=64
-    PRIVATE HAVE_LIBARCHIVE3=0
-    PRIVATE VERSION_NUMBER="${VERSION_NUMBER}"
-)
-set_target_properties(appimage PROPERTIES VERSION ${VERSION_NUMBER})
-set_target_properties(appimage PROPERTIES PUBLIC_HEADER ./libappimage.h)
+# Create the AppImageConfig.cmake and AppImageConfigVersion files
+file(RELATIVE_PATH REL_INCLUDE_DIR "${INSTALL_CMAKE_DIR}"
+ "${INSTALL_INCLUDE_DIR}")
+# ... for the build tree
+set(CONF_INCLUDE_DIRS "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}")
+configure_file(cmake/AppImageConfig.cmake.in
+"${PROJECT_BINARY_DIR}/AppImageConfig.cmake" @ONLY)
+# ... for the install tree
+set(CONF_INCLUDE_DIRS "${INSTALL_INCLUDE_DIR}")
+configure_file(cmake/AppImageConfig.cmake.in
+"${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageConfig.cmake" @ONLY)
+# ... for both
+configure_file(cmake/AppImageConfigVersion.cmake.in
+"${PROJECT_BINARY_DIR}/AppImageConfigVersion.cmake" @ONLY)
 
-target_link_libraries(appimage
-    ssl
-    squashfuse
-    crypto
-    z
-    lzma
-    pthread
-    archive
-    inotifytools
-    ${GLIB_LIBRARIES}
-    ${GIO_LIBRARIES}
-    ${CAIRO_LIBRARIES}
-)
+# Install the AppImageConfig.cmake and AppImageConfigVersion.cmake
+install(FILES
+"${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageConfig.cmake"
+"${PROJECT_BINARY_DIR}/AppImageConfigVersion.cmake"
+DESTINATION "${INSTALL_CMAKE_DIR}" COMPONENT dev)
 
-###
-# Deploy
-###
-include(cmake/ConfigureDeploy.cmake)
+# Install the export set for use with the install-tree
+install(EXPORT AppImageTargets DESTINATION
+"${INSTALL_CMAKE_DIR}" COMPONENT dev)
+
+################## TESTING #####################
 
 enable_testing()
 add_subdirectory(test)
+
+########### Add uninstall target ###############
+
+CONFIGURE_FILE(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY
+)
+    
+ADD_CUSTOM_TARGET(uninstall
+    "${CMAKE_COMMAND}" -P "${CMAKE_CURRENT_BINARY_DIR}/cmake/cmake_uninstall.cmake"
+)

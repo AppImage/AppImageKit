@@ -1,18 +1,16 @@
 # - Config file for the AppImage package
 # It defines the following variables
-#  APPIMAGE_INCLUDE_DIRS - include directories for APPIMAGE
+#  APPIMAGE_INCLUDE_DIRS - include directories for AppImage
 #  APPIMAGE_LIBRARIES    - libraries to link against
-#  APPIMAGE_EXECUTABLE   - the bar executable
- 
+
 # Compute paths
 get_filename_component(APPIMAGE_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
-set(APPIMAGE_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(APPIMAGE_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@" ${GLIB_INCLUDE_DIRS})
  
 # Our library dependencies (contains definitions for IMPORTED targets)
-if(NOT TARGET foo AND NOT APPIMAGE_BINARY_DIR)
-  include("${APPIMAGE_CMAKE_DIR}/AppImageTargets.cmake")
-endif()
- 
+include("${APPIMAGE_CMAKE_DIR}/AppImageTargets.cmake")
+
 # These are IMPORTED targets created by AppImageTargets.cmake
-set(APPIMAGE_LIBRARIES foo)
-set(APPIMAGE_EXECUTABLE bar)
+set(APPIMAGE_LIBRARIES
+  appimage
+)
