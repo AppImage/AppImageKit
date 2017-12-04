@@ -72,12 +72,12 @@ if [ $STATIC_BUILD -eq 1 ]; then
   # Build inotify-tools
   if [ ! -e "./inotify-tools-3.14/build/lib/libinotifytools.a" ] ; then
     if [ ! -e "./inotify-tools-3.14/src" ] ; then
-      wget -c http://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
+      wget -c https://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
       tar xf inotify-tools-3.14.tar.gz
       # Pull the latest `configure` scripts to handle newer platforms.
-      wget "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" \
+      wget "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD" \
            --output-document=inotify-tools-3.14/config.guess
-      wget "http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
+      wget "https://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD" \
              --output-document=inotify-tools-3.14/config.sub
     fi
     cd inotify-tools-3.14
@@ -103,7 +103,7 @@ fi
 # Build lzma always static because the runtime gets distributed with
 # the generated .AppImage file.
 if [ ! -e "./xz-5.2.3/build/lib/liblzma.a" ] ; then
-  wget -c http://tukaani.org/xz/xz-5.2.3.tar.gz
+  wget -c https://tukaani.org/xz/xz-5.2.3.tar.gz
   tar xf xz-5.2.3.tar.gz
   cd xz-5.2.3
   mkdir -p build/lib
@@ -114,7 +114,7 @@ fi
 
 # Build libarchive
 if [ $STATIC_BUILD -eq 1 ] && [ ! -e "./libarchive-3.3.1/.libs/libarchive.a" ] ; then
-  wget -c http://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
+  wget -c https://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
   tar xf libarchive-3.3.1.tar.gz
   cd libarchive-3.3.1
   mkdir -p build/lib
