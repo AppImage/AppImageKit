@@ -302,8 +302,10 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     }
                     /* Some AppImages only have the icon in their root directory, so we have to get it from there */
                     if((g_str_has_prefix(trv.path, desktop_icon_value_original)) && (! strstr(trv.path, "/")) && ( (g_str_has_suffix(trv.path, ".png")) || (g_str_has_suffix(trv.path, ".xpm")) || (g_str_has_suffix(trv.path, ".svg")) || (g_str_has_suffix(trv.path, ".svgz")))){
-                        dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(trv.path));
+                        gchar* ext = get_file_extension(trv.path);
+                        dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
                         dest = g_build_path("/", "/tmp", dest_basename, NULL);
+                        g_free(ext);
                     }
                     
                     if(dest){
@@ -661,8 +663,10 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         /* Some AppImages only have the icon in their root directory, so we have to get it from there */
         if(desktop_icon_value_original){
             if((g_str_has_prefix(filename, desktop_icon_value_original)) && (! strstr(filename, "/")) && ( (g_str_has_suffix(filename, ".png")) || (g_str_has_suffix(filename, ".xpm")) || (g_str_has_suffix(filename, ".svg")) || (g_str_has_suffix(filename, ".svgz")))){
-                dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
+                gchar *ext = get_file_extension(filename);
+                dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
                 dest = g_build_path("/", "/tmp", dest_basename, NULL);
+                g_free(ext);
             }
         }
                     
