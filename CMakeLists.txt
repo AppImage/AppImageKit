@@ -8,7 +8,7 @@ include(ExternalProject)
 
 execute_process(
     COMMAND git describe --tags --always --abbrev=7
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
@@ -23,6 +23,7 @@ find_package(PkgConfig REQUIRED)
 pkg_check_modules(GLIB REQUIRED glib-2.0)
 pkg_check_modules(LZMA REQUIRED liblzma)
 pkg_check_modules(ZLIB REQUIRED zlib)
+pkg_check_modules(CAIRO REQUIRED cairo)
 
 set(USE_SYSTEM_XZ OFF CACHE BOOL "Use system xz (well, liblzma) instead of bundled one")
 
@@ -43,8 +44,8 @@ if(NOT USE_SYSTEM_XZ)
     mark_as_advanced(SOURCE_DIR)
 
     set(xz_INCLUDE_DIR "${SOURCE_DIR}")
-    find_library(xz_LIBRARY liblzma.a ${xz_SOURCE_DIR}/src/liblzma/.libs/)
-    set(xz_LIBRARY_DIR "${xz_SOURCE_DIR}/src/liblzma/.libs/")
+    set(xz_LIBRARY_DIR "${xz_SOURCE_DIR}/src/liblzma/.libs")
+    set(xz_LIBRARY "${xz_LIBRARY_DIR}/liblzma.a")
 
     set(xz_PREFIX "${xz_SOURCE_DIR}/build")
 else()
@@ -89,8 +90,8 @@ mark_as_advanced(SOURCE_DIR)
 set(squashfuse_SOURCE_DIR ${SOURCE_DIR})
 set(squashfuse_LIBRARY_DIR ${squashfuse_SOURCE_DIR}/.libs)
 
-find_library(libsquashfuse libsquashfuse.a PATHS ${squashfuse_LIBRARY_DIR})
-find_library(libfuseprivate libfuseprivate.a PATHS ${squashfuse_LIBRARY_DIR})
+set(libsquashfuse "${squashfuse_LIBRARY_DIR}/libsquashfuse.a")
+set(libfuseprivate "${squashfuse_LIBRARY_DIR}/libfuseprivate.a")
 set(squashfuse_LIBRARIES ${libsquashfuse} ${libfuseprivate})
 mark_as_advanced(libsquashfuse libfuseprivate)
 
@@ -111,12 +112,6 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 include_directories(${xz_INCLUDE_DIR})
 include_directories(${squashfuse_SOURCE_DIR})
 
-add_custom_command(OUTPUT data.o
-    COMMAND bash ${PROJECT_SOURCE_DIR}/build-runtime.sh
-    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-    MAIN_DEPENDENCY runtime.c
-)
-
 # only have to build custom xz when not using system libxz
 if(NOT USE_SYSTEM_XZ)
     add_dependencies(squashfuse xz)
@@ -124,13 +119,19 @@ if(NOT USE_SYSTEM_XZ)
 endif()
 
 if(xz_LIBRARY_DIR)
-    link_libraries(${xz_LIBRARY_DIR})
+    link_directories(${xz_LIBRARY_DIR})
 endif()
 
 
 ######################
 # main build targets #
 ######################
+
+add_custom_command(OUTPUT data.o
+    COMMAND bash ${PROJECT_SOURCE_DIR}/build-runtime.sh
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    MAIN_DEPENDENCY runtime.c
+)
 
 add_executable(appimagetool
     appimagetool.c
@@ -146,7 +147,12 @@ target_link_libraries(appimagetool
     ${squashfuse_LIBRARIES}
 )
 
-target_link_libraries(appimagetool dl pthread z ${xz_LIBRARY})
+target_link_libraries(appimagetool
+    dl
+    pthread
+    z
+    ${xz_LIBRARY}
+)
 
 target_compile_definitions(appimagetool
     PRIVATE -D_FILE_OFFSET_BITS=64
