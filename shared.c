@@ -182,8 +182,11 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
     gchar* icon_dest_path = g_build_path("/", dest_dir, g_path_get_basename(icon_path), NULL);
     if(verbose)
         fprintf(stderr, "Move from %s to %s\n", icon_path, icon_dest_path);
-    if(g_mkdir_with_parents(g_path_get_dirname(dest_dir), 0755))
+    gchar *dirname = g_path_get_dirname(dest_dir);
+    if(g_mkdir_with_parents(dirname, 0755))
         fprintf(stderr, "Could not create directory: %s\n", dest_dir);
+    g_free(dirname);
+
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(icon_path);
     GFile *target_file = g_file_new_for_path(icon_dest_path);
@@ -286,8 +289,8 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     fprintf(stderr, "squash_get_matching_files found: %s\n", trv.path);
                 g_ptr_array_add(array, g_strdup(trv.path));
                 gchar *dest = NULL;
-                gchar *dest_dirname;
-                gchar *dest_basename;
+                gchar *dest_dirname = NULL;
+                gchar *dest_basename = NULL;
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
                     if(g_str_has_prefix(trv.path, "usr/share/icons/") || g_str_has_prefix(trv.path, "usr/share/pixmaps/") || (g_str_has_prefix(trv.path, "usr/share/mime/") && g_str_has_suffix(trv.path, ".xml"))){
                         dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));          
@@ -311,8 +314,12 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     if(dest){
                         if(verbose)
                             fprintf(stderr, "install: %s\n", dest);
-                        if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
-                            fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
+                        
+                        gchar *dirname = g_path_get_dirname(dest);
+                        if(g_mkdir_with_parents(dirname, 0755))
+                            fprintf(stderr, "Could not create directory: %s\n", dirname);
+
+                        g_free(dirname);
                         
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
@@ -344,6 +351,10 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                         } 
                     }
                 }
+                
+                g_free(dest);
+                g_free(dest_dirname);
+                g_free(dest_basename);
             }
         }
     }
@@ -563,8 +574,10 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
 
     if(verbose)
         fprintf(stderr, "install: %s\n", destination);
-    if(g_mkdir_with_parents(g_path_get_dirname(destination), 0755))
-        fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(destination));
+    gchar *dirname = g_path_get_dirname(destination);
+    if(g_mkdir_with_parents(dirname, 0755))
+        fprintf(stderr, "Could not create directory: %s\n", dirname);
+    g_free(dirname);
 
     // g_key_file_save_to_file(key_file_structure, destination, NULL);
     // g_key_file_save_to_file is too new, only since 2.40
@@ -674,10 +687,11 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         
             if(verbose)
                 fprintf(stderr, "install: %s\n", dest);
-            
-            if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
-                fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
-        
+            gchar *dirname = g_path_get_dirname(dest);
+            if(g_mkdir_with_parents(dirname, 0755))
+                fprintf(stderr, "Could not create directory: %s\n", dirname);
+            g_free(dirname);
+
             FILE *f;
             f = fopen(dest, "w+");
             
@@ -716,6 +730,10 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
                 move_icon_to_destination(dest, verbose);
             } 
         }
+
+        g_free(dest);
+        g_free(dest_dirname);
+        g_free(dest_basename);
     }
     archive_read_close(a);
     archive_read_free(a);
