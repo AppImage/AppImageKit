@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include <libgen.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 #define die(...)                                    \
     do {                                            \
