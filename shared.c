@@ -130,9 +130,13 @@ char * get_md5(char *path)
  */
 char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 {
-    char *file;
-    file = g_strconcat (get_md5(path), ".png", NULL);
+    char *file, *md5;
+    md5 = get_md5(path);
+    file = g_strconcat (md5, ".png", NULL);
+
     gchar *thumbnail_path = g_build_filename (g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
+
+    g_free(md5);
     g_free (file);
     return thumbnail_path;
 }
