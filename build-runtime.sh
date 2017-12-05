@@ -74,6 +74,4 @@ dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH
 
 # Convert runtime into a data object that can be embedded into appimagetool
 
-ld -r -b binary -o data.o runtime
-
-cp data.o "$orig_cwd"/
+cp runtime "$orig_cwd"/
