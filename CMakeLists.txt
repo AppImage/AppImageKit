@@ -80,7 +80,7 @@ else()
     set(xz_PREFIX "/usr/lib")
 endif()
 
-mark_as_advanced(xz_INCLUDE_DIR xz_LIBRARIES xz_PREFIX)
+mark_as_advanced(xz_INCLUDE_DIR xz_LIBRARIES_DIR xz_LIBRARIES xz_PREFIX)
 
 # as distros don't provide suitable squashfuse and squashfs-tools, those dependencies are bundled in, can, and should
 # be used from this repository
@@ -95,7 +95,7 @@ ExternalProject_Add(squashfuse
               COMMAND autoreconf -fi || true
               COMMAND sed -i "/PKG_CHECK_MODULES.*/,/,:./d" configure  # https://github.com/vasi/squashfuse/issues/12
               COMMAND ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib --with-xz=${xz_PREFIX}
-              COMMAND sed -i "s|XZ_LIBS = -llzma |XZ_LIBS = -Bstatic -llzma  -L${xz_LIBRARIES_DIR}/|g" Makefile
+              COMMAND sed -i "s|XZ_LIBS = -llzma |XZ_LIBS = -Bstatic ${xz_LIBRARY}/|g" Makefile
     BUILD_COMMAND make
     BUILD_IN_SOURCE ON
     INSTALL_COMMAND make install
@@ -121,7 +121,7 @@ mark_as_advanced(squashfuse_LIBRARY_DIR squashfuse_LIBRARIES)
 ExternalProject_Add(mksquashfs
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/squashfs-tools/squashfs-tools
     CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIR}|g" <SOURCE_DIR>/Makefile
-              COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic -l${xz_LIBRARIES} -L${xz_LIBRARIES_DIR}|g" <SOURCE_DIR>/Makefile
+              COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/Makefile
     BUILD_COMMAND make XZ_SUPPORT=1 mksquashfs
     BUILD_IN_SOURCE ON
     # make install unfortunately expects unsquashfs to be built as well, hence can't install the binary
@@ -195,10 +195,6 @@ include_directories(${squashfuse_SOURCE_DIR})
 if(NOT USE_SYSTEM_XZ)
     add_dependencies(squashfuse xz)
     add_dependencies(mksquashfs xz)
-endif()
-
-if(xz_LIBRARIES_DIR)
-    link_directories(${xz_LIBRARIES_DIR})
 endif()
 
 
