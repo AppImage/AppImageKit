@@ -122,12 +122,14 @@ ExternalProject_Add(mksquashfs
     SOURCE_DIR ${PROJECT_SOURCE_DIR}/squashfs-tools/squashfs-tools
     CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIR}|g" <SOURCE_DIR>/Makefile
               COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/Makefile
+              COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" Makefile
+              COMMAND sed -i "/cp unsquashfs/d" Makefile
     BUILD_COMMAND make XZ_SUPPORT=1 mksquashfs
-    BUILD_IN_SOURCE ON
     # make install unfortunately expects unsquashfs to be built as well, hence can't install the binary
     # therefore using built file in SOURCE_DIR
     # TODO: implement building out of source
-    INSTALL_COMMAND true
+    BUILD_IN_SOURCE ON
+    INSTALL_COMMAND make install INSTALL_DIR=<INSTALL_DIR>
 )
 
 ExternalProject_Get_Property(mksquashfs SOURCE_DIR)
@@ -137,7 +139,7 @@ set(mksquashfs_INSTALL_DIR "${INSTALL_DIR}")
 mark_as_advanced(mksquashfs_SOURCE_DIR mksquashfs_INSTALL_DIR)
 
 # for later use when packaging as an AppImage
-set(mksquashfs_BINARY "${mksquashfs_SOURCE_DIR}/mksquashfs")
+set(mksquashfs_BINARY "${mksquashfs_INSTALL_DIR}/mksquashfs")
 mark_as_advanced(mksquashfs_BINARY)
 
 
