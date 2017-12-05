@@ -89,6 +89,7 @@ gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
         gchar* temp = g_strconcat(before_find,replace,after_find,NULL);
         g_free(retval);
         retval = g_strdup(temp);
+        g_free(after_find);
         g_free(before_find);
         g_free(temp);
     }   
