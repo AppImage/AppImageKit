@@ -95,7 +95,7 @@ ExternalProject_Add(squashfuse
               COMMAND autoreconf -fi || true
               COMMAND sed -i "/PKG_CHECK_MODULES.*/,/,:./d" configure  # https://github.com/vasi/squashfuse/issues/12
               COMMAND ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib --with-xz=${xz_PREFIX}
-              COMMAND sed -i "s|XZ_LIBS = -llzma |XZ_LIBS = -Bstatic ${xz_LIBRARY}/|g" Makefile
+              COMMAND sed -i "s|XZ_LIBS = -llzma |XZ_LIBS = -Bstatic ${xz_LIBRARIES}/|g" Makefile
     BUILD_COMMAND make
     BUILD_IN_SOURCE ON
     INSTALL_COMMAND make install
