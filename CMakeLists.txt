@@ -62,7 +62,7 @@ if(NOT USE_SYSTEM_XZ)
     set(xz_INSTALL_DIR "${INSTALL_DIR}")
     mark_as_advanced(xz_SOURCE_DIR xz_INSTALL_DIR)
 
-    set(xz_INCLUDE_DIR "${xz_SOURCE_DIR}/src/xz")
+    set(xz_INCLUDE_DIR "${xz_SOURCE_DIR}/src/xz/liblzma/api/")
     set(xz_LIBRARIES_DIR "${xz_INSTALL_DIR}/lib")
     set(xz_LIBRARIES "${xz_LIBRARIES_DIR}/liblzma.a")
 
