@@ -147,9 +147,10 @@ char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 {
     // FIXME: This default location is most likely wrong, but at least the icons with unknown size can go somewhere
-    gchar *dest_dir = dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
-    
+    gchar *dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
+
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
+        g_free(dest_dir);
         dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
     }
  
@@ -173,20 +174,26 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
             h = cairo_image_surface_get_height (image);
             cairo_surface_destroy (image);
         }
-                    
+        
         // FIXME: The following sizes are taken from the hicolor icon theme. 
         // Probably the right thing to do would be to figure out at runtime which icon sizes are allowable.
         // Or could we put our own index.theme into .local/share/icons/ and have it observed?
         if((w != h) || ((w != 16) && (w != 24) && (w != 32) && (w != 36) && (w != 48) && (w != 64) && (w != 72) && (w != 96) && (w != 128) && (w != 192) && (w != 256) && (w != 512))){
             fprintf(stderr, "%s has nonstandard size w = %i, h = %i; please fix it\n", icon_path, w, h);
         } else {
-            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps", NULL);
+            g_free(dest_dir);
+            gchar *t = g_strdup_printf("%ix%i", w, h);
+            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", t, "/apps", NULL);
+            g_free(t);
         }
     }
     if(verbose)
         fprintf(stderr, "dest_dir %s\n", dest_dir);
     
-    gchar* icon_dest_path = g_build_path("/", dest_dir, g_path_get_basename(icon_path), NULL);
+    gchar* icon_name = g_path_get_basename(icon_path);
+    gchar* icon_dest_path = g_build_path("/", dest_dir, icon_name, NULL);
+    g_free(icon_name);
+
     if(verbose)
         fprintf(stderr, "Move from %s to %s\n", icon_path, icon_dest_path);
     gchar *dirname = g_path_get_dirname(dest_dir);
@@ -199,11 +206,13 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
     GFile *target_file = g_file_new_for_path(icon_dest_path);
     if (!g_file_move (icon_file, target_file, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error)) {
         fprintf(stderr, "Error moving file: %s\n", error->message);
-        g_error_free (error);
+        g_clear_error (&error);
     }
+
+    g_free(dest_dir);
+    g_free(icon_dest_path);
     g_object_unref(icon_file); 
     g_object_unref(target_file);
-    
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
