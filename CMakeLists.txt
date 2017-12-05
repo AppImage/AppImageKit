@@ -25,7 +25,7 @@ function(check_program name)
 
     message(STATUS "Checking for program ${name}")
 
-    if(${name_upper}_NOTFOUND)
+    if(NOT ${name_upper})
         message(FATAL_ERROR "Could not find required program ${name}.")
     endif()
 
