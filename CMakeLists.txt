@@ -42,6 +42,7 @@ pkg_check_modules(GIO REQUIRED gio-2.0)
 pkg_check_modules(LZMA REQUIRED liblzma)
 pkg_check_modules(ZLIB REQUIRED zlib)
 pkg_check_modules(CAIRO REQUIRED cairo)
+pkg_check_modules(OPENSSL REQUIRED openssl)
 
 set(USE_SYSTEM_XZ OFF CACHE BOOL "Use system xz (well, liblzma) instead of bundled one")
 
@@ -262,6 +263,17 @@ target_compile_definitions(appimaged
 )
 
 add_dependencies(appimaged squashfuse inotify-tools libarchive)
+
+
+add_executable(AppRun AppRun.c)
+
+
+add_executable(validate validate.c getsection.c)
+
+target_link_libraries(validate
+    ${GLIB_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+)
 
 
 ################################
