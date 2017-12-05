@@ -205,11 +205,20 @@ endif()
 # main build targets #
 ######################
 
-add_custom_command(OUTPUT data.o
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/runtime
     COMMAND bash ${PROJECT_SOURCE_DIR}/build-runtime.sh
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-    MAIN_DEPENDENCY runtime.c
+    DEPENDS ${PROJECT_SOURCE_DIR}/runtime.c
 )
+
+add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/data.o
+    COMMAND ld -r -b binary -o data.o runtime
+    WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
+    DEPENDS runtime
+)
+
+add_custom_target(runtime DEPENDS ${PROJECT_BINARY_DIR}/runtime)
+
 
 add_executable(appimagetool
     appimagetool.c
