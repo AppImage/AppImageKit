@@ -887,6 +887,7 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
         if(verbose)
             fprintf(stderr, "deleted: %s\n", thumbnail_path);
     }
+    g_free(thumbnail_path);
 }
 
 /* Recursively delete files in path and subdirectories that contain the given md5
