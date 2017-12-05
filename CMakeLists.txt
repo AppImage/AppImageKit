@@ -23,6 +23,8 @@ function(check_program name)
     string(TOUPPER ${name} name_upper)
     find_program(${name_upper} ${name})
 
+    message(STATUS "Checking for program ${name}")
+
     if(${name_upper}_NOTFOUND)
         message(FATAL_ERROR "Could not find required program ${name}.")
     endif()
@@ -30,8 +32,14 @@ function(check_program name)
     mark_as_advanced(${name_upper})
 endfunction()
 
-check_program(wget)
+check_program(aclocal)
+check_program(autoheader)
+check_program(automake)
+check_program(autoreconf)
+check_program(libtoolize)
 check_program(patch)
+check_program(sed)
+check_program(wget)
 # TODO: add checks for remaining commands
 
 
