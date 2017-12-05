@@ -180,10 +180,9 @@ TEST_F(AppImageTest, get_md5)
 
 TEST_F(AppImageTest, get_md5_invalid_file_path)
 {
-    std::string expected = "";
     gchar * sum = get_md5("");
 
-    int res = g_strcmp0(expected.c_str(), sum);
+    int res = g_strcmp0(NULL, sum);
     g_free(sum);
     ASSERT_TRUE(res == 0);
 }

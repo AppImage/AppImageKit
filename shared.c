@@ -118,7 +118,7 @@ char * get_md5(char *path)
 
         return out;
     } else {
-        return "";
+        return NULL;
     }
 }
 
