@@ -12,7 +12,7 @@ namespace AppImageTests
 class AppImageTest : public testing::Test
 {
   protected:
-    char tests_dir[250];
+    char tests_dir[5000];
     bool tests_dir_created;
     std::string test_file_content;
     std::string appImage_type_1_file_path;
@@ -84,8 +84,9 @@ class AppImageTest : public testing::Test
             if (m != NULL)
                 found = true;
         }
+        g_free(sum);
         g_free(apps_path);
-
+        g_dir_close(dir);
         return found;
     }
 };
@@ -159,6 +160,7 @@ TEST_F(AppImageTest, get_md5)
 
     std::cout << sum;
     int res = g_strcmp0(expected.c_str(), sum);
+    g_free(sum);
     ASSERT_TRUE(res == 0);
 }
 
@@ -168,6 +170,7 @@ TEST_F(AppImageTest, get_md5_invalid_file_path)
     gchar * sum = get_md5("");
 
     int res = g_strcmp0(expected.c_str(), sum);
+    g_free(sum);
     ASSERT_TRUE(res == 0);
 }
 
