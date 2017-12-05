@@ -116,13 +116,14 @@ set(squashfuse_INSTALL_DIR "${INSTALL_DIR}")
 mark_as_advanced(squashfuse_SOURCE_DIR squashfuse_INSTALL_DIR)
 
 set(squashfuse_LIBRARY_DIR ${squashfuse_SOURCE_DIR}/.libs)
+set(squashfuse_INCLUDE_DIR ${squashfuse_SOURCE_DIR})
 
 set(libsquashfuse ${squashfuse_LIBRARY_DIR}/libsquashfuse.a)
 set(libfuseprivate ${squashfuse_LIBRARY_DIR}/libfuseprivate.a)
 set(squashfuse_LIBRARIES ${libsquashfuse} ${libfuseprivate})
 mark_as_advanced(libsquashfuse libfuseprivate)
 
-mark_as_advanced(squashfuse_LIBRARY_DIR squashfuse_LIBRARIES)
+mark_as_advanced(squashfuse_LIBRARY_DIR squashfuse_LIBRARIES squashfuse_INCLUDE_DIR)
 
 
 # TODO: allow using system wide mksquashfs
@@ -160,7 +161,7 @@ ExternalProject_Add(inotify-tools
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
     BUILD_COMMAND make
     INSTALL_COMMAND make install
-    )
+)
 
 ExternalProject_Get_Property(inotify-tools SOURCE_DIR)
 ExternalProject_Get_Property(inotify-tools INSTALL_DIR)
@@ -168,9 +169,10 @@ set(inotify-tools_SOURCE_DIR "${SOURCE_DIR}")
 set(inotify-tools_INSTALL_DIR "${INSTALL_DIR}")
 mark_as_advanced(inotify-tools_SOURCE_DIR inotify-tools_INSTALL_DIR)
 
+set(inotify-tools_INCLUDE_DIR ${inotify-tools_SOURCE_DIR})
 set(inotify-tools_LIBRARY_DIR ${inotify-tools_INSTALL_DIR}/lib)
 set(inotify-tools_LIBRARIES ${inotify-tools_LIBRARY_DIR}/libinotifytools.a)
-mark_as_advanced(inotify-tools_LIBRARY_DIR inotify-tools_LIBRARIES)
+mark_as_advanced(inotify-tools_LIBRARY_DIR inotify-tools_LIBRARIES inotify-tools_INCLUDE_DIR)
 
 
 # TODO: allow using system wide libarchive, analog to libxz
@@ -198,7 +200,8 @@ include_directories(${GLIB_INCLUDE_DIRS})
 include_directories(${CAIRO_INCLUDE_DIRS})
 include_directories(${ZLIB_INCLUDE_DIRS})
 include_directories(${xz_INCLUDE_DIR})
-include_directories(${squashfuse_SOURCE_DIR})
+include_directories(${inotify-tools_INCLUDE_DIR})
+include_directories(${squashfuse_INCLUDE_DIR})
 
 
 # only have to build custom xz when not using system libxz
