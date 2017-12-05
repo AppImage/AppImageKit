@@ -110,7 +110,13 @@ char * get_md5(char *path)
         g_checksum_update(checksum, (const guchar *) uri, strlen (uri));
         g_checksum_get_digest(checksum, digest, &digest_len);
         g_assert(digest_len == 16);
-        return g_strdup_printf("%s", g_checksum_get_string(checksum));
+
+        gchar *out = g_strdup_printf("%s", g_checksum_get_string(checksum)); 
+
+        g_checksum_free(checksum);
+        g_free(uri);
+
+        return out;
     } else {
         return "";
     }
