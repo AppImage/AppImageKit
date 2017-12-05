@@ -856,23 +856,20 @@ void unregister_using_md5_id(const char *name, int level, char* md5, gboolean ve
         return;
     
     do {
+        gchar *path_to_be_deleted = g_strdup_printf("%s/%s", name, entry->d_name);
         if (entry->d_type == DT_DIR) {
-            char path[1024];
-            int len = snprintf(path, sizeof(path)-1, "%s/%s", name, entry->d_name);
-            path[len] = 0;
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-                continue;
-            unregister_using_md5_id(path, level + 1, md5, verbose);
-        }
-        
-        else if(strstr(entry->d_name, g_strdup_printf("%s_%s", vendorprefix, md5))) {
-            gchar *path_to_be_deleted = g_strdup_printf("%s/%s", name, entry->d_name);
+            if ( strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name) != 0 )
+                unregister_using_md5_id(path_to_be_deleted, level + 1, md5, verbose);
+        } else
+        if (strstr(entry->d_name, vendorprefix) != NULL &&
+            strstr(entry->d_name, md5)  != NULL ) {
             if(g_file_test(path_to_be_deleted, G_FILE_TEST_IS_REGULAR)){
                 g_unlink(path_to_be_deleted);
                 if(verbose)
                     fprintf(stderr, "deleted: %s\n", path_to_be_deleted);
             }
         }
+        g_free(path_to_be_deleted);
     } while ((entry = readdir(dir)) != NULL);
     closedir(dir);
 }
