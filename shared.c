@@ -417,10 +417,10 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     
     /* If firejail is on the $PATH, then use it to run AppImages */
     if(g_find_program_in_path ("firejail")){
-        char *firejail_exec;
+        char *firejail_exec = NULL;
         firejail_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --noprofile --appimage '%s'", appimage_path);
         g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_exec);
-        
+
         gchar *firejail_profile_group = "Desktop Action FirejailProfile";
         gchar *firejail_profile_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --private --appimage '%s'", appimage_path);
         gchar *firejail_tryexec = "firejail";
@@ -428,7 +428,11 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
         g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_profile_exec);
         g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, firejail_tryexec);
         g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "FirejailProfile;");
-        
+
+        g_free(firejail_exec);
+        g_free(firejail_profile_group);
+        g_free(firejail_profile_exec);
+        g_free(firejail_tryexec);
     }
     
     /* Add AppImageUpdate desktop action
@@ -465,12 +469,25 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
                 g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_NAME, "Update");
                 g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_EXEC, appimageupdate_exec);
                 g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "AppImageUpdate;");
+
+                g_free(appimageupdate_group);
+                g_free(appimageupdate_exec);
             }
         }
     }
     
-    gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL)));
+    gchar *icon_path = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
+    gchar *icon = g_path_get_basename(icon_path);
+
+    gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, icon);
+
+    g_free(icon_path);
+    g_free(icon);
+
     g_key_file_set_value(key_file_structure, "Desktop Entry", "Icon", icon_with_md5);
+
+    g_free(icon_with_md5);
+
     /* At compile time, inject VERSION_NUMBER like this:
      * cc ... -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -..
      */
@@ -478,9 +495,13 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     g_key_file_set_value(key_file_structure, "Desktop Entry", "X-AppImage-Comment", generated_by);
     g_key_file_set_value(key_file_structure, "Desktop Entry", "X-AppImage-Identifier", md5);
     fprintf(stderr, "Installing desktop file\n");
+
+    gchar * file_content = g_key_file_to_data(key_file_structure, NULL, NULL);
     if(verbose)
-        fprintf(stderr, "%s", g_key_file_to_data(key_file_structure, NULL, NULL));
-    
+        fprintf(stderr, "%s", file_content);
+
+    g_free(file_content);
+    g_free(generated_by);
     /* https://specifications.freedesktop.org/menu-spec/menu-spec-latest.html#paths says:
      * 
      * $XDG_DATA_DIRS/applications/
@@ -562,9 +583,9 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     /* FIXME: The following is most likely not correct; see the comments above.
      * Open a GitHub issue or send a pull request if you would like to propose asolution. */
     /* TODO: Check for consistency of the id with the AppStream file, if it exists in the AppImage */
-    gchar *partial_path;
+    gchar *partial_path = NULL;
     partial_path = g_strdup_printf("applications/appimagekit_%s-%s", md5, desktop_filename);
-    gchar *destination;
+    gchar *destination = NULL;
     destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
 
     /* When appimaged sees itself, then do nothing here */
@@ -583,16 +604,21 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     // g_key_file_save_to_file is too new, only since 2.40
     /* Write config file on disk */
     gsize length;
-    gchar *buf;
+    gchar *buf = NULL;
     GIOChannel *file;
     buf = g_key_file_to_data(key_file_structure, &length, NULL);
     file = g_io_channel_new_file(destination, "w", NULL);
     g_io_channel_write_chars(file, buf, length, NULL, NULL);
     g_io_channel_shutdown(file, TRUE, NULL);
+    g_io_channel_unref(file);
     
     
     /* GNOME shows the icon and name on the desktop file only if it is executable */
     chmod(destination, 0755);
+    
+    g_free(buf);
+    g_free(destination);
+    g_free(partial_path);
 }
 
 /* Register a type 1 AppImage in the system */
