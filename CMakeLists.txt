@@ -312,6 +312,20 @@ target_link_libraries(digest
 )
 
 
+# install binaries
+install(
+    PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${PROJECT_BINARY_DIR}/runtime
+    DESTINATION bin
+)
+install(
+    TARGETS AppRun appimaged appimagetool digest validate
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib/static
+    INCLUDES DESTINATION include
+)
+
+
 ################################
 # unit and functionality tests #
 ################################
