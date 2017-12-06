@@ -85,7 +85,7 @@ popd
 
 # Strip and check size and dependencies
 
-rm build/*.o build/1024_blank_bytes
+rm build/*.o
 $STRIP build/AppRun build/appimaged build/appimagetool build/digest build/mksquashfs build/validate 2>/dev/null # Do NOT strip build/runtime_with_magic
 chmod a+x build/*
 ls -lh build/*
