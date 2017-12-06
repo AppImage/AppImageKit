@@ -125,8 +125,9 @@ set(squashfuse_LIBRARY_DIR ${squashfuse_SOURCE_DIR}/.libs)
 set(squashfuse_INCLUDE_DIR ${squashfuse_SOURCE_DIR})
 
 set(libsquashfuse ${squashfuse_LIBRARY_DIR}/libsquashfuse.a)
+set(libsquashfuse_ll ${squashfuse_LIBRARY_DIR}/libsquashfuse_ll.a)
 set(libfuseprivate ${squashfuse_LIBRARY_DIR}/libfuseprivate.a)
-set(squashfuse_LIBRARIES ${libsquashfuse} ${libfuseprivate})
+set(squashfuse_LIBRARIES ${libsquashfuse} ${libsquashfuse_ll} ${libfuseprivate})
 mark_as_advanced(libsquashfuse libfuseprivate)
 
 mark_as_advanced(squashfuse_LIBRARY_DIR squashfuse_LIBRARIES squashfuse_INCLUDE_DIR)
@@ -225,8 +226,15 @@ endif()
 # main build targets #
 ######################
 
+# set up build script
+configure_file(
+    ${PROJECT_SOURCE_DIR}/build-runtime.sh.in
+    ${PROJECT_BINARY_DIR}/build-runtime.sh
+    @ONLY
+)
+
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/runtime
-    COMMAND bash ${PROJECT_SOURCE_DIR}/build-runtime.sh
+    COMMAND bash ${PROJECT_BINARY_DIR}/build-runtime.sh
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     DEPENDS ${PROJECT_SOURCE_DIR}/runtime.c
 )

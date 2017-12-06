@@ -1,5 +1,11 @@
 #! /bin/bash
 
+########################
+# build runtime script #
+########################
+#
+# template to be configured by the CMake build system
+
 if which clang >/dev/null; then
     CC=clang
 else
@@ -8,19 +14,18 @@ fi
 
 STRIP=strip
 
-set -x
+set -xe
 
 build_dir=$(mktemp -d)
 orig_cwd=$(pwd)
-repo_root=$(dirname $(readlink -f $0))
+repo_root="@PROJECT_SOURCE_DIR@"
 
 # TODO: check whether those options are needed for other tools' build processes
 small_FLAGS="-Os -ffunction-sections -fdata-sections"
 small_LDFLAGS="-s -Wl,--gc-sections"
 
 cd $repo_root
-# TODO: configure Git hash within version string from CMake to make sure it's the same across all tools
-git_version=$(git describe --tags --always --abbrev=7)
+git_version="@GIT_VERSION@"
 
 cleanup() {
     [ -d $build_dir ] && rm -r "$build_dir"
@@ -31,8 +36,8 @@ trap cleanup EXIT
 cd "$build_dir"
 
 # Compile runtime but do not link
-# TODO: configure include dir for squashfuse from CMake
-$CC -DVERSION_NUMBER=\"$git_version\" -I"$repo_root"/squashfuse/ -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
+$CC -DVERSION_NUMBER=\"$git_version\" -I"@xz_INCLUDE_DIR@" -I"@squashfuse_INCLUDE_DIR@" \
+    -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
 printf '\0%.0s' {0..1023} > 1024_blank_bytes
@@ -45,9 +50,10 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed .upd_info and .sha256_sig sections
-$CC $small_FLAGS $small_LDFLAGS -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.c runtime3.o \
-    "$repo_root"/squashfuse/.libs/libsquashfuse_ll.a "$repo_root"/squashfuse/.libs/libsquashfuse.a \
-    "$repo_root"/squashfuse/.libs/libfuseprivate.a -L"$repo_root"/xz-5.2.3/build/lib \
+# TODO: squashfuse_LIBRARIES is a semicolon separated list of values that has to be split during runtime of this script
+squashfuse_libs="@squashfuse_LIBRARIES@"
+$CC $small_FLAGS $small_LDFLAGS -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.c \
+    runtime3.o ${squashfuse_libs//;/ } -L"@xz_LIBRARY_DIR@" \
     -Wl,-Bdynamic -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
 $STRIP runtime
 
