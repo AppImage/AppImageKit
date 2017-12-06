@@ -44,7 +44,6 @@ $CC -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.
     "$repo_root"/squashfuse/.libs/libsquashfuse_ll.a "$repo_root"/squashfuse/.libs/libsquashfuse.a \
     "$repo_root"/squashfuse/.libs/libfuseprivate.a -L"$repo_root"/xz-5.2.3/build/lib \
     -Wl,-Bdynamic -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
-$STRIP runtime
 
 # Test if we can read it back
 readelf -x .upd_info runtime # hexdump
