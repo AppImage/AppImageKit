@@ -75,7 +75,7 @@ if [ -e /usr/bin/pacman ] ; then
 fi
 
 # Install latest CMake
-wget https://cmake.org/files/v3.10/cmake-3.10.0-rc3-Linux-x86_64.tar.gz -O cmake-x86_64.tar.gz
+wget -nv https://cmake.org/files/v3.10/cmake-3.10.0-rc3-Linux-x86_64.tar.gz -O cmake-x86_64.tar.gz
 echo "a0f3b69d34c30c1e286b6ecf50bab374acedc5c88437a82e5ef556f5f085766c  cmake-x86_64.tar.gz" | sha256sum -c
 sudo tar xzf cmake-x86_64.tar.gz -C /usr --strip-components=1
 rm cmake-x86_64.tar.gz
