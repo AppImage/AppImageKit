@@ -286,7 +286,7 @@ static gchar *get_file_extension(const gchar *filename)
  * with a custom name that involves the md5 identifier to tie them to a particular
  * AppImage.
  */
-gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_value_original, char *md5, gboolean verbose) {
+gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_icon_value_original, char *md5, gboolean verbose) {
     GPtrArray *array = g_ptr_array_new();
     sqfs_traverse trv;
     sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
@@ -328,7 +328,15 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     }
 
                     /* Some AppImages only have the icon in their root directory, so we have to get it from there */
-                    if((g_str_has_prefix(trv.path, desktop_icon_value_original)) && (! strstr(trv.path, "/")) && ( (g_str_has_suffix(trv.path, ".png")) || (g_str_has_suffix(trv.path, ".xpm")) || (g_str_has_suffix(trv.path, ".svg")) || (g_str_has_suffix(trv.path, ".svgz")))){
+                    if(
+                            g_str_has_prefix(trv.path, desktop_icon_value_original)
+                            && !strstr(trv.path, "/")
+                            && ( (g_str_has_suffix(trv.path, ".png"))
+                                 || (g_str_has_suffix(trv.path, ".xpm"))
+                                 || (g_str_has_suffix(trv.path, ".svg"))
+                                 || (g_str_has_suffix(trv.path, ".svgz"))
+                                 )
+                            ){
                         gchar* ext = get_file_extension(trv.path);
                         dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
                         dest = g_build_path("/", "/tmp", dest_basename, NULL);
@@ -809,7 +817,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     long unsigned int fs_offset; // The offset at which a squashfs image is expected
     char *md5 = get_md5(path);
     GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
-    gchar *desktop_icon_value_original = "iDoNotMatchARegex"; // FIXME: otherwise the regex does weird stuff in the first run
+    gchar *desktop_icon_value_original = g_strdup("iDoNotMatchARegex"); // FIXME: otherwise the regex does weird stuff in the first run
     if(verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
     fs_offset = get_elf_size(path);
@@ -839,12 +847,12 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(success) {
             gchar *desktop_filename = g_path_get_basename(str_array[i]);
 
+            g_free(desktop_icon_value_original);
             desktop_icon_value_original = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
             if(verbose)
                 fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
             write_edited_desktop_file(key_file_structure, path, desktop_filename, 2, md5, verbose);
             
-            g_free(desktop_icon_value_original);
             g_free(desktop_filename);
         }
         g_key_file_free(key_file_structure);
@@ -864,6 +872,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     set_executable(path, verbose);
     
     g_free(md5);
+    g_free(desktop_icon_value_original);
     sqfs_destroy(&fs);
 
     return TRUE;
