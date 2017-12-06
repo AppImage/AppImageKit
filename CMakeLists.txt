@@ -192,9 +192,10 @@ set(libarchive_SOURCE_DIR "${SOURCE_DIR}")
 set(libarchive_INSTALL_DIR "${INSTALL_DIR}")
 mark_as_advanced(libarchive_SOURCE_DIR inotify-tools_INSTALL_DIR)
 
+set(libarchive_INCLUDE_DIR ${libarchive_SOURCE_DIR}/libarchive)
 set(libarchive_LIBRARY_DIR ${libarchive_INSTALL_DIR}/lib)
 set(libarchive_LIBRARIES ${libarchive_LIBRARY_DIR}/libarchive.a)
-mark_as_advanced(libarchive_LIBRARY_DIR libarchive_LIBRARIES)
+mark_as_advanced(libarchive_LIBRARY_DIR libarchive_LIBRARIES libarchive_INCLUDE_DIR)
 
 
 # include directories globally
@@ -204,6 +205,7 @@ include_directories(${ZLIB_INCLUDE_DIRS})
 include_directories(${xz_INCLUDE_DIR})
 include_directories(${inotify-tools_INCLUDE_DIR})
 include_directories(${squashfuse_INCLUDE_DIR})
+include_directories(${libarchive_INCLUDE_DIR})
 
 
 # only have to build custom xz when not using system libxz
