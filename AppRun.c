@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include <libgen.h>
 #include <dirent.h>
 #include <string.h>
+#include <errno.h>
 
 #define die(...)                                    \
     do {                                            \
@@ -176,7 +177,7 @@ int main(int argc, char *argv[]) {
     old_env = getenv("PYTHONPATH") ?: "";
     SET_NEW_ENV(new_pythonpath, appdir_s + strlen(old_env), "PYTHONPATH=%s/usr/share/pyshared/:%s", appdir, old_env);
 
-    old_env = getenv("XDG_DATA_DIRS") ?: "";
+    old_env = getenv("XDG_DATA_DIRS") ?: "/usr/local/share/:/usr/share/";
     SET_NEW_ENV(new_xdg_data_dirs, appdir_s + strlen(old_env), "XDG_DATA_DIRS=%s/usr/share/:%s", appdir, old_env);
 
     old_env = getenv("PERLLIB") ?: "";
@@ -194,9 +195,11 @@ int main(int argc, char *argv[]) {
 
     /* Run */
     ret = execvp(exe, outargptrs);
+    
+    int error = errno;
 
     if (ret == -1)
-        die("Error executing '%s'; return code: %d\n", exe, ret);
+        die("Error executing '%s': %s\n", exe, strerror(error));
 
     free(line);
     free(desktop_file);
