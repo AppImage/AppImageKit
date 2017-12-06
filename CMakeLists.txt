@@ -153,6 +153,7 @@ mark_as_advanced(mksquashfs_BINARY)
 
 
 # TODO: allow using system wide inotify-tools, analog to libxz
+# TODO: build out of source
 ExternalProject_Add(inotify-tools
     URL https://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
     URL_HASH SHA512=6074d510e89bba5da0d7c4d86f2562c662868666ba0a7ea5d73e53c010a0050dd1fc01959b22cffdb9b8a35bd1b0b43c04d02d6f19927520f05889e8a9297dfb
@@ -160,6 +161,7 @@ ExternalProject_Add(inotify-tools
           COMMAND wget -N "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.sub$<SEMICOLON>hb=HEAD" -O config.sub
     CONFIGURE_COMMAND <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
     BUILD_COMMAND make
+    BUILD_IN_SOURCE ON
     INSTALL_COMMAND make install
 )
 
@@ -169,7 +171,7 @@ set(inotify-tools_SOURCE_DIR "${SOURCE_DIR}")
 set(inotify-tools_INSTALL_DIR "${INSTALL_DIR}")
 mark_as_advanced(inotify-tools_SOURCE_DIR inotify-tools_INSTALL_DIR)
 
-set(inotify-tools_INCLUDE_DIR ${inotify-tools_SOURCE_DIR})
+set(inotify-tools_INCLUDE_DIR ${inotify-tools_SOURCE_DIR}/libinotifytools/src/)
 set(inotify-tools_LIBRARY_DIR ${inotify-tools_INSTALL_DIR}/lib)
 set(inotify-tools_LIBRARIES ${inotify-tools_LIBRARY_DIR}/libinotifytools.a)
 mark_as_advanced(inotify-tools_LIBRARY_DIR inotify-tools_LIBRARIES inotify-tools_INCLUDE_DIR)
