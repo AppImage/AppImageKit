@@ -152,6 +152,7 @@ void initially_register(const char *name, int level)
                     pthread_join(some_thread, NULL);
                 }
             }
+            g_free(absolute_path);
         }
     } while ((entry = readdir(dir)) != NULL);
     closedir(dir);
