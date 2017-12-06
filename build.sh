@@ -101,4 +101,4 @@ bash -ex "$HERE/build-appdirs.sh"
 ls -lh
 
 mkdir -p out
-cp -r build/* ./*.AppDir out/
+cp -r build/out/usr/bin/* ./*.AppDir out/
