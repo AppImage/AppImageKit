@@ -30,10 +30,6 @@ trap cleanup EXIT
 
 cd "$build_dir"
 
-# TODO: ensure mksquashfs is built before the runtime
-# TODO: configure this file with the right path from CMake
-cp "$repo_root"/squashfs-tools/squashfs-tools/mksquashfs .
-
 # Compile runtime but do not link
 # TODO: configure include dir for squashfuse from CMake
 $CC -DVERSION_NUMBER=\"$git_version\" -I"$repo_root"/squashfuse/ -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
