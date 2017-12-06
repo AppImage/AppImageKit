@@ -305,6 +305,13 @@ target_link_libraries(validate
 )
 
 
+add_executable(digest digest.c getsection.c)
+
+target_link_libraries(digest
+    ${OPENSSL_LIBRARIES}
+)
+
+
 ################################
 # unit and functionality tests #
 ################################
