@@ -236,10 +236,11 @@ configure_file(
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/runtime
     COMMAND bash ${PROJECT_BINARY_DIR}/build-runtime.sh
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
-    DEPENDS ${PROJECT_SOURCE_DIR}/runtime.c squashfuse xz
+    MAIN_DEPENDENCY ${PROJECT_SOURCE_DIR}/runtime.c
+    DEPENDS squashfuse xz
 )
 
-add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/data.o
+add_custom_command(OUTPUT data.o
     COMMAND ld -r -b binary -o data.o runtime
     WORKING_DIRECTORY ${PROJECT_BINARY_DIR}
     DEPENDS ${PROJECT_BINARY_DIR}/runtime
