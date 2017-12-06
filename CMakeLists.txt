@@ -13,6 +13,12 @@ execute_process(
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
+# C and C++ versions
+set(CMAKE_C_STANDARD 99)
+set(CMAKE_CXX_STANDARD 98)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 
 ##########################
 # configure dependencies #
