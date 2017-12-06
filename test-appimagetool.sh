@@ -20,9 +20,9 @@ fi
 
 if [ "$TRAVIS" == true ]; then
   # TODO: find way to get colored log on Travis
-  log() { echo "$*"; }
+  log() { echo -e "\n$*\n"; }
 else
-  log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
+  log() { echo -e "\n$(tput setaf 2)$(tput bold)$*$(tput sgr0)\n"; }
 fi
 
 # debug log
