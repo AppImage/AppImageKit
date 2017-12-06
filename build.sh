@@ -76,12 +76,12 @@ mv runtime runtime_with_magic
 
 cd ..
 
-## Lib AppImage optional
-
-mkdir -p libappimage/build
-pushd libappimage/build
-cmake .. && make all && ctest 
-popd
+### Lib AppImage optional
+#
+#mkdir -p libappimage/build
+#pushd libappimage/build
+#cmake .. && make all && ctest
+#popd
 
 # Strip and check size and dependencies
 
