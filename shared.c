@@ -894,9 +894,9 @@ int appimage_register_in_system(char *path, gboolean verbose)
      * and writing attributes into the thumbnail, see
      * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#CREATION */
     if(verbose) {
-        gchar *path = get_thumbnail_path(path, "normal", verbose);
-        fprintf(stderr, "get_thumbnail_path: %s\n", path);
-        g_free(path);
+        gchar *thumbnail_path = get_thumbnail_path(path, "normal", verbose);
+        fprintf(stderr, "get_thumbnail_path: %s\n", thumbnail_path);
+        g_free(thumbnail_path);
     }
     if(type == 1){
         appimage_type1_register_in_system(path, verbose);
