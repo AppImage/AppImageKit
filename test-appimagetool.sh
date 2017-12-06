@@ -1,6 +1,8 @@
 #! /bin/bash
 
-set -xe
+set -e
+set -E
+set -o functrace
 
 # this script attempts to package appimagetool as an AppImage with... surprise, appimagetool
 
@@ -16,17 +18,33 @@ if [ ! -x "$appimagetool" ]; then
     exit 1
 fi
 
-cleanup() { rm -r "$tempdir"; }
-trap cleanup EXIT
-
-cd "$tempdir"
-
 if [ "$TRAVIS" == true ]; then
   # TODO: find way to get colored log on Travis
   log() { echo "$*"; }
 else
   log() { echo "$(tput setaf 2)$(tput bold)$*$(tput sgr0)"; }
 fi
+
+# debug log
+trap '[[ $FUNCNAME = exithook ]] || { last_lineno=$real_lineno; real_lineno=$LINENO; }' DEBUG
+
+exithook() {
+    local lineno=${last_lineno:-$2}
+    if [ $1 -ne 0 ]; then
+        echo "$(tput setaf 1)$(tput bold)Test run failed: error in line $lineno$(tput sgr0)"
+    else
+        log "Tests succeeded!"
+    fi
+
+    rm -r "$tempdir";
+
+    exit $1
+}
+
+trap 'exithook $? $LINENO ${BASH_LINENO[@]}' EXIT
+
+# real script begins here
+cd "$tempdir"
 
 log "create a sample AppDir"
 mkdir -p appimagetool.AppDir/usr/share/metainfo/
@@ -40,23 +58,23 @@ log "create a file that should be ignored"
 touch appimagetool.AppDir/to-be-ignored
 
 log "create an AppImage without an ignore file to make sure it is bundled"
-$appimagetool appimagetool.AppDir appimagetool.AppImage || exit $?
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || exit 1
+$appimagetool appimagetool.AppDir appimagetool.AppImage || false
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || false
 
 log "now set up the ignore file, and check that the file is properly ignored"
 echo "to-be-ignored" > .appimageignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
 
 log "remove the default ignore file, and check if an explicitly passed one works, too"
 rm .appimageignore
 log "to-be-ignored" > ignore
-$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || exit $?
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
+$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || false
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
 
 log "check whether files in both .appimageignore and the explicitly passed file work"
 touch appimagetool.AppDir/to-be-ignored-too
 echo "to-be-ignored-too" > .appimageignore
-$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || exit $?
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && exit 1 || true
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored-too && exit 1 || true
+$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored-too && false
