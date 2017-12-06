@@ -67,8 +67,9 @@ git submodule update --init --recursive
 mkdir build
 cd build
 
-cmake ..
-make -j8
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+make -j$JOBS
+make install DESTDIR=out
 
 xxd runtime | head -n 1
 mv runtime runtime_with_magic
@@ -86,10 +87,11 @@ cd ..
 # Strip and check size and dependencies
 
 rm build/*.o
-$STRIP build/AppRun build/appimaged build/appimagetool build/digest build/mksquashfs build/validate 2>/dev/null # Do NOT strip build/runtime_with_magic
-chmod a+x build/*
-ls -lh build/*
-for FILE in $(ls build/*) ; do
+# Do NOT strip runtime
+find build/out/usr/bin/ -not -iname runtime -exec "$STRIP" "{}" \; 2>/dev/null
+
+ls -lh build/out/usr/bin/
+for FILE in build/out/usr/bin/*; do
   echo "$FILE"
   ldd "$FILE" || true
 done
