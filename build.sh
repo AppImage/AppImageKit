@@ -88,7 +88,7 @@ cd ..
 
 rm build/*.o
 # Do NOT strip runtime
-find build/out/usr/bin/ -not -iname runtime -exec "$STRIP" "{}" \; 2>/dev/null
+find build/out/usr/bin/ -not -iname runtime -print -exec "$STRIP" "{}" \; 2>/dev/null
 
 ls -lh build/out/usr/bin/
 for FILE in build/out/usr/bin/*; do
