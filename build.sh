@@ -27,6 +27,8 @@ while [ $1 ]; do
     '--clean' | '-c' )
       rm -rf build
       git clean -df
+      rm -rf fltk/* fltk/.git
+      rm -rf libdesktopenvironments/* libdesktopenvironments/.git
       rm -rf squashfuse/* squashfuse/.git
       rm -rf squashfs-tools/* squashfs-tools/.git
       exit
@@ -66,6 +68,11 @@ git submodule update
 
 # Clean up from previous run
 rm -rf build/ || true
+
+# Build the dialog tool
+#if [ ! -e "./build/dialog" ]; then
+#  ./build-dialog.sh
+#fi
 
 # Build static libraries
 if [ $STATIC_BUILD -eq 1 ]; then
@@ -178,7 +185,6 @@ cd ../../
 
 pwd
 
-mkdir build
 cd build
 
 cp ../squashfs-tools/squashfs-tools/mksquashfs .

@@ -4,3 +4,9 @@
 [submodule "squashfs-tools"]
 	path = squashfs-tools
 	url = https://github.com/plougher/squashfs-tools.git
+[submodule "fltk"]
+	path = fltk
+	url = https://github.com/darealshinji/fltk-1.3.4
+[submodule "libdesktopenvironments"]
+	path = libdesktopenvironments
+	url = https://github.com/TheAssassin/libdesktopenvironments/
