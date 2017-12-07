@@ -29,8 +29,11 @@ fi
 trap '[[ $FUNCNAME = exithook ]] || { last_lineno=$real_lineno; real_lineno=$LINENO; }' DEBUG
 
 exithook() {
+    local exitcode="$1"
+    echo "$@"
     local lineno=${last_lineno:-$2}
-    if [ $1 -ne 0 ]; then
+
+    if [ $exitcode -ne 0 ]; then
         echo "$(tput setaf 1)$(tput bold)Test run failed: error in line $lineno$(tput sgr0)"
     else
         log "Tests succeeded!"
@@ -38,7 +41,7 @@ exithook() {
 
     rm -r "$tempdir";
 
-    exit $1
+    exit $exitcode
 }
 
 trap 'exithook $? $LINENO ${BASH_LINENO[@]}' EXIT
@@ -76,5 +79,7 @@ log "check whether files in both .appimageignore and the explicitly passed file 
 touch appimagetool.AppDir/to-be-ignored-too
 echo "to-be-ignored-too" > .appimageignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored-too && false
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || true
+$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored-too || true
+
+false
