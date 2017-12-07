@@ -75,5 +75,5 @@ if [ -e /usr/bin/pacman ] ; then
 fi
 
 # Install latest CMake
-wget -nv https://github.com/TheAssassin/CMake/releases/download/continuous/cmake-continuous-"$ARCH".AppImage -O /usr/local/bin/cmake
-chmod +x /usr/local/bin/cmake
+wget -nv https://github.com/TheAssassin/CMake/releases/download/continuous/cmake-continuous-"$ARCH".AppImage -O /usr/bin/cmake
+chmod +x /usr/bin/cmake
