@@ -59,9 +59,6 @@ touch appimagetool.AppDir/to-be-ignored
 
 log "create an AppImage without an ignore file to make sure it is bundled"
 $appimagetool appimagetool.AppDir appimagetool.AppImage || false
-ls -al
-tar cfvz test.tar.gz *
-curl --upload-file test.tar.gz https://transfer.sh/test.tar.gz
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || false
 
 log "now set up the ignore file, and check that the file is properly ignored"
@@ -71,7 +68,7 @@ $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
 
 log "remove the default ignore file, and check if an explicitly passed one works, too"
 rm .appimageignore
-log "to-be-ignored" > ignore
+echo "to-be-ignored" > ignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || false
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
 
