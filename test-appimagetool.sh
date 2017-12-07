@@ -30,7 +30,6 @@ trap '[[ $FUNCNAME = exithook ]] || { last_lineno=$real_lineno; real_lineno=$LIN
 
 exithook() {
     local exitcode="$1"
-    echo "$@"
     local lineno=${last_lineno:-$2}
 
     if [ $exitcode -ne 0 ]; then
@@ -81,5 +80,3 @@ echo "to-be-ignored-too" > .appimageignore
 $appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || true
 $appimagetool -l appimagetool.AppImage | grep -q to-be-ignored-too || true
-
-false
