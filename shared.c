@@ -99,7 +99,7 @@ gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
 /* Return the md5 hash constructed according to
  * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#THUMBSAVE
  * This can be used to identify files that are related to a given AppImage at a given location */
-char * get_md5(char *path)
+char * get_md5(const char *path)
 {
     gchar *uri = g_filename_to_uri (path, NULL, NULL);
     if (uri != NULL)
@@ -128,7 +128,7 @@ char * get_md5(char *path)
  * Check libgnomeui/gnome-thumbnail.h for actually generating thumbnails in the correct
  * sizes at the correct locations automatically; which would draw in a dependency on gdk-pixbuf.
  */
-char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
+char * get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbose)
 {
     char *file, *md5;
     md5 = get_md5(path);
@@ -220,7 +220,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
-int check_appimage_type(char *path, gboolean verbose)
+int check_appimage_type(const char *path, gboolean verbose)
 {
     char buffer[3] = {0x0};
     FILE *f = fopen(path, "rt");
@@ -274,6 +274,69 @@ static gchar *get_file_extension(const gchar *filename)
     return extension;
 }
 
+void squash_extract_inode_to_file(const gchar *dest, sqfs *fs, sqfs_inode inode)
+{
+    off_t bytes_already_read = 0;
+    sqfs_off_t bytes_at_a_time = 64*1024;
+    FILE * f;
+    f = fopen (dest, "w+");
+    if (f == NULL){
+        fprintf(stderr, "fopen error\n");
+        return;
+    }
+    while (bytes_already_read < inode.xtra.reg.file_size)
+    {
+        char buf[bytes_at_a_time];
+        if (sqfs_read_range(fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
+            fprintf(stderr, "sqfs_read_range error\n");
+        fwrite(buf, 1, bytes_at_a_time, f);
+        bytes_already_read = bytes_already_read + bytes_at_a_time;
+    }
+    fclose(f);
+}
+
+gchar * gess_install_destination(const gchar *desktop_icon_value_original, const char *path, const char *md5)
+{
+    gchar *dest = NULL;
+    gchar *dest_dirname = NULL;
+    gchar *dest_basename = NULL;
+
+    gchar * base_name = g_path_get_basename(path);
+    if(g_str_has_prefix(path, "usr/share/icons/") || g_str_has_prefix(path, "usr/share/pixmaps/") || (g_str_has_prefix(path, "usr/share/mime/") && g_str_has_suffix(path, ".xml"))){
+        dest_dirname = g_path_get_dirname(replace_str(path, "usr/share", g_get_user_data_dir()));
+        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, base_name);
+        dest = g_build_path("/", dest_dirname, dest_basename, NULL);
+    }
+    /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
+     * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
+    if(g_str_has_prefix (path, "usr/share/pixmaps/")){
+        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, base_name);
+        dest = g_build_path("/", "/tmp", dest_basename, NULL);
+    }
+
+    /* Some AppImages only have the icon in their root directory, so we have to get it from there */
+    if(
+            g_str_has_prefix(path, desktop_icon_value_original)
+            && !strstr(path, "/")
+            && ( (g_str_has_suffix(path, ".png"))
+                 || (g_str_has_suffix(path, ".xpm"))
+                 || (g_str_has_suffix(path, ".svg"))
+                 || (g_str_has_suffix(path, ".svgz"))
+                 )
+            ){
+        gchar* ext = get_file_extension(path);
+        dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
+        dest = g_build_path("/", "/tmp", dest_basename, NULL);
+        g_free(ext);
+    }
+
+    g_free(base_name);
+    g_free(dest_dirname);
+    g_free(dest_basename);
+
+    return dest;
+}
+
 /* Find files in the squashfs matching to the regex pattern. 
  * Returns a newly-allocated NULL-terminated array of strings.
  * Use g_strfreev() to free it. 
@@ -311,39 +374,8 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                 
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
                     gchar *dest = NULL;
-                    gchar *dest_dirname = NULL;
-                    gchar *dest_basename = NULL;
+                    dest = gess_install_destination(desktop_icon_value_original, trv.path, md5);
 
-                    gchar * base_name = g_path_get_basename(trv.path);
-                    if(g_str_has_prefix(trv.path, "usr/share/icons/") || g_str_has_prefix(trv.path, "usr/share/pixmaps/") || (g_str_has_prefix(trv.path, "usr/share/mime/") && g_str_has_suffix(trv.path, ".xml"))){
-                        dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));
-                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, base_name);
-                        dest = g_build_path("/", dest_dirname, dest_basename, NULL);
-                    }
-                    /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
-                     * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
-                    if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){       
-                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, base_name);
-                        dest = g_build_path("/", "/tmp", dest_basename, NULL);
-                    }
-
-                    /* Some AppImages only have the icon in their root directory, so we have to get it from there */
-                    if(
-                            g_str_has_prefix(trv.path, desktop_icon_value_original)
-                            && !strstr(trv.path, "/")
-                            && ( (g_str_has_suffix(trv.path, ".png"))
-                                 || (g_str_has_suffix(trv.path, ".xpm"))
-                                 || (g_str_has_suffix(trv.path, ".svg"))
-                                 || (g_str_has_suffix(trv.path, ".svgz"))
-                                 )
-                            ){
-                        gchar* ext = get_file_extension(trv.path);
-                        dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
-                        dest = g_build_path("/", "/tmp", dest_basename, NULL);
-                        g_free(ext);
-                    }
-                    
-                    g_free(base_name);
                     if(dest){
                         if(verbose)
                             fprintf(stderr, "install: %s\n", dest);
@@ -355,23 +387,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                         g_free(dirname);
                         
                         // Read the file in chunks
-                        off_t bytes_already_read = 0;
-                        sqfs_off_t bytes_at_a_time = 64*1024;
-                        FILE * f;
-                        f = fopen (dest, "w+");
-                        if (f == NULL){
-                            fprintf(stderr, "fopen error\n");
-                            break;
-                        }
-                        while (bytes_already_read < inode.xtra.reg.file_size)
-                        {
-                            char buf[bytes_at_a_time];
-                            if (sqfs_read_range(fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
-                                fprintf(stderr, "sqfs_read_range error\n");
-                            fwrite(buf, 1, bytes_at_a_time, f);
-                            bytes_already_read = bytes_already_read + bytes_at_a_time;
-                        }
-                        fclose(f);
+                        squash_extract_inode_to_file(dest, fs, inode);
                         chmod (dest, 0644);
                         
                         if(verbose)
@@ -385,8 +401,6 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                     }
 
                     g_free(dest);
-                    g_free(dest_dirname);
-                    g_free(dest_basename);
                 }
             }
         }
@@ -974,4 +988,228 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     
     g_free(md5);
     return 0;
+}
+
+
+int match_regexp(const gchar *text, const gchar *pattern)
+{
+    int result = 0;
+    regex_t regex;
+    regmatch_t match[2];
+    regcomp(&regex, pattern, REG_ICASE | REG_EXTENDED);
+    result = regexec(&regex, text, 2, match, 0);
+    regfree(&regex);
+
+    return result;
+}
+
+gchar **filter_paths(const gchar ** const paths, const char *pattern) {
+    GPtrArray *array = g_ptr_array_new();
+    for (const gchar **path = paths; path && *path; path ++) {
+        int r = match_regexp(*path, pattern);
+        if(r == 0)
+            g_ptr_array_add(array, g_strdup(*path));
+    }
+
+    g_ptr_array_add(array, NULL);
+    return (gchar **) g_ptr_array_free(array, FALSE);
+}
+
+gchar **squash_find(sqfs *fs, const gchar *pattern) {
+    GPtrArray *array = g_ptr_array_new();
+    sqfs_traverse trv;
+    sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
+    if (err!= SQFS_OK)
+        fprintf(stderr, "sqfs_traverse_open error\n");
+    while (sqfs_traverse_next(&trv, &err)) {
+        if (!trv.dir_end) {
+            int r = match_regexp(trv.path, pattern);
+            if(r == 0)
+                g_ptr_array_add(array, g_strdup(trv.path));
+        }
+    }
+    g_ptr_array_add(array, NULL);
+    if (err)
+        fprintf(stderr, "sqfs_traverse_next error\n");
+    sqfs_traverse_close(&trv);
+    return (gchar **) g_ptr_array_free(array, FALSE);
+}
+
+
+
+/* AppImage generic handler to be used in algorithms */
+struct appimage_handler
+{
+    const gchar *path;
+    gchar ** (*list_files_func)(struct appimage_handler * handler);
+    gchar ** (*extract_files_func)(struct appimage_handler * handler,
+                                   const gchar ** const files,
+                                   const gchar *target);
+
+    void (*open) (struct appimage_handler * handler);
+    void (*close) (struct appimage_handler * handler);
+    void *cache;
+    bool is_open;
+} typedef appimage_handler;
+
+bool is_handler_valid(const appimage_handler * handler) {
+    if (!handler) {
+        fprintf(stderr, "WARNING: Invalid handler found, you should take a look at this now!");
+        return false;
+    }
+
+    return true;
+}
+
+void open_dummy (struct appimage_handler * handler) {
+    if ( is_handler_valid(handler) && !handler->is_open ) {
+        fprintf(stderr, "Called %s\n", __FUNCTION__);
+        handler->is_open = true;
+    }
+}
+void close_dummy (struct appimage_handler * handler) {
+    if ( is_handler_valid(handler) && handler->is_open ) {
+        fprintf(stderr, "Called %s\n", __FUNCTION__);
+        handler->is_open = false;
+    }
+}
+
+gchar ** list_files_func_dummy(appimage_handler * handler) {
+    fprintf(stderr, "Called %s\n", __FUNCTION__);
+    return NULL;
+}
+
+gchar ** extract_files_func_dummy(appimage_handler * handler,
+                                  const gchar ** const files,
+                                  const gchar *target) {
+    fprintf(stderr, "Called %s\n", __FUNCTION__);
+    return NULL;
+}
+
+void open_appimage_type1(appimage_handler * handler) {
+    if ( is_handler_valid(handler) && !handler->is_open ) {
+        fprintf(stderr, "Opening %s\n", handler->path);
+        int r;
+        struct archive *a;
+        a = archive_read_new();
+        archive_read_support_format_iso9660(a);
+        if ((r = archive_read_open_filename(a, handler->path, 10240))) {
+            fprintf(stderr, "%s", archive_error_string(a));
+        } else {
+            handler->cache = a;
+            handler->is_open = true;
+        }
+    }
+}
+
+void close_appimage_type1(appimage_handler * handler) {
+    if ( is_handler_valid(handler) && handler->is_open ) {
+        fprintf(stderr, "Closing %s\n", handler->path);
+        struct archive *a = handler->cache;
+        archive_read_close(a);
+        archive_read_free(a);
+
+        handler->cache = NULL;
+        handler->is_open = false;
+    }
+}
+
+gchar ** list_files_appimage_type1(appimage_handler * handler) {
+    GPtrArray *array = g_ptr_array_new();
+
+    if (handler->is_open) {
+        struct archive *a = handler->cache;
+        struct archive_entry *entry;
+        int r;
+
+        for (;;) {
+            r = archive_read_next_header(a, &entry);
+            if (r == ARCHIVE_EOF) {
+                break;
+            }
+            if (r != ARCHIVE_OK) {
+                fprintf(stderr, "%s\n", archive_error_string(a));
+                break;
+            }
+
+            /* Skip all but regular files; FIXME: Also handle symlinks correctly */
+            if(archive_entry_filetype(entry) != AE_IFREG) {
+                continue;
+            }
+            gchar *filename;
+            filename = replace_str(archive_entry_pathname(entry), "./", "");
+            g_ptr_array_add(array, filename);
+        }
+    }
+
+    g_ptr_array_add(array, NULL);
+    return (gchar **) g_ptr_array_free(array, FALSE);
+}
+
+appimage_handler create_appimage_handler_type_1() {
+    appimage_handler h;
+    h.list_files_func = list_files_appimage_type1;
+    h.extract_files_func = extract_files_func_dummy;
+    h.open = open_appimage_type1;
+    h.close = close_appimage_type1;
+
+    return h;
+}
+
+/* Factory function for creating the right appimage handler for
+ * a given file. */
+appimage_handler create_appimage_handler(const char * const path) {
+    int appimage_type = check_appimage_type(path, 0);
+
+    appimage_handler handler;
+    fprintf(stderr,"AppImage type: %d\n", appimage_type);
+    switch (appimage_type) {
+    case 1:
+        handler = create_appimage_handler_type_1();
+        break;
+    default:
+        fprintf(stderr,"Appimage type %d not supported yet\n", appimage_type);
+        handler.list_files_func = list_files_func_dummy;
+        handler.extract_files_func = extract_files_func_dummy;
+        handler.open = open_dummy;
+        handler.close = close_dummy;
+        break;
+    }
+    handler.path = path;
+    handler.is_open = false;
+    return handler;
+}
+
+void extract_appimage_icon(appimage_handler *h, const gchar *path) {
+    h->open(h);
+    gchar ** files = h->list_files_func(h);
+    fprintf(stderr, "AppImage Files:\n");
+    for (gchar ** file = files; file && *file; file++)
+        fprintf(stderr, "   %s\n", *file);
+
+    g_strfreev(files);
+    h->close(h);
+}
+
+/* Create AppImage thumbanil according to
+ * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
+ */
+void create_thumbnail(const gchar * appimage_file_path, gboolean verbose) {
+    // extract AppImage icon to /tmp
+    appimage_handler handler = create_appimage_handler(appimage_file_path);
+
+    gchar *path = "/tmp/appimage_thumbnailer_tmp";
+    extract_appimage_icon(&handler, path);
+
+    // transform it to png with sizes 128x128 and 254x254
+
+    // get thumbnail destination paths
+    gchar * normal_path = get_thumbnail_path(appimage_file_path, "normal", verbose);
+    gchar * large_path = get_thumbnail_path(appimage_file_path, "large", verbose);
+
+    // deploy icon as thumbnail
+
+    // clean up
+    g_free(normal_path);
+    g_free(large_path);
 }

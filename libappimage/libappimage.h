@@ -24,6 +24,11 @@ extern "C" {
 
     /* Unregister an AppImage in the system */
     int appimage_unregister_in_system(const char *path, gboolean verbose);
+
+    /* Create AppImage thumbanil according to
+     * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
+     */
+    void create_thumbnail(const gchar * appimage_file_path);
 }
 
 #endif // !AppImage
