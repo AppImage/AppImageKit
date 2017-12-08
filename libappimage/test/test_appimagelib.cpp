@@ -29,10 +29,10 @@ class AppImageTest : public testing::Test {
 
     std::string path;
 
-    path = std::string(TEST_DATA_DIR) + "/AppImageExtract_6-x86_64.AppImage";
+    path = std::string(TEST_DATA_DIR) + "AppImageExtract_6-x86_64.AppImage";
     appImage_type_1_file_path = g_strdup(path.c_str());
 
-    path = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
+    path = std::string(TEST_DATA_DIR) + "Echo-x86_64.AppImage";
     appImage_type_2_file_path = g_strdup(path.c_str());
   }
 
@@ -164,19 +164,34 @@ TEST_F(AppImageTest, get_md5_invalid_file_path) {
 TEST_F(AppImageTest, create_thumbnail_appimage_type_1) {
   create_thumbnail(appImage_type_1_file_path);
 
-//  gchar* sum = get_md5(appImage_type_1_file_path);
+  gchar* sum = get_md5(appImage_type_1_file_path);
+  std::string path = std::string(g_get_user_cache_dir())
+          + "/thumbnails/normal/"
+          + std::string(sum) + ".png";
+
+  g_free(sum);
+
+  ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+
+  // Clean
+  rm_file(path);
+}
+
+//TEST_F(AppImageTest, create_thumbnail_appimage_type_2) {
+//  create_thumbnail(appImage_type_2_file_path);
+
+//  gchar* sum = get_md5(appImage_type_2_file_path);
 //  std::string path = std::string(g_get_user_cache_dir())
 //          + "/thumbnails/normal/"
 //          + std::string(sum) + ".png";
 
 //  g_free(sum);
 
-//  // std::cout << path << std::endl;
 //  ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
 
 //  // Clean
 //  rm_file(path);
-}
+//}
 
 }  // namespace
 

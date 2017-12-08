@@ -34,6 +34,7 @@
 #include <dirent.h>
 #include <stdio.h>
 #include <errno.h>
+#include <fcntl.h>
 
 #include <glib.h>
 #include <glib/gprintf.h>
@@ -112,7 +113,7 @@ char * get_md5(const char *path)
         g_checksum_get_digest(checksum, digest, &digest_len);
         g_assert(digest_len == 16);
 
-        gchar *out = g_strdup_printf("%s", g_checksum_get_string(checksum)); 
+        gchar *out = g_strdup_printf("%s", g_checksum_get_string(checksum));
 
         g_checksum_free(checksum);
         g_free(uri);
@@ -133,6 +134,7 @@ char * get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbo
     char *file, *md5;
     md5 = get_md5(path);
     file = g_strconcat (md5, ".png", NULL);
+    fprintf(stderr, "---- > %s %s %s\n", path, md5, file);
 
     gchar *thumbnail_path = g_build_filename (g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
 
@@ -1035,19 +1037,18 @@ gchar **squash_find(sqfs *fs, const gchar *pattern) {
     return (gchar **) g_ptr_array_free(array, FALSE);
 }
 
-
+/* AppImage generic handler calback to be used in algorithms */
+typedef void (*traverse_cb)(void *handler, void *entry, void *command_data);
 
 /* AppImage generic handler to be used in algorithms */
 struct appimage_handler
 {
     const gchar *path;
-    gchar ** (*list_files_func)(struct appimage_handler * handler);
-    gchar ** (*extract_files_func)(struct appimage_handler * handler,
-                                   const gchar ** const files,
-                                   const gchar *target);
+    char* (*get_file_name) (struct appimage_handler * handler, void *entry);
+    void (*extract_file) (struct appimage_handler * handler, void *entry, char *target);
 
-    void (*open) (struct appimage_handler * handler);
-    void (*close) (struct appimage_handler * handler);
+    void (*traverse)(struct appimage_handler * handler, traverse_cb command, void *data);
+
     void *cache;
     bool is_open;
 } typedef appimage_handler;
@@ -1061,30 +1062,24 @@ bool is_handler_valid(const appimage_handler * handler) {
     return true;
 }
 
-void open_dummy (struct appimage_handler * handler) {
-    if ( is_handler_valid(handler) && !handler->is_open ) {
-        fprintf(stderr, "Called %s\n", __FUNCTION__);
-        handler->is_open = true;
-    }
-}
-void close_dummy (struct appimage_handler * handler) {
-    if ( is_handler_valid(handler) && handler->is_open ) {
-        fprintf(stderr, "Called %s\n", __FUNCTION__);
-        handler->is_open = false;
-    }
+/*
+ * Dummy fallback functions
+ */
+void dummy_traverse_func(appimage_handler * handler, traverse_cb command, void *data) {
+    fprintf(stderr, "Called %s\n", __FUNCTION__);
 }
 
-gchar ** list_files_func_dummy(appimage_handler * handler) {
+char* dummy_get_file_name (appimage_handler * handler, void *data) {
     fprintf(stderr, "Called %s\n", __FUNCTION__);
-    return NULL;
 }
 
-gchar ** extract_files_func_dummy(appimage_handler * handler,
-                                  const gchar ** const files,
-                                  const gchar *target) {
+void dummy_extract_file(struct appimage_handler * handler, void *data, char *target) {
     fprintf(stderr, "Called %s\n", __FUNCTION__);
-    return NULL;
 }
+
+/*
+ * AppImage Type 1 Functions
+ */
 
 void open_appimage_type1(appimage_handler * handler) {
     if ( is_handler_valid(handler) && !handler->is_open ) {
@@ -1114,8 +1109,13 @@ void close_appimage_type1(appimage_handler * handler) {
     }
 }
 
-gchar ** list_files_appimage_type1(appimage_handler * handler) {
-    GPtrArray *array = g_ptr_array_new();
+void traverse_appimage_type1(appimage_handler * handler, traverse_cb command, void *command_data) {
+    open_appimage_type1(handler);
+
+    if (!command) {
+        fprintf(stderr, "No traverse command set.\n");
+        return;
+    }
 
     if (handler->is_open) {
         struct archive *a = handler->cache;
@@ -1136,22 +1136,46 @@ gchar ** list_files_appimage_type1(appimage_handler * handler) {
             if(archive_entry_filetype(entry) != AE_IFREG) {
                 continue;
             }
-            gchar *filename;
-            filename = replace_str(archive_entry_pathname(entry), "./", "");
-            g_ptr_array_add(array, filename);
+
+            command(handler, entry, command_data);
         }
     }
 
-    g_ptr_array_add(array, NULL);
-    return (gchar **) g_ptr_array_free(array, FALSE);
+    close_appimage_type1(handler);
+}
+
+char* appimage_type1_get_file_name (appimage_handler * handler, void *data) {
+    struct archive_entry *entry = (struct archive_entry *) data;
+    char *filename = replace_str(archive_entry_pathname(entry), "./", "");
+    return filename;
+}
+
+void appimage_type1_extract_file (struct appimage_handler * handler, void *data, char *target) {
+    struct archive *a = handler->cache;
+    struct archive_entry *entry = data;
+    gchar *dirname = g_path_get_dirname(target);
+    if(g_mkdir_with_parents(dirname, 0755))
+        fprintf(stderr, "Could not create directory: %s\n", dirname);
+    g_free(dirname);
+
+    int f = -1;
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    f = open(target, O_WRONLY | O_CREAT | O_TRUNC, mode);
+
+    if (f == -1){
+        fprintf(stderr, "open error: %s\n", target);
+        return;
+    }
+
+    archive_read_data_into_fd(a, f);
+    close(f);
 }
 
 appimage_handler create_appimage_handler_type_1() {
     appimage_handler h;
-    h.list_files_func = list_files_appimage_type1;
-    h.extract_files_func = extract_files_func_dummy;
-    h.open = open_appimage_type1;
-    h.close = close_appimage_type1;
+    h.traverse = traverse_appimage_type1;
+    h.get_file_name = appimage_type1_get_file_name;
+    h.extract_file = appimage_type1_extract_file;
 
     return h;
 }
@@ -1169,10 +1193,7 @@ appimage_handler create_appimage_handler(const char * const path) {
         break;
     default:
         fprintf(stderr,"Appimage type %d not supported yet\n", appimage_type);
-        handler.list_files_func = list_files_func_dummy;
-        handler.extract_files_func = extract_files_func_dummy;
-        handler.open = open_dummy;
-        handler.close = close_dummy;
+        handler.traverse = dummy_traverse_func;
         break;
     }
     handler.path = path;
@@ -1180,15 +1201,31 @@ appimage_handler create_appimage_handler(const char * const path) {
     return handler;
 }
 
-void extract_appimage_icon(appimage_handler *h, const gchar *path) {
-    h->open(h);
-    gchar ** files = h->list_files_func(h);
-    fprintf(stderr, "AppImage Files:\n");
-    for (gchar ** file = files; file && *file; file++)
-        fprintf(stderr, "   %s\n", *file);
+void move_file(const char *source, const  char *target) {
+    GError *error = NULL;
+    GFile *source_file = g_file_new_for_path(source);
+    GFile *target_file = g_file_new_for_path(target);
+    if (!g_file_move (source_file, target_file, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error)) {
+        fprintf(stderr, "Error moving file: %s\n", error->message);
+        g_clear_error (&error);
+    }
 
-    g_strfreev(files);
-    h->close(h);
+    g_object_unref(source_file);
+    g_object_unref(target_file);
+}
+
+
+void extract_appimage_icon_command(appimage_handler *h, struct archive_entry *entry, gchar *path) {
+    char *filename = h->get_file_name(h, entry);
+    if (strcmp(".DirIcon", filename) == 0)
+        h->extract_file(h, entry, path);
+
+    free(filename);
+}
+
+void extract_appimage_icon(appimage_handler *h, gchar *target) {
+    traverse_cb cb = (traverse_cb) extract_appimage_icon_command;
+    h->traverse(h, cb, target);
 }
 
 /* Create AppImage thumbanil according to
@@ -1198,18 +1235,17 @@ void create_thumbnail(const gchar * appimage_file_path, gboolean verbose) {
     // extract AppImage icon to /tmp
     appimage_handler handler = create_appimage_handler(appimage_file_path);
 
-    gchar *path = "/tmp/appimage_thumbnailer_tmp";
+    gchar *path = "/tmp/appimage_thumbnailer_tmp.png";
     extract_appimage_icon(&handler, path);
 
-    // transform it to png with sizes 128x128 and 254x254
+    if (g_file_test(path, G_FILE_TEST_EXISTS) ) {
+        // TODO: transform it to png with sizes 128x128 and 254x254
+        gchar * target_path = get_thumbnail_path(appimage_file_path, "normal", verbose);
 
-    // get thumbnail destination paths
-    gchar * normal_path = get_thumbnail_path(appimage_file_path, "normal", verbose);
-    gchar * large_path = get_thumbnail_path(appimage_file_path, "large", verbose);
+        // deploy icon as thumbnail
+        move_file (path, target_path);
 
-    // deploy icon as thumbnail
-
-    // clean up
-    g_free(normal_path);
-    g_free(large_path);
+        // clean up
+        g_free(target_path);
+    }
 }
