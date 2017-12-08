@@ -174,24 +174,24 @@ TEST_F(AppImageTest, create_thumbnail_appimage_type_1) {
   ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
 
   // Clean
-  rm_file(path);
+//  rm_file(path);
 }
 
-//TEST_F(AppImageTest, create_thumbnail_appimage_type_2) {
-//  create_thumbnail(appImage_type_2_file_path);
+TEST_F(AppImageTest, create_thumbnail_appimage_type_2) {
+  create_thumbnail(appImage_type_2_file_path);
 
-//  gchar* sum = get_md5(appImage_type_2_file_path);
-//  std::string path = std::string(g_get_user_cache_dir())
-//          + "/thumbnails/normal/"
-//          + std::string(sum) + ".png";
+  gchar* sum = get_md5(appImage_type_2_file_path);
+  std::string path = std::string(g_get_user_cache_dir())
+          + "/thumbnails/normal/"
+          + std::string(sum) + ".png";
 
-//  g_free(sum);
+  g_free(sum);
 
-//  ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+  ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
 
-//  // Clean
+  // Clean
 //  rm_file(path);
-//}
+}
 
 }  // namespace
 
