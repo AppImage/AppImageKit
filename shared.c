@@ -377,8 +377,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                 g_ptr_array_add(array, g_strdup(trv.path));
                 
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
-                    gchar *dest = NULL;
-                    dest = gess_install_destination(desktop_icon_value_original, trv.path, md5);
+                    gchar *dest = gess_install_destination(desktop_icon_value_original, trv.path, md5);
 
                     if(dest){
                         if(verbose)
@@ -1129,12 +1128,10 @@ char* appimage_type1_get_file_name (appimage_handler * handler, void *data) {
 
 void appimage_type1_extract_file (appimage_handler * handler, void *data, char *target) {
     struct archive *a = handler->cache;
-    struct archive_entry *entry = data;
     mk_base_dir(target);
 
-    int f = -1;
     mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
-    f = open(target, O_WRONLY | O_CREAT | O_TRUNC, mode);
+    int f = open(target, O_WRONLY | O_CREAT | O_TRUNC, mode);
 
     if (f == -1){
         fprintf(stderr, "open error: %s\n", target);
