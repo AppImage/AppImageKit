@@ -299,7 +299,7 @@ void squash_extract_inode_to_file(sqfs *fs, sqfs_inode inode, const gchar *dest)
     fclose(f);
 }
 
-gchar * gess_install_destination(const gchar *desktop_icon_value_original, const char *path, const char *md5)
+gchar * guess_install_destination(const gchar *desktop_icon_value_original, const char *path, const char *md5)
 {
     gchar *dest = NULL;
     gchar *dest_dirname = NULL;
@@ -377,7 +377,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                 g_ptr_array_add(array, g_strdup(trv.path));
                 
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
-                    gchar *dest = gess_install_destination(desktop_icon_value_original, trv.path, md5);
+                    gchar *dest = guess_install_destination(desktop_icon_value_original, trv.path, md5);
 
                     if(dest){
                         if(verbose)
