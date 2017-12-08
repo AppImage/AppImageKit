@@ -898,6 +898,8 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     return TRUE;
 }
 
+void create_thumbnail(const gchar * appimage_file_path, gboolean verbose);
+
 /* Register an AppImage in the system */
 int appimage_register_in_system(char *path, gboolean verbose)
 {
@@ -908,16 +910,9 @@ int appimage_register_in_system(char *path, gboolean verbose)
         fprintf(stderr, "\n");
         fprintf(stderr, "-> REGISTER %s\n", path);
     }
-    /* TODO: Generate thumbnails.
-     * Generating proper thumbnails involves more than just copying images out of the AppImage,
-     * including checking if the thumbnail already exists and if it's valid 
-     * and writing attributes into the thumbnail, see
-     * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#CREATION */
-    if(verbose) {
-        gchar *thumbnail_path = get_thumbnail_path(path, "normal", verbose);
-        fprintf(stderr, "get_thumbnail_path: %s\n", thumbnail_path);
-        g_free(thumbnail_path);
-    }
+
+    create_thumbnail(path, verbose);
+
     if(type == 1){
         appimage_type1_register_in_system(path, verbose);
     }
