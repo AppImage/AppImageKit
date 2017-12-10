@@ -1,0 +1,327 @@
+# Translations template for PROJECT.
+# Copyright (C) 2017 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2017-12-10 17:44+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: zh\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.5.1\n"
+
+#: index.jinja2:7
+msgid "page_title"
+msgstr ""
+
+#: index.jinja2:17
+msgid "meta_description"
+msgstr ""
+
+#: index.jinja2:58
+msgid "docs_link_title"
+msgstr ""
+
+#: index.jinja2:63
+msgid "source_link_title"
+msgstr ""
+
+#: index.jinja2:68
+msgid "wiki_link_title"
+msgstr ""
+
+#: index.jinja2:73
+msgid "discourse_link_title"
+msgstr ""
+
+#: index.jinja2:139
+msgid "Linux apps that run anywhere"
+msgstr ""
+
+#: index.jinja2:143
+msgid "user_story_1"
+msgstr ""
+
+#: index.jinja2:146
+msgid "user_story_2"
+msgstr ""
+
+#: index.jinja2:156
+msgid "Leading Linux distributions"
+msgstr ""
+
+#: index.jinja2:158
+msgid "download_make_executable_run"
+msgstr ""
+
+#: index.jinja2:159
+#, python-format
+msgid ""
+"\n"
+"                 can_run_in_sandboxes_like %(sandbox_name)s\n"
+"            "
+msgstr ""
+
+#: index.jinja2:183
+msgid "distribute_linux_apps_as_appimage_and_win_users"
+msgstr ""
+
+#: index.jinja2:184
+msgid "package_once_and_run_everywhere"
+msgstr ""
+
+#: index.jinja2:185
+msgid "reach_users_on_all_distros"
+msgstr ""
+
+#: index.jinja2:194
+msgid "what_people_think"
+msgstr ""
+
+#: index.jinja2:209
+msgid "torvalds_quote"
+msgstr ""
+
+#: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
+#: index.jinja2:429
+msgid "picture:"
+msgstr ""
+
+#: index.jinja2:214 index.jinja2:233
+msgid "copyright_faces_of_open_source_/_peter_adams"
+msgstr ""
+
+#: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
+msgid "licensed_under_CC-BY-NC-SA_4.0"
+msgstr ""
+
+#: index.jinja2:217 index.jinja2:236
+msgid "original_picture"
+msgstr ""
+
+#: index.jinja2:229
+msgid "hohndel_quote"
+msgstr ""
+
+#: index.jinja2:249
+msgid "shuttleworth_quote"
+msgstr ""
+
+#: index.jinja2:254
+msgid "copyright_aaron_hockley"
+msgstr ""
+
+#: index.jinja2:255
+msgid "licensed_under_CC-BY-SA_2.0"
+msgstr ""
+
+#: index.jinja2:267
+msgid "richard_brown_quote"
+msgstr ""
+
+#: index.jinja2:272
+msgid "copyright_theassassin"
+msgstr ""
+
+#: index.jinja2:299
+msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
+msgstr ""
+
+#: index.jinja2:305
+msgid "logo:"
+msgstr ""
+
+#: index.jinja2:306
+msgid "licensed_under_GPLv2"
+msgstr ""
+
+#: index.jinja2:308
+msgid "see_more"
+msgstr ""
+
+#: index.jinja2:323
+msgid "see_it_in_action"
+msgstr ""
+
+#: index.jinja2:325
+msgid "here_appimage_for_you_to_try"
+msgstr ""
+
+#: index.jinja2:326
+msgid "just_download_make_executable_run"
+msgstr ""
+
+#: index.jinja2:327
+msgid "no_need_to_install"
+msgstr ""
+
+#: index.jinja2:328
+msgid "runs_on_most_desktops"
+msgstr ""
+
+#: index.jinja2:333
+msgid "try_subsurface_64-bit"
+msgstr ""
+
+#: index.jinja2:337
+msgid "try_subsurface_32-bit"
+msgstr ""
+
+#: index.jinja2:340
+#, python-format
+msgid ""
+"\n"
+"                    "
+"many_upstream_projects_like_%(krita)s_subsurface_musescore_kdevelop_and_digiKam_have_started_to_provide_appimages_directly_on_their_download_pages"
+"\n"
+"                    "
+msgstr ""
+
+#: index.jinja2:343
+#, python-format
+msgid ""
+"\n"
+"                    "
+"more_appimages_for_other_apps_like_atom_arduino_blender_chromium_firefox_libreoffice_and_qcad_can_be_downloaded_%(here)s_(64-bit)"
+"\n"
+"                    "
+msgstr ""
+
+#: index.jinja2:357
+msgid "how_to_run_an_appimage?"
+msgstr ""
+
+#: index.jinja2:365
+msgid "to_run_an_AppImage_simply:"
+msgstr ""
+
+#: index.jinja2:368
+msgid "make_it_executable"
+msgstr ""
+
+#: index.jinja2:374
+msgid "and_run!"
+msgstr ""
+
+#: index.jinja2:380
+msgid "that_was_easy_wasn't_it?"
+msgstr ""
+
+#: index.jinja2:384
+msgid "watch_how_it_works"
+msgstr ""
+
+#: index.jinja2:401
+msgid "buzzwords_easy_title"
+msgstr ""
+
+#: index.jinja2:404
+msgid "buzzwords_easy_description"
+msgstr ""
+
+#: index.jinja2:410
+msgid "buzzwords_trusted_title"
+msgstr ""
+
+#: index.jinja2:413
+msgid "buzzwords_trusted_description"
+msgstr ""
+
+#: index.jinja2:419
+msgid "buzzwords_fast_title"
+msgstr ""
+
+#: index.jinja2:422
+msgid "buzzwords_fast_description"
+msgstr ""
+
+#: index.jinja2:430
+msgid "copyright_andis_rado"
+msgstr ""
+
+#: index.jinja2:450
+msgid "buzzwords_open_source_title"
+msgstr ""
+
+#: index.jinja2:453
+msgid "buzzwords_open_source_description"
+msgstr ""
+
+#: index.jinja2:464
+msgid "buzzwords_proven_title"
+msgstr ""
+
+#: index.jinja2:467
+msgid "buzzwords_proven_description"
+msgstr ""
+
+#: index.jinja2:477
+msgid "buzzwords_compatible_title"
+msgstr ""
+
+#: index.jinja2:480
+msgid "buzzwords_compatible_description"
+msgstr ""
+
+#: index.jinja2:494
+msgid "get_started_title"
+msgstr ""
+
+#: index.jinja2:497
+msgid "get_started_description"
+msgstr ""
+
+#: index.jinja2:500
+msgid "wiki_title"
+msgstr ""
+
+#: index.jinja2:512
+msgid "forum_title"
+msgstr ""
+
+#: index.jinja2:515
+msgid "forum_description"
+msgstr ""
+
+#: index.jinja2:521
+msgid "forum_link_title"
+msgstr ""
+
+#: index.jinja2:536
+msgid "live_chat_title"
+msgstr ""
+
+#: index.jinja2:539
+msgid "live_chat_description"
+msgstr ""
+
+#: index.jinja2:542
+msgid "live_chat_join_us"
+msgstr ""
+
+#: index.jinja2:548
+msgid "#AppImage_on_freenode"
+msgstr ""
+
+#: index.jinja2:563
+msgid "contact_probono"
+msgstr ""
+
+#: index.jinja2:570
+msgid "github_title"
+msgstr ""
+
+#: index.jinja2:578
+msgid "e-mail_title"
+msgstr ""
+
+#: index.jinja2:586
+msgid "google+_title"
+msgstr ""
