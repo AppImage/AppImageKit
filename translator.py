@@ -2,9 +2,9 @@
 
 import argparse
 import babel.support
-import gettext
 import jinja2
 import os
+import subprocess
 import sys
 
 LOCALES = ["en"]
@@ -61,44 +61,51 @@ class cd:
 
 
 def extract_strings():
+    print("Extracting strings...")
     with cd(this_dir):
-        return os.system("pybabel extract -F babel.cfg -o messages.pot .")
+        return subprocess.call(["pybabel", "extract", "-F", "babel.cfg", "-o", "messages.pot", "."]) == 0
 
 
 def init_translations():
+    print("Initializating translations...")
+
     retval = 0
 
     with cd(this_dir):
         for locale in LOCALES:
-            this_retval = os.system("pybabel init -i messages.pot -l %s -d locale/" % locale)
+            this_retval = subprocess.call(["pybabel", "init", "-i", "messages.pot", "-l", locale, "-d", "locale/"])
             if this_retval > retval:
                 retval = this_retval
 
-    return retval
+    return retval == 0
 
 
 def update_translations():
+    print("Updating translations...")
+
     retval = 0
 
     with cd(this_dir):
         for locale in LOCALES:
-            this_retval = os.system("pybabel update -i messages.pot -l %s -d locale/" % locale)
+            this_retval = subprocess.call(["pybabel", "update", "-i", "messages.pot", "-l", locale, "-d", "locale/"])
             if this_retval > retval:
                 retval = this_retval
 
-    return retval
+    return retval == 0
 
 
 def compile_translations():
+    print("Compiling translations...")
+
     retval = 0
 
     with cd(this_dir):
         for locale in LOCALES:
-            this_retval = os.system("pybabel compile -d locale/ -l %s" % locale)
+            this_retval = subprocess.call(["pybabel", "compile", "-d", "locale/", "-l", locale])
             if this_retval > retval:
                 retval = this_retval
 
-    return retval
+    return retval == 0
 
 
 def main():
@@ -107,43 +114,46 @@ def main():
 
     parser.add_argument("--render-pages", action='store_true')
     parser.add_argument("--extract-strings", action='store_true')
-    parser.add_argument("--init-translations", action='store_true')
-    parser.add_argument("--update-translations", action='store_true')
-    parser.add_argument("--compile-translations", action='store_true')
+    parser.add_argument("--init", action='store_true')
+    parser.add_argument("--update", action='store_true')
+    parser.add_argument("--compile", action='store_true')
 
     ns = parser.parse_args()
 
-    arg_given = False
+    arg_given = any([getattr(ns, i, False) for i in [
+        "render_pages", "extract_strings", "init", "update", "compile"
+    ]])
+
+    # define default set of operations: compile and render
+    if not arg_given:
+        ns.compile_translations = True
+        ns.render_pages = True
 
     # execute all requested operations until one of them fails
-    if getattr(ns, "render_pages", False):
-        arg_given = True
-        if not render_pages():
-            sys.exit(1)
-
     if getattr(ns, "extract_strings", False):
-        arg_given = True
         if not extract_strings():
+            print("Error extracting strings!")
             sys.exit(1)
 
-    if getattr(ns, "init_translations", False):
-        arg_given = True
+    if getattr(ns, "init", False):
         if not init_translations():
+            print("Error initializing translations!")
             sys.exit(1)
 
-    if getattr(ns, "update_translations", False):
-        arg_given = True
+    if getattr(ns, "update", False):
         if not update_translations():
+            print("Error updating translations!")
             sys.exit(1)
 
-    if getattr(ns, "compile_translations", False):
-        arg_given = True
+    if getattr(ns, "compile", False):
         if not compile_translations():
+            print("Error compiling translations!")
             sys.exit(1)
 
-    if not arg_given:
-        parser.print_help()
-        sys.exit(0)
+    if getattr(ns, "render_pages", False):
+        if not render_pages():
+            print("Error rendering pages!")
+            sys.exit(1)
 
 
 if __name__ == "__main__":
