@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-12-10 17:44+0100\n"
+"POT-Creation-Date: 2017-12-10 18:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,7 +42,7 @@ msgid "discourse_link_title"
 msgstr ""
 
 #: index.jinja2:139
-msgid "Linux apps that run anywhere"
+msgid "linux_apps_that_run_anywhere"
 msgstr ""
 
 #: index.jinja2:143
@@ -54,7 +54,7 @@ msgid "user_story_2"
 msgstr ""
 
 #: index.jinja2:156
-msgid "Leading Linux distributions"
+msgid "leading_linux_distributions"
 msgstr ""
 
 #: index.jinja2:158
