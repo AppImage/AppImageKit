@@ -117,8 +117,8 @@ def main():
     # parse arguments
     parser = argparse.ArgumentParser("AppImage website translator")
 
-    parser.add_argument("--render-pages", action='store_true')
-    parser.add_argument("--extract-strings", action='store_true')
+    parser.add_argument("--render", action='store_true')
+    parser.add_argument("--extract", action='store_true')
     parser.add_argument("--init", action='store_true')
     parser.add_argument("--update", action='store_true')
     parser.add_argument("--compile", action='store_true')
@@ -126,16 +126,16 @@ def main():
     ns = parser.parse_args()
 
     arg_given = any([getattr(ns, i, False) for i in [
-        "render_pages", "extract_strings", "init", "update", "compile"
+        "render", "extract", "init", "update", "compile"
     ]])
 
     # define default set of operations: compile and render
     if not arg_given:
         ns.compile = True
-        ns.render_pages = True
+        ns.render = True
 
     # execute all requested operations until one of them fails
-    if getattr(ns, "extract_strings", False):
+    if getattr(ns, "extract", False):
         if not extract_strings():
             print("Error extracting strings!")
             sys.exit(1)
@@ -155,7 +155,7 @@ def main():
             print("Error compiling translations!")
             sys.exit(1)
 
-    if getattr(ns, "render_pages", False):
+    if getattr(ns, "render", False):
         if not render_pages():
             print("Error rendering pages!")
             sys.exit(1)
