@@ -5,8 +5,8 @@
 #
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2017-12-10 20:24+0000\n"
-"Last-Translator: TheAssassin <theassassin@assassinate-you.net>\n"
+"PO-Revision-Date: 2017-12-10 20:54+0000\n"
+"Last-Translator: probonopd <probono@puredarwin.org>\n"
 "Language-Team: Chinese <https://translate.assassinate-"
 "you.net/projects/appimage/website/zh/>\n"
 "Language: zh\n"
@@ -323,3 +323,11 @@ msgstr ""
 #: index.jinja2:586
 msgid "google+_title"
 msgstr ""
+
+#: index.jinja2:139
+msgid "linux_apps_that_run_anywhere"
+msgstr "让Linux应用随处运行"
+
+#: index.jinja2:156
+msgid "leading_linux_distributions"
+msgstr "领先的Linux应用打包方式"
