@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2017-12-10 21:22+0000\n"
+"PO-Revision-Date: 2017-12-10 21:25+0000\n"
 "Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
 "Language-Team: Chinese <https://translate.assassinate-"
 "you.net/projects/appimage/website/zh/>\n"
@@ -22,11 +22,11 @@ msgstr ""
 
 #: index.jinja2:7
 msgid "page_title"
-msgstr ""
+msgstr "AppImage | 让Linux应用随处运行"
 
 #: index.jinja2:17
 msgid "meta_description"
-msgstr ""
+msgstr "AppImage | 让Linux应用随处运行"
 
 #: index.jinja2:58
 msgid "docs_link_title"
@@ -38,7 +38,7 @@ msgstr "代码"
 
 #: index.jinja2:68
 msgid "wiki_link_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:73
 msgid "discourse_link_title"
@@ -54,7 +54,7 @@ msgstr "作为一名Linux用户，我想从软件应用作者处下载后，像�
 
 #: index.jinja2:146
 msgid "user_story_2"
-msgstr ""
+msgstr "作为一名应用开发者，我想为Linux桌面系统提供软件包，而不需要将其分发到每一个发行版中，因此不必为不同的发行版编译多个版本。"
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
@@ -297,11 +297,11 @@ msgstr "在AppImageKit Wiki中了解如何使用AppImageKit创建自己的AppIma
 
 #: index.jinja2:500
 msgid "wiki_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:512
 msgid "forum_title"
-msgstr ""
+msgstr "论坛"
 
 #: index.jinja2:515
 msgid "forum_description"
@@ -309,7 +309,7 @@ msgstr "在Discourse论坛和邮件列表上解答你的问题，让我们知道
 
 #: index.jinja2:521
 msgid "forum_link_title"
-msgstr ""
+msgstr "论坛"
 
 #: index.jinja2:536
 msgid "live_chat_title"
