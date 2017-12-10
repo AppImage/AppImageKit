@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2017-12-10 21:07+0000\n"
+"PO-Revision-Date: 2017-12-10 21:26+0000\n"
 "Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
 "Language-Team: German <https://translate.assassinate-"
 "you.net/projects/appimage/website/de/>\n"
@@ -58,6 +58,9 @@ msgstr ""
 #: index.jinja2:146
 msgid "user_story_2"
 msgstr ""
+"Als Softwareautor möchte ich Anwendungen für Linux-Desktopsysteme "
+"bereitstellen, ohne sie in eine Distribution bringen zu müssen und ohne für "
+"unzählige verschiedene Distributionen bauen zu müssen."
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
@@ -326,11 +329,11 @@ msgstr ""
 
 #: index.jinja2:500
 msgid "wiki_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:512
 msgid "forum_title"
-msgstr ""
+msgstr "Discourse-Forum"
 
 #: index.jinja2:515
 msgid "forum_description"
@@ -341,7 +344,7 @@ msgstr ""
 
 #: index.jinja2:521
 msgid "forum_link_title"
-msgstr ""
+msgstr "Discourse-Forum"
 
 #: index.jinja2:536
 msgid "live_chat_title"
