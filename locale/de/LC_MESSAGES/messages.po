@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2017-12-10 21:01+0000\n"
+"PO-Revision-Date: 2017-12-10 21:07+0000\n"
 "Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
 "Language-Team: German <https://translate.assassinate-"
 "you.net/projects/appimage/website/de/>\n"
@@ -22,11 +22,11 @@ msgstr ""
 
 #: index.jinja2:7
 msgid "page_title"
-msgstr ""
+msgstr "AppImage | Linux-Anwendungen, die überall laufen"
 
 #: index.jinja2:17
 msgid "meta_description"
-msgstr ""
+msgstr "AppImage | Linux-Anwendungen, die überall laufen"
 
 #: index.jinja2:58
 msgid "docs_link_title"
@@ -38,7 +38,7 @@ msgstr "Quellcode"
 
 #: index.jinja2:68
 msgid "wiki_link_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:73
 msgid "discourse_link_title"
