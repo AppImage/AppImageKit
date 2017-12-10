@@ -8,39 +8,41 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 17:44+0100\n"
-"PO-Revision-Date: 2017-12-10 03:38+0100\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"PO-Revision-Date: 2017-12-10 17:04+0000\n"
+"Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
+"Language-Team: English <http://translate.assassinate-"
+"you.net/projects/appimage/website/en/>\n"
 "Language: en\n"
-"Language-Team: en <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.17.1\n"
 "Generated-By: Babel 2.5.1\n"
 
 #: index.jinja2:7
 msgid "page_title"
-msgstr ""
+msgstr "AppImage | Linux apps that run anywhere"
 
 #: index.jinja2:17
 msgid "meta_description"
-msgstr ""
+msgstr "AppImage | Linux apps that run anywhere"
 
 #: index.jinja2:58
 msgid "docs_link_title"
-msgstr ""
+msgstr "Documentation"
 
 #: index.jinja2:63
 msgid "source_link_title"
-msgstr ""
+msgstr "Source Code"
 
 #: index.jinja2:68
 msgid "wiki_link_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:73
 msgid "discourse_link_title"
-msgstr ""
+msgstr "Community"
 
 #: index.jinja2:139
 msgid "Linux apps that run anywhere"
@@ -607,4 +609,3 @@ msgstr ""
 
 #~ msgid "Google+"
 #~ msgstr ""
-
