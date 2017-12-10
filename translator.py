@@ -41,7 +41,8 @@ def render_pages():
         print("Rendering page %s for locale %s" % (filename, locale))
 
         with open(os.path.join(this_dir, "www", filename), "w") as f:
-            f.write(template.render())
+            html = template.render(languages=[locale])
+            f.write(html)
 
     return True
 
@@ -126,7 +127,7 @@ def main():
 
     # define default set of operations: compile and render
     if not arg_given:
-        ns.compile_translations = True
+        ns.compile = True
         ns.render_pages = True
 
     # execute all requested operations until one of them fails
