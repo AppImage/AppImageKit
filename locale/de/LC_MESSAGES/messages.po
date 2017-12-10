@@ -5,8 +5,8 @@
 #
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2017-12-10 20:16+0000\n"
-"Last-Translator: probonopd <probono@puredarwin.org>\n"
+"PO-Revision-Date: 2017-12-10 20:33+0000\n"
+"Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
 "Language-Team: German <https://translate.assassinate-"
 "you.net/projects/appimage/website/de/>\n"
 "Language: de\n"
