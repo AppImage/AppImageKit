@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 17:44+0100\n"
-"PO-Revision-Date: 2017-12-10 17:04+0000\n"
+"PO-Revision-Date: 2017-12-10 17:38+0000\n"
 "Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
-"Language-Team: English <http://translate.assassinate-"
+"Language-Team: English <https://translate.assassinate-"
 "you.net/projects/appimage/website/en/>\n"
 "Language: en\n"
 "MIME-Version: 1.0\n"
@@ -46,23 +46,31 @@ msgstr "Community"
 
 #: index.jinja2:139
 msgid "linux_apps_that_run_anywhere"
-msgstr ""
+msgstr "Linux apps that run anywhere"
 
 #: index.jinja2:143
 msgid "user_story_1"
 msgstr ""
+"As a user, I want to download an application from the original author, and "
+"run it on my Linux desktop system just like I would do with a Windows or Mac "
+"application."
 
 #: index.jinja2:146
 msgid "user_story_2"
 msgstr ""
+"As an application author, I want to provide packages for Linux desktop "
+"systems, without the need to get it \\'into\\' a distribution and without "
+"having to build for gazillions of different distributions."
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
-msgstr ""
+msgstr "Leading Linux distributions"
 
 #: index.jinja2:158
 msgid "download_make_executable_run"
 msgstr ""
+"Download an application, make it executable, and run! No need to install. No "
+"system libraries or system preferences are altered."
 
 #: index.jinja2:159
 #, python-format
@@ -71,111 +79,117 @@ msgid ""
 "                 can_run_in_sandboxes_like %(sandbox_name)s\n"
 "            "
 msgstr ""
+"\n"
+"                 Can also run in a sandbox like %(sandbox_name)s\n"
+"            "
 
 #: index.jinja2:183
 msgid "distribute_linux_apps_as_appimage_and_win_users"
 msgstr ""
+"Distribute your desktop Linux application in the AppImage format and win "
+"users running all common Linux distributions."
 
 #: index.jinja2:184
 msgid "package_once_and_run_everywhere"
-msgstr ""
+msgstr "Package once and run everywhere."
 
 #: index.jinja2:185
 msgid "reach_users_on_all_distros"
-msgstr ""
+msgstr "Reach users on all major desktop distributions."
 
 #: index.jinja2:194
 msgid "what_people_think"
-msgstr ""
+msgstr "What people think"
 
 #: index.jinja2:209
 msgid "torvalds_quote"
-msgstr ""
+msgstr "This is just very cool."
 
 #: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
 #: index.jinja2:429
 msgid "picture:"
-msgstr ""
+msgstr "Picture:"
 
 #: index.jinja2:214 index.jinja2:233
 msgid "copyright_faces_of_open_source_/_peter_adams"
-msgstr ""
+msgstr "Copyright Faces of Open Source / Peter Adams."
 
 #: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
 msgid "licensed_under_CC-BY-NC-SA_4.0"
-msgstr ""
+msgstr "Licensed under CC-BY-NC-SA 4.0."
 
 #: index.jinja2:217 index.jinja2:236
 msgid "original_picture"
-msgstr ""
+msgstr "Original picture"
 
 #: index.jinja2:229
 msgid "hohndel_quote"
-msgstr ""
+msgstr "The AppImage approach is really really useful."
 
 #: index.jinja2:249
 msgid "shuttleworth_quote"
 msgstr ""
+"AppImages are a pretty clean experience and I admire the work behind them."
 
 #: index.jinja2:254
 msgid "copyright_aaron_hockley"
-msgstr ""
+msgstr "Copyright Aaron Hockley."
 
 #: index.jinja2:255
 msgid "licensed_under_CC-BY-SA_2.0"
-msgstr ""
+msgstr "Licensed under CC-BY-SA 2.0."
 
 #: index.jinja2:267
 msgid "richard_brown_quote"
-msgstr ""
+msgstr "I now love AppImage. I really love AppImage."
 
 #: index.jinja2:272
 msgid "copyright_theassassin"
-msgstr ""
+msgstr "Copyright TheAssassin."
 
 #: index.jinja2:299
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
-msgstr ""
+msgstr "Drawing: lewing@isc.tamu.edu Larry Ewing and The GIMP."
 
 #: index.jinja2:305
 msgid "logo:"
-msgstr ""
+msgstr "Logo:"
 
 #: index.jinja2:306
 msgid "licensed_under_GPLv2"
-msgstr ""
+msgstr "Licensed under the terms of the GPLv2."
 
 #: index.jinja2:308
 msgid "see_more"
-msgstr ""
+msgstr "See more"
 
 #: index.jinja2:323
 msgid "see_it_in_action"
-msgstr ""
+msgstr "See it in action"
 
 #: index.jinja2:325
 msgid "here_appimage_for_you_to_try"
-msgstr ""
+msgstr "Here is an application packaged as an AppImage for you to try."
 
 #: index.jinja2:326
 msgid "just_download_make_executable_run"
-msgstr ""
+msgstr "Just download the application, make it executable, and run!"
 
 #: index.jinja2:327
 msgid "no_need_to_install"
-msgstr ""
+msgstr "No need to install."
 
 #: index.jinja2:328
 msgid "runs_on_most_desktops"
-msgstr ""
+msgstr "Runs on most 32-bit and 64-bit Linux desktops."
 
 #: index.jinja2:333
 msgid "try_subsurface_64-bit"
-msgstr ""
+msgstr "Try Subsurface AppImage (64-bit)"
 
 #: index.jinja2:337
 msgid "try_subsurface_32-bit"
-msgstr ""
+msgstr "Try Subsurface AppImage (32-bit)"
 
 #: index.jinja2:340
 #, python-format
@@ -186,6 +200,11 @@ msgid ""
 "\n"
 "                    "
 msgstr ""
+"\n"
+"                    Many upstream projects like %(krita)s, Subsurface, "
+"MuseScore, KDevelop, and digiKam have started to provideAppImages directly "
+"on their download pages.\n"
+"                    "
 
 #: index.jinja2:343
 #, python-format
@@ -196,138 +215,162 @@ msgid ""
 "\n"
 "                    "
 msgstr ""
+"\n"
+"                    More AppImages for other applications like Atom, "
+"Arduino, Blender, Chromium, Firefox, LibreOffice, and QCAD can be downloaded "
+"%(here)s (64-bit).\n"
+"                    "
 
 #: index.jinja2:357
 msgid "how_to_run_an_appimage?"
-msgstr ""
+msgstr "How to run an AppImage?"
 
 #: index.jinja2:365
 msgid "to_run_an_AppImage_simply:"
-msgstr ""
+msgstr "To run an AppImage, simply:"
 
 #: index.jinja2:368
 msgid "make_it_executable"
-msgstr ""
+msgstr "Make it executable"
 
 #: index.jinja2:374
 msgid "and_run!"
-msgstr ""
+msgstr "and run!"
 
 #: index.jinja2:380
 msgid "that_was_easy_wasn't_it?"
-msgstr ""
+msgstr "That was easy, wasn't it?"
 
 #: index.jinja2:384
 msgid "watch_how_it_works"
-msgstr ""
+msgstr "Watch How It Works"
 
 #: index.jinja2:401
 msgid "buzzwords_easy_title"
-msgstr ""
+msgstr "Easy."
 
 #: index.jinja2:404
 msgid "buzzwords_easy_description"
 msgstr ""
+"The key idea of the AppImage format is <b>one app = one file</b>. Every "
+"AppImage contains an app and all the files the app needs to run. In other "
+"words, each AppImage has no dependencies other than what is included in the "
+"targeted base operating system(s)."
 
 #: index.jinja2:410
 msgid "buzzwords_trusted_title"
-msgstr ""
+msgstr "Trusted."
 
 #: index.jinja2:413
 msgid "buzzwords_trusted_description"
 msgstr ""
+"AppImage format is ideal for <b>upstream packaging</b>, which means that you "
+"get the software directly from the original author(s) without any "
+"intermediaries, exactlyin the way the author(s) intended. And quickly."
 
 #: index.jinja2:419
 msgid "buzzwords_fast_title"
-msgstr ""
+msgstr "Fast."
 
 #: index.jinja2:422
 msgid "buzzwords_fast_description"
 msgstr ""
+"AppImages can be downloaded and run <b>without installation</b> or the need "
+"for root rights."
 
 #: index.jinja2:430
 msgid "copyright_andis_rado"
-msgstr ""
+msgstr "Copyright Andis Rado."
 
 #: index.jinja2:450
 msgid "buzzwords_open_source_title"
-msgstr ""
+msgstr "Open Source."
 
 #: index.jinja2:453
 msgid "buzzwords_open_source_description"
 msgstr ""
+"Like Linux itself, AppImageKit is Open Source. Use it to package your open "
+"or commercial applications."
 
 #: index.jinja2:464
 msgid "buzzwords_proven_title"
-msgstr ""
+msgstr "Proven."
 
 #: index.jinja2:467
 msgid "buzzwords_proven_description"
 msgstr ""
+"AppImageKit and its predecessor, klik, have been in the making for over a "
+"decade."
 
 #: index.jinja2:477
 msgid "buzzwords_compatible_title"
-msgstr ""
+msgstr "Compatible."
 
 #: index.jinja2:480
 msgid "buzzwords_compatible_description"
 msgstr ""
+"Works with most reasonably recent desktop Linux distributions. Well, almost."
 
 #: index.jinja2:494
 msgid "get_started_title"
-msgstr ""
+msgstr "Get started packaging your application!"
 
 #: index.jinja2:497
 msgid "get_started_description"
 msgstr ""
+"Learn about how you can use AppImageKit to create your own AppImages in the "
+"AppImageKit Wiki."
 
 #: index.jinja2:500
 msgid "wiki_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:512
 msgid "forum_title"
-msgstr ""
+msgstr "Discourse Forum"
 
 #: index.jinja2:515
 msgid "forum_description"
 msgstr ""
+"Get your answers questioned on the Discourse forum and mailing list. Let us "
+"know what application you are working on. Discuss with other AppImage users."
 
 #: index.jinja2:521
 msgid "forum_link_title"
-msgstr ""
+msgstr "Discourse Forum"
 
 #: index.jinja2:536
 msgid "live_chat_title"
-msgstr ""
+msgstr "Live Chat"
 
 #: index.jinja2:539
 msgid "live_chat_description"
 msgstr ""
+"Feel free to provide some feedback, give suggestions, or to just say hello!"
 
 #: index.jinja2:542
 msgid "live_chat_join_us"
-msgstr ""
+msgstr "Join us on #AppImage on irc.freenode.net"
 
 #: index.jinja2:548
 msgid "#AppImage_on_freenode"
-msgstr ""
+msgstr "#AppImage on irc.freenode.net"
 
 #: index.jinja2:563
 msgid "contact_probono"
-msgstr ""
+msgstr "Contact probono"
 
 #: index.jinja2:570
 msgid "github_title"
-msgstr ""
+msgstr "GitHub"
 
 #: index.jinja2:578
 msgid "e-mail_title"
-msgstr ""
+msgstr "e-mail"
 
 #: index.jinja2:586
 msgid "google+_title"
-msgstr ""
+msgstr "Google+"
 
 #~ msgid ""
 #~ "Download an application, make it "
@@ -609,13 +652,3 @@ msgstr ""
 
 #~ msgid "Google+"
 #~ msgstr ""
-<<<<<<< HEAD
-
-#~ msgid "Linux apps that run anywhere"
-#~ msgstr ""
-
-#~ msgid "Leading Linux distributions"
-#~ msgstr ""
-
-=======
->>>>>>> 894d5ee0fc2297f8de6ded8268ebf3470d2380fd
