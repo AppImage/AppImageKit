@@ -7,9 +7,13 @@ import os
 import subprocess
 import sys
 
-LOCALES = ["en"]
+LOCALES = {"en"}
 
 this_dir = os.path.abspath(os.path.dirname(__file__))
+
+for entry in os.listdir(os.path.join(this_dir, "locale")):
+    if os.path.isdir(os.path.join(this_dir, "locale", entry)):
+        LOCALES.add(entry)
 
 
 def render_pages():
