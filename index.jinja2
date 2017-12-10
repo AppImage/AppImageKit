@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+
+    <title>{{ _('AppImage | Linux apps that run anywhere') }}</title>
+
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0'
+          name='viewport'/>
+    <meta name="viewport" content="width=device-width"/>
+    <link href="css/bootstrap.css" rel="stylesheet"/>
+    <link href="css/landing-page.css" rel="stylesheet"/>
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+
+    <!-- SEO -->
+    <meta name="description"
+          content="Appimage | Linux apps that run anywhere"/>
+    <meta name="keywords"
+          content="appimage, portable linux apps, app, linux, portable, probonopd"/>
+
+    <!-- Metadata for share buttons -->
+    <meta property="og:title" content="AppImage"/>
+    <meta property="og:image" content="images/logo3.svg"/>
+    <meta property="og:description" content="Linux apps that run anywhere"/>
+    <link rel='shortcut icon' href='favicon.ico' type='image/x-icon'/>
+
+</head>
+
+<body class="landing-page">
+
+<nav class="navbar navbar-transparent navbar-top" role="navigation">
+    <div class="container">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+            <button id="menu-toggle" type="button" class="navbar-toggle"
+                    data-toggle="collapse" data-target="#example">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar bar1"></span>
+                <span class="icon-bar bar2"></span>
+                <span class="icon-bar bar3"></span>
+            </button>
+            <a href="">
+                <div class="logo-container">
+                    <div class="logo">
+                        <!-- you logо img -->
+                    </div>
+                    <div class="brand">
+                        AppImage
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="example">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="https://github.com/AppImage/AppImageKit/blob/appimagetool/master/README.md">
+                        {{ _('Documentation') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com/AppImage/AppImageKit">
+                        {{ _('Source') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="https://github.com/AppImage/AppImageKit/wiki">
+                        {{ _('Wiki') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="https://discourse.appimage.org">
+                        {{ _('Community') }}
+                    </a>
+                </li>
+
+                <li>
+                    <iframe style="margin-top:11%;margin-left:10%"
+                            src="https://ghbtns.com/github-btn.html?user=AppImage&repo=appimagekit&type=star&count=true&size=large"
+                            frameborder="0" scrolling="0" width="160px"
+                            height="30px"></iframe>
+
+                    <!--<a href="https://github.com/probonopd/AppImageKit">
+                        <i class="fa fa-github-alt"></i> </a>-->
+                </li>
+            </ul>
+        </div><!-- /.navbar-collapse -->
+    </div>
+</nav>
+<!-- social buttons right -->
+<div class="container-fixed">
+    <div class="row">
+        <div class="col-md-1 navbar-fixed-top"
+             style="margin-left:92%; margin-top:9%;">
+            <ul>
+
+                <a href="https://github.com/probonopd"
+                   class="btn btn-social btn-simple"><i
+                        class="fa fa-github-alt fa-fw"></i> <span
+                        class="network-name"></span></a>
+                <a href="mailto:probono@puredarwin.org"
+                   class="btn btn-social btn-simple"><i
+                        class="fa fa-envelope fa-fw"></i> <span
+                        class="network-name"></span></a>
+                <a href="https://plus.google.com/u/0/105493415534008524873"
+                   class="btn btn-social btn-simple"><i
+                        class="fa fa-google-plus fa-fw"></i> <span
+                        class="network-name"></span></a>
+                <a href="https://www.reddit.com/domain/appimage.org/"
+                   class="btn btn-social btn-simple"><i
+                        class="fa fa-reddit fa-fw"></i> <span
+                        class="network-name"></span></a>
+                <a href="https://twitter.com/appimages"
+                   class="btn btn-social btn-simple"><i
+                        class="fa fa-twitter fa-fw"></i> <span
+                        class="network-name"></span></a>
+                <a href="https://discourse.appimage.org"
+                   class="btn btn-social btn-simple"><i
+                        class="fa fa-comment-o fa-fw"></i> <span
+                        class="network-name"></span></a>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<div class="parallax filter-gradient blue" data-color="blue">
+    <div class="parallax-background">
+        <img src="images/background.jpg">
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-5 hidden-xs">
+                <div class="parallax-image">
+                    <img src="images/logo3.svg"/>
+                </div>
+            </div>
+            <div class="col-sm-6 col-xs-offset-1">
+                <div class="description">
+                    <h2>
+                        {{ _('Linux apps that run anywhere') }}
+                    </h2>
+                    <br>
+                    <h5>
+                        {{ _('"As a user, I want to download an application from the original author, and run it on my Linux desktop system just like I would do with a Windows or Mac application."') }}
+                    </h5>
+                    <h5>
+                        {{ _('"As an application author, I want to provide packages for Linux desktop systems, without the need to get it \'into\' a distribution and without having to build for gazillions of different distributions."') }}
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section section-gray section-clients">
+    <div class="container text-center">
+        <h4 class="header-text">{{ _('Leading Linux distributions') }}</h4>
+        <p>
+            {% trans sandbox_name='<a href="https://github.com/netblue30/firejail" target="_blank">Firejail</a>'|safe %}
+                Download an application, make it executable, and run! No need to install. No system libraries or system preferences are altered. Can also run in a sandbox like {{sandbox_name}}.
+            {% endtrans %}
+        </p>
+        <br/>
+        <div class="logos">
+            <ul class="list-unstyled">
+                <li><img src="images/distributions/arch.svg" alt="Arch Linux"
+                         height="48" width="48"></li>
+                <li><img src="images/distributions/centos.svg" alt="CentOS"
+                         height="48" width="48"></li>
+                <li><img src="images/distributions/debian.svg" alt="debian"
+                         height="48" width="48"></li>
+                <li><img src="images/distributions/fedora.svg" alt="Fedora"
+                         height="48" width="48"></li>
+                <li><img src="images/distributions/opensuse.svg" alt="openSUSE"
+                         height="64" width="64"></li>
+                <li><img src="images/distributions/rh.svg" alt="Red Hat"
+                         height="48" width="128"></li>
+                <li><img src="images/distributions/ubuntu.svg" alt="Ubuntu"
+                         height="48" width="48"></li>
+            </ul>
+        </div>
+        <p>
+            {{ _('Distribute your desktop Linux application in the AppImage format and win users running all common Linux distributions. Package onceand run everywhere. Reach users on all major desktop distributions.') }}
+        </p>
+        <br/>
+    </div>
+</div>
+
+<div class="section section-testimonial">
+    <div class="container">
+        <h4 class="header-text text-center">
+            {{ _('What people think') }}
+        </h4>
+
+        <div id="carousel-example-generic" class="carousel fade"
+             data-ride="carousel">
+            <!-- Wrapper for slides -->
+            <div class="carousel-inner" role="listbox">
+                <div class="item active">
+                    <div class="mask">
+                        <img src="images/linus-torvalds.jpg">
+                    </div>
+                    <div class="carousel-testimonial-caption">
+                        <p>Linus Torvalds</p>
+                        <h3>
+                            <a href="https://plus.google.com/+LinusTorvalds/posts/WyrATKUnmrS" target="_blank">
+                                {{ _('"This is just very cool."') }}
+                            </a>
+                        </h3>
+                        <span class="picture-copyright">
+                            {{ _('Picture: Copyright Faces of Open Source / Peter Adams.') }}
+                            {{ _('Licensed under CC-BY-NC-SA 4.0.') }}
+                            <a href="http://facesofopensource.com/linus-torvalds-2/">
+                                {{ _('Original picture') }}
+                            </a>
+                        </span>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="mask">
+                        <img src="images/dirk-hohndel.jpg">
+                    </div>
+                    <div class="carousel-testimonial-caption">
+                        <p>Dirk Hohndel</p>
+                        <h3>
+                            {{ _('"The AppImage approach is really really useful."') }}
+                        </h3>
+                        <span class="picture-copyright">
+                            {{ _('Picture: Copyright Faces of Open Source / Peter Adams.') }}
+                            {{ _('Licensed under CC-BY-NC-SA 4.0.') }}
+                            <a href="http://facesofopensource.com/dirk-hohndel/">
+                                {{ _('Original picture') }}
+                            </a>
+                        </span>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="mask">
+                        <img src="images/mark-shuttleworth.jpg">
+                    </div>
+                    <div class="carousel-testimonial-caption">
+                        <p>Mark Shuttleworth</p>
+                        <h3>
+                            <a href="https://plus.google.com/+MarkShuttleworthCanonical/posts/7LYubpaHUHH" target="_blank">
+                                {{ _('"AppImages are a pretty clean experience<br>and I admire the work behind them."') }}
+                            </a>
+                        </h3>
+                        <span class="picture-copyright">
+                            {{ _('Picture: Copyright Aaron Hockley. Licensed under CC-BY-SA 2.0.') }}
+                        </span>
+                    </div>
+                </div>
+                <div class="item">
+                    <div class="mask">
+                        <img src="images/richard-brown.jpg">
+                    </div>
+                    <div class="carousel-testimonial-caption">
+                        <p>Richard Brown</p>
+                        <h3>
+                            <a href="https://media.ccc.de/v/1320-opensuse-jurrassic-park" target="_blank">
+                                {{ _('"I now love AppImage. I really love AppImage."') }}
+                            </a>
+                        </h3>
+                        <span class="picture-copyright">
+                            {{ _('Picture: Copyright TheAssassin. Licensed under CC-BY-NC-SA 4.0.') }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <ol class="carousel-indicators carousel-indicators-blue">
+                <li data-target="#carousel-example-generic" data-slide-to="0"
+                    class="active"></li>
+                <li data-target="#carousel-example-generic"
+                    data-slide-to="1"></li>
+                <li data-target="#carousel-example-generic"
+                    data-slide-to="2"></li>
+                <li data-target="#carousel-example-generic"
+                    data-slide-to="3"></li>
+            </ol>
+        </div>
+
+    </div>
+</div>
+
+<div class="section section-demo">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div id="description-carousel" class="carousel fade"
+                     data-ride="carousel">
+                    <div class="carousel-inner">
+                        <div class="item">
+                            <img src="images/tux.svg"
+                                 style="max-height: 320px;">
+                            <span class="picture-copyright">
+                                {{ _('Drawing: lewing@isc.tamu.edu Larry Ewing and The GIMP.') }}
+                            </span>
+                        </div>
+                        <div class="item active">
+                            <img src="images/subsurface.svg"
+                                 style="max-height: 315px; padding-bottom: 5px;">
+                            <span class="picture-copyright">
+                                {{ _('Logo: Licensed under the terms of the GPLv2.') }}
+                                <a href="https://commons.wikimedia.org/wiki/File:Tux.svg">
+                                    {{ _('See more') }}.
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+
+                    <ol class="carousel-indicators carousel-indicators-blue">
+                        <li data-target="#description-carousel"
+                            data-slide-to="0" class=""></li>
+                        <li data-target="#description-carousel"
+                            data-slide-to="1" class="active"></li>
+                    </ol>
+                </div>
+            </div>
+            <div class="col-md-5 col-md-offset-1">
+                <h4 class="header-text">{{ _('See it in action') }}</h4>
+                <p>
+                    {{ _('Here is an application packaged as an AppImage for you to try. Just download the application, make it executable, and run! No need to install. Runs on most 32-bit and 64-bit Linux desktops.') }}
+                </p>
+                <a href="https://subsurface-divelog.org/downloads/Subsurface-4.6.4-x86_64.AppImage"
+                   id="Demo" class="btn btn-lg btn-info btn-fill"
+                   data-button="info">
+                    {{ _('Try Subsurface AppImage (64-bit)') }}
+                </a>
+                <a href="https://github.com/probonopd/AppImages/releases/download/1/Subsurface-4.5.1.251-i386.AppImage"
+                   id="Demo" class="btn btn-lg btn-info " data-button="info">
+                    {{ _('Try Subsurface AppImage (32-bit)') }}
+                </a>
+                <p>
+                    <a href="https://appimage.github.io/apps/" target="_blank">
+                        {% trans here='<a href="https://bintray.com/probono/AppImages">here</a>'|safe %}
+                        Many upstream projects</a> like Krita, Subsurface, MuseScore, KDevelop, and digiKam have started to provideAppImages directly on their download pages. More AppImages for other applications like Atom, Arduino, Blender, Chromium, Firefox, LibreOffice, and QCAD can be downloaded {{ here }} (64-bit).
+                        {%  endtrans %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section section-presentation">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>
+                    {{ _('How to run an AppImage?') }}
+                </h2>
+                <br/>
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" width="640"
+                            height="360"
+                            src="https://www.youtube.com/embed/nzZ6Ikc7juw"
+                            frameborder="0" allowfullscreen></iframe>
+                </div>
+
+                <p>
+                    {{ _('To run an AppImage, simply:') }}
+                </p>
+                <p>
+                    {{ _('Make it executable') }}
+                </p>
+                <pre>
+                    $ chmod a+x Subsurface*.AppImage
+                </pre>
+                <p>
+                    {{ _('and run!') }}
+                </p>
+                <pre>
+                    $ ./Subsurface*.AppImage
+                </pre>
+                <p>
+                    {{ _('That was easy, wasn\'t it?') }}
+                </p>
+
+                <h2>
+                    {{ _('Watch How It Works') }}
+                </h2>
+                <br/>
+                <div class="embed-responsive embed-responsive-16by9">
+                    <iframe class="embed-responsive-item" width="640"
+                            height="360"
+                            src="https://www.youtube.com/embed/mVVP77jC8Fc"
+                            frameborder="0" allowfullscreen></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section section-presentation">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="description">
+                    <h4 class="header-text">
+                        {{ _('Easy.') }}
+                    </h4>
+                    <p>
+                        {{ _('The key idea of the AppImage format is <b>one app = one file</b>. Every AppImage contains an app and all the files the app needs to run. In other words, each AppImage has no dependencies other than what is included in the targeted base operating system(s).') }}
+                    </p>
+
+                    <br>
+
+                    <h4 class="header-text">
+                        {{ _('Trusted.') }}
+                    </h4>
+                    <p>
+                        {{ _('AppImage format is ideal for <b>upstream packaging</b>, which means that you get the software directly from the original author(s) without any intermediaries, exactlyin the way the author(s) intended. And quickly.') }}
+                    </p>
+
+                    <br>
+
+                    <h4 class="header-text">
+                        {{ _('Fast.') }}
+                    </h4>
+                    <p>
+                        {{ _('AppImages can be downloaded and run <b>without installation</b> or the need for root rights.') }}
+                    <p>
+                </div>
+            </div>
+            <div class="col-md-5 col-md-offset-1 hidden-xs">
+                <img src="images/linux-weekend-2017.jpg">
+                <span class="picture-copyright">
+                    {{ _('Picture: Copyright Andis Rado.') }}
+                    <br/>
+                    {{ _('Licensed under the CC-BY-SA 4.0 International.') }}
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="section section-features section-no-padding">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4 grayblock2">
+                <div class="card card-blue">
+                    <div class="icon">
+                        <i class="fa fa-github"></i>
+                    </div>
+                    <div class="text">
+                        <h4>
+                            {{ _('Open Source') }}
+                        </h4>
+                        <p>
+                            {{ _('Like Linux itself, AppImageKit is Open Source. Use it to package your open or commercial applications.') }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 grayblock">
+                <div class="card card-blue">
+                    <div class="icon">
+                        <i class="fa  fa-check-circle"></i>
+                    </div>
+                    <h4>
+                        {{ _('Proven') }}
+                    </h4>
+                    <p>
+                        {{ _('AppImageKit and its predecessor, klik, have been in the making for over a decade.') }}
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4 grayblock2">
+                <div class="card card-blue">
+                    <div class="icon">
+                        <i class="fa fa-linux"></i>
+                    </div>
+                    <h4>
+                        {{ _('Compatible') }}
+                    </h4>
+                    <p>
+                        {{ _('Works with most reasonably recent desktop Linux distributions. Well, almost.') }}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="section section-no-padding">
+    <div class="full-background filter-gradient blue"
+         style="background-image:url('images/background.jpg');">
+        <div class="container">
+            <div class="info">
+                <h1>
+                    {{ _('Get started packaging your application!') }}
+                </h1>
+                <p>
+                    {{ _('Learn about how you can use AppImageKit to create your own AppImages in the AppImageKit Wiki.') }}
+                </p>
+                <a href="https://github.com/AppImage/AppImageKit/wiki/Creating-AppImages"
+                   class="btn btn-neutral btn-lg">WIKI</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section section-gray">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>
+                    {{ _('Discourse forum') }}
+                </h2>
+                <p>
+                    {{ _('Get your answers questioned on the Discourse forum and mailing list. Let us know what application you are working on. Discuss with other AppImage users.') }}
+                </p>
+                <ul class="list-inline banner-social-buttons">
+                    <li>
+                        <a href="https://discourse.appimage.org/" class="btn btn-default btn-lg">
+                            <span class="network-name">
+                                {{ _('Discourse forum') }}
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>
+                    {{ _('Live Chat') }}
+                </h2>
+                <p>
+                    {{ _('Feel free to provide some feedback, give suggestions, or to just say hello!') }}</p>
+                <p>
+                    {{ _('Join us on #AppImage on irc.freenode.net') }}
+                </p>
+                <ul class="list-inline banner-social-buttons">
+                    <li>
+                        <a href="irc://irc.freenode.net/#AppImage" class="btn btn-default btn-lg">
+                            <span class="network-name">
+                                {{ _('#AppImage on Freenode') }}
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="section section-contact">
+    <div class="container text-center">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2">
+                <h2>
+                    {{ _('Contact probono') }}
+                </h2>
+                <ul class="list-inline banner-social-buttons">
+                    <li>
+                        <a href="https://github.com/probonopd" class="btn btn-default btn-lg">
+                            <i class="fa fa-github-alt fa-fw"></i>
+                            <span class="network-name">
+                                {{ _('GitHub') }}
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="mailto:probono@puredarwin.org" class="btn btn-default btn-lg">
+                            <i class="fa fa-envelope fa-fw"></i>
+                            <span class="network-name">
+                                {{ _('e-mail') }}
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://plus.google.com/u/0/105493415534008524873" class="btn btn-default btn-lg">
+                            <i class="fa fa-google-plus fa-fw"></i>
+                            <span class="network-name">
+                                {{ _('Google+') }}
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer class="footer">
+    <div class="container">
+        <nav class="pull-left copyright">
+            &copy; 2015-17 <a href="https://github.com/probonopd">Simon Peter</a> &mdash; I <i class="fa fa-heart"></i> simplicity
+        </nav>
+        <div class="social-area pull-right">
+            <a href="https://github.com/AppImage"
+               class="btn btn-social btn-simple"><i
+                    class="fa fa-github-alt fa-fw"></i> <span
+                    class="network-name"></span></a>
+            <a href="mailto:probono@puredarwin.org"
+               class="btn btn-social btn-simple"><i
+                    class="fa fa-envelope fa-fw"></i> <span
+                    class="network-name"></span></a>
+            <a href="https://plus.google.com/u/0/105493415534008524873"
+               class="btn btn-social btn-simple"><i
+                    class="fa fa-google-plus fa-fw"></i> <span
+                    class="network-name"></span></a>
+            <a href="https://www.reddit.com/domain/appimage.org/"
+               class="btn btn-social btn-simple"><i
+                    class="fa fa-reddit fa-fw"></i> <span
+                    class="network-name"></span></a>
+            <a href="https://twitter.com/probonopd"
+               class="btn btn-social btn-simple"><i
+                    class="fa fa-twitter fa-fw"></i> <span
+                    class="network-name"></span></a>
+            <a href="https://discourse.appimage.org"
+               class="btn btn-social btn-simple"><i
+                    class="fa fa-comment-o fa-fw"></i> <span
+                    class="network-name"></span></a>
+        </div>
+
+    </div>
+
+
+</footer>
+
+</body>
+<script src="js/jquery-1.10.2.js" type="text/javascript"></script>
+<script src="js/jquery-ui-1.10.4.custom.min.js"
+        type="text/javascript"></script>
+
+<script src="js/bootstrap.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+    var big_image;
+    $().ready(function () {
+
+        responsive = $(window).width();
+
+        if (responsive >= 768) {
+            big_image = $('.parallax-background').find('img');
+            console.log(big_image);
+            $(window).on('scroll', function () {
+                parallax();
+            });
+        }
+
+        $('.selector').click(function () {
+            SelectColor(this);
+        });
+    });
+
+    function SelectColor(btn) {
+        oldColor = $('.filter-gradient').attr('data-color');
+        newColor = $(btn).attr('data-color');
+
+        oldButton = $('#Demo').attr('data-button');
+        newButton = $(btn).attr('data-button');
+
+        $('.filter-gradient').removeClass(oldColor).addClass(newColor).attr('data-color', newColor);
+
+        $('#Demo').removeClass("btn-" + oldButton).addClass("btn-" + newButton).attr('data-button', newButton);
+
+        $('.carousel-indicators').removeClass("carousel-indicators-" + oldColor).addClass("carousel-indicators-" + newColor);
+
+        $('.card').removeClass("card-" + oldColor).addClass("card-" + newColor);
+
+        $('.selector').parent().removeClass('active');
+        $(btn).parent().addClass('active');
+    }
+
+    var parallax = function () {
+        var current_scroll = $(this).scrollTop();
+
+        oVal = ($(window).scrollTop() / 3);
+        big_image.css('top', oVal);
+    };
+</script>
+</html>
