@@ -343,3 +343,10 @@ enable_testing()
 add_test(test_appimagetool
     bash ${PROJECT_SOURCE_DIR}/test-appimagetool.sh ${PROJECT_BINARY_DIR}/appimagetool
 )
+
+
+#######################
+# include libappimage #
+#######################
+
+add_subdirectory(libappimage)
