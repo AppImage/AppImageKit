@@ -172,13 +172,11 @@ ExternalProject_Add(inotify-tools
     INSTALL_COMMAND make install
 )
 
-ExternalProject_Get_Property(inotify-tools SOURCE_DIR)
 ExternalProject_Get_Property(inotify-tools INSTALL_DIR)
-set(inotify-tools_SOURCE_DIR "${SOURCE_DIR}")
 set(inotify-tools_INSTALL_DIR "${INSTALL_DIR}")
-mark_as_advanced(inotify-tools_SOURCE_DIR inotify-tools_INSTALL_DIR)
+mark_as_advanced(inotify-tools_INSTALL_DIR)
 
-set(inotify-tools_INCLUDE_DIR ${inotify-tools_SOURCE_DIR}/libinotifytools/src/)
+set(inotify-tools_INCLUDE_DIR ${inotify-tools_INSTALL_DIR}/include/)
 set(inotify-tools_LIBRARY_DIR ${inotify-tools_INSTALL_DIR}/lib)
 set(inotify-tools_LIBRARIES ${inotify-tools_LIBRARY_DIR}/libinotifytools.a)
 mark_as_advanced(inotify-tools_LIBRARY_DIR inotify-tools_LIBRARIES inotify-tools_INCLUDE_DIR)
@@ -193,13 +191,11 @@ ExternalProject_Add(libarchive
     INSTALL_COMMAND make install
 )
 
-ExternalProject_Get_Property(libarchive SOURCE_DIR)
 ExternalProject_Get_Property(libarchive INSTALL_DIR)
-set(libarchive_SOURCE_DIR "${SOURCE_DIR}")
 set(libarchive_INSTALL_DIR "${INSTALL_DIR}")
-mark_as_advanced(libarchive_SOURCE_DIR inotify-tools_INSTALL_DIR)
+mark_as_advanced(libarchive_INSTALL_DIR)
 
-set(libarchive_INCLUDE_DIR ${libarchive_SOURCE_DIR}/libarchive)
+set(libarchive_INCLUDE_DIR ${libarchive_INSTALL_DIR}/include)
 set(libarchive_LIBRARY_DIR ${libarchive_INSTALL_DIR}/lib)
 set(libarchive_LIBRARIES ${libarchive_LIBRARY_DIR}/libarchive.a)
 mark_as_advanced(libarchive_LIBRARY_DIR libarchive_LIBRARIES libarchive_INCLUDE_DIR)
