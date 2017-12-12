@@ -89,7 +89,6 @@ gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
         gchar* temp = g_strconcat(before_find,replace,after_find,NULL);
         g_free(retval);
         retval = g_strdup(temp);
-        g_free(after_find);
         g_free(before_find);
         g_free(temp);
     }   
@@ -111,15 +110,9 @@ char * get_md5(char *path)
         g_checksum_update(checksum, (const guchar *) uri, strlen (uri));
         g_checksum_get_digest(checksum, digest, &digest_len);
         g_assert(digest_len == 16);
-
-        gchar *out = g_strdup_printf("%s", g_checksum_get_string(checksum)); 
-
-        g_checksum_free(checksum);
-        g_free(uri);
-
-        return out;
+        return g_strdup_printf("%s", g_checksum_get_string(checksum));
     } else {
-        return NULL;
+        return "";
     }
 }
 
@@ -130,13 +123,9 @@ char * get_md5(char *path)
  */
 char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 {
-    char *file, *md5;
-    md5 = get_md5(path);
-    file = g_strconcat (md5, ".png", NULL);
-
+    char *file;
+    file = g_strconcat (get_md5(path), ".png", NULL);
     gchar *thumbnail_path = g_build_filename (g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
-
-    g_free(md5);
     g_free (file);
     return thumbnail_path;
 }
@@ -151,20 +140,19 @@ char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
 void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 {
     // FIXME: This default location is most likely wrong, but at least the icons with unknown size can go somewhere
-    gchar *dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
-
+    gchar *dest_dir = dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
+    
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
-        g_free(dest_dir);
         dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
     }
  
     if((g_str_has_suffix (icon_path, ".png")) || (g_str_has_suffix (icon_path, ".xpm"))) {
-
+        
         cairo_surface_t *image;
 
         int w = 0;
         int h = 0;
-
+        
         if(g_str_has_suffix (icon_path, ".xpm")) {
             // TODO: GdkPixbuf has a convenient way to load XPM data. Then you can call
             // gdk_cairo_set_source_pixbuf() to transfer the data to a Cairo surface.
@@ -178,51 +166,40 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
             h = cairo_image_surface_get_height (image);
             cairo_surface_destroy (image);
         }
-
+                    
         // FIXME: The following sizes are taken from the hicolor icon theme. 
         // Probably the right thing to do would be to figure out at runtime which icon sizes are allowable.
         // Or could we put our own index.theme into .local/share/icons/ and have it observed?
         if((w != h) || ((w != 16) && (w != 24) && (w != 32) && (w != 36) && (w != 48) && (w != 64) && (w != 72) && (w != 96) && (w != 128) && (w != 192) && (w != 256) && (w != 512))){
             fprintf(stderr, "%s has nonstandard size w = %i, h = %i; please fix it\n", icon_path, w, h);
         } else {
-            g_free(dest_dir);
-            gchar *t = g_strdup_printf("%ix%i", w, h);
-            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", t, "/apps", NULL);
-            g_free(t);
+            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps", NULL);
         }
     }
     if(verbose)
         fprintf(stderr, "dest_dir %s\n", dest_dir);
-
-    gchar* icon_name = g_path_get_basename(icon_path);
-    gchar* icon_dest_path = g_build_path("/", dest_dir, icon_name, NULL);
-    g_free(icon_name);
-
+    
+    gchar* icon_dest_path = g_build_path("/", dest_dir, g_path_get_basename(icon_path), NULL);
     if(verbose)
         fprintf(stderr, "Move from %s to %s\n", icon_path, icon_dest_path);
-    gchar *dirname = g_path_get_dirname(dest_dir);
-    if(g_mkdir_with_parents(dirname, 0755))
+    if(g_mkdir_with_parents(g_path_get_dirname(dest_dir), 0755))
         fprintf(stderr, "Could not create directory: %s\n", dest_dir);
-    g_free(dirname);
-
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(icon_path);
     GFile *target_file = g_file_new_for_path(icon_dest_path);
     if (!g_file_move (icon_file, target_file, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error)) {
         fprintf(stderr, "Error moving file: %s\n", error->message);
-        g_clear_error (&error);
+        g_error_free (error);
     }
-
-    g_free(dest_dir);
-    g_free(icon_dest_path);
     g_object_unref(icon_file); 
     g_object_unref(target_file);
+    
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
 int check_appimage_type(char *path, gboolean verbose)
 {
-    char buffer[3] = {0x0};
+    char buffer[3];
     FILE *f = fopen(path, "rt");
     if (f != NULL)
     {
@@ -286,7 +263,7 @@ static gchar *get_file_extension(const gchar *filename)
  * with a custom name that involves the md5 identifier to tie them to a particular
  * AppImage.
  */
-gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_icon_value_original, char *md5, gboolean verbose) {
+gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_value_original, char *md5, gboolean verbose) {
     GPtrArray *array = g_ptr_array_new();
     sqfs_traverse trv;
     sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
@@ -308,51 +285,32 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                 if(verbose)
                     fprintf(stderr, "squash_get_matching_files found: %s\n", trv.path);
                 g_ptr_array_add(array, g_strdup(trv.path));
-                
+                gchar *dest = NULL;
+                gchar *dest_dirname;
+                gchar *dest_basename;
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
-                    gchar *dest = NULL;
-                    gchar *dest_dirname = NULL;
-                    gchar *dest_basename = NULL;
-
-                    gchar * base_name = g_path_get_basename(trv.path);
                     if(g_str_has_prefix(trv.path, "usr/share/icons/") || g_str_has_prefix(trv.path, "usr/share/pixmaps/") || (g_str_has_prefix(trv.path, "usr/share/mime/") && g_str_has_suffix(trv.path, ".xml"))){
-                        dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));
-                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, base_name);
+                        dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));          
+                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
                         dest = g_build_path("/", dest_dirname, dest_basename, NULL);
                     }
                     /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
                      * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
                     if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){       
-                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, base_name);
+                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
                         dest = g_build_path("/", "/tmp", dest_basename, NULL);
                     }
-
                     /* Some AppImages only have the icon in their root directory, so we have to get it from there */
-                    if(
-                            g_str_has_prefix(trv.path, desktop_icon_value_original)
-                            && !strstr(trv.path, "/")
-                            && ( (g_str_has_suffix(trv.path, ".png"))
-                                 || (g_str_has_suffix(trv.path, ".xpm"))
-                                 || (g_str_has_suffix(trv.path, ".svg"))
-                                 || (g_str_has_suffix(trv.path, ".svgz"))
-                                 )
-                            ){
-                        gchar* ext = get_file_extension(trv.path);
-                        dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
+                    if((g_str_has_prefix(trv.path, desktop_icon_value_original)) && (! strstr(trv.path, "/")) && ( (g_str_has_suffix(trv.path, ".png")) || (g_str_has_suffix(trv.path, ".xpm")) || (g_str_has_suffix(trv.path, ".svg")) || (g_str_has_suffix(trv.path, ".svgz")))){
+                        dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(trv.path));
                         dest = g_build_path("/", "/tmp", dest_basename, NULL);
-                        g_free(ext);
                     }
                     
-                    g_free(base_name);
                     if(dest){
                         if(verbose)
                             fprintf(stderr, "install: %s\n", dest);
-                        
-                        gchar *dirname = g_path_get_dirname(dest);
-                        if(g_mkdir_with_parents(dirname, 0755))
-                            fprintf(stderr, "Could not create directory: %s\n", dirname);
-
-                        g_free(dirname);
+                        if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
+                            fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
                         
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
@@ -383,10 +341,6 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                             move_icon_to_destination(dest, verbose);
                         } 
                     }
-
-                    g_free(dest);
-                    g_free(dest_dirname);
-                    g_free(dest_basename);
                 }
             }
         }
@@ -450,10 +404,10 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     
     /* If firejail is on the $PATH, then use it to run AppImages */
     if(g_find_program_in_path ("firejail")){
-        char *firejail_exec = NULL;
+        char *firejail_exec;
         firejail_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --noprofile --appimage '%s'", appimage_path);
         g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_exec);
-
+        
         gchar *firejail_profile_group = "Desktop Action FirejailProfile";
         gchar *firejail_profile_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --private --appimage '%s'", appimage_path);
         gchar *firejail_tryexec = "firejail";
@@ -461,11 +415,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
         g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_profile_exec);
         g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, firejail_tryexec);
         g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "FirejailProfile;");
-
-        g_free(firejail_exec);
-        g_free(firejail_profile_group);
-        g_free(firejail_profile_exec);
-        g_free(firejail_tryexec);
+        
     }
     
     /* Add AppImageUpdate desktop action
@@ -502,25 +452,12 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
                 g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_NAME, "Update");
                 g_key_file_set_value(key_file_structure, appimageupdate_group, G_KEY_FILE_DESKTOP_KEY_EXEC, appimageupdate_exec);
                 g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "AppImageUpdate;");
-
-                g_free(appimageupdate_group);
-                g_free(appimageupdate_exec);
             }
         }
     }
     
-    gchar *icon_path = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
-    gchar *icon = g_path_get_basename(icon_path);
-
-    gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, icon);
-
-    g_free(icon_path);
-    g_free(icon);
-
+    gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL)));
     g_key_file_set_value(key_file_structure, "Desktop Entry", "Icon", icon_with_md5);
-
-    g_free(icon_with_md5);
-
     /* At compile time, inject VERSION_NUMBER like this:
      * cc ... -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -..
      */
@@ -528,13 +465,9 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     g_key_file_set_value(key_file_structure, "Desktop Entry", "X-AppImage-Comment", generated_by);
     g_key_file_set_value(key_file_structure, "Desktop Entry", "X-AppImage-Identifier", md5);
     fprintf(stderr, "Installing desktop file\n");
-
-    gchar * file_content = g_key_file_to_data(key_file_structure, NULL, NULL);
     if(verbose)
-        fprintf(stderr, "%s", file_content);
-
-    g_free(file_content);
-    g_free(generated_by);
+        fprintf(stderr, "%s", g_key_file_to_data(key_file_structure, NULL, NULL));
+    
     /* https://specifications.freedesktop.org/menu-spec/menu-spec-latest.html#paths says:
      * 
      * $XDG_DATA_DIRS/applications/
@@ -616,9 +549,9 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
     /* FIXME: The following is most likely not correct; see the comments above.
      * Open a GitHub issue or send a pull request if you would like to propose asolution. */
     /* TODO: Check for consistency of the id with the AppStream file, if it exists in the AppImage */
-    gchar *partial_path = NULL;
+    gchar *partial_path;
     partial_path = g_strdup_printf("applications/appimagekit_%s-%s", md5, desktop_filename);
-    gchar *destination = NULL;
+    gchar *destination;
     destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
 
     /* When appimaged sees itself, then do nothing here */
@@ -628,30 +561,23 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
 
     if(verbose)
         fprintf(stderr, "install: %s\n", destination);
-    gchar *dirname = g_path_get_dirname(destination);
-    if(g_mkdir_with_parents(dirname, 0755))
-        fprintf(stderr, "Could not create directory: %s\n", dirname);
-    g_free(dirname);
+    if(g_mkdir_with_parents(g_path_get_dirname(destination), 0755))
+        fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(destination));
 
     // g_key_file_save_to_file(key_file_structure, destination, NULL);
     // g_key_file_save_to_file is too new, only since 2.40
     /* Write config file on disk */
     gsize length;
-    gchar *buf = NULL;
+    gchar *buf;
     GIOChannel *file;
     buf = g_key_file_to_data(key_file_structure, &length, NULL);
     file = g_io_channel_new_file(destination, "w", NULL);
     g_io_channel_write_chars(file, buf, length, NULL, NULL);
     g_io_channel_shutdown(file, TRUE, NULL);
-    g_io_channel_unref(file);
     
     
     /* GNOME shows the icon and name on the desktop file only if it is executable */
     chmod(destination, 0755);
-    
-    g_free(buf);
-    g_free(destination);
-    g_free(partial_path);
 }
 
 /* Register a type 1 AppImage in the system */
@@ -709,11 +635,10 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
             gboolean success = g_key_file_load_from_data (key_file_structure, buff, size, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
             if(success){
                 gchar *desktop_filename = g_path_get_basename(filename);
-                desktop_icon_value_original = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
+                desktop_icon_value_original = g_strdup_printf("%s", g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL));
                 if(verbose)
                     fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
                 write_edited_desktop_file(key_file_structure, path, desktop_filename, 1, md5, verbose);
-                g_free(desktop_filename);
             }
             g_key_file_free(key_file_structure);
         }
@@ -724,10 +649,7 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         /* Get icon file(s) and act on them in one go */
         
         if(g_str_has_prefix(filename, "usr/share/icons/") || g_str_has_prefix(filename, "usr/share/pixmaps/") || (g_str_has_prefix(filename, "usr/share/mime/") && g_str_has_suffix(filename, ".xml"))){
-            gchar *t = replace_str(filename, "usr/share", g_get_user_data_dir());            
-            dest_dirname = g_path_get_dirname(t);
-            g_free(t);
-
+            dest_dirname = g_path_get_dirname(replace_str(filename, "usr/share", g_get_user_data_dir()));          
             dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(filename));
             dest = g_build_path("/", dest_dirname, dest_basename, NULL);
         }
@@ -739,10 +661,8 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         /* Some AppImages only have the icon in their root directory, so we have to get it from there */
         if(desktop_icon_value_original){
             if((g_str_has_prefix(filename, desktop_icon_value_original)) && (! strstr(filename, "/")) && ( (g_str_has_suffix(filename, ".png")) || (g_str_has_suffix(filename, ".xpm")) || (g_str_has_suffix(filename, ".svg")) || (g_str_has_suffix(filename, ".svgz")))){
-                gchar *ext = get_file_extension(filename);
-                dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
+                dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
                 dest = g_build_path("/", "/tmp", dest_basename, NULL);
-                g_free(ext);
             }
         }
                     
@@ -750,11 +670,10 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
         
             if(verbose)
                 fprintf(stderr, "install: %s\n", dest);
-            gchar *dirname = g_path_get_dirname(dest);
-            if(g_mkdir_with_parents(dirname, 0755))
-                fprintf(stderr, "Could not create directory: %s\n", dirname);
-            g_free(dirname);
-
+            
+            if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
+                fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
+        
             FILE *f;
             f = fopen(dest, "w+");
             
@@ -791,22 +710,12 @@ bool appimage_type1_register_in_system(char *path, gboolean verbose)
             // it to /tmp and now move it into the proper place
             if(g_str_has_prefix (dest, "/tmp/")) {
                 move_icon_to_destination(dest, verbose);
-            }
+            } 
         }
-
-        g_free(filename);
-        g_free(dest);
-        g_free(dest_dirname);
-        g_free(dest_basename);
     }
-
     archive_read_close(a);
     archive_read_free(a);
     set_executable(path, verbose);
-
-    g_free(desktop_icon_value_original);
-    g_free(md5);
-
     return TRUE;
 }
 
@@ -817,7 +726,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     long unsigned int fs_offset; // The offset at which a squashfs image is expected
     char *md5 = get_md5(path);
     GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
-    gchar *desktop_icon_value_original = g_strdup("iDoNotMatchARegex"); // FIXME: otherwise the regex does weird stuff in the first run
+    gchar *desktop_icon_value_original = "iDoNotMatchARegex"; // FIXME: otherwise the regex does weird stuff in the first run
     if(verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
     fs_offset = get_elf_size(path);
@@ -827,12 +736,11 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
     if (err != SQFS_OK){
         fprintf(stderr, "sqfs_open_image error: %s\n", path);
-        g_free(md5);
-        sqfs_destroy(&fs);
         return FALSE;
+    } else {
+        if(verbose)
+            fprintf(stderr, "sqfs_open_image: %s\n", path);
     }
-    if(verbose)
-        fprintf(stderr, "sqfs_open_image: %s\n", path);
     
     /* TOOO: Change so that only one run of squash_get_matching_files is needed in total,
      * this should hopefully improve performance */
@@ -844,16 +752,13 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     for (int i=0; str_array[i]; ++i) {
         fprintf(stderr, "Got root desktop: %s\n", str_array[i]);
         gboolean success = g_key_file_load_from_squash(&fs, str_array[i], key_file_structure, verbose);
-        if(success) {
+        if(success){
             gchar *desktop_filename = g_path_get_basename(str_array[i]);
-
-            g_free(desktop_icon_value_original);
-            desktop_icon_value_original = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
+            
+            desktop_icon_value_original = g_strdup_printf("%s", g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL));
             if(verbose)
                 fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
             write_edited_desktop_file(key_file_structure, path, desktop_filename, 2, md5, verbose);
-            
-            g_free(desktop_filename);
         }
         g_key_file_free(key_file_structure);
         
@@ -871,10 +776,6 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     
     set_executable(path, verbose);
     
-    g_free(md5);
-    g_free(desktop_icon_value_original);
-    sqfs_destroy(&fs);
-
     return TRUE;
 }
 
@@ -893,11 +794,9 @@ int appimage_register_in_system(char *path, gboolean verbose)
      * including checking if the thumbnail already exists and if it's valid 
      * and writing attributes into the thumbnail, see
      * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#CREATION */
-    if(verbose) {
-        gchar *thumbnail_path = get_thumbnail_path(path, "normal", verbose);
-        fprintf(stderr, "get_thumbnail_path: %s\n", thumbnail_path);
-        g_free(thumbnail_path);
-    }
+    if(verbose)
+        fprintf(stderr, "get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
+    
     if(type == 1){
         appimage_type1_register_in_system(path, verbose);
     }
@@ -920,7 +819,6 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
         if(verbose)
             fprintf(stderr, "deleted: %s\n", thumbnail_path);
     }
-    g_free(thumbnail_path);
 }
 
 /* Recursively delete files in path and subdirectories that contain the given md5
@@ -936,20 +834,23 @@ void unregister_using_md5_id(const char *name, int level, char* md5, gboolean ve
         return;
     
     do {
-        gchar *path_to_be_deleted = g_strdup_printf("%s/%s", name, entry->d_name);
         if (entry->d_type == DT_DIR) {
-            if ( strcmp(".", entry->d_name) != 0 && strcmp("..", entry->d_name) != 0 )
-                unregister_using_md5_id(path_to_be_deleted, level + 1, md5, verbose);
-        } else
-        if (strstr(entry->d_name, vendorprefix) != NULL &&
-            strstr(entry->d_name, md5)  != NULL ) {
+            char path[1024];
+            int len = snprintf(path, sizeof(path)-1, "%s/%s", name, entry->d_name);
+            path[len] = 0;
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
+            unregister_using_md5_id(path, level + 1, md5, verbose);
+        }
+        
+        else if(strstr(entry->d_name, g_strdup_printf("%s_%s", vendorprefix, md5))) {
+            gchar *path_to_be_deleted = g_strdup_printf("%s/%s", name, entry->d_name);
             if(g_file_test(path_to_be_deleted, G_FILE_TEST_IS_REGULAR)){
                 g_unlink(path_to_be_deleted);
                 if(verbose)
                     fprintf(stderr, "deleted: %s\n", path_to_be_deleted);
             }
         }
-        g_free(path_to_be_deleted);
     } while ((entry = readdir(dir)) != NULL);
     closedir(dir);
 }
@@ -972,6 +873,5 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     
     unregister_using_md5_id(g_get_user_data_dir(), 0, md5, verbose);
     
-    g_free(md5);
     return 0;
 }
