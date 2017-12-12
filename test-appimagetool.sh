@@ -60,23 +60,23 @@ log "create a file that should be ignored"
 touch appimagetool.AppDir/to-be-ignored
 
 log "create an AppImage without an ignore file to make sure it is bundled"
-$appimagetool appimagetool.AppDir appimagetool.AppImage || false
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || false
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage || false
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || false
 
 log "now set up the ignore file, and check that the file is properly ignored"
 echo "to-be-ignored" > .appimageignore
-$appimagetool appimagetool.AppDir appimagetool.AppImage
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false
 
 log "remove the default ignore file, and check if an explicitly passed one works, too"
 rm .appimageignore
 echo "to-be-ignored" > ignore
-$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || false
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored && false
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || false
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false
 
 log "check whether files in both .appimageignore and the explicitly passed file work"
 touch appimagetool.AppDir/to-be-ignored-too
 echo "to-be-ignored-too" > .appimageignore
-$appimagetool appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored || true
-$appimagetool -l appimagetool.AppImage | grep -q to-be-ignored-too || true
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || true
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored-too || true
