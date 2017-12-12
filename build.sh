@@ -67,7 +67,7 @@ git submodule update --init --recursive
 mkdir build
 cd build
 
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
 make -j$JOBS
 make install DESTDIR=out
 
@@ -76,13 +76,6 @@ mv runtime runtime_with_magic
 
 
 cd ..
-
-### Lib AppImage optional
-#
-#mkdir -p libappimage/build
-#pushd libappimage/build
-#cmake .. && make all && ctest
-#popd
 
 # Strip and check size and dependencies
 
