@@ -66,7 +66,15 @@ target_link_libraries(libappimage
     ${GIO_LIBRARIES}
     ${CAIRO_LIBRARIES}
 )
-add_dependencies(libappimage squashfuse inotify-tools libarchive)
+add_dependencies(libappimage squashfuse)
+
+if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+    add_dependencies(appimaged inotify-tools)
+endif()
+if(NOT USE_SYSTEM_LIBARCHIVE)
+    add_dependencies(appimaged libarchive)
+endif()
+
 
 ###
 # Deploy
