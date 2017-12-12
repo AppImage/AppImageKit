@@ -278,7 +278,7 @@ static gchar *get_file_extension(const gchar *filename)
     return extension;
 }
 
-void squash_extract_inode_to_file(sqfs *fs, sqfs_inode inode, const gchar *dest)
+void squash_extract_inode_to_file(sqfs *fs, sqfs_inode *inode, const gchar *dest)
 {
     off_t bytes_already_read = 0;
     sqfs_off_t bytes_at_a_time = 64*1024;
@@ -288,10 +288,10 @@ void squash_extract_inode_to_file(sqfs *fs, sqfs_inode inode, const gchar *dest)
         fprintf(stderr, "fopen error\n");
         return;
     }
-    while (bytes_already_read < inode.xtra.reg.file_size)
+    while (bytes_already_read < inode->xtra.reg.file_size)
     {
         char buf[bytes_at_a_time];
-        if (sqfs_read_range(fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
+        if (sqfs_read_range(fs, inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
             fprintf(stderr, "sqfs_read_range error\n");
         fwrite(buf, 1, bytes_at_a_time, f);
         bytes_already_read = bytes_already_read + bytes_at_a_time;
@@ -390,7 +390,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, const gchar *desktop_
                         g_free(dirname);
                         
                         // Read the file in chunks
-                        squash_extract_inode_to_file(fs, inode, dest);
+                        squash_extract_inode_to_file(fs, &inode, dest);
                         chmod (dest, 0644);
                         
                         if(verbose)
@@ -1029,7 +1029,7 @@ bool is_handler_valid(const appimage_handler * handler) {
     return true;
 }
 
-void mk_base_dir(char *target)
+void mk_base_dir(const char *target)
 {
     gchar *dirname = g_path_get_dirname(target);
     if(g_mkdir_with_parents(dirname, 0755))
@@ -1208,6 +1208,46 @@ char* appimage_type2_get_file_name (appimage_handler * handler, void *data) {
     return strdup(trv->path);
 }
 
+void appimage_type2_extract_symlink(sqfs *fs, sqfs_inode *inode, const char *target);
+
+void appimage_type2_extract_regular_file(sqfs *fs, sqfs_inode *inode, const char* target) {
+    mk_base_dir(target);
+
+    // Read the file in chunks
+    squash_extract_inode_to_file(fs, inode, target);
+}
+void appimage_type2_extract_file_following_symlinks(sqfs *fs, sqfs_inode *inode, const char* target) {
+    if(inode->base.inode_type == SQUASHFS_REG_TYPE)
+        appimage_type2_extract_regular_file(fs, inode, target);
+    else if(inode->base.inode_type == SQUASHFS_SYMLINK_TYPE) {
+        appimage_type2_extract_symlink(fs, inode, target);
+    } else
+        fprintf(stderr, "WARNING: Unable to extract file of type %d", inode->base.inode_type);
+}
+
+void appimage_type2_extract_symlink(sqfs *fs, sqfs_inode *inode, const char *target) {
+    size_t size;
+    sqfs_readlink(fs, inode, NULL, &size);
+    char buf[size];
+    int ret = sqfs_readlink(fs, inode, buf, &size);
+    if (ret != 0)
+        fprintf(stderr, "WARNING: Symlink error.");
+    else {
+
+        sqfs_err err = sqfs_inode_get(fs, inode, fs->sb.root_inode);
+        if (err != SQFS_OK)
+            fprintf(stderr, "WARNING: Unable to get the root inode. Error: %d", err);
+        
+        bool found = false;
+        err = sqfs_lookup_path(fs, inode, buf, &found);
+        if (err != SQFS_OK)
+            fprintf(stderr, "WARNING: There was an error while trying to lookup a symblink. Error: %d", err);
+
+        if (found)
+            appimage_type2_extract_file_following_symlinks(fs, inode, target);
+    }
+}
+
 void appimage_type2_extract_file (appimage_handler * handler, void *data, char *target) {
     sqfs *fs = handler->cache;
     sqfs_traverse *trv = data;
@@ -1216,15 +1256,7 @@ void appimage_type2_extract_file (appimage_handler * handler, void *data, char *
     if(sqfs_inode_get(fs, &inode, trv->entry.inode))
         fprintf(stderr, "sqfs_inode_get error\n");
 
-    // TODO: Also follow and extract symlinks
-    if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
-        mk_base_dir(target);
-
-        // Read the file in chunks
-        squash_extract_inode_to_file(fs, inode, target);
-    } else
-        fprintf(stderr, "WARNING: Unable to extract non regular file \"%s\", Type %d\n",
-                trv->path, inode.base.inode_type);
+    appimage_type2_extract_file_following_symlinks(fs, &inode, target);
 }
 
 appimage_handler appimage_type_2_create_handler() {
@@ -1296,7 +1328,7 @@ void create_thumbnail(const gchar * appimage_file_path, gboolean verbose) {
     // extract AppImage icon to /tmp
     appimage_handler handler = create_appimage_handler(appimage_file_path);
 
-    char *tmp_path = "/tmp/appimage_thumbnailer_tmp";
+    char *tmp_path = "/tmp/appimage_thumbnail_tmp";
     extract_appimage_icon(&handler, tmp_path);
 
     if (g_file_test(tmp_path, G_FILE_TEST_EXISTS) ) {
