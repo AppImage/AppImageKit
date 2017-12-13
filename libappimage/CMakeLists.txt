@@ -1,4 +1,4 @@
-project(appimagelib)
+project(libappimage)
 cmake_minimum_required(VERSION 3.5)
 
 set(APPIMAGE_MAJOR_VERSION 0)
@@ -6,10 +6,6 @@ set(APPIMAGE_MINOR_VERSION 1)
 set(APPIMAGE_PATCH_VERSION 0)
 set(APPIMAGE_VERSION
   ${APPIMAGE_MAJOR_VERSION}.${APPIMAGE_MINOR_VERSION}.${APPIMAGE_PATCH_VERSION})
-  
-SET (STATIC_BUILD NO CACHE PATH "Link against static libs.")
-
-include(cmake/ImportedTargets.cmake)
 
 
 ###
@@ -36,8 +32,6 @@ include_directories(${CAIRO_INCLUDE_DIRS})
 ###
 # Sources
 ###
-include_directories("../squashfuse/")
-include_directories("../libarchive-3.3.1/libarchive")
 
 SET(LIBAPPIMAGE_SRC
     libappimage.h
@@ -51,28 +45,36 @@ SET(LIBAPPIMAGE_SRC
 ###
 # Build
 ###
-add_library(appimage ${LIBAPPIMAGE_SRC})
-target_compile_definitions(appimage
+add_library(libappimage ${LIBAPPIMAGE_SRC})
+target_compile_definitions(libappimage
     PRIVATE _FILE_OFFSET_BITS=64
     PRIVATE HAVE_LIBARCHIVE3=0
     PRIVATE VERSION_NUMBER="${VERSION_NUMBER}"
 )
-set_target_properties(appimage PROPERTIES VERSION ${VERSION_NUMBER})
-set_target_properties(appimage PROPERTIES PUBLIC_HEADER ./libappimage.h)
+set_target_properties(libappimage PROPERTIES PREFIX "")
+set_target_properties(libappimage PROPERTIES VERSION ${VERSION_NUMBER})
+set_target_properties(libappimage PROPERTIES PUBLIC_HEADER ./libappimage.h)
 
-target_link_libraries(appimage
-    ssl
-    squashfuse
-    crypto
-    z
-    lzma
+target_link_libraries(libappimage
     pthread
-    archive
-    inotifytools
+    ${squashfuse_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${libarchive_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+    ${inotify-tools_LIBRARIES}
     ${GLIB_LIBRARIES}
     ${GIO_LIBRARIES}
     ${CAIRO_LIBRARIES}
 )
+add_dependencies(libappimage squashfuse)
+
+if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+    add_dependencies(appimaged inotify-tools)
+endif()
+if(NOT USE_SYSTEM_LIBARCHIVE)
+    add_dependencies(appimaged libarchive)
+endif()
+
 
 ###
 # Deploy

@@ -169,8 +169,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
             args[i++] = "-ef";
 
             // avoid warning: assignment discards ‘const’ qualifier
-            char buf[256];
-            strcpy(buf, APPIMAGEIGNORE);
+            char* buf = strdup(APPIMAGEIGNORE);
             args[i++] = buf;
         }
 

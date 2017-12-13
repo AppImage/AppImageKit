@@ -8,7 +8,7 @@ set(INSTALL_INCLUDE_DIR include CACHE PATH
 set(INSTALL_CMAKE_DIR lib/CMake/AppImage CACHE PATH
   "Installation directory for CMake files")
 
-install(TARGETS appimage 
+install(TARGETS libappimage
     EXPORT AppImageTargets
     ARCHIVE DESTINATION ${INSTALL_LIB_DIR}
     LIBRARY DESTINATION ${INSTALL_LIB_DIR}
@@ -26,7 +26,7 @@ endforeach()
 
  
 # Add all targets to the build-tree export set
-export(TARGETS appimage
+export(TARGETS libappimage
 FILE "${PROJECT_BINARY_DIR}/AppImageTargets.cmake")
 
 # Export the package for use from the build-tree
