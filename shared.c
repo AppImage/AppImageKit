@@ -205,6 +205,11 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
         fprintf(stderr, "Could not create directory: %s\n", dest_dir);
     g_free(dirname);
 
+    // initialize gio type system in order to fix segfaults
+    // as per https://stackoverflow.com/a/7233435
+    // required for our ancient version of GIO/GLib, ignored in future versions
+    g_type_init();
+
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(icon_path);
     GFile *target_file = g_file_new_for_path(icon_dest_path);
