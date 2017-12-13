@@ -1,0 +1,8 @@
+#! /bin/bash
+
+git checkout ll.c Makefile.am fuseprivate.c fuseprivate.h hl.c ll.h ll_inode.c nonstd-daemon.c
+
+patch -p1 < @PROJECT_SOURCE_DIR@/squashfuse.patch
+patch -p1 < @PROJECT_SOURCE_DIR@/squashfuse_dlopen.patch
+
+cp -v @PROJECT_SOURCE_DIR@/squashfuse_dlopen.c @PROJECT_SOURCE_DIR@/squashfuse_dlopen.h .
