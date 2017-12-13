@@ -5,36 +5,39 @@ services:
   - docker
 
 env:
-  - ARCH=x86_64 DOCKER_IMAGE=library/centos:6.8
-  - ARCH=i686 DOCKER_IMAGE=toopher/centos-i386:centos6
+  - ARCH=x86_64 DOCKER_IMAGE=quay.io/appimage/appimagebuild
+  - ARCH=i686 DOCKER_IMAGE=quay.io/appimage/appimagebuild-i386
 
 script:
   - if [ "$ARCH" == "x86_64" ] ; then sed -i -e 's|%ARCH%|amd64|g' appimaged.ctl; fi
-  - if [ "$ARCH" == "i686" ] ; then sed -i -e 's|%ARCH%|i386|g' appimaged.ctl && sleep 60 ; fi # Slep so as not to overwrite during uploading (FIXME)
+  - if [ "$ARCH" == "i686" ] ; then sed -i -e 's|%ARCH%|i386|g' appimaged.ctl && sleep 60 ; fi # Sleep so as not to overwrite during uploading (FIXME)
   - grep Architecture appimaged.ctl
   - rm -rf data.tar.g* .gnu* || true
   - wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
   - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
   - ( tar xf data.tar.gz ; sudo chown -R $USER .gnu* ; rm -rf $HOME/.gnu* ; mv .gnu* $HOME/ ) || true
   - mkdir -p ./out/
-  - docker run -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit ; yum -y install sudo ; sudo ./build.sh; sudo ./test-appimagetool.sh build/appimagetool"
-  - ls -lh out/*
-  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  - docker run --device /dev/fuse:mrw -e TRAVIS -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit && ./build.sh && ./test-appimagetool.sh out/appimagetool"
   - find ./out/appimagetool.AppDir/
   - find ./out/appimaged.AppDir/
-  - docker run --cap-add SYS_ADMIN --device /dev/fuse:/dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -exc
-      "yum -y install fuse fuse-libs &&
-      cd /out &&
-      ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-x86_64.AppImage.zsync\" appimagetool-$ARCH.AppImage &&
+  - docker run --cap-add SYS_ADMIN --device /dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -c
+      "cd /out &&
+      ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-x86_64.AppImage.zsync\"
+      appimagetool-$ARCH.AppImage &&
       ./appimagetool-$ARCH.AppImage ./appimaged.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimaged-x86_64.AppImage.zsync\" appimaged-$ARCH.AppImage"
   - sudo apt-get install equivs vim-common # vim-common contains xxd
   - ( cd out ; equivs-build ../appimaged.ctl )
   - rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs || true
-  - xxd out/runtime_with_magic | head -n 1
-  - mv out/runtime_with_magic out/runtime-$ARCH
+  - xxd out/runtime | head -n 1
+  - mv out/runtime out/runtime-$ARCH
   - sudo rm -rf out/*.AppDir out/*.AppImage.digest || true # Not needed
   - if [ "$ARCH" == "x86_64" ] ; then sudo mv out/AppRun out/AppRun-x86_64; fi
   - if [ "$ARCH" == "i686" ] ; then sudo mv out/AppRun out/AppRun-i686; fi
+
+
+after_success:
+  - ls -lh out/*
+  - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash ./upload.sh out/*
 
 notifications:
