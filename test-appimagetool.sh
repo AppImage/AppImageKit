@@ -9,9 +9,10 @@ set -o functrace
 tempdir=$(mktemp -d /tmp/appimage-test.XXXXXXXX)
 thisdir=$(dirname $(readlink -f "$0"))
 
-export PATH="$thisdir/squashfs-tools/squashfs-tools:$PATH"
-
 appimagetool=$(readlink -f "$1")
+
+# make sure to use the built mksquashfs
+export PATH=$(dirname "$appimagetool"):"$PATH"
 
 if [ ! -x "$appimagetool" ]; then
     echo "Usage: $0 <path to appimagetool>"

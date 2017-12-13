@@ -103,9 +103,16 @@ mark_as_advanced(xz_INCLUDE_DIR xz_LIBRARIES_DIR xz_LIBRARIES xz_PREFIX)
 # as distros don't provide suitable squashfuse and squashfs-tools, those dependencies are bundled in, can, and should
 # be used from this repository
 # TODO: implement out-of-source builds for squashfuse, as for the other dependencies
+configure_file(
+    ${PROJECT_SOURCE_DIR}/patch.sh.in
+    ${PROJECT_BINARY_DIR}/patch.sh
+    @ONLY
+)
+
 ExternalProject_Add(squashfuse
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/squashfuse
-    PATCH_COMMAND bash -xe ${PROJECT_SOURCE_DIR}/patch.sh
+    GIT_REPOSITORY https://github.com/vasi/squashfuse/
+    GIT_TAG 1f98030
+    PATCH_COMMAND bash -xe ${PROJECT_BINARY_DIR}/patch.sh
     CONFIGURE_COMMAND libtoolize --force
               COMMAND env ACLOCAL_FLAGS="-I /usr/share/aclocal" aclocal
               COMMAND autoheader
@@ -139,17 +146,18 @@ mark_as_advanced(squashfuse_LIBRARY_DIR squashfuse_LIBRARIES squashfuse_INCLUDE_
 
 # TODO: allow using system wide mksquashfs
 ExternalProject_Add(mksquashfs
-    SOURCE_DIR ${PROJECT_SOURCE_DIR}/squashfs-tools/squashfs-tools
-    CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIR}|g" <SOURCE_DIR>/Makefile
-              COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/Makefile
-              COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" Makefile
-              COMMAND sed -i "/cp unsquashfs/d" Makefile
-    BUILD_COMMAND make XZ_SUPPORT=1 mksquashfs
+    GIT_REPOSITORY https://github.com/plougher/squashfs-tools/
+    GIT_TAG 5be5d61
+    CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIR}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+              COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+              COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
+              COMMAND sed -i "/cp unsquashfs/d" squashfs-tools/Makefile
+    BUILD_COMMAND make -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
     # make install unfortunately expects unsquashfs to be built as well, hence can't install the binary
     # therefore using built file in SOURCE_DIR
     # TODO: implement building out of source
     BUILD_IN_SOURCE ON
-    INSTALL_COMMAND make install INSTALL_DIR=<INSTALL_DIR>
+    INSTALL_COMMAND make -C squashfs-tools/ install INSTALL_DIR=<INSTALL_DIR>
 )
 
 ExternalProject_Get_Property(mksquashfs INSTALL_DIR)

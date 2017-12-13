@@ -17,10 +17,10 @@ script:
   - ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
   - ( tar xf data.tar.gz ; sudo chown -R $USER .gnu* ; rm -rf $HOME/.gnu* ; mv .gnu* $HOME/ ) || true
   - mkdir -p ./out/
-  - docker run --device /dev/fuse:mrw -e TRAVIS -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -c "cd /AppImageKit && ./build.sh && ./test-appimagetool.sh out/appimagetool"
+  - docker run --device /dev/fuse:mrw -e TRAVIS -i -v ${PWD}/out:/out -v "${PWD}:/AppImageKit" "$DOCKER_IMAGE" /bin/bash -xc "cd /AppImageKit && ./build.sh && ./test-appimagetool.sh build/out/usr/bin/appimagetool"
   - find ./out/appimagetool.AppDir/
   - find ./out/appimaged.AppDir/
-  - docker run --cap-add SYS_ADMIN --device /dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -c
+  - docker run --cap-add SYS_ADMIN --device /dev/fuse:mrw -i -v ${PWD}/out:/out -v $HOME/.gnupg:/root/.gnupg "$DOCKER_IMAGE" /bin/bash -xc
       "cd /out &&
       ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v -u \"gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-x86_64.AppImage.zsync\"
       appimagetool-$ARCH.AppImage &&

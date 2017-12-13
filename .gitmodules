@@ -1,6 +1,0 @@
-[submodule "squashfuse"]
-	path = squashfuse
-	url = https://github.com/vasi/squashfuse.git
-[submodule "squashfs-tools"]
-	path = squashfs-tools
-	url = https://github.com/plougher/squashfs-tools.git
