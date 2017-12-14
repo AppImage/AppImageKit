@@ -73,7 +73,7 @@ cd build
 
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
 make -j$JOBS
-make install DESTDIR=out
+make install DESTDIR=install_prefix/
 
 if [ ! -z $RUN_TESTS ]; then
   ctest -V

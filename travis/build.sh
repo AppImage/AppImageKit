@@ -38,9 +38,12 @@ docker run \
     "$DOCKER_IMAGE" \
     /bin/bash -x "/travis/build-binaries.sh" --no-install-dependencies --run-tests
 
+# TODO: remove this line
+find build/
+
 # inspect AppDirs
-find ./out/appimagetool.AppDir/
-find ./out/appimaged.AppDir/
+find build/out/appimagetool.AppDir/
+find build/out/appimaged.AppDir/
 
 # build AppImages
 docker run \
@@ -48,7 +51,7 @@ docker run \
     --device /dev/fuse:mrw \
     -i \
     -v "${PWD}"/travis/:/travis \
-    -v "${PWD}"/out:/out \
+    -v "${PWD}"/build:/build \
     -v $HOME/.gnupg:/root/.gnupg \
     "$DOCKER_IMAGE" \
     /bin/bash -x "/travis/build-appimages.sh"
@@ -60,8 +63,10 @@ sudo apt-get install equivs vim-common
 # build .deb
 (cd out ; equivs-build ../appimaged.ctl)
 
+cd build/
+
 # remove binaries from output directory
-rm -rf out/appimaged out/appimagetool out/validate out/digest out/mksquashfs
+rm -rf out/{appimaged,appimagetool,validate,digest,mksquashfs}
 
 # inspect runtime
 xxd out/runtime | head -n 1

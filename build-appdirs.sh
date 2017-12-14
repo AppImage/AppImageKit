@@ -1,46 +1,47 @@
 #!/bin/bash
 
-#######################################################################
 
-# Build appimagetool.AppDir
-
-if [ ! -d ./build ] ; then
-  echo "You need to run build.sh first"
-fi
-
-rm -rf appimagetool.AppDir/ || true
-mkdir -p appimagetool.AppDir/usr/bin
-cp -f build/out/usr/bin/appimagetool appimagetool.AppDir/usr/bin
-
-cp resources/AppRun appimagetool.AppDir/
-cp build/out/usr/bin/appimagetool appimagetool.AppDir/usr/bin/
-cp build/out/usr/bin/mksquashfs appimagetool.AppDir/usr/bin/
-cp $(which desktop-file-validate) appimagetool.AppDir/usr/bin/
-cp $(which zsyncmake) appimagetool.AppDir/usr/bin/
-
-cp resources/appimagetool.desktop appimagetool.AppDir/
-cp resources/appimagetool.svg appimagetool.AppDir/appimagetool.svg
-( cd appimagetool.AppDir/ ; ln -s appimagetool.svg .DirIcon )
-mkdir -p appimagetool.AppDir/usr/share/metainfo
-cp resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
+# preparations
+mkdir -p appdirs/
 
 #######################################################################
 
-# Build appimaged.AppDir
+# build AppImageTool AppDir
+APPIMAGETOOL_APPDIR=appdirs/appimagetool.AppDir
 
-rm -rf appimaged.AppDir/ || true
-mkdir -p appimaged.AppDir/usr/bin
-mkdir -p appimaged.AppDir/usr/lib
-cp -f build/out/usr/bin/appimaged appimaged.AppDir/usr/bin
-cp -f build/out/usr/bin/validate appimaged.AppDir/usr/bin
-mkdir -p appimaged.AppDir/usr/share/metainfo
-cp resources/usr/share/metainfo/appimaged.appdata.xml appimaged.AppDir/usr/share/metainfo/
+rm -rf "$APPIMAGETOOL_APPDIR" || true
+mkdir -p "$APPIMAGETOOL_APPDIR"/usr/bin
+cp -f install_prefix/usr/bin/appimagetool "$APPIMAGETOOL_APPDIR"/usr/bin
 
-cp resources/AppRun appimaged.AppDir/
-find /usr -name "libarchive.so.*.*" -exec cp "{}" appimaged.AppDir/usr/lib/ \; > /dev/null 2>&1
+cp resources/AppRun "$APPIMAGETOOL_APPDIR"
+cp install_prefix/usr/bin/appimagetool "$APPIMAGETOOL_APPDIR"/usr/bin/
+cp install_prefix/usr/bin/mksquashfs "$APPIMAGETOOL_APPDIR"/usr/bin/
+cp $(which desktop-file-validate) "$APPIMAGETOOL_APPDIR"/usr/bin/
+cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
 
-cp resources/appimaged.desktop appimaged.AppDir/
-cp resources/appimagetool.svg appimaged.AppDir/appimaged.svg
-( cd appimaged.AppDir/ ; ln -s appimaged.svg .DirIcon )
+cp resources/appimagetool.desktop "$APPIMAGETOOL_APPDIR"
+cp resources/appimagetool.svg "$APPIMAGETOOL_APPDIR"/appimagetool.svg
+ln -s "$APPIMAGETOOL_APPDIR"/appimagetool.svg "$APPIMAGETOOL_APPDIR"/.DirIcon
+mkdir -p "$APPIMAGETOOL_APPDIR"/usr/share/metainfo
+cp resources/usr/share/metainfo/appimagetool.appdata.xml "$APPIMAGETOOL_APPDIR"/usr/share/metainfo/
 
 #######################################################################
+
+# build appimaged AppDir
+
+APPIMAGED_APPDIR=appdirs/appimaged.AppDir
+
+rm -rf "$APPIMAGED_APPDIR"/ || true
+mkdir -p "$APPIMAGED_APPDIR"/usr/bin
+mkdir -p "$APPIMAGED_APPDIR"/usr/lib
+cp -f install_prefix/usr/bin/appimaged "$APPIMAGED_APPDIR"/usr/bin
+cp -f install_prefix/usr/bin/validate "$APPIMAGED_APPDIR"/usr/bin
+mkdir -p "$APPIMAGED_APPDIR"/usr/share/metainfo
+cp resources/usr/share/metainfo/appimaged.appdata.xml "$APPIMAGED_APPDIR"/usr/share/metainfo/
+
+cp resources/AppRun "$APPIMAGED_APPDIR"/
+find /usr -name "libarchive.so.*.*" -exec cp "{}" "$APPIMAGED_APPDIR"/usr/lib/ \; > /dev/null 2>&1
+
+cp resources/appimaged.desktop "$APPIMAGED_APPDIR"/
+cp resources/appimagetool.svg "$APPIMAGED_APPDIR"/appimaged.svg
+( cd "$APPIMAGED_APPDIR"/ ; ln -s appimaged.svg .DirIcon )
