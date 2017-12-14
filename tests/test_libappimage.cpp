@@ -107,25 +107,25 @@ class AppImageTest : public testing::Test
 TEST_F(AppImageTest, check_appimage_type_invalid)
 {
     int t = check_appimage_type("/tmp", 0);
-    ASSERT_EQ(-1, t);
+    ASSERT_EQ(t, -1);
 }
 
 TEST_F(AppImageTest, check_appimage_type_1)
 {
     int t = check_appimage_type(appImage_type_1_file_path.c_str(), 0);
-    ASSERT_EQ(1, t);
+    ASSERT_EQ(t, 1);
 }
 
 TEST_F(AppImageTest, check_appimage_type_2)
 {
     int t = check_appimage_type(appImage_type_2_file_path.c_str(), 0);
-    ASSERT_EQ(2, t);
+    ASSERT_EQ(t, 2);
 }
 
 TEST_F(AppImageTest, appimage_register_in_system_with_type1)
 {
     int r = appimage_register_in_system(appImage_type_1_file_path.c_str(), true);
-    ASSERT_EQ(0, r);
+    ASSERT_EQ(r, 0);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
     
@@ -135,7 +135,7 @@ TEST_F(AppImageTest, appimage_register_in_system_with_type1)
 TEST_F(AppImageTest, appimage_register_in_system_with_type2)
 {
     int r = appimage_register_in_system(appImage_type_2_file_path.c_str(), true);
-    ASSERT_EQ(0, r);
+    ASSERT_EQ(r, 0);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
 
@@ -145,7 +145,7 @@ TEST_F(AppImageTest, appimage_register_in_system_with_type2)
 TEST_F(AppImageTest, appimage_type1_register_in_system)
 {
     bool r = appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false);
-    ASSERT_EQ(true, r);
+    ASSERT_TRUE(r);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
 
@@ -155,7 +155,7 @@ TEST_F(AppImageTest, appimage_type1_register_in_system)
 TEST_F(AppImageTest, appimage_type2_register_in_system)
 {
     bool r = appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false);
-    ASSERT_EQ(true, r);
+    ASSERT_TRUE(r);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
     appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
@@ -173,7 +173,7 @@ TEST_F(AppImageTest, get_md5)
 
     std::cout << sum;
     int res = g_strcmp0(expected.c_str(), sum);
-    ASSERT_TRUE(res == 0);
+    ASSERT_EQ(res, 0);
 }
 
 TEST_F(AppImageTest, get_md5_invalid_file_path)
@@ -182,7 +182,7 @@ TEST_F(AppImageTest, get_md5_invalid_file_path)
     gchar * sum = get_md5("");
 
     int res = g_strcmp0(expected.c_str(), sum);
-    ASSERT_TRUE(res == 0);
+    ASSERT_EQ(res, 0);
 }
 
 
