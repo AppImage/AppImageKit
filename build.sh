@@ -71,7 +71,7 @@ git submodule update --init --recursive
 mkdir build
 cd build
 
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
 make -j$JOBS
 make install DESTDIR=out
 
