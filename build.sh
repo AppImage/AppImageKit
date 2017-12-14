@@ -1,12 +1,12 @@
 #!/bin/bash
+
 #
 # This script installs the required build-time dependencies
-# and builds AppImage
+# and builds AppImages for AppImageKit
 #
 
-
 STRIP="strip"
-INSTALL_DEPENDENCIES=0
+INSTALL_DEPENDENCIES=1
 STATIC_BUILD=1
 JOBS=${JOBS:-1}
 
@@ -15,7 +15,7 @@ while [ $1 ]; do
     '--debug' | '-d' )
       STRIP="true"
       ;;
-    '--no-dependencies' | '-n' )
+    '--no-install-dependencies' | '-n' )
       INSTALL_DEPENDENCIES=0
       ;;
     '--use-shared-libs' | '-s' )
