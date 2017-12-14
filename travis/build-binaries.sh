@@ -2,6 +2,6 @@
 
 cd /AppImageKit
 
-./build.sh
+./build.sh "$@"
 
 ./test-appimagetool.sh build/out/usr/bin/appimagetool
