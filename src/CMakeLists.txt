@@ -54,6 +54,7 @@ target_link_libraries(libappimage
     ${GLIB_LIBRARIES}
     ${GIO_LIBRARIES}
     ${CAIRO_LIBRARIES}
+    ${xz_LIBRARIES}
 )
 
 add_dependencies(libappimage squashfuse)
