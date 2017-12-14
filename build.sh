@@ -77,9 +77,7 @@ mv src/runtime runtime_with_magic
 
 cd ..
 
-# Strip and check size and dependencies
 
-rm build/*.o
 # Do NOT strip runtime
 find build/out/usr/bin/ -not -iname runtime -print -exec "$STRIP" "{}" \; 2>/dev/null
 
