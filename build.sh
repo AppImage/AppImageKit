@@ -71,8 +71,8 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
 make -j$JOBS
 make install DESTDIR=out
 
-xxd runtime | head -n 1
-mv runtime runtime_with_magic
+xxd src/runtime | head -n 1
+mv src/runtime runtime_with_magic
 
 
 cd ..
