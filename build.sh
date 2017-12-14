@@ -80,7 +80,6 @@ if [ ! -z $RUN_TESTS ]; then
 fi
 
 xxd src/runtime | head -n 1
-mv src/runtime runtime_with_magic
 
 
 cd ..
