@@ -36,7 +36,7 @@ docker run \
     -v "${PWD}"/travis/:/travis
     -v "${PWD}"/out:/out \
     "$DOCKER_IMAGE" \
-    /bin/bash -x "/travis/build-binaries.sh" --no-install-dependencies
+    /bin/bash -x "/travis/build-binaries.sh" --no-install-dependencies --run-tests
 
 # inspect AppDirs
 find ./out/appimagetool.AppDir/
