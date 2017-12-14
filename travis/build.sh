@@ -33,7 +33,7 @@ docker run \
     --device /dev/fuse:mrw \
     -e TRAVIS -i \
     -v "${PWD}":/AppImageKit \
-    -v "${PWD}"/travis/:/travis
+    -v "${PWD}"/travis/:/travis \
     -v "${PWD}"/out:/out \
     "$DOCKER_IMAGE" \
     /bin/bash -x "/travis/build-binaries.sh" --no-install-dependencies --run-tests
@@ -47,7 +47,7 @@ docker run \
     --cap-add SYS_ADMIN \
     --device /dev/fuse:mrw \
     -i \
-    -v "${PWD}"/travis/:/travis
+    -v "${PWD}"/travis/:/travis \
     -v "${PWD}"/out:/out \
     -v $HOME/.gnupg:/root/.gnupg \
     "$DOCKER_IMAGE" \
