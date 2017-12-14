@@ -5,7 +5,7 @@ project(AppImageKit)
 include(ExternalProject)
 
 # enable testing globally
-enable_testing()
+include(CTest)
 
 #####################
 # build information #
