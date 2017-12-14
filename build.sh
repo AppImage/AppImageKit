@@ -9,6 +9,7 @@ STRIP="strip"
 INSTALL_DEPENDENCIES=1
 STATIC_BUILD=1
 JOBS=${JOBS:-1}
+RUN_TESTS=0
 
 while [ $1 ]; do
   case $1 in
@@ -20,6 +21,9 @@ while [ $1 ]; do
       ;;
     '--use-shared-libs' | '-s' )
       STATIC_BUILD=0
+      ;;
+    '--run-tests' | '-t' )
+      RUN_TESTS=1
       ;;
     '--clean' | '-c' )
       rm -rf build
@@ -44,7 +48,7 @@ while [ $1 ]; do
   shift
 done
 
-echo $KEY | md5sum
+echo "$KEY" | md5sum
 
 set -e
 set -x
@@ -70,6 +74,10 @@ cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
 make -j$JOBS
 make install DESTDIR=out
+
+if [ ! -z $RUN_TESTS ]; then
+  ctest -V
+fi
 
 xxd src/runtime | head -n 1
 mv src/runtime runtime_with_magic
