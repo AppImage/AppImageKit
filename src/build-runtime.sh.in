@@ -18,7 +18,7 @@ set -xe
 
 build_dir=$(mktemp -d)
 orig_cwd=$(pwd)
-repo_root="@PROJECT_SOURCE_DIR@"
+repo_root="@CMAKE_CURRENT_SOURCE_DIR@"
 
 # TODO: check whether those options are needed for other tools' build processes
 small_FLAGS="-Os -ffunction-sections -fdata-sections"
