@@ -71,9 +71,13 @@ include_directories(${squashfuse_INCLUDE_DIR})
 include_directories(${libarchive_INCLUDE_DIR})
 
 
-################################
-# unit and functionality tests #
-################################
+################
+# Source files #
+################
+
+# sanitizer support
+set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/sanitizers-cmake/cmake" ${CMAKE_MODULE_PATH})
+
 add_subdirectory(src)
 
 

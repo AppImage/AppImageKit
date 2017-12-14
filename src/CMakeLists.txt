@@ -1,3 +1,5 @@
+find_package(Sanitizers)
+
 # set up build script
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/build-runtime.sh.in
@@ -94,6 +96,8 @@ target_compile_definitions(appimagetool
 
 add_dependencies(appimagetool mksquashfs squashfuse)
 
+add_sanitizers(appimagetool)
+
 
 add_executable(appimaged appimaged.c notify.c elf.c getsection.c)
 
@@ -125,7 +129,12 @@ if(NOT USE_SYSTEM_LIBARCHIVE)
     add_dependencies(appimaged libarchive)
 endif()
 
+add_sanitizers(appimaged)
+
+
 add_executable(AppRun AppRun.c)
+
+add_sanitizers(AppRun)
 
 
 add_executable(validate validate.c getsection.c)
@@ -133,14 +142,16 @@ add_executable(validate validate.c getsection.c)
 target_link_libraries(validate
     ${GLIB_LIBRARIES}
     ${OPENSSL_LIBRARIES}
-    )
+)
 
 
 add_executable(digest digest.c getsection.c)
 
 target_link_libraries(digest
     ${OPENSSL_LIBRARIES}
-    )
+)
+
+add_sanitizers(digest)
 
 
 # install binaries
@@ -148,6 +159,7 @@ install(
     PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
     DESTINATION bin
 )
+
 install(
     TARGETS AppRun appimaged appimagetool digest validate
     RUNTIME DESTINATION bin
