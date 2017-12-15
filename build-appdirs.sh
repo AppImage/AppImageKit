@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+set -x
 
 # preparations
 mkdir -p appdirs/
