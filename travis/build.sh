@@ -38,9 +38,6 @@ docker run \
     "$DOCKER_IMAGE" \
     /bin/bash -x "/travis/build-binaries.sh" --no-install-dependencies --run-tests
 
-# TODO: remove this line
-find build/
-
 # inspect AppDirs
 find build/out/appimagetool.AppDir/
 find build/out/appimaged.AppDir/
