@@ -9,7 +9,7 @@ env:
   - ARCH=i686 DOCKER_IMAGE=quay.io/appimage/appimagebuild-i386
 
 script:
-  - bash travis/build.sh
+  - bash travis/travis-build.sh
 
 
 after_success:
