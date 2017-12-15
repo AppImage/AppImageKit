@@ -95,4 +95,4 @@ bash -ex "$HERE/build-appdirs.sh"
 ls -lh
 
 mkdir -p out
-cp -r install_prefix/usr/bin/* ./*.AppDir out/
+cp -r install_prefix/usr/bin/* appdirs/*.AppDir out/

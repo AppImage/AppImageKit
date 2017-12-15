@@ -40,7 +40,6 @@ mkdir -p "$APPIMAGED_APPDIR"/usr/share/metainfo
 cp ../resources/usr/share/metainfo/appimaged.appdata.xml "$APPIMAGED_APPDIR"/usr/share/metainfo/
 
 cp ../resources/AppRun "$APPIMAGED_APPDIR"/
-find /usr -name "libarchive.so.*.*" -exec cp "{}" "$APPIMAGED_APPDIR"/usr/lib/ \; > /dev/null 2>&1
 
 cp ../resources/appimaged.desktop "$APPIMAGED_APPDIR"/
 cp ../resources/appimagetool.svg "$APPIMAGED_APPDIR"/appimaged.svg
