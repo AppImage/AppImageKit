@@ -56,10 +56,10 @@ docker run \
 # (vim-common contains xxd)
 sudo apt-get install equivs vim-common
 
+cd build/
+
 # build .deb
 (cd out ; equivs-build ../../appimaged.ctl)
-
-cd build/
 
 # remove binaries from output directory
 rm -rf out/{appimaged,appimagetool,validate,digest,mksquashfs}
