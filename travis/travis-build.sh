@@ -57,7 +57,7 @@ docker run \
 sudo apt-get install equivs vim-common
 
 # build .deb
-(cd out ; equivs-build ../appimaged.ctl)
+(cd out ; equivs-build ../../appimaged.ctl)
 
 cd build/
 
