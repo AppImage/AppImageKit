@@ -62,7 +62,7 @@ cd build/
 (cd out ; equivs-build ../../appimaged.ctl)
 
 # remove binaries from output directory
-rm -rf out/{appimaged,appimagetool,validate,digest,mksquashfs}
+rm -r out/{appimaged,appimagetool,validate,digest,mksquashfs}
 
 # inspect runtime
 xxd out/runtime | head -n 1
