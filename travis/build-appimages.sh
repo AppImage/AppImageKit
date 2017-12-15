@@ -1,6 +1,6 @@
 #! /bin/bash
 
-cd /out
+cd /build/out
 
 ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v \
     -u "gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-x86_64.AppImage.zsync" \

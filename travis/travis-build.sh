@@ -34,7 +34,6 @@ docker run \
     -e ARCH -e TRAVIS -i \
     -v "${PWD}":/AppImageKit \
     -v "${PWD}"/travis/:/travis \
-    -v "${PWD}"/out:/out \
     "$DOCKER_IMAGE" \
     /bin/bash -x "/travis/build-binaries.sh" --no-install-dependencies --run-tests
 
