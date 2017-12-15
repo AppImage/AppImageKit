@@ -81,15 +81,11 @@ fi
 
 xxd src/runtime | head -n 1
 
-
-cd ..
-
-
 # Do NOT strip runtime
-find build/out/usr/bin/ -not -iname runtime -print -exec "$STRIP" "{}" \; 2>/dev/null
+find install_prefix/usr/bin/ -not -iname runtime -print -exec "$STRIP" "{}" \; 2>/dev/null
 
-ls -lh build/out/usr/bin/
-for FILE in build/out/usr/bin/*; do
+ls -lh install_prefix/usr/bin/
+for FILE in install_prefix/usr/bin/*; do
   echo "$FILE"
   ldd "$FILE" || true
 done
@@ -99,4 +95,4 @@ bash -ex "$HERE/build-appdirs.sh"
 ls -lh
 
 mkdir -p out
-cp -r build/out/usr/bin/* ./*.AppDir out/
+cp -r install_prefix/usr/bin/* ./*.AppDir out/
