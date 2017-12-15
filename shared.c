@@ -184,6 +184,10 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
         fprintf(stderr, "Move from %s to %s\n", icon_path, icon_dest_path);
     if(g_mkdir_with_parents(g_path_get_dirname(dest_dir), 0755))
         fprintf(stderr, "Could not create directory: %s\n", dest_dir);
+
+    // This is required only for old versions of glib2 and is harmless for newer
+    g_type_init();
+
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(icon_path);
     GFile *target_file = g_file_new_for_path(icon_dest_path);
