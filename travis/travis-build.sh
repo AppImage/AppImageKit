@@ -58,6 +58,9 @@ sudo apt-get install equivs vim-common
 
 cd build/
 
+# fix permissions
+sudo chown -R travis.travis .
+
 # build .deb
 (cd out ; equivs-build ../../appimaged.ctl)
 
