@@ -4,4 +4,4 @@ cd /AppImageKit
 
 ./build.sh "$@"
 
-./test-appimagetool.sh build/out/usr/bin/appimagetool
+./test-appimagetool.sh build/install_prefix/usr/bin/appimagetool
