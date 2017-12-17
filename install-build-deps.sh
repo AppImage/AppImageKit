@@ -50,12 +50,10 @@ if [ -e /usr/bin/yum ] ; then
   yum -y install epel-release
   yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-static openssl-devel vim-common cairo-devel desktop-file-utils libtool # inotify-tools-devel lz4-devel
 
-  wget -nv https://github.com/TheAssassin/CMake/releases/download/continuous/cmake-continuous-$ARCH.AppImage -O /usr/bin/cmake
-  chmod +x /usr/bin/cmake
-
-  export AUTOMAKE_VERSION=1.15 AUTOCONF_VERSION=2.69
+  export AUTOMAKE_VERSION=1.15 AUTOCONF_VERSION=2.69 CMAKE_VERSION=3.10.0
   wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-autoconf.sh -O- | bash
   wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-automake.sh -O- | bash
+  wget https://cmake.org/files/v3.10/cmake-"$CMAKE_VERSION"-Linux-x86_64.tar.gz -O- | tar xz --strip-components=1 -C /usr
 fi
 
 # Install dependencies for Arch Linux
