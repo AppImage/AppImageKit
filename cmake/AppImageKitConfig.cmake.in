@@ -15,4 +15,3 @@ endif()
  
 # These are IMPORTED targets created by AppImageTargets.cmake
 set(APPIMAGE_LIBRARIES foo)
-set(APPIMAGE_EXECUTABLE bar)

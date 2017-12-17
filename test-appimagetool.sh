@@ -14,7 +14,7 @@ appimagetool=$(readlink -f "$1")
 # make sure to use the built mksquashfs
 export PATH=$(dirname "$appimagetool"):"$PATH"
 
-if [ ! -x "$appimagetool" ]; then
+if [ ! -f "$appimagetool" ] || [ ! -x "$appimagetool" ]; then
     echo "Usage: $0 <path to appimagetool>"
     exit 1
 fi

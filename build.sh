@@ -1,25 +1,25 @@
 #!/bin/bash
+
 #
 # This script installs the required build-time dependencies
-# and builds AppImage
+# and builds AppImages for AppImageKit
 #
 
-
 STRIP="strip"
-INSTALL_DEPENDENCIES=0
 STATIC_BUILD=1
 JOBS=${JOBS:-1}
+RUN_TESTS=0
 
 while [ $1 ]; do
   case $1 in
     '--debug' | '-d' )
       STRIP="true"
       ;;
-    '--no-dependencies' | '-n' )
-      INSTALL_DEPENDENCIES=0
-      ;;
     '--use-shared-libs' | '-s' )
       STATIC_BUILD=0
+      ;;
+    '--run-tests' | '-t' )
+      RUN_TESTS=1
       ;;
     '--clean' | '-c' )
       rm -rf build
@@ -44,18 +44,20 @@ while [ $1 ]; do
   shift
 done
 
-echo $KEY | md5sum
+
+if cat /etc/*release | grep "CentOS" 2>&1 >/dev/null; then
+    if [ -e /opt/rh/devtoolset-4/enable ]; then
+        . /opt/rh/devtoolset-4/enable
+    fi
+fi
+
+echo "$KEY" | md5sum
 
 set -e
 set -x
 
 HERE="$(dirname "$(readlink -f "${0}")")"
 cd "$HERE"
-
-# Install dependencies if enabled
-if [ $INSTALL_DEPENDENCIES -eq 1 ]; then
-  . ./install-build-deps.sh
-fi
 
 # Fetch git submodules
 git submodule update --init --recursive
@@ -67,24 +69,21 @@ git submodule update --init --recursive
 mkdir build
 cd build
 
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON
 make -j$JOBS
-make install DESTDIR=out
+make install DESTDIR=install_prefix/
 
-xxd runtime | head -n 1
-mv runtime runtime_with_magic
+if [ ! -z $RUN_TESTS ]; then
+  ctest -V
+fi
 
+xxd src/runtime | head -n 1
 
-cd ..
-
-# Strip and check size and dependencies
-
-rm build/*.o
 # Do NOT strip runtime
-find build/out/usr/bin/ -not -iname runtime -print -exec "$STRIP" "{}" \; 2>/dev/null
+find install_prefix/usr/bin/ -not -iname runtime -print -exec "$STRIP" "{}" \; 2>/dev/null
 
-ls -lh build/out/usr/bin/
-for FILE in build/out/usr/bin/*; do
+ls -lh install_prefix/usr/bin/
+for FILE in install_prefix/usr/bin/*; do
   echo "$FILE"
   ldd "$FILE" || true
 done
@@ -94,4 +93,4 @@ bash -ex "$HERE/build-appdirs.sh"
 ls -lh
 
 mkdir -p out
-cp -r build/out/usr/bin/* ./*.AppDir out/
+cp -r install_prefix/usr/bin/* appdirs/*.AppDir out/
