@@ -6,7 +6,6 @@
 #
 
 STRIP="strip"
-INSTALL_DEPENDENCIES=1
 STATIC_BUILD=1
 JOBS=${JOBS:-1}
 RUN_TESTS=0
@@ -15,9 +14,6 @@ while [ $1 ]; do
   case $1 in
     '--debug' | '-d' )
       STRIP="true"
-      ;;
-    '--no-install-dependencies' | '-n' )
-      INSTALL_DEPENDENCIES=0
       ;;
     '--use-shared-libs' | '-s' )
       STATIC_BUILD=0
@@ -55,11 +51,6 @@ set -x
 
 HERE="$(dirname "$(readlink -f "${0}")")"
 cd "$HERE"
-
-# Install dependencies if enabled
-if [ $INSTALL_DEPENDENCIES -eq 1 ]; then
-  . ./install-build-deps.sh
-fi
 
 # Fetch git submodules
 git submodule update --init --recursive
