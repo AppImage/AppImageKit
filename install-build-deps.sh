@@ -53,6 +53,7 @@ if [ -e /usr/bin/yum ] ; then
   wget -nv https://github.com/TheAssassin/CMake/releases/download/continuous/cmake-continuous-$ARCH.AppImage -O /usr/bin/cmake
   chmod +x /usr/bin/cmake
 
+  export AUTOMAKE_VERSION=1.15 AUTOCONF_VERSION=2.69
   wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-autoconf.sh -O- | bash
   wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-automake.sh -O- | bash
 
