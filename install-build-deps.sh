@@ -56,12 +56,6 @@ if [ -e /usr/bin/yum ] ; then
   export AUTOMAKE_VERSION=1.15 AUTOCONF_VERSION=2.69
   wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-autoconf.sh -O- | bash
   wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-automake.sh -O- | bash
-
-  if [ "$ARCH" == "x86_64" ]; then
-    . /opt/rh/devtoolset-4/enable
-  fi
-  . /opt/rh/autotools-latest/enable
-
 fi
 
 # Install dependencies for Arch Linux

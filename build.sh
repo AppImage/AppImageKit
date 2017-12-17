@@ -44,6 +44,13 @@ while [ $1 ]; do
   shift
 done
 
+
+if cat /etc/*release | grep "CentOS" 2>&1 >/dev/null; then
+    if [ -e /opt/rh/devtoolset-4/enable ]; then
+        . /opt/rh/devtoolset-4/enable
+    fi
+fi
+
 echo "$KEY" | md5sum
 
 set -e
