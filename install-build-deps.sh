@@ -25,6 +25,11 @@ if [ -e /usr/bin/apt-get ] ; then
   liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs libcairo-dev desktop-file-utils cmake
   # libtool-bin might be required in newer distributions but is not available in precise
   sudo cp resources/liblz4.pc /usr/lib/$ARCH-linux-gnu/pkgconfig/
+  if cat /etc/lsb-release | grep 14.04 2>&1 >/dev/null; then
+    export CMAKE_VERSION=3.10.0
+    # sometimes, using a crowbar is easier than fiddling with PPAs
+    wget https://cmake.org/files/v3.10/cmake-"$CMAKE_VERSION"-Linux-x86_64.tar.gz -O- | tar xz --strip-components=1 -C /usr/local
+  fi
 fi
 
 if [ -e /usr/bin/yum ] ; then
@@ -51,8 +56,8 @@ if [ -e /usr/bin/yum ] ; then
   yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-static openssl-devel vim-common cairo-devel desktop-file-utils libtool # inotify-tools-devel lz4-devel
 
   export AUTOMAKE_VERSION=1.15 AUTOCONF_VERSION=2.69 CMAKE_VERSION=3.10.0
-  wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-autoconf.sh -O- | bash
   wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-automake.sh -O- | bash
+  wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-autoconf.sh -O- | bash
   wget https://cmake.org/files/v3.10/cmake-"$CMAKE_VERSION"-Linux-x86_64.tar.gz -O- | tar xz --strip-components=1 -C /usr
 fi
 
