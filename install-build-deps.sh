@@ -53,6 +53,9 @@ if [ -e /usr/bin/yum ] ; then
   wget -nv https://github.com/TheAssassin/CMake/releases/download/continuous/cmake-continuous-$ARCH.AppImage -O /usr/bin/cmake
   chmod +x /usr/bin/cmake
 
+  wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-autoconf.sh -O- | bash
+  wget https://raw.githubusercontent.com/AppImage/AppImageBuild/master/build-automake.sh -O- | bash
+
   if [ "$ARCH" == "x86_64" ]; then
     . /opt/rh/devtoolset-4/enable
   fi
