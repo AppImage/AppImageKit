@@ -482,19 +482,21 @@ main (int argc, char *argv[])
     if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
         die("Only gzip (faster execution, larger files) and xz (slower execution, smaller files) compression is supported at the moment. Let us know if there are reasons for more, should be easy to add. You could help the project by doing some systematic size/performance measurements. Watch for size, execution speed, and zsync delta size.");
     /* Check for dependencies here. Better fail early if they are not present. */
+    if(! g_find_program_in_path ("file"))
+        die("file command is missing but required, please install it");
     if(! g_find_program_in_path ("mksquashfs"))
-        die("mksquashfs is missing but required, please install it");
+        die("mksquashfs command is missing but required, please install it");
     if(! g_find_program_in_path ("desktop-file-validate"))
-        g_print("WARNING: desktop-file-validate is missing, please install it so that desktop files can be checked for potential errors\n");
+        g_print("WARNING: desktop-file-validate command is missing, please install it so that desktop files can be checked for potential errors\n");
     if(! g_find_program_in_path ("zsyncmake"))
-        g_print("WARNING: zsyncmake is missing, please install it if you want to use binary delta updates\n");
+        g_print("WARNING: zsyncmake command is missing, please install it if you want to use binary delta updates\n");
     if(! no_appstream)
         if(! g_find_program_in_path ("appstreamcli"))
-            g_print("WARNING: appstreamcli is missing, please install it if you want to use AppStream metadata\n");
+            g_print("WARNING: appstreamcli command is missing, please install it if you want to use AppStream metadata\n");
     if(! g_find_program_in_path ("gpg2") && ! g_find_program_in_path ("gpg"))
-        g_print("WARNING: gpg2 or gpg is missing, please install it if you want to create digital signatures\n");
+        g_print("WARNING: gpg2 or gpg command is missing, please install it if you want to create digital signatures\n");
     if(! g_find_program_in_path ("sha256sum") && ! g_find_program_in_path ("shasum"))
-        g_print("WARNING: sha256sum or shasum is missing, please install it if you want to create digital signatures\n");
+        g_print("WARNING: sha256sum or shasum command is missing, please install it if you want to create digital signatures\n");
     
     if(!&remaining_args[0])
         die("SOURCE is missing");
