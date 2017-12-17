@@ -48,7 +48,10 @@ if [ -e /usr/bin/yum ] ; then
   fi
 
   yum -y install epel-release
-  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-static openssl-devel vim-common cairo-devel desktop-file-utils cmake # inotify-tools-devel lz4-devel
+  yum -y install git wget make binutils fuse glibc-devel glib2-devel libarchive3-devel fuse-devel zlib-devel patch openssl-static openssl-devel vim-common cairo-devel desktop-file-utils # inotify-tools-devel lz4-devel
+
+  wget -nv https://github.com/TheAssassin/CMake/releases/download/continuous/cmake-continuous-$ARCH.AppImage -O /usr/bin/cmake
+  chmod +x /usr/bin/cmake
 
   if [ "$ARCH" == "x86_64" ]; then
     . /opt/rh/devtoolset-4/enable
