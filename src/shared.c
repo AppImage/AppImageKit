@@ -65,7 +65,7 @@
 
 char *vendorprefix = "appimagekit";
 
-void set_executable(char *path, gboolean verbose)
+void set_executable(const char *path, gboolean verbose)
 {
     if(!g_find_program_in_path ("firejail")){
         int result = chmod(path, 0755); // TODO: Only do this if signature verification passed
@@ -99,7 +99,7 @@ gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
 /* Return the md5 hash constructed according to
  * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#THUMBSAVE
  * This can be used to identify files that are related to a given AppImage at a given location */
-char * get_md5(char *path)
+char * get_md5(const char *path)
 {
     gchar *uri = g_filename_to_uri (path, NULL, NULL);
     if (uri != NULL)
@@ -122,7 +122,7 @@ char * get_md5(char *path)
  * Check libgnomeui/gnome-thumbnail.h for actually generating thumbnails in the correct
  * sizes at the correct locations automatically; which would draw in a dependency on gdk-pixbuf.
  */
-char * get_thumbnail_path(char *path, char *thumbnail_size, gboolean verbose)
+char * get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbose)
 {
     char *file;
     file = g_strconcat (get_md5(path), ".png", NULL);
@@ -202,7 +202,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
-int check_appimage_type(char *path, gboolean verbose)
+int check_appimage_type(const char *path, gboolean verbose)
 {
     char buffer[3];
     FILE *f = fopen(path, "rt");
@@ -401,7 +401,7 @@ gboolean g_key_file_load_from_squash(sqfs *fs, char *path, GKeyFile *key_file_st
 }
 
 /* Write a modified desktop file to disk that points to the AppImage */
-void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path, gchar* desktop_filename, int appimage_type, char *md5, gboolean verbose){
+void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimage_path, gchar* desktop_filename, int appimage_type, char *md5, gboolean verbose){
     if(!g_key_file_has_key(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, NULL)){
         fprintf(stderr, "Desktop file has no Exec key\n");
         return;
@@ -589,7 +589,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, char* appimage_path
 }
 
 /* Register a type 1 AppImage in the system */
-bool appimage_type1_register_in_system(char *path, gboolean verbose)
+bool appimage_type1_register_in_system(const char *path, gboolean verbose)
 {
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
     gchar *desktop_icon_value_original = NULL;
