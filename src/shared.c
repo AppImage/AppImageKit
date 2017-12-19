@@ -1218,10 +1218,15 @@ void create_thumbnail(const gchar * appimage_file_path, gboolean verbose) {
         // TODO: transform it to png with sizes 128x128 and 254x254
         gchar * target_path = get_thumbnail_path(appimage_file_path, "normal", verbose);
 
+        mk_base_dir(target_path);
+
         // deploy icon as thumbnail
         move_file (tmp_path, target_path);
 
         // clean up
         g_free(target_path);
+    } else {
+        fprintf(stderr, "ERROR: Icon file not extracted: %s", tmp_path);
     }
+
 }
