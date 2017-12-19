@@ -30,9 +30,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include <stdio.h>
 #include <errno.h>
 
 #include <glib.h>
@@ -255,7 +256,27 @@ static gchar *get_file_extension(const gchar *filename)
     return extension;
 }
 
-/* Find files in the squashfs matching to the regex pattern. 
+void squash_extract_inode_to_file(const sqfs *fs, sqfs_inode *inode, const gchar *dest) {// Read the file in chunks
+    off_t bytes_already_read = 0;
+    sqfs_off_t bytes_at_a_time = 64*1024;
+    FILE * f;
+    f = fopen (dest, "w+");
+    if (f == NULL){
+        fprintf(stderr, "fopen error\n");
+        return;
+    }
+    while (bytes_already_read < (*inode).xtra.reg.file_size)
+    {
+        char buf[bytes_at_a_time];
+        if (sqfs_read_range(fs, inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
+            fprintf(stderr, "sqfs_read_range error\n");
+        fwrite(buf, 1, bytes_at_a_time, f);
+        bytes_already_read = bytes_already_read + bytes_at_a_time;
+    }
+    fclose(f);
+}
+
+/* Find files in the squashfs matching to the regex pattern.
  * Returns a newly-allocated NULL-terminated array of strings.
  * Use g_strfreev() to free it. 
  * 
@@ -315,25 +336,8 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                             fprintf(stderr, "install: %s\n", dest);
                         if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
                             fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
-                        
-                        // Read the file in chunks
-                        off_t bytes_already_read = 0;
-                        sqfs_off_t bytes_at_a_time = 64*1024;
-                        FILE * f;
-                        f = fopen (dest, "w+");
-                        if (f == NULL){
-                            fprintf(stderr, "fopen error\n");
-                            break;
-                        }
-                        while (bytes_already_read < inode.xtra.reg.file_size)
-                        {
-                            char buf[bytes_at_a_time];
-                            if (sqfs_read_range(fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
-                                fprintf(stderr, "sqfs_read_range error\n");
-                            fwrite(buf, 1, bytes_at_a_time, f);
-                            bytes_already_read = bytes_already_read + bytes_at_a_time;
-                        }
-                        fclose(f);
+                        squash_extract_inode_to_file(fs, &inode, dest);
+
                         chmod (dest, 0644);
                         
                         if(verbose)
@@ -786,20 +790,22 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
 /* Register an AppImage in the system */
 int appimage_register_in_system(char *path, gboolean verbose)
 {
-    if((g_str_has_suffix(path, ".part")) || (g_str_has_suffix(path, ".tmp")) || (g_str_has_suffix(path, ".download")) || (g_str_has_suffix(path, ".zs-old")) || (g_str_has_suffix(path, ".~")))
+    if((g_str_has_suffix(path, ".part")) ||
+            (g_str_has_suffix(path, ".tmp")) ||
+            (g_str_has_suffix(path, ".download")) ||
+            (g_str_has_suffix(path, ".zs-old")) ||
+            (g_str_has_suffix(path, ".~")))
         return 0;
     int type = check_appimage_type(path, verbose);
     if(type == 1 || type == 2){
         fprintf(stderr, "\n");
         fprintf(stderr, "-> REGISTER %s\n", path);
+
+        create_thumbnail(path, false);
+    } else {
+        fprintf(stderr, "-> HANDLIND Unknown AppImage type %s\n", path);
+        return 0;
     }
-    /* TODO: Generate thumbnails.
-     * Generating proper thumbnails involves more than just copying images out of the AppImage,
-     * including checking if the thumbnail already exists and if it's valid 
-     * and writing attributes into the thumbnail, see
-     * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#CREATION */
-    if(verbose)
-        fprintf(stderr, "get_thumbnail_path: %s\n", get_thumbnail_path(path, "normal", verbose));
     
     if(type == 1){
         appimage_type1_register_in_system(path, verbose);
@@ -878,4 +884,343 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     unregister_using_md5_id(g_get_user_data_dir(), 0, md5, verbose);
     
     return 0;
+}
+
+/* AppImage generic handler calback to be used in algorithms */
+typedef void (*traverse_cb)(void *handler, void *entry_data, void *user_data);
+
+/* AppImage generic handler to be used in algorithms */
+struct appimage_handler
+{
+    const gchar *path;
+    char* (*get_file_name) (struct appimage_handler * handler, void *entry);
+    void (*extract_file) (struct appimage_handler * handler, void *entry, char *target);
+
+    void (*traverse)(struct appimage_handler * handler, traverse_cb command, void *user_data);
+
+    void *cache;
+    bool is_open;
+} typedef appimage_handler;
+
+bool is_handler_valid(const appimage_handler * handler) {
+    if (!handler) {
+        fprintf(stderr, "WARNING: Invalid handler found, you should take a look at this now!");
+        return false;
+    }
+
+    return true;
+}
+
+void mk_base_dir(const char *target)
+{
+    gchar *dirname = g_path_get_dirname(target);
+    if(g_mkdir_with_parents(dirname, 0755))
+        fprintf(stderr, "Could not create directory: %s\n", dirname);
+
+    g_free(dirname);
+}
+
+/*
+ * Dummy fallback functions
+ */
+void dummy_traverse_func(appimage_handler * handler, traverse_cb command, void *data) {
+    fprintf(stderr, "Called %s\n", __FUNCTION__);
+}
+
+char* dummy_get_file_name (appimage_handler * handler, void *data) {
+    fprintf(stderr, "Called %s\n", __FUNCTION__);
+}
+
+void dummy_extract_file(struct appimage_handler * handler, void *data, char *target) {
+    fprintf(stderr, "Called %s\n", __FUNCTION__);
+}
+
+/*
+ * AppImage Type 1 Functions
+ */
+
+void appimage_type1_open(appimage_handler * handler) {
+    if ( is_handler_valid(handler) && !handler->is_open ) {
+        fprintf(stderr, "Opening %s as Type 1 AppImage\n", handler->path);
+        int r;
+        struct archive *a;
+        a = archive_read_new();
+        archive_read_support_format_iso9660(a);
+        if ((r = archive_read_open_filename(a, handler->path, 10240))) {
+            fprintf(stderr, "%s", archive_error_string(a));
+        } else {
+            handler->cache = a;
+            handler->is_open = true;
+        }
+    }
+}
+
+void appimage_type1_close(appimage_handler * handler) {
+    if ( is_handler_valid(handler) && handler->is_open ) {
+        fprintf(stderr, "Closing %s\n", handler->path);
+        struct archive *a = handler->cache;
+        archive_read_close(a);
+        archive_read_free(a);
+
+        handler->cache = NULL;
+        handler->is_open = false;
+    }
+}
+
+void appimage_type1_traverse(appimage_handler * handler, traverse_cb command, void *command_data) {
+    appimage_type1_open(handler);
+
+    if (!command) {
+        fprintf(stderr, "No traverse command set.\n");
+        return;
+    }
+
+    if (handler->is_open) {
+        struct archive *a = handler->cache;
+        struct archive_entry *entry;
+        int r;
+
+        for (;;) {
+            r = archive_read_next_header(a, &entry);
+            if (r == ARCHIVE_EOF) {
+                break;
+            }
+            if (r != ARCHIVE_OK) {
+                fprintf(stderr, "%s\n", archive_error_string(a));
+                break;
+            }
+
+            /* Skip all but regular files; FIXME: Also handle symlinks correctly */
+            if(archive_entry_filetype(entry) != AE_IFREG) {
+                continue;
+            }
+
+            command(handler, entry, command_data);
+        }
+    }
+
+    appimage_type1_close(handler);
+}
+
+char* appimage_type1_get_file_name (appimage_handler * handler, void *data) {
+    struct archive_entry *entry = (struct archive_entry *) data;
+    char *filename = replace_str(archive_entry_pathname(entry), "./", "");
+    return filename;
+}
+
+void appimage_type1_extract_file (appimage_handler * handler, void *data, char *target) {
+    struct archive *a = handler->cache;
+    mk_base_dir(target);
+
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH;
+    int f = open(target, O_WRONLY | O_CREAT | O_TRUNC, mode);
+
+    if (f == -1){
+        fprintf(stderr, "open error: %s\n", target);
+        return;
+    }
+
+    archive_read_data_into_fd(a, f);
+    close(f);
+}
+
+appimage_handler appimage_type_1_create_handler() {
+    appimage_handler h;
+    h.traverse = appimage_type1_traverse;
+    h.get_file_name = appimage_type1_get_file_name;
+    h.extract_file = appimage_type1_extract_file;
+
+    return h;
+}
+
+/*
+ * AppImage Type 2 Functions
+ */
+
+void appimage_type2_open(appimage_handler * handler) {
+    if (is_handler_valid(handler) && !handler->is_open) {
+        fprintf(stderr, "Opening %s as Type 2 AppImage\n", handler->path);
+        long unsigned int fs_offset; // The offset at which a squashfs image is expected
+        fs_offset = get_elf_size(handler->path);
+
+        sqfs *fs = malloc(sizeof(sqfs));
+        sqfs_err err = sqfs_open_image(fs, handler->path, fs_offset);
+        if (err != SQFS_OK){
+            fprintf(stderr, "sqfs_open_image error: %s\n", handler->path);
+            sqfs_destroy(fs);
+        } else {
+            handler->is_open = true;
+            handler->cache = fs;
+        }
+    }
+}
+
+void appimage_type2_close(appimage_handler * handler) {
+    if ( is_handler_valid(handler) && handler->is_open ) {
+        fprintf(stderr, "Closing %s\n", handler->path);
+
+        sqfs_destroy(handler->cache);
+        free(handler->cache);
+
+        handler->is_open = false;
+        handler->cache = NULL;
+    }
+}
+
+void appimage_type2_traverse(appimage_handler * handler, traverse_cb command, void *command_data) {
+    appimage_type2_open(handler);
+
+    sqfs *fs = handler->cache;
+    sqfs_traverse trv;
+    sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
+    if (err!= SQFS_OK)
+        fprintf(stderr, "sqfs_traverse_open error\n");
+    while (sqfs_traverse_next(&trv, &err))
+        command(handler, &trv, command_data);
+
+    if (err)
+        fprintf(stderr, "sqfs_traverse_next error\n");
+    sqfs_traverse_close(&trv);
+
+    appimage_type2_close(handler);
+}
+
+char* appimage_type2_get_file_name (appimage_handler * handler, void *data) {
+    sqfs_traverse *trv = data;
+    return strdup(trv->path);
+}
+
+void appimage_type2_extract_symlink(sqfs *fs, sqfs_inode *inode, const char *target);
+
+void appimage_type2_extract_regular_file(sqfs *fs, sqfs_inode *inode, const char* target) {
+    mk_base_dir(target);
+
+    // Read the file in chunks
+    squash_extract_inode_to_file(fs, inode, target);
+}
+void appimage_type2_extract_file_following_symlinks(sqfs *fs, sqfs_inode *inode, const char* target) {
+    if(inode->base.inode_type == SQUASHFS_REG_TYPE)
+        appimage_type2_extract_regular_file(fs, inode, target);
+    else if(inode->base.inode_type == SQUASHFS_SYMLINK_TYPE) {
+        appimage_type2_extract_symlink(fs, inode, target);
+    } else
+        fprintf(stderr, "WARNING: Unable to extract file of type %d", inode->base.inode_type);
+}
+
+void appimage_type2_extract_symlink(sqfs *fs, sqfs_inode *inode, const char *target) {
+    size_t size;
+    sqfs_readlink(fs, inode, NULL, &size);
+    char buf[size];
+    int ret = sqfs_readlink(fs, inode, buf, &size);
+    if (ret != 0)
+        fprintf(stderr, "WARNING: Symlink error.");
+    else {
+
+        sqfs_err err = sqfs_inode_get(fs, inode, fs->sb.root_inode);
+        if (err != SQFS_OK)
+            fprintf(stderr, "WARNING: Unable to get the root inode. Error: %d", err);
+
+        bool found = false;
+        err = sqfs_lookup_path(fs, inode, buf, &found);
+        if (err != SQFS_OK)
+            fprintf(stderr, "WARNING: There was an error while trying to lookup a symblink. Error: %d", err);
+
+        if (found)
+            appimage_type2_extract_file_following_symlinks(fs, inode, target);
+    }
+}
+
+void appimage_type2_extract_file (appimage_handler * handler, void *data, char *target) {
+    sqfs *fs = handler->cache;
+    sqfs_traverse *trv = data;
+
+    sqfs_inode inode;
+    if(sqfs_inode_get(fs, &inode, trv->entry.inode))
+        fprintf(stderr, "sqfs_inode_get error\n");
+
+    appimage_type2_extract_file_following_symlinks(fs, &inode, target);
+}
+
+appimage_handler appimage_type_2_create_handler() {
+    appimage_handler h;
+    h.traverse = appimage_type2_traverse;
+    h.get_file_name = appimage_type2_get_file_name;
+    h.extract_file = appimage_type2_extract_file;
+
+    return h;
+}
+
+/* Factory function for creating the right appimage handler for
+ * a given file. */
+appimage_handler create_appimage_handler(const char * const path) {
+    int appimage_type = check_appimage_type(path, 0);
+
+    appimage_handler handler;
+    fprintf(stderr,"AppImage type: %d\n", appimage_type);
+    switch (appimage_type) {
+        case 1:
+            handler = appimage_type_1_create_handler();
+            break;
+        case 2:
+            handler = appimage_type_2_create_handler();
+            break;
+        default:
+            fprintf(stderr,"Appimage type %d not supported yet\n", appimage_type);
+            handler.traverse = dummy_traverse_func;
+            break;
+    }
+    handler.path = path;
+    handler.is_open = false;
+    return handler;
+}
+
+void move_file(const char *source, const char *target) {
+    GError *error = NULL;
+    GFile *icon_file = g_file_new_for_path(source);
+    GFile *target_file = g_file_new_for_path(target);
+    if (!g_file_move (icon_file, target_file, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error)) {
+        fprintf(stderr, "Error moving file: %s\n", error->message);
+        g_clear_error (&error);
+    }
+
+    g_object_unref(icon_file);
+    g_object_unref(target_file);
+}
+
+void extract_appimage_icon_command(void *handler_data, void *entry_data, void *user_data) {
+    appimage_handler *h = handler_data;
+    struct archive_entry *entry = entry_data;
+    gchar *path = user_data;
+
+    char *filename = h->get_file_name(h, entry);
+    if (strcmp(".DirIcon", filename) == 0)
+        h->extract_file(h, entry, path);
+
+    free(filename);
+}
+
+void extract_appimage_icon(appimage_handler *h, gchar *target) {
+    h->traverse(h, extract_appimage_icon_command, target);
+}
+
+/* Create AppImage thumbanil according to
+ * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
+ */
+void create_thumbnail(const gchar * appimage_file_path, gboolean verbose) {
+    // extract AppImage icon to /tmp
+    appimage_handler handler = create_appimage_handler(appimage_file_path);
+
+    char *tmp_path = "/tmp/appimage_thumbnail_tmp";
+    extract_appimage_icon(&handler, tmp_path);
+
+    if (g_file_test(tmp_path, G_FILE_TEST_EXISTS) ) {
+        // TODO: transform it to png with sizes 128x128 and 254x254
+        gchar * target_path = get_thumbnail_path(appimage_file_path, "normal", verbose);
+
+        // deploy icon as thumbnail
+        move_file (tmp_path, target_path);
+
+        // clean up
+        g_free(target_path);
+    }
 }

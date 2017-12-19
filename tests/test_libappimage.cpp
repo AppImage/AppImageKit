@@ -185,6 +185,38 @@ TEST_F(AppImageTest, get_md5_invalid_file_path)
     ASSERT_EQ(res, 0);
 }
 
+TEST_F(AppImageTest, create_thumbnail_appimage_type_1) {
+    create_thumbnail(appImage_type_1_file_path.c_str());
+
+    gchar *sum = get_md5(appImage_type_1_file_path.c_str());
+    std::string path = std::string(g_get_user_cache_dir())
+                       + "/thumbnails/normal/"
+                       + std::string(sum) + ".png";
+
+    g_free(sum);
+
+    ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+
+    // Clean
+    rm_file(path);
+}
+
+TEST_F(AppImageTest, create_thumbnail_appimage_type_2) {
+    create_thumbnail(appImage_type_2_file_path.c_str());
+
+    gchar* sum = get_md5(appImage_type_2_file_path.c_str());
+    std::string path = std::string(g_get_user_cache_dir())
+                       + "/thumbnails/normal/"
+                       + std::string(sum) + ".png";
+
+    g_free(sum);
+
+    ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+
+    // Clean
+    rm_file(path);
+}
+
 
 } // namespace
 
