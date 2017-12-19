@@ -1175,6 +1175,7 @@ appimage_handler create_appimage_handler(const char * const path) {
 }
 
 void move_file(const char *source, const char *target) {
+    g_type_init();
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(source);
     GFile *target_file = g_file_new_for_path(target);
