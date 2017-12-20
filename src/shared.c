@@ -954,6 +954,8 @@ void appimage_type1_open(appimage_handler *handler) {
         archive_read_support_format_iso9660(a);
         if (archive_read_open_filename(a, handler->path, 10240) != ARCHIVE_OK) {
             fprintf(stderr, "%s", archive_error_string(a));
+            handler->cache = NULL;
+            handler->is_open = false;
         } else {
             handler->cache = a;
             handler->is_open = true;
@@ -1059,6 +1061,8 @@ void appimage_type2_open(appimage_handler *handler) {
         if (err != SQFS_OK){
             fprintf(stderr, "sqfs_open_image error: %s\n", handler->path);
             sqfs_destroy(fs);
+            handler->is_open = false;
+            handler->cache = NULL;
         } else {
             handler->is_open = true;
             handler->cache = fs;
@@ -1081,17 +1085,20 @@ void appimage_type2_close(appimage_handler *handler) {
 void appimage_type2_traverse(appimage_handler *handler, traverse_cb command, void *command_data) {
     appimage_type2_open(handler);
 
-    sqfs *fs = handler->cache;
-    sqfs_traverse trv;
-    sqfs_err err = sqfs_traverse_open(&trv, fs, sqfs_inode_root(fs));
-    if (err!= SQFS_OK)
-        fprintf(stderr, "sqfs_traverse_open error\n");
-    while (sqfs_traverse_next(&trv, &err))
-        command(handler, &trv, command_data);
+    if (handler->is_open && handler->cache != NULL) {
+        sqfs *fs = handler->cache;
+        sqfs_traverse trv;
+        sqfs_inode_id root_inode = sqfs_inode_root(fs);
+        sqfs_err err = sqfs_traverse_open(&trv, fs, root_inode);
+        if (err!= SQFS_OK)
+            fprintf(stderr, "sqfs_traverse_open error\n");
+        while (sqfs_traverse_next(&trv, &err))
+            command(handler, &trv, command_data);
 
-    if (err)
-        fprintf(stderr, "sqfs_traverse_next error\n");
-    sqfs_traverse_close(&trv);
+        if (err)
+            fprintf(stderr, "sqfs_traverse_next error\n");
+        sqfs_traverse_close(&trv);
+    }
 
     appimage_type2_close(handler);
 }
