@@ -420,7 +420,7 @@ main (int argc, char *argv[])
     if(arg && (strcmp(arg,"appimage-updateinformation")==0 || strcmp(arg,"appimage-updateinfo")==0)) {
         unsigned long offset = 0;
         unsigned long length = 0;
-        get_elf_section_offset_and_lenghth(appimage_path, ".upd_info", &offset, &length);
+        get_elf_section_offset_and_length(appimage_path, ".upd_info", &offset, &length);
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
@@ -431,7 +431,7 @@ main (int argc, char *argv[])
     if(arg && strcmp(arg,"appimage-signature")==0) {
         unsigned long offset = 0;
         unsigned long length = 0;
-        get_elf_section_offset_and_lenghth(appimage_path, ".sha256_sig", &offset, &length);
+        get_elf_section_offset_and_length(appimage_path, ".sha256_sig", &offset, &length);
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
