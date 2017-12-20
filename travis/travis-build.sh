@@ -52,11 +52,14 @@ docker run \
     "$DOCKER_IMAGE" \
     /bin/bash -x "/travis/build-appimages.sh"
 
+cd build/
+
+# test AppImages
+bash -x ../travis/test-appimages.sh
+
 # install more tools
 # (vim-common contains xxd)
 sudo apt-get install equivs vim-common
-
-cd build/
 
 # fix permissions
 sudo chown -R travis.travis .
