@@ -897,7 +897,7 @@ struct appimage_handler
 {
     const gchar *path;
     char* (*get_file_name) (struct appimage_handler *handler, void *entry);
-    void (*extract_file) (struct appimage_handler *handler, void *entry, char *target);
+    void (*extract_file) (struct appimage_handler *handler, void *entry, const char const *target);
 
     void (*traverse)(struct appimage_handler *handler, traverse_cb command, void *user_data);
 
@@ -1017,7 +1017,7 @@ char* appimage_type1_get_file_name (appimage_handler *handler, void *data) {
     return filename;
 }
 
-void appimage_type1_extract_file (appimage_handler *handler, void *data, char *target) {
+void appimage_type1_extract_file (appimage_handler *handler, void *data, const char const *target) {
     (void) data;
 
     struct archive *a = handler->cache;
@@ -1142,7 +1142,7 @@ void appimage_type2_extract_symlink(sqfs *fs, sqfs_inode *inode, const char *tar
     }
 }
 
-void appimage_type2_extract_file (appimage_handler *handler, void *data, char *target) {
+void appimage_type2_extract_file (appimage_handler *handler, void *data, const char const *target) {
     sqfs *fs = handler->cache;
     sqfs_traverse *trv = data;
 
@@ -1186,7 +1186,7 @@ appimage_handler create_appimage_handler(const char *const path) {
     return handler;
 }
 
-void move_file(const char *source, const char *target) {
+void move_file(const char const *source, const char const *target) {
     g_type_init();
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(source);
@@ -1198,6 +1198,30 @@ void move_file(const char *source, const char *target) {
 
     g_object_unref(icon_file);
     g_object_unref(target_file);
+}
+
+struct extract_appimage_file_command_data {
+    const char *path;
+    const char *destination;
+};
+
+void extract_appimage_file_command(void *handler_data, void *entry_data, void *user_data) {
+    appimage_handler *h = handler_data;
+    struct archive_entry *entry = entry_data;
+    const struct extract_appimage_file_command_data const *params = user_data;
+
+    char *filename = h->get_file_name(h, entry);
+    if (strcmp(params->path, filename) == 0)
+        h->extract_file(h, entry, params->destination);
+
+    free(filename);
+}
+
+void extract_appimage_file(appimage_handler *h, const char const *path, const char const *destination) {
+    struct extract_appimage_file_command_data data;
+    data.path = path;
+    data.destination = destination;
+    h->traverse(h, extract_appimage_file_command, &data);
 }
 
 void extract_appimage_icon_command(void *handler_data, void *entry_data, void *user_data) {
@@ -1241,4 +1265,10 @@ void create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
         fprintf(stderr, "ERROR: Icon file not extracted: %s", tmp_path);
     }
 
+}
+
+void extract_file_following_symlinks(const gchar const *appimage_file_path, const char const *file_path, const char const *target_dir) {
+    appimage_handler handler = create_appimage_handler(appimage_file_path);
+
+    extract_appimage_file(&handler, file_path, target_dir);
 }

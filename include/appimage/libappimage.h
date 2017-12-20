@@ -26,6 +26,9 @@ int appimage_register_in_system(const char *path, gboolean verbose);
 /* Unregister an AppImage in the system */
 int appimage_unregister_in_system(const char *path, gboolean verbose);
 
+/* Extract a given file from the appimage following the symlinks until a concrete file is found */
+void extract_file_following_symlinks(const char *appimage_file_path, const char *file_path, const char *target_dir);
+
 /* Create AppImage thumbnail according to
  * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
  */
