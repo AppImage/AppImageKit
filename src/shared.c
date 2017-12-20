@@ -794,19 +794,19 @@ void create_thumbnail(const gchar *appimage_file_path, gboolean verbose);
 int appimage_register_in_system(char *path, gboolean verbose)
 {
     if((g_str_has_suffix(path, ".part")) ||
-            (g_str_has_suffix(path, ".tmp")) ||
-            (g_str_has_suffix(path, ".download")) ||
-            (g_str_has_suffix(path, ".zs-old")) ||
-            (g_str_has_suffix(path, ".~")))
+        g_str_has_suffix(path, ".tmp") ||
+        g_str_has_suffix(path, ".download") ||
+        g_str_has_suffix(path, ".zs-old") ||
+        g_str_has_suffix(path, ".~")
+    )
         return 0;
     int type = check_appimage_type(path, verbose);
-    if(type == 1 || type == 2){
-        fprintf(stderr, "\n");
-        fprintf(stderr, "-> REGISTER %s\n", path);
-
+    if(type == 1 || type == 2) {
+        fprintf(stderr, "\n-> Registering type %d AppImage: %s\n", type, path);
         create_thumbnail(path, false);
     } else {
-        fprintf(stderr, "-> HANDLIND Unknown AppImage type %s\n", path);
+        if (verbose)
+            fprintf(stderr, "-> Skipping file %s\n", path);
         return 0;
     }
     
