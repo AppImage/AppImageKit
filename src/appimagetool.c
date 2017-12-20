@@ -780,7 +780,7 @@ main (int argc, char *argv[])
           
             unsigned long ui_offset = 0;
             unsigned long ui_length = 0;
-            get_elf_section_offset_and_lenghth(destination, ".upd_info", &ui_offset, &ui_length);
+            get_elf_section_offset_and_length(destination, ".upd_info", &ui_offset, &ui_length);
             if(verbose) {
                 printf("ui_offset: %lu\n", ui_offset);
                 printf("ui_length: %lu\n", ui_length);
@@ -866,7 +866,7 @@ main (int argc, char *argv[])
                 } else {
                     unsigned long sig_offset = 0;
                     unsigned long sig_length = 0;
-                    get_elf_section_offset_and_lenghth(destination, ".sha256_sig", &sig_offset, &sig_length);
+                    get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
                     if(verbose) {
                         printf("sig_offset: %lu\n", sig_offset);
                         printf("sig_length: %lu\n", sig_length);
