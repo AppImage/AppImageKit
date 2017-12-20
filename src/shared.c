@@ -80,7 +80,7 @@ void set_executable(const char *path, gboolean verbose)
 
 /* Search and replace on a string, this really should be in Glib
  * https://mail.gnome.org/archives/gtk-list/2012-February/msg00005.html */
-gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
+gchar* replace_str(const gchar const *src, const gchar const *find, const gchar const *replace){
     gchar* retval = g_strdup(src);
     gchar* ptr = NULL;
     ptr = g_strstr_len(retval,-1,find); 
@@ -99,7 +99,7 @@ gchar* replace_str(const gchar *src, const gchar *find, const gchar *replace){
 /* Return the md5 hash constructed according to
  * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#THUMBSAVE
  * This can be used to identify files that are related to a given AppImage at a given location */
-char * get_md5(const char *path)
+char *get_md5(const char const *path)
 {
     gchar *uri = g_filename_to_uri (path, NULL, NULL);
     if (uri != NULL)
@@ -122,12 +122,11 @@ char * get_md5(const char *path)
  * Check libgnomeui/gnome-thumbnail.h for actually generating thumbnails in the correct
  * sizes at the correct locations automatically; which would draw in a dependency on gdk-pixbuf.
  */
-char * get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbose)
+char *get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbose)
 {
-    char *file;
-    file = g_strconcat (get_md5(path), ".png", NULL);
-    gchar *thumbnail_path = g_build_filename (g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
-    g_free (file);
+    char *file  = g_strconcat(get_md5(path), ".png", NULL);
+    gchar *thumbnail_path = g_build_filename(g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
+    g_free(file);
     return thumbnail_path;
 }
 
@@ -141,7 +140,7 @@ char * get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbo
 void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 {
     // FIXME: This default location is most likely wrong, but at least the icons with unknown size can go somewhere
-    gchar *dest_dir = dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
+    gchar *dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
     
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
         dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
@@ -897,8 +896,8 @@ typedef void (*traverse_cb)(void *handler, void *entry_data, void *user_data);
 struct appimage_handler
 {
     const gchar *path;
-    char* (*get_file_name) (struct appimage_handler * handler, void *entry);
-    void (*extract_file) (struct appimage_handler * handler, void *entry, char *target);
+    char* (*get_file_name) (struct appimage_handler *handler, void *entry);
+    void (*extract_file) (struct appimage_handler *handler, void *entry, char *target);
 
     void (*traverse)(struct appimage_handler *handler, traverse_cb command, void *user_data);
 
@@ -927,15 +926,19 @@ void mk_base_dir(const char const *target)
 /*
  * Dummy fallback functions
  */
-void dummy_traverse_func(appimage_handler * handler, traverse_cb command, void *data) {
+void dummy_traverse_func(appimage_handler *handler, traverse_cb command, void *data) {
+    (void) handler;
+    (void) command;
+    (void) data;
+
     fprintf(stderr, "Called %s\n", __FUNCTION__);
 }
 
-char* dummy_get_file_name (appimage_handler * handler, void *data) {
+char* dummy_get_file_name (appimage_handler *handler, void *data) {
     fprintf(stderr, "Called %s\n", __FUNCTION__);
 }
 
-void dummy_extract_file(struct appimage_handler * handler, void *data, char *target) {
+void dummy_extract_file(struct appimage_handler *handler, void *data, char *target) {
     fprintf(stderr, "Called %s\n", __FUNCTION__);
 }
 
@@ -943,7 +946,7 @@ void dummy_extract_file(struct appimage_handler * handler, void *data, char *tar
  * AppImage Type 1 Functions
  */
 
-void appimage_type1_open(appimage_handler * handler) {
+void appimage_type1_open(appimage_handler *handler) {
     if ( is_handler_valid(handler) && !handler->is_open ) {
         fprintf(stderr, "Opening %s as Type 1 AppImage\n", handler->path);
         struct archive *a;
@@ -958,7 +961,7 @@ void appimage_type1_open(appimage_handler * handler) {
     }
 }
 
-void appimage_type1_close(appimage_handler * handler) {
+void appimage_type1_close(appimage_handler *handler) {
     if ( is_handler_valid(handler) && handler->is_open ) {
         fprintf(stderr, "Closing %s\n", handler->path);
         struct archive *a = handler->cache;
@@ -1005,7 +1008,7 @@ void appimage_type1_traverse(appimage_handler *handler, traverse_cb command, voi
     appimage_type1_close(handler);
 }
 
-char* appimage_type1_get_file_name (appimage_handler * handler, void *data) {
+char* appimage_type1_get_file_name (appimage_handler *handler, void *data) {
     (void) handler;
 
     struct archive_entry *entry = (struct archive_entry *) data;
@@ -1014,7 +1017,7 @@ char* appimage_type1_get_file_name (appimage_handler * handler, void *data) {
     return filename;
 }
 
-void appimage_type1_extract_file (appimage_handler * handler, void *data, char *target) {
+void appimage_type1_extract_file (appimage_handler *handler, void *data, char *target) {
     (void) data;
 
     struct archive *a = handler->cache;
@@ -1045,7 +1048,7 @@ appimage_handler appimage_type_1_create_handler() {
  * AppImage Type 2 Functions
  */
 
-void appimage_type2_open(appimage_handler * handler) {
+void appimage_type2_open(appimage_handler *handler) {
     if (is_handler_valid(handler) && !handler->is_open) {
         fprintf(stderr, "Opening %s as Type 2 AppImage\n", handler->path);
         long unsigned int fs_offset; // The offset at which a squashfs image is expected
@@ -1063,7 +1066,7 @@ void appimage_type2_open(appimage_handler * handler) {
     }
 }
 
-void appimage_type2_close(appimage_handler * handler) {
+void appimage_type2_close(appimage_handler *handler) {
     if ( is_handler_valid(handler) && handler->is_open ) {
         fprintf(stderr, "Closing %s\n", handler->path);
 
@@ -1075,7 +1078,7 @@ void appimage_type2_close(appimage_handler * handler) {
     }
 }
 
-void appimage_type2_traverse(appimage_handler * handler, traverse_cb command, void *command_data) {
+void appimage_type2_traverse(appimage_handler *handler, traverse_cb command, void *command_data) {
     appimage_type2_open(handler);
 
     sqfs *fs = handler->cache;
@@ -1139,7 +1142,7 @@ void appimage_type2_extract_symlink(sqfs *fs, sqfs_inode *inode, const char *tar
     }
 }
 
-void appimage_type2_extract_file (appimage_handler * handler, void *data, char *target) {
+void appimage_type2_extract_file (appimage_handler *handler, void *data, char *target) {
     sqfs *fs = handler->cache;
     sqfs_traverse *trv = data;
 
@@ -1161,7 +1164,7 @@ appimage_handler appimage_type_2_create_handler() {
 
 /* Factory function for creating the right appimage handler for
  * a given file. */
-appimage_handler create_appimage_handler(const char * const path) {
+appimage_handler create_appimage_handler(const char *const path) {
     int appimage_type = check_appimage_type(path, 0);
 
     appimage_handler handler;
@@ -1225,7 +1228,7 @@ void create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
 
     if (g_file_test(tmp_path, G_FILE_TEST_EXISTS) ) {
         // TODO: transform it to png with sizes 128x128 and 254x254
-        gchar * target_path = get_thumbnail_path(appimage_file_path, "normal", verbose);
+        gchar *target_path = get_thumbnail_path(appimage_file_path, "normal", verbose);
 
         mk_base_dir(target_path);
 
