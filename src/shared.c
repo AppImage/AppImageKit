@@ -256,7 +256,8 @@ static gchar *get_file_extension(const gchar *filename)
     return extension;
 }
 
-void squash_extract_inode_to_file(const sqfs *fs, sqfs_inode *inode, const gchar *dest) {// Read the file in chunks
+// Read the file in chunks
+void squash_extract_inode_to_file(sqfs *fs, sqfs_inode *inode, const gchar *dest) {
     off_t bytes_already_read = 0;
     sqfs_off_t bytes_at_a_time = 64*1024;
     FILE * f;
@@ -270,7 +271,7 @@ void squash_extract_inode_to_file(const sqfs *fs, sqfs_inode *inode, const gchar
         char buf[bytes_at_a_time];
         if (sqfs_read_range(fs, inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
             fprintf(stderr, "sqfs_read_range error\n");
-        fwrite(buf, 1, bytes_at_a_time, f);
+        fwrite(buf, 1, (size_t) bytes_at_a_time, f);
         bytes_already_read = bytes_already_read + bytes_at_a_time;
     }
     fclose(f);
@@ -435,7 +436,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     unsigned long upd_length = 0;
     if(g_find_program_in_path ("AppImageUpdate")){
         if(appimage_type == 2){
-            get_elf_section_offset_and_lenghth(appimage_path, ".upd_info", &upd_offset, &upd_length);
+            get_elf_section_offset_and_length(appimage_path, ".upd_info", &upd_offset, &upd_length);
             if(upd_length != 1024)
                 fprintf(stderr, "WARNING: .upd_info length is %lu rather than 1024, this might be a bug in the AppImage\n", upd_length);
         }
@@ -589,7 +590,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 }
 
 /* Register a type 1 AppImage in the system */
-bool appimage_type1_register_in_system(const char *path, gboolean verbose)
+bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
 {
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
     gchar *desktop_icon_value_original = NULL;
@@ -787,6 +788,9 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     return TRUE;
 }
 
+// forward declare function
+void create_thumbnail(const gchar *appimage_file_path, gboolean verbose);
+
 /* Register an AppImage in the system */
 int appimage_register_in_system(char *path, gboolean verbose)
 {
@@ -833,7 +837,7 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
 
 /* Recursively delete files in path and subdirectories that contain the given md5
  */
-void unregister_using_md5_id(const char *name, int level, char* md5, gboolean verbose)
+void unregister_using_md5_id(const char const *name, int level, char* md5, gboolean verbose)
 {
     DIR *dir;
     struct dirent *entry;
@@ -896,13 +900,13 @@ struct appimage_handler
     char* (*get_file_name) (struct appimage_handler * handler, void *entry);
     void (*extract_file) (struct appimage_handler * handler, void *entry, char *target);
 
-    void (*traverse)(struct appimage_handler * handler, traverse_cb command, void *user_data);
+    void (*traverse)(struct appimage_handler *handler, traverse_cb command, void *user_data);
 
     void *cache;
     bool is_open;
 } typedef appimage_handler;
 
-bool is_handler_valid(const appimage_handler * handler) {
+bool is_handler_valid(const appimage_handler const *handler) {
     if (!handler) {
         fprintf(stderr, "WARNING: Invalid handler found, you should take a look at this now!");
         return false;
@@ -911,7 +915,7 @@ bool is_handler_valid(const appimage_handler * handler) {
     return true;
 }
 
-void mk_base_dir(const char *target)
+void mk_base_dir(const char const *target)
 {
     gchar *dirname = g_path_get_dirname(target);
     if(g_mkdir_with_parents(dirname, 0755))
@@ -942,11 +946,10 @@ void dummy_extract_file(struct appimage_handler * handler, void *data, char *tar
 void appimage_type1_open(appimage_handler * handler) {
     if ( is_handler_valid(handler) && !handler->is_open ) {
         fprintf(stderr, "Opening %s as Type 1 AppImage\n", handler->path);
-        int r;
         struct archive *a;
         a = archive_read_new();
         archive_read_support_format_iso9660(a);
-        if ((r = archive_read_open_filename(a, handler->path, 10240))) {
+        if (archive_read_open_filename(a, handler->path, 10240) != ARCHIVE_OK) {
             fprintf(stderr, "%s", archive_error_string(a));
         } else {
             handler->cache = a;
@@ -967,7 +970,7 @@ void appimage_type1_close(appimage_handler * handler) {
     }
 }
 
-void appimage_type1_traverse(appimage_handler * handler, traverse_cb command, void *command_data) {
+void appimage_type1_traverse(appimage_handler *handler, traverse_cb command, void *command_data) {
     appimage_type1_open(handler);
 
     if (!command) {
@@ -1003,12 +1006,17 @@ void appimage_type1_traverse(appimage_handler * handler, traverse_cb command, vo
 }
 
 char* appimage_type1_get_file_name (appimage_handler * handler, void *data) {
+    (void) handler;
+
     struct archive_entry *entry = (struct archive_entry *) data;
+
     char *filename = replace_str(archive_entry_pathname(entry), "./", "");
     return filename;
 }
 
 void appimage_type1_extract_file (appimage_handler * handler, void *data, char *target) {
+    (void) data;
+
     struct archive *a = handler->cache;
     mk_base_dir(target);
 
@@ -1085,7 +1093,8 @@ void appimage_type2_traverse(appimage_handler * handler, traverse_cb command, vo
     appimage_type2_close(handler);
 }
 
-char* appimage_type2_get_file_name (appimage_handler * handler, void *data) {
+char* appimage_type2_get_file_name (appimage_handler *handler, void *data) {
+    (void) handler;
     sqfs_traverse *trv = data;
     return strdup(trv->path);
 }
@@ -1207,7 +1216,7 @@ void extract_appimage_icon(appimage_handler *h, gchar *target) {
 /* Create AppImage thumbanil according to
  * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
  */
-void create_thumbnail(const gchar * appimage_file_path, gboolean verbose) {
+void create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
     // extract AppImage icon to /tmp
     appimage_handler handler = create_appimage_handler(appimage_file_path);
 
