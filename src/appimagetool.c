@@ -612,7 +612,7 @@ main (int argc, char *argv[])
             fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} defined in desktop file but not found\n", icon_name);
             fprintf (stderr, "For example, you could put a 256x256 pixel png into\n");
             gchar *icon_name_with_png = g_strconcat(icon_name, ".png", NULL);
-            gchar *example_path = g_build_filename(source, "/usr/share/icons/hicolor/256x256/apps/", icon_name_with_png, NULL);
+            gchar *example_path = g_build_filename(source, "/", icon_name_with_png, NULL);
             fprintf (stderr, "%s\n", example_path);
             exit(1);
         }
