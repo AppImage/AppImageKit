@@ -91,7 +91,9 @@ target_link_libraries(appimagetool
 
 target_compile_definitions(appimagetool
     PRIVATE -D_FILE_OFFSET_BITS=64
-    PRIVATE -DVERSION_NUMBER="${GIT_VERSION}"
+    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
+    PRIVATE -DBUILD_NUMBER="${BUILD_NUMBER}"
+    PRIVATE -DBUILD_DATE="${DATE}"
     PRIVATE -DENABLE_BINRELOC
 )
 
@@ -116,7 +118,10 @@ target_link_libraries(appimaged
 )
 
 target_compile_definitions(appimaged
-    PRIVATE -DVERSION_NUMBER="${GIT_VERSION}"
+    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
+    PRIVATE -DVERSION_NUMBER="${GIT_COMMIT}"  # legacy variable
+    PRIVATE -DBUILD_NUMBER="${BUILD_NUMBER}"
+    PRIVATE -DBUILD_DATE="${DATE}"
     PRIVATE -D_FILE_OFFSET_BITS=64
     PRIVATE -DHAVE_LIBARCHIVE3=0
 )
