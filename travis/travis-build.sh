@@ -55,7 +55,7 @@ docker run \
 cd build/
 
 # test AppImages
-sudo apt-get install -y gcc-multilib lib32z1 libfuse2 libfuse2:i386
+sudo apt-get install -y gcc-multilib lib32z1 libfuse2 libfuse2:i386 libglib2.0-0:i386
 bash -x ../travis/test-appimages.sh
 
 # install more tools
