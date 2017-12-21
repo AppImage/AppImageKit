@@ -315,8 +315,12 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                 gchar *dest_basename;
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
                     if(g_str_has_prefix(trv.path, "usr/share/icons/") || g_str_has_prefix(trv.path, "usr/share/pixmaps/") || (g_str_has_prefix(trv.path, "usr/share/mime/") && g_str_has_suffix(trv.path, ".xml"))){
-                        dest_dirname = g_path_get_dirname(replace_str(trv.path, "usr/share", g_get_user_data_dir()));          
-                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
+                        gchar *path = replace_str(trv.path, "usr/share", g_get_user_data_dir());
+                        dest_dirname = g_path_get_dirname(path);
+                        g_free(path);
+                        gchar *base_name = g_path_get_basename(trv.path);
+                        dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, base_name);
+                        g_free(base_name);
                         dest = g_build_path("/", dest_dirname, dest_basename, NULL);
                     }
                     /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
@@ -657,8 +661,13 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
         /* Get icon file(s) and act on them in one go */
         
         if(g_str_has_prefix(filename, "usr/share/icons/") || g_str_has_prefix(filename, "usr/share/pixmaps/") || (g_str_has_prefix(filename, "usr/share/mime/") && g_str_has_suffix(filename, ".xml"))){
-            dest_dirname = g_path_get_dirname(replace_str(filename, "usr/share", g_get_user_data_dir()));          
-            dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(filename));
+            gchar *t = replace_str(filename, "usr/share", g_get_user_data_dir());            
+            dest_dirname = g_path_get_dirname(t);
+            g_free(t);
+
+            gchar *file_basename = g_path_get_basename(filename);
+            dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, file_basename);
+            g_free(file_basename);
             dest = g_build_path("/", dest_dirname, dest_basename, NULL);
         }
         /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
