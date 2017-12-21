@@ -55,6 +55,7 @@ docker run \
 cd build/
 
 # test AppImages
+[ "$ARCH" == "i686" ] && sudo apt-get install -y gcc-multilib lib32z1
 bash -x ../travis/test-appimages.sh
 
 # install more tools
