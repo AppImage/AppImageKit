@@ -7,19 +7,16 @@ set +e
 TIMEOUT=3
 ARCH=${ARCH:-$(uname -p)}
 
-# fix architecture name
-if [ "$ARCH" == "i686" ]; then
-    export ARCH="i386"
-fi
-
 error() {
     echo "Error: command failed" >&2
     exit 1
 }
 
+ls -al out/
+
 # first of all, try to run appimagetool
-out/appimagetool-"$ARCH".AppImage || error
-out/appimagetool-"$ARCH".AppImage -h || error
+out/appimagetool-"$ARCH".AppImage && error  # should fail due to missing parameter
+out/appimagetool-"$ARCH".AppImage -h || error  # should not fail
 
 # now check appimaged
 timeout "$TIMEOUT" out/appimaged-"$ARCH".AppImage --no-install
