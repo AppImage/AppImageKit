@@ -12,10 +12,26 @@ include(CTest)
 # build information #
 #####################
 
+# determine Git commit ID
 execute_process(
     COMMAND git describe --tags --always --abbrev=7
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+
+# set version and build number
+set(VERSION 1-alpha)
+if("$ENV{TRAVIS_BUILD_NUMBER}" STREQUAL "")
+    set(BUILD_NUMBER "<local dev build>")
+else()
+    set(BUILD_NUMBER "$ENV{TRAVIS_BUILD_NUMBER}")
+endif()
+
+# get current date
+execute_process(
+    COMMAND env LC_ALL=C date -u "+%Y-%m-%d %H:%M:%S %Z"
+    OUTPUT_VARIABLE DATE
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 

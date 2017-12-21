@@ -26,6 +26,10 @@
 
 #ident "AppImage by Simon Peter, http://appimage.org/"
 
+#ifndef RELEASE_NAME
+    #define RELEASE_NAME "continuous build"
+#endif
+
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <stdlib.h>
@@ -71,7 +75,7 @@ static char _exclude_file_desc[256];
 
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
-static gboolean version = FALSE;
+static gboolean showVersionOnly = FALSE;
 static gboolean sign = FALSE;
 static gboolean no_appstream = FALSE;
 gchar **remaining_args = NULL;
@@ -407,7 +411,7 @@ static GOptionEntry entries[] =
     { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI environment variables", NULL },
     { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
-    { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
+    { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
@@ -474,10 +478,15 @@ main (int argc, char *argv[])
         exit(1);
     }
 
-    if(version){
-        fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
+    fprintf(
+        stderr,
+        "appimagetool, %s (commit %s), build %s built on %s\n",
+        RELEASE_NAME, GIT_COMMIT, BUILD_NUMBER, BUILD_DATE
+    );
+
+    // always show version, but exit immediately if only the version number was requested
+    if (showVersionOnly)
         exit(0);
-    }
 
     if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
         die("Only gzip (faster execution, larger files) and xz (slower execution, smaller files) compression is supported at the moment. Let us know if there are reasons for more, should be easy to add. You could help the project by doing some systematic size/performance measurements. Watch for size, execution speed, and zsync delta size.");
@@ -612,7 +621,7 @@ main (int argc, char *argv[])
             fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} defined in desktop file but not found\n", icon_name);
             fprintf (stderr, "For example, you could put a 256x256 pixel png into\n");
             gchar *icon_name_with_png = g_strconcat(icon_name, ".png", NULL);
-            gchar *example_path = g_build_filename(source, "/usr/share/icons/hicolor/256x256/apps/", icon_name_with_png, NULL);
+            gchar *example_path = g_build_filename(source, "/", icon_name_with_png, NULL);
             fprintf (stderr, "%s\n", example_path);
             exit(1);
         }
@@ -780,7 +789,7 @@ main (int argc, char *argv[])
           
             unsigned long ui_offset = 0;
             unsigned long ui_length = 0;
-            get_elf_section_offset_and_lenghth(destination, ".upd_info", &ui_offset, &ui_length);
+            get_elf_section_offset_and_length(destination, ".upd_info", &ui_offset, &ui_length);
             if(verbose) {
                 printf("ui_offset: %lu\n", ui_offset);
                 printf("ui_length: %lu\n", ui_length);
@@ -866,7 +875,7 @@ main (int argc, char *argv[])
                 } else {
                     unsigned long sig_offset = 0;
                     unsigned long sig_length = 0;
-                    get_elf_section_offset_and_lenghth(destination, ".sha256_sig", &sig_offset, &sig_length);
+                    get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
                     if(verbose) {
                         printf("sig_offset: %lu\n", sig_offset);
                         printf("sig_length: %lu\n", sig_length);
