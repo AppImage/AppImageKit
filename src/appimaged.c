@@ -55,10 +55,14 @@
 
 #include <pthread.h>
 
+#ifndef RELEASE_NAME
+    #define RELEASE_NAME "continuous build"
+#endif
+
 extern int notify(char *title, char *body, int timeout);
 
 static gboolean verbose = FALSE;
-static gboolean version = FALSE;
+static gboolean showVersionOnly = FALSE;
 static gboolean install = FALSE;
 static gboolean uninstall = FALSE;
 gchar **remaining_args = NULL;
@@ -68,7 +72,7 @@ static GOptionEntry entries[] =
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     { "install", 'i', 0, G_OPTION_ARG_NONE, &install, "Install this appimaged instance to $HOME", NULL },
     { "uninstall", 'u', 0, G_OPTION_ARG_NONE, &uninstall, "Uninstall an appimaged instance from $HOME", NULL },
-    { "version", 0, 0, G_OPTION_ARG_NONE, &version, "Show version number", NULL },
+    { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
 };
@@ -226,12 +230,17 @@ int main(int argc, char ** argv) {
         exit (1);
     }
 
-    if(version){
-        fprintf(stderr,"Version: %s\n", VERSION_NUMBER);
-        exit(0);
-    }
+    // always show version, but exit immediately if only the version number was requested
+    fprintf(
+        stderr,
+        "appimaged, %s (commit %s), build %s built on %s\n",
+        RELEASE_NAME, GIT_COMMIT, BUILD_NUMBER, BUILD_DATE
+    );
 
-    if ( !inotifytools_initialize()){
+    if(showVersionOnly)
+        exit(0);
+
+    if (!inotifytools_initialize()) {
         fprintf(stderr, "inotifytools_initialize error\n");
         exit(1);
     }
