@@ -12,13 +12,9 @@ error() {
     exit 1
 }
 
-ls -al out/
-ls -al out/appimagetool-"$ARCH".AppImage
-file out/appimagetool-"$ARCH".AppImage
-
 # first of all, try to run appimagetool
-out/appimagetool-"$ARCH".AppImage && error  # should fail due to missing parameter
-out/appimagetool-"$ARCH".AppImage -h || error  # should not fail
+./out/appimagetool-"$ARCH".AppImage && error  # should fail due to missing parameter
+./out/appimagetool-"$ARCH".AppImage -h || error  # should not fail
 
 # now check appimaged
 timeout "$TIMEOUT" out/appimaged-"$ARCH".AppImage --no-install
