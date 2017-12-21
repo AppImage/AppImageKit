@@ -97,6 +97,10 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/sanitizers-cmake/cmake" ${CMA
 
 add_subdirectory(src)
 
+################################
+#            packing           #
+################################
+include(cmake/cpack_debs.cmake)
 
 ################################
 # unit and functionality tests #
