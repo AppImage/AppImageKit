@@ -479,7 +479,8 @@ main (int argc, char *argv[])
     }
 
     fprintf(
-        stderr,"appimagetool, %s (commit %s), build %s built on %s\n",
+        stderr,
+        "appimagetool, %s (commit %s), build %s built on %s\n",
         RELEASE_NAME, GIT_COMMIT, BUILD_NUMBER, BUILD_DATE
     );
 
