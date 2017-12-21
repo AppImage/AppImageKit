@@ -115,7 +115,7 @@ int main(int argc,char **argv)	{
     unsigned long skip_offset = 0;
     unsigned long skip_length = 0;
   
-    get_elf_section_offset_and_lenghth(filename, ".sha256_sig", &skip_offset, &skip_length);
+    get_elf_section_offset_and_length(filename, ".sha256_sig", &skip_offset, &skip_length);
     if(skip_length > 0) {
         fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_name, skip_offset, skip_length);
     } else {

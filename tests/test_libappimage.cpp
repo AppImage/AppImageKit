@@ -1,25 +1,17 @@
 #include "appimage/libappimage.h"
 
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <glib.h>
-#include <glib/gstdio.h>
-#include <glib/gprintf.h>
-#include <stdio.h>
-#include <gnu/libc-version.h>
-
 #include <unistd.h>
-
-#include <gtest/gtest.h>
-
-#include <squashfuse.h>
-#include <squashfs_fs.h>
+#include <sys/stat.h>
 
 #include <cstdio>
-#include <string>
 #include <cstring>
-#include <cstdlib>
-#include <iostream>
+#include <fstream>
+
+#include <glib/gstdio.h>
+
+#include <squashfuse.h>
+#include <gtest/gtest.h>
+
 
 namespace AppImageTests
 {
@@ -128,7 +120,7 @@ TEST_F(AppImageTest, appimage_register_in_system_with_type1)
     ASSERT_EQ(r, 0);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
-    
+
     appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
 }
 
@@ -185,6 +177,65 @@ TEST_F(AppImageTest, get_md5_invalid_file_path)
     ASSERT_EQ(res, 0);
 }
 
+TEST_F(AppImageTest, create_thumbnail_appimage_type_1) {
+    create_thumbnail(appImage_type_1_file_path.c_str());
+
+    gchar *sum = get_md5(appImage_type_1_file_path.c_str());
+    std::string path = std::string(g_get_user_cache_dir())
+                       + "/thumbnails/normal/"
+                       + std::string(sum) + ".png";
+
+    g_free(sum);
+
+    ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+
+    // Clean
+    rm_file(path);
+}
+
+TEST_F(AppImageTest, create_thumbnail_appimage_type_2) {
+    create_thumbnail(appImage_type_2_file_path.c_str());
+
+    gchar* sum = get_md5(appImage_type_2_file_path.c_str());
+    std::string path = std::string(g_get_user_cache_dir())
+                       + "/thumbnails/normal/"
+                       + std::string(sum) + ".png";
+
+    g_free(sum);
+
+    ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
+
+    // Clean
+    rm_file(path);
+}
+
+TEST_F(AppImageTest, extract_file_following_symlinks) {
+        char * target_path = const_cast<char *>("/tmp/test_libappimage_tmp_file");
+    extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path);
+
+    char *expected = const_cast<char *>("[Desktop Entry]\n"
+                    "Version=1.0\n"
+                    "Type=Application\n"
+                    "Name=Echo\n"
+                    "Comment=Just echo.\n"
+                    "Exec=echo %F\n"
+                    "Icon=utilities-terminal\n");
+
+    ASSERT_TRUE(g_file_test(target_path, G_FILE_TEST_EXISTS));
+
+    std::ifstream file(target_path, std::ios::binary | std::ios::ate);
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+
+    std::vector<char> buffer(size);
+    if (file.read(buffer.data(), size))
+        ASSERT_TRUE( strncmp(expected, buffer.data(), strlen(expected)) == 0 );
+    else
+        FAIL();
+
+    // Clean
+    remove(target_path);
+}
 
 } // namespace
 
