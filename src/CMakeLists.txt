@@ -40,23 +40,23 @@ target_compile_definitions(libappimage
     PRIVATE -DENABLE_BINRELOC
 )
 
-target_include_directories(libappimage PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
+target_include_directories(libappimage
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/> )
 
 target_link_libraries(libappimage
-    pthread
+    PRIVATE
     ${squashfuse_LIBRARIES}
-    ${ZLIB_LIBRARIES}
     ${libarchive_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
     ${inotify-tools_LIBRARIES}
+    ${xz_LIBRARIES}
+    PUBLIC
+    pthread
     ${GLIB_LIBRARIES}
     ${GIO_LIBRARIES}
+    ${ZLIB_LIBRARIES}
     ${CAIRO_LIBRARIES}
-    ${xz_LIBRARIES}
-)
+    ${OPENSSL_LIBRARIES})
 
 add_dependencies(libappimage squashfuse)
 
@@ -165,30 +165,30 @@ add_sanitizers(digest)
 install(
     PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
     DESTINATION bin
+    COMPONENT applications
 )
 
 install(
     TARGETS AppRun appimaged appimagetool digest validate
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    INCLUDES DESTINATION include
+    RUNTIME DESTINATION bin COMPONENT applications
+    LIBRARY DESTINATION lib COMPONENT applications
+    ARCHIVE DESTINATION lib/static COMPONENT applications
+    INCLUDES DESTINATION include COMPONENT applications
 )
 
 
 # install libappimage
 install(TARGETS libappimage
-    EXPORT AppImageKit
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    PUBLIC_HEADER DESTINATION include
+    EXPORT AppImageKitTargets
+    LIBRARY DESTINATION lib COMPONENT libappimage
+    ARCHIVE DESTINATION lib/static COMPONENT libappimage
+    PUBLIC_HEADER DESTINATION include/appimage COMPONENT libappimage-dev
 )
 
 # Add all targets to the build-tree export set
 export(
     TARGETS libappimage
-    FILE "${PROJECT_BINARY_DIR}/AppImageTargets.cmake"
+    FILE "${PROJECT_BINARY_DIR}/AppImageKitTargets.cmake"
 )
 
 # Export the package for use from the build-tree
@@ -212,13 +212,12 @@ configure_file(
 install(FILES
     "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
     "${PROJECT_BINARY_DIR}/AppImageKitConfigVersion.cmake"
-    DESTINATION "/lib/CMake/AppImage"
-    COMPONENT dev
+    DESTINATION "lib/cmake/AppImageKit"
+    COMPONENT libappimage-dev
 )
 
 # Install the export set for use with the install-tree
-install(
-    EXPORT AppImageKit
-    DESTINATION "/lib/CMake/AppImage"
-    COMPONENT dev
+install(EXPORT AppImageKitTargets
+    DESTINATION "lib/cmake/AppImageKit"
+    COMPONENT libappimage-dev
 )
