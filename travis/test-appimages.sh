@@ -13,7 +13,7 @@ out/appimagetool-"$ARCH".AppImage
 out/appimagetool-"$ARCH".AppImage -h
 
 # now check appimaged
-timeout "$TIMEOUT" out/appimaged-"$ARCH".AppImage
+timeout "$TIMEOUT" out/appimaged-"$ARCH".AppImage --no-install
 
 if [ $? -ne 124 ]; then
     echo "Error: appimaged was not terminated by timeout as expected" >&2
