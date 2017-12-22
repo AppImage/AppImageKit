@@ -50,11 +50,11 @@ msgstr "让Linux应用随处运行"
 
 #: index.jinja2:143
 msgid "user_story_1"
-msgstr "作为一名Linux用户，我想从软件应用作者处下载后，像在Windows或Mac下一样在Linux桌面系统上运行它。"
+msgstr "作为一名用户，我在从原作者处下载到应用后，我希望能直接在Linux桌面上运行它，就像运行一个Windows或者Mac应用程序一样。"
 
 #: index.jinja2:146
 msgid "user_story_2"
-msgstr "作为一名应用开发者，我想为Linux桌面系统提供软件包，而不需要将其分发到每一个发行版中，因此不必为不同的发行版编译多个版本。"
+msgstr "作为一名应用开发者，我想为Linux桌面系统提供软件包的同时，不需要将其分发到每一个发行版中，也不必为不同的发行版编译多个版本。"
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
@@ -62,7 +62,7 @@ msgstr "领先的Linux应用打包方式"
 
 #: index.jinja2:158
 msgid "download_make_executable_run"
-msgstr "下载一个应用程序，给予运行权限，双击运行！无需安装！ 不需要改变依赖或系统配置。"
+msgstr "下载一个应用程序，给予运行权限，双击运行！无需安装！不需要改变依赖或系统配置。"
 
 #: index.jinja2:159
 #, python-format
@@ -118,7 +118,7 @@ msgstr "AppImage真的真的很好用。"
 
 #: index.jinja2:249
 msgid "shuttleworth_quote"
-msgstr "AppImage给我一种相当洁净的感受，我很佩服他们背后的工作。"
+msgstr "AppImage给我一种相当洁净的感受，我很佩服他们背后所做的工作。"
 
 #: index.jinja2:254
 msgid "copyright_aaron_hockley"
@@ -174,11 +174,11 @@ msgstr "可以在大多数64位Linux桌面上运行。"
 
 #: index.jinja2:333
 msgid "try_subsurface_64-bit"
-msgstr "尝试地下AppImage (64位版本)"
+msgstr "尝试一下AppImage (64位版本)"
 
 #: index.jinja2:337
 msgid "try_subsurface_32-bit"
-msgstr "尝试地下AppImage (32位版本)"
+msgstr "尝试一下AppImage (32位版本)"
 
 #: index.jinja2:340
 #, python-format
@@ -285,7 +285,7 @@ msgstr "兼容性。"
 
 #: index.jinja2:480
 msgid "buzzwords_compatible_description"
-msgstr "适用于所有相当现代的Linux桌面发行版。好吧，是几乎。"
+msgstr "适用于所有相当现代的Linux桌面发行版。好吧，是几乎所有的。"
 
 #: index.jinja2:494
 msgid "get_started_title"
