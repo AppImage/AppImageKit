@@ -188,7 +188,7 @@ install(TARGETS libappimage
 # Add all targets to the build-tree export set
 export(
     TARGETS libappimage
-    FILE "${PROJECT_BINARY_DIR}/AppImageKitTargets.cmake"
+    FILE "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitTargets.cmake"
 )
 
 # Export the package for use from the build-tree
@@ -204,14 +204,14 @@ configure_file(
 # ... for both
 configure_file(
     "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfigVersion.cmake.in"
-    "${PROJECT_BINARY_DIR}/AppImageKitConfigVersion.cmake"
+    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
     @ONLY
 )
 
 # Install the AppImageConfig.cmake and AppImageConfigVersion.cmake
 install(FILES
     "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
-    "${PROJECT_BINARY_DIR}/AppImageKitConfigVersion.cmake"
+    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
     DESTINATION "lib/cmake/AppImageKit"
     COMPONENT libappimage-dev
 )
