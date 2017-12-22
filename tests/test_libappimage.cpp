@@ -1,4 +1,4 @@
-#include "appimage/libappimage.h"
+#include "appimage/appimage.h"
 
 #include <unistd.h>
 #include <sys/stat.h>

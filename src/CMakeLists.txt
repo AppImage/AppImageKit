@@ -24,7 +24,7 @@ add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 
 
 add_library(libappimage
-    ${PROJECT_SOURCE_DIR}/include/appimage/libappimage.h
+    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     shared.c
     getsection.c
     notify.c
@@ -32,6 +32,7 @@ add_library(libappimage
 )
 
 set_target_properties(libappimage PROPERTIES PREFIX "")
+set_target_properties(libappimage PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/appimage/appimage.h")
 
 target_compile_definitions(libappimage
     PRIVATE -D_FILE_OFFSET_BITS=64
