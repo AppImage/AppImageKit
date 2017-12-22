@@ -65,6 +65,7 @@ static gboolean verbose = FALSE;
 static gboolean showVersionOnly = FALSE;
 static gboolean install = FALSE;
 static gboolean uninstall = FALSE;
+static gboolean no_install = FALSE;
 gchar **remaining_args = NULL;
 
 static GOptionEntry entries[] =
@@ -72,6 +73,7 @@ static GOptionEntry entries[] =
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Be verbose", NULL },
     { "install", 'i', 0, G_OPTION_ARG_NONE, &install, "Install this appimaged instance to $HOME", NULL },
     { "uninstall", 'u', 0, G_OPTION_ARG_NONE, &uninstall, "Uninstall an appimaged instance from $HOME", NULL },
+    { "no-install", 'n', 0, G_OPTION_ARG_NONE, &no_install, "Force run without installation", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL },
     { NULL }
@@ -303,7 +305,7 @@ int main(int argc, char ** argv) {
 
     /* When we run from inside an AppImage, then we check if we are installed
      * in a per-user location and if not, we install ourselves there */
-    if(((appimage_location != NULL)) && ((own_desktop_file_location != NULL))){
+    if(!no_install && (appimage_location != NULL && own_desktop_file_location != NULL)) {
         if ( (! g_file_test ("/usr/bin/appimaged", G_FILE_TEST_EXISTS)) && ((! g_file_test (global_autostart_file, G_FILE_TEST_EXISTS)) || (! g_file_test (destination, G_FILE_TEST_EXISTS))) && (! g_file_test (global_systemd_file, G_FILE_TEST_EXISTS)) && (! g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS)) && (g_file_test (own_desktop_file_location, G_FILE_TEST_IS_REGULAR))){
             char *title;
             char *body;
