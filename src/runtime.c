@@ -289,7 +289,9 @@ main (int argc, char *argv[])
     sprintf(argv0_path, argv[0]);
 
     fs_offset = get_elf_size(appimage_path);
-    
+    /*It's better to keep filesystems aligned at 512bytes intervals, like sectors on a real partitioned disk*/
+    fs_offset = ((fs_offset-1)|511)+1;
+
     arg=getArg(argc,argv,'-');
 
     /* Print the help and then exit */

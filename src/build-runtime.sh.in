@@ -72,6 +72,9 @@ printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 # Convert runtime into a data object that can be embedded into appimagetool
 ld -r -b binary -o data.o runtime
 
+# Pad runtime to multiple of 512bytes
+dd if=/dev/null of=runtime bs=1 count=1 seek=$(./runtime --appimage-offset)
+
 # Show header for debugging purposes
 xxd runtime | head -n 1
 
