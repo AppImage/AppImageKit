@@ -75,6 +75,12 @@ ld -r -b binary -o data.o runtime
 # Pad runtime to multiple of 512bytes
 dd if=/dev/null of=runtime bs=1 count=1 seek=$(./runtime --appimage-offset)
 
+# Add boot signature to runtime, this way fdisk recognize the appimage as a partitioned disk image
+printf '\x55\xaa' | dd of=runtime bs=1 seek=510 count=2 conv=notrunc
+
+# Add partition entry to runtime, this way gnome-disk-image-mounter can open it.
+printf "0x%08x" $(( $(./runtime --appimage-offset) / 512 )) | xxd -r | tac -rs. | dd of=runtime bs=1 seek=454 count=4 conv=notrunc
+
 # Show header for debugging purposes
 xxd runtime | head -n 1
 
