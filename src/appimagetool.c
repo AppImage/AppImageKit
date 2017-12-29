@@ -656,7 +656,7 @@ main (int argc, char *argv[])
                 /* Use ximion's appstreamcli to make sure that desktop file and appdata match together */
                 if(g_find_program_in_path ("appstreamcli")) {
                     sprintf (command, "%s validate-tree %s", g_find_program_in_path ("appstreamcli"), source);
-                    g_print("Trying to to validate AppStream information with the appstreamcli tool\n");
+                    g_print("Trying to validate AppStream information with the appstreamcli tool\n");
                     g_print("In case of issues, please refer to https://github.com/ximion/appstream\n");
                     int ret = system(command);
                     if (ret != 0)
@@ -665,7 +665,7 @@ main (int argc, char *argv[])
                 /* It seems that hughsie's appstream-util does additional validations */
                 if(g_find_program_in_path ("appstream-util")) {
                     sprintf (command, "%s validate-relax %s", g_find_program_in_path ("appstream-util"), appdata_path);
-                    g_print("Trying to to validate AppStream information with the appstream-util tool\n");
+                    g_print("Trying to validate AppStream information with the appstream-util tool\n");
                     g_print("In case of issues, please refer to https://github.com/hughsie/appstream-glib\n");
                     int ret = system(command);
                     if (ret != 0)
