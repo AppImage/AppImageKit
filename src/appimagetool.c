@@ -650,23 +650,14 @@ main (int argc, char *argv[])
                 fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
                 fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
                 fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps\n");
-                fprintf (stderr, "         for more information.\n");
-                /* As a courtesy, generate one to be filled by the user */
-                if(g_find_program_in_path ("appstream-util")) {
-                    gchar *appdata_dir = g_build_filename(source, "/usr/share/metainfo/", NULL);
-                    g_mkdir_with_parents(appdata_dir, 0755);
-                    sprintf (command, "%s appdata-from-desktop %s %s", g_find_program_in_path ("appstream-util"), desktop_file, appdata_path);
-                    int ret = system(command);
-                    if (ret != 0)
-                        die("Failed to generate AppStream template");
-                    fprintf (stderr, "AppStream template has been generated in in %s, please edit it\n", appdata_path);
-                    exit(1);
-                }
+                fprintf (stderr, "         for more information or use the generator at http://output.jsbin.com/qoqukof.\n");
             } else {
                 fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", application_id);
                 /* Use ximion's appstreamcli to make sure that desktop file and appdata match together */
                 if(g_find_program_in_path ("appstreamcli")) {
                     sprintf (command, "%s validate-tree %s", g_find_program_in_path ("appstreamcli"), source);
+                    g_print("Trying to validate AppStream information with the appstreamcli tool\n");
+                    g_print("In case of issues, please refer to https://github.com/ximion/appstream\n");
                     int ret = system(command);
                     if (ret != 0)
                         die("Failed to validate AppStream information with appstreamcli");
@@ -674,6 +665,8 @@ main (int argc, char *argv[])
                 /* It seems that hughsie's appstream-util does additional validations */
                 if(g_find_program_in_path ("appstream-util")) {
                     sprintf (command, "%s validate-relax %s", g_find_program_in_path ("appstream-util"), appdata_path);
+                    g_print("Trying to validate AppStream information with the appstream-util tool\n");
+                    g_print("In case of issues, please refer to https://github.com/hughsie/appstream-glib\n");
                     int ret = system(command);
                     if (ret != 0)
                         die("Failed to validate AppStream information with appstream-util");
