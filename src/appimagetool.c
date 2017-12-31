@@ -496,7 +496,7 @@ main (int argc, char *argv[])
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs command is missing but required, please install it");
     if(! g_find_program_in_path ("desktop-file-validate"))
-        g_print("WARNING: desktop-file-validate command is missing, please install it so that desktop files can be checked for potential errors\n");
+        die("desktop-file-validate command is missing, please install it");
     if(! g_find_program_in_path ("zsyncmake"))
         g_print("WARNING: zsyncmake command is missing, please install it if you want to use binary delta updates\n");
     if(! no_appstream)
