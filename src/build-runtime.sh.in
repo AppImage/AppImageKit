@@ -71,9 +71,6 @@ APPIMAGEOFFSET=$(./runtime --appimage-offset)
 # Insert AppImage magic bytes
 printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
 
-# Convert runtime into a data object that can be embedded into appimagetool
-ld -r -b binary -o data.o runtime
-
 # Pad runtime to multiple of 512bytes
 dd if=/dev/null of=runtime bs=1 count=1 seek=$APPIMAGEOFFSET
 
@@ -82,6 +79,9 @@ printf '\x55\xaa' | dd of=runtime bs=1 seek=510 count=2 conv=notrunc
 
 # Add partition entry to runtime, this way gnome-disk-image-mounter can open it.
 printf "0x%08x" $(echo $APPIMAGEOFFSET / 512 | bc) | xxd -r | tac -rs. | dd of=runtime bs=1 seek=454 count=4 conv=notrunc
+
+# Convert runtime into a data object that can be embedded into appimagetool
+ld -r -b binary -o data.o runtime
 
 # Show header for debugging purposes
 xxd runtime | head -n 1
