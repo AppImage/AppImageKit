@@ -23,7 +23,7 @@ add_custom_command(OUTPUT data.o
 add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 
 
-add_library(libappimage
+add_library(libappimage SHARED
     ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     shared.c
     getsection.c

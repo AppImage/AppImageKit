@@ -19,5 +19,5 @@ pkg_check_modules(OPENSSL REQUIRED openssl)
 
 # These are IMPORTED targets created by AppImageKitTargets.cmake
 set(APPIMAGEKIT_LIBRARIES
-  libappimage
+  appimage
 )
