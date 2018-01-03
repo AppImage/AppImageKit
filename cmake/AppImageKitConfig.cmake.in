@@ -17,7 +17,9 @@ pkg_check_modules(ZLIB REQUIRED zlib)
 pkg_check_modules(CAIRO REQUIRED cairo)
 pkg_check_modules(OPENSSL REQUIRED openssl)
 
-# These are IMPORTED targets created by AppImageKitTargets.cmake
-set(APPIMAGEKIT_LIBRARIES
-  appimage
+find_library(LIBAPPIMAGE_SHARED_PATH
+    NAMES appimage
+    HINTS "${CMAKE_PREFIX_PATH}"
 )
+
+set(APPIMAGEKIT_LIBRARIES ${LIBAPPIMAGE_SHARED_PATH})
