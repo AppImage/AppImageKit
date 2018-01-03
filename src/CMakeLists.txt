@@ -23,8 +23,8 @@ add_custom_command(OUTPUT data.o
 add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 
 
-add_library(libappimage
-    ${PROJECT_SOURCE_DIR}/include/appimage/libappimage.h
+add_library(libappimage SHARED
+    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     shared.c
     getsection.c
     notify.c
@@ -32,6 +32,7 @@ add_library(libappimage
 )
 
 set_target_properties(libappimage PROPERTIES PREFIX "")
+set_target_properties(libappimage PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/appimage/appimage.h")
 
 target_compile_definitions(libappimage
     PRIVATE -D_FILE_OFFSET_BITS=64
@@ -39,23 +40,23 @@ target_compile_definitions(libappimage
     PRIVATE -DENABLE_BINRELOC
 )
 
-target_include_directories(libappimage PUBLIC
-    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
+target_include_directories(libappimage
+    PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/> )
 
 target_link_libraries(libappimage
-    pthread
+    PRIVATE
     ${squashfuse_LIBRARIES}
-    ${ZLIB_LIBRARIES}
     ${libarchive_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
     ${inotify-tools_LIBRARIES}
+    ${xz_LIBRARIES}
+    PUBLIC
+    pthread
     ${GLIB_LIBRARIES}
     ${GIO_LIBRARIES}
+    ${ZLIB_LIBRARIES}
     ${CAIRO_LIBRARIES}
-    ${xz_LIBRARIES}
-)
+    ${OPENSSL_LIBRARIES})
 
 add_dependencies(libappimage squashfuse)
 
@@ -164,30 +165,30 @@ add_sanitizers(digest)
 install(
     PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
     DESTINATION bin
+    COMPONENT applications
 )
 
 install(
     TARGETS AppRun appimaged appimagetool digest validate
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    INCLUDES DESTINATION include
+    RUNTIME DESTINATION bin COMPONENT applications
+    LIBRARY DESTINATION lib COMPONENT applications
+    ARCHIVE DESTINATION lib/static COMPONENT applications
+    INCLUDES DESTINATION include COMPONENT applications
 )
 
 
 # install libappimage
 install(TARGETS libappimage
-    EXPORT AppImageKit
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib/static
-    PUBLIC_HEADER DESTINATION include
+    EXPORT AppImageKitTargets
+    LIBRARY DESTINATION lib COMPONENT libappimage
+    ARCHIVE DESTINATION lib/static COMPONENT libappimage
+    PUBLIC_HEADER DESTINATION include/appimage COMPONENT libappimage-dev
 )
 
 # Add all targets to the build-tree export set
 export(
     TARGETS libappimage
-    FILE "${PROJECT_BINARY_DIR}/AppImageTargets.cmake"
+    FILE "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitTargets.cmake"
 )
 
 # Export the package for use from the build-tree
@@ -203,21 +204,20 @@ configure_file(
 # ... for both
 configure_file(
     "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfigVersion.cmake.in"
-    "${PROJECT_BINARY_DIR}/AppImageKitConfigVersion.cmake"
+    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
     @ONLY
 )
 
 # Install the AppImageConfig.cmake and AppImageConfigVersion.cmake
 install(FILES
     "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
-    "${PROJECT_BINARY_DIR}/AppImageKitConfigVersion.cmake"
-    DESTINATION "/lib/CMake/AppImage"
-    COMPONENT dev
+    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
+    DESTINATION "lib/cmake/AppImageKit"
+    COMPONENT libappimage-dev
 )
 
 # Install the export set for use with the install-tree
-install(
-    EXPORT AppImageKit
-    DESTINATION "/lib/CMake/AppImage"
-    COMPONENT dev
+install(EXPORT AppImageKitTargets
+    DESTINATION "lib/cmake/AppImageKit"
+    COMPONENT libappimage-dev
 )
