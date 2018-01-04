@@ -680,30 +680,34 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
         }
 
         gchar *dest = NULL;
-        gchar *dest_dirname = NULL;
-        gchar *dest_basename = NULL;
         /* Get icon file(s) and act on them in one go */
         
         if(g_str_has_prefix(filename, "usr/share/icons/") || g_str_has_prefix(filename, "usr/share/pixmaps/") || (g_str_has_prefix(filename, "usr/share/mime/") && g_str_has_suffix(filename, ".xml"))){
             gchar *t = replace_str(filename, "usr/share", g_get_user_data_dir());            
-            dest_dirname = g_path_get_dirname(t);
+            gchar *dest_dirname = g_path_get_dirname(t);
             g_free(t);
 
             gchar *file_basename = g_path_get_basename(filename);
-            dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, file_basename);
-            g_free(file_basename);
+            gchar *dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, file_basename);
+
             dest = g_build_path("/", dest_dirname, dest_basename, NULL);
+
+            g_free(file_basename);
+            g_free(dest_basename);
+            g_free(dest_dirname);
         }
         /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
          * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
         if(g_str_has_prefix (filename, "usr/share/pixmaps/")){
-            dest = g_build_path("/", "/tmp", dest_basename, NULL);
+            dest = g_build_path("/", "/tmp", NULL);
         }
         /* Some AppImages only have the icon in their root directory, so we have to get it from there */
         if(desktop_icon_value_original){
             if((g_str_has_prefix(filename, desktop_icon_value_original)) && (! strstr(filename, "/")) && ( (g_str_has_suffix(filename, ".png")) || (g_str_has_suffix(filename, ".xpm")) || (g_str_has_suffix(filename, ".svg")) || (g_str_has_suffix(filename, ".svgz")))){
-                dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
+                gchar *dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
+                g_free(dest);
                 dest = g_build_path("/", "/tmp", dest_basename, NULL);
+                g_free(dest_basename);
             }
         }
 
@@ -753,7 +757,9 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
             // it to /tmp and now move it into the proper place
             if(g_str_has_prefix (dest, "/tmp/")) {
                 move_icon_to_destination(dest, verbose);
-            } 
+            }
+
+            g_free(dest);
         }
     }
     archive_read_close(a);
