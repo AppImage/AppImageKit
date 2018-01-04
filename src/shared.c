@@ -736,10 +736,13 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
         
             if(verbose)
                 fprintf(stderr, "install: %s\n", dest);
-            
-            if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
-                fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
-        
+
+            gchar *dirname = g_path_get_dirname(dest);
+            if(g_mkdir_with_parents(dirname, 0755))
+                fprintf(stderr, "Could not create directory: %s\n", dirname);
+
+            g_free(dirname);
+
             FILE *f;
             f = fopen(dest, "w+");
             
