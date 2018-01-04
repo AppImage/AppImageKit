@@ -206,6 +206,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
     }
     g_object_unref(icon_file); 
     g_object_unref(target_file);
+    g_free(icon_dest_path);
     
 }
 
