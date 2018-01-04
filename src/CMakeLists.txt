@@ -41,7 +41,7 @@ target_compile_definitions(libappimage
 )
 
 target_include_directories(libappimage
-    PUBLIC $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}/include/>
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
     INTERFACE $<INSTALL_INTERFACE:include/> )
 
 target_link_libraries(libappimage
