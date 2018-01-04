@@ -654,6 +654,7 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
             r = archive_read_data_block(a, &buff, &size, &offset);
             if (r == ARCHIVE_EOF) {
                 g_free(md5);
+                g_free(filename);
                 return (ARCHIVE_OK);
             }
 
@@ -700,7 +701,9 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
                 dest = g_build_path("/", "/tmp", dest_basename, NULL);
             }
         }
-                    
+
+        g_free(filename);
+
         if(dest){
         
             if(verbose)
