@@ -599,8 +599,11 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 
     if(verbose)
         fprintf(stderr, "install: %s\n", destination);
-    if(g_mkdir_with_parents(g_path_get_dirname(destination), 0755))
-        fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(destination));
+
+    gchar *dirname = g_path_get_dirname(destination);
+    if(g_mkdir_with_parents(dirname, 0755))
+        fprintf(stderr, "Could not create directory: %s\n", dirname);
+    g_free(dirname);
 
     // g_key_file_save_to_file(key_file_structure, destination, NULL);
     // g_key_file_save_to_file is too new, only since 2.40
