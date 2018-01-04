@@ -126,9 +126,11 @@ char *get_md5(const char const *path)
  */
 char *get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbose)
 {
-    char *file  = g_strconcat(get_md5(path), ".png", NULL);
+    char *md5 = get_md5(path);
+    char *file  = g_strconcat(md5, ".png", NULL);
     gchar *thumbnail_path = g_build_filename(g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
     g_free(file);
+    g_free(md5);
     return thumbnail_path;
 }
 
@@ -645,8 +647,11 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
             size_t size = 1024*1024;
             int64_t offset = 0;
             r = archive_read_data_block(a, &buff, &size, &offset);
-            if (r == ARCHIVE_EOF)
+            if (r == ARCHIVE_EOF) {
+                g_free(md5);
                 return (ARCHIVE_OK);
+            }
+
             if (r != ARCHIVE_OK) {
                 fprintf(stderr, "%s", archive_error_string(a));
                 break;
@@ -741,6 +746,8 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
     archive_read_close(a);
     archive_read_free(a);
     set_executable(path, verbose);
+
+    g_free(md5);
     return TRUE;
 }
 
@@ -803,7 +810,8 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     /* The above also gets AppStream metainfo file(s), TODO: Check if the id matches and do something with them*/
     
     set_executable(path, verbose);
-    
+
+    g_free(md5);
     return TRUE;
 }
 
@@ -905,6 +913,8 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     delete_thumbnail(path, "large", verbose); // 256x256
     
     unregister_using_md5_id(g_get_user_data_dir(), 0, md5, verbose);
+
+    g_free(md5);
     
     return 0;
 }

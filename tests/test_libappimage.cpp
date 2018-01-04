@@ -91,7 +91,7 @@ class AppImageTest : public testing::Test
                 found = true;
         }
         g_free(apps_path);
-
+        g_free(sum);
         return found;
     }
 };
