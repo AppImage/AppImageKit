@@ -477,8 +477,12 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     g_key_file_set_value(key_file_structure, "Desktop Entry", "X-AppImage-Comment", generated_by);
     g_key_file_set_value(key_file_structure, "Desktop Entry", "X-AppImage-Identifier", md5);
     fprintf(stderr, "Installing desktop file\n");
-    if(verbose)
-        fprintf(stderr, "%s", g_key_file_to_data(key_file_structure, NULL, NULL));
+    if(verbose) {
+        gchar *buf  = g_key_file_to_data(key_file_structure, NULL, NULL);
+        fprintf(stderr, "%s", buf);
+        g_free(buf);
+    }
+
     
     /* https://specifications.freedesktop.org/menu-spec/menu-spec-latest.html#paths says:
      * 
@@ -586,7 +590,8 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     file = g_io_channel_new_file(destination, "w", NULL);
     g_io_channel_write_chars(file, buf, length, NULL, NULL);
     g_io_channel_shutdown(file, TRUE, NULL);
-    
+
+    g_free(buf);
     
     /* GNOME shows the icon and name on the desktop file only if it is executable */
     chmod(destination, 0755);
