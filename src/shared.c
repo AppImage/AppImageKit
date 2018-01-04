@@ -824,6 +824,8 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
             if(verbose)
                 fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
             write_edited_desktop_file(key_file_structure, path, desktop_filename, 2, md5, verbose);
+
+            g_free(desktop_filename);
         }
         g_key_file_free(key_file_structure);
         
