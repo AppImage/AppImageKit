@@ -354,8 +354,13 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     if(dest){
                         if(verbose)
                             fprintf(stderr, "install: %s\n", dest);
-                        if(g_mkdir_with_parents(g_path_get_dirname(dest), 0755))
-                            fprintf(stderr, "Could not create directory: %s\n", g_path_get_dirname(dest));
+
+                        gchar *dirname = g_path_get_dirname(dest);
+                        if(g_mkdir_with_parents(dirname, 0755))
+                            fprintf(stderr, "Could not create directory: %s\n", dirname);
+
+                        g_free(dirname);
+
                         squash_extract_inode_to_file(fs, &inode, dest);
 
                         chmod (dest, 0644);
