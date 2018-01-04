@@ -342,11 +342,13 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     }
                     /* Some AppImages only have the icon in their root directory, so we have to get it from there */
                     if((g_str_has_prefix(trv.path, desktop_icon_value_original)) && (! strstr(trv.path, "/")) && ( (g_str_has_suffix(trv.path, ".png")) || (g_str_has_suffix(trv.path, ".xpm")) || (g_str_has_suffix(trv.path, ".svg")) || (g_str_has_suffix(trv.path, ".svgz")))){
-                        gchar *dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(trv.path));
+                        gchar *ext = get_file_extension(trv.path);
+                        gchar *dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, ext);
 
                         dest = g_build_path("/", "/tmp", dest_basename, NULL);
 
                         g_free(dest_basename);
+                        g_free(ext);
                     }
                     
                     if(dest){
