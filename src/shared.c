@@ -592,6 +592,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     file = g_io_channel_new_file(destination, "w", NULL);
     g_io_channel_write_chars(file, buf, length, NULL, NULL);
     g_io_channel_shutdown(file, TRUE, NULL);
+    g_io_channel_unref(file);
 
     g_free(buf);
     
