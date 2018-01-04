@@ -715,10 +715,12 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
         /* Some AppImages only have the icon in their root directory, so we have to get it from there */
         if(desktop_icon_value_original){
             if((g_str_has_prefix(filename, desktop_icon_value_original)) && (! strstr(filename, "/")) && ( (g_str_has_suffix(filename, ".png")) || (g_str_has_suffix(filename, ".xpm")) || (g_str_has_suffix(filename, ".svg")) || (g_str_has_suffix(filename, ".svgz")))){
-                gchar *dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, get_file_extension(filename));
+                gchar *file_extension = get_file_extension(filename);
+                gchar *dest_basename = g_strdup_printf("%s_%s_%s.%s", vendorprefix, md5, desktop_icon_value_original, file_extension);
                 g_free(dest);
                 dest = g_build_path("/", "/tmp", dest_basename, NULL);
                 g_free(dest_basename);
+                g_free(file_extension);
             }
         }
 
