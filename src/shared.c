@@ -78,21 +78,12 @@ void set_executable(const char *path, gboolean verbose)
     }
 }
 
-/* Search and replace on a string, this really should be in Glib
- * https://mail.gnome.org/archives/gtk-list/2012-February/msg00005.html */
+/* Search and replace on a string, this really should be in Glib */
 gchar* replace_str(const gchar const *src, const gchar const *find, const gchar const *replace){
-    gchar* retval = g_strdup(src);
-    gchar* ptr = NULL;
-    ptr = g_strstr_len(retval,-1,find); 
-    if (ptr != NULL){
-        gchar* after_find = replace_str(ptr+strlen(find),find,replace);
-        gchar* before_find = g_strndup(retval,ptr-retval);
-        gchar* temp = g_strconcat(before_find,replace,after_find,NULL);
-        g_free(retval);
-        retval = g_strdup(temp);
-        g_free(before_find);
-        g_free(temp);
-    }   
+    gchar **split = g_strsplit(src, find, -1);
+    gchar *retval = g_strjoinv(replace, split);
+
+    g_strfreev(split);
     return retval;
 }
 
