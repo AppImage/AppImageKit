@@ -210,7 +210,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
 int check_appimage_type(const char *path, gboolean verbose)
 {
-    char buffer[3];
+    char buffer[3] = {0};
     FILE *f = fopen(path, "rt");
     if (f != NULL)
     {
