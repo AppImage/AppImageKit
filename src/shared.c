@@ -752,6 +752,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     sqfs fs;
     sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
     if (err != SQFS_OK){
+        sqfs_destroy(&fs);
         fprintf(stderr, "sqfs_open_image error: %s\n", path);
         return FALSE;
     } else {
@@ -785,7 +786,9 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     
     /* Get relevant  file(s) */
     gchar **str_array2 = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)", desktop_icon_value_original, md5, verbose);
-    
+
+    sqfs_destroy(&fs);
+
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev(str_array2);
     
