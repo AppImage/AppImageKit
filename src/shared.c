@@ -113,6 +113,7 @@ char *get_md5(const char const *path)
         g_assert(digest_len == 16);
         gchar *result = g_strdup(g_checksum_get_string(checksum));
         g_checksum_free(checksum);
+        g_free(uri);
         return result;
     } else {
         return "";
