@@ -574,9 +574,11 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     partial_path = g_strdup_printf("applications/appimagekit_%s-%s", md5, desktop_filename);
     gchar *destination;
     destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
+    g_free(partial_path);
 
     /* When appimaged sees itself, then do nothing here */
     if(strcmp ("appimaged.desktop", desktop_filename) == 0) {
+        g_free(destination);
         return;
     }
 
@@ -601,6 +603,8 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     
     /* GNOME shows the icon and name on the desktop file only if it is executable */
     chmod(destination, 0755);
+
+    g_free(destination);
 }
 
 /* Register a type 1 AppImage in the system */
