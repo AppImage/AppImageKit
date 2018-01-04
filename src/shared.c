@@ -494,13 +494,18 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     gchar *icon_path = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
     gchar *basename = g_path_get_basename(icon_path);
 
-    gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, basename);
+    {
+        gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, basename);
 
-    g_free(basename);
-    g_free(icon_path);
+        g_free(basename);
+        g_free(icon_path);
 
 
-    g_key_file_set_value(key_file_structure, "Desktop Entry", "Icon", icon_with_md5);
+        g_key_file_set_value(key_file_structure, "Desktop Entry", "Icon", icon_with_md5);
+
+        g_free(icon_with_md5);
+    }
+
     /* At compile time, inject VERSION_NUMBER like this:
      * cc ... -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" -..
      */
