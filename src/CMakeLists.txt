@@ -42,7 +42,8 @@ target_compile_definitions(libappimage
 
 target_include_directories(libappimage
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
-    INTERFACE $<INSTALL_INTERFACE:include/> )
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
 
 target_link_libraries(libappimage
     PRIVATE
@@ -56,7 +57,8 @@ target_link_libraries(libappimage
     ${GIO_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${CAIRO_LIBRARIES}
-    ${OPENSSL_LIBRARIES})
+    ${OPENSSL_LIBRARIES}
+)
 
 add_dependencies(libappimage squashfuse)
 
@@ -66,6 +68,55 @@ endif()
 
 if(NOT USE_SYSTEM_INOTIFY_TOOLS)
     add_dependencies(libappimage inotify-tools)
+endif()
+
+
+add_library(libappimage_static STATIC
+    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
+    shared.c
+    getsection.c
+    notify.c
+    elf.c
+)
+
+set_target_properties(libappimage_static PROPERTIES PREFIX "")
+set_target_properties(libappimage_static PROPERTIES LIBRARY_OUTPUT_NAME libappimage)
+set_target_properties(libappimage_static PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/appimage/appimage.h")
+
+target_compile_definitions(libappimage_static
+    PRIVATE -D_FILE_OFFSET_BITS=64
+    PRIVATE -DVERSION_NUMBER="${GIT_VERSION}"
+    PRIVATE -DENABLE_BINRELOC
+)
+
+target_include_directories(libappimage_static
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
+
+target_link_libraries(libappimage_static
+    PRIVATE
+    ${squashfuse_LIBRARIES}
+    ${libarchive_LIBRARIES}
+    ${inotify-tools_LIBRARIES}
+    ${xz_LIBRARIES}
+    PUBLIC
+    pthread
+    ${GLIB_LIBRARIES}
+    ${GIO_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${CAIRO_LIBRARIES}
+    ${OPENSSL_LIBRARIES}
+)
+
+add_dependencies(libappimage_static squashfuse)
+
+if(NOT USE_SYSTEM_LIBARCHIVE)
+    add_dependencies(libappimage_static libarchive)
+endif()
+
+if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+    add_dependencies(libappimage_static inotify-tools)
 endif()
 
 
