@@ -111,7 +111,9 @@ char *get_md5(const char const *path)
         g_checksum_update(checksum, (const guchar *) uri, strlen (uri));
         g_checksum_get_digest(checksum, digest, &digest_len);
         g_assert(digest_len == 16);
-        return g_strdup_printf("%s", g_checksum_get_string(checksum));
+        gchar *result = g_strdup(g_checksum_get_string(checksum));
+        g_checksum_free(checksum);
+        return result;
     } else {
         return "";
     }
