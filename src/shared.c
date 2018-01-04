@@ -148,6 +148,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
     gchar *dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
     
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
+        g_free(dest_dir);
         dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
     }
  
@@ -178,6 +179,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
         if((w != h) || ((w != 16) && (w != 24) && (w != 32) && (w != 36) && (w != 48) && (w != 64) && (w != 72) && (w != 96) && (w != 128) && (w != 192) && (w != 256) && (w != 512))){
             fprintf(stderr, "%s has nonstandard size w = %i, h = %i; please fix it\n", icon_path, w, h);
         } else {
+            g_free(dest_dir);
             dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps", NULL);
         }
     }
@@ -189,6 +191,8 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
         fprintf(stderr, "Move from %s to %s\n", icon_path, icon_dest_path);
     if(g_mkdir_with_parents(g_path_get_dirname(dest_dir), 0755))
         fprintf(stderr, "Could not create directory: %s\n", dest_dir);
+
+    g_free(dest_dir);
 
     // This is required only for old versions of glib2 and is harmless for newer
     g_type_init();
