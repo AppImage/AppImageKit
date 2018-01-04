@@ -826,7 +826,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(success){
             gchar *desktop_filename = g_path_get_basename(str_array[i]);
             
-            desktop_icon_value_original = g_strdup_printf("%s", g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL));
+            desktop_icon_value_original = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
             if(verbose)
                 fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
             write_edited_desktop_file(key_file_structure, path, desktop_filename, 2, md5, verbose);
@@ -852,6 +852,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     set_executable(path, verbose);
 
     g_free(md5);
+    g_free(desktop_icon_value_original);
     return TRUE;
 }
 
