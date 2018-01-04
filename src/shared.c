@@ -703,10 +703,12 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
             gboolean success = g_key_file_load_from_data (key_file_structure, buff, size, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
             if(success){
                 gchar *desktop_filename = g_path_get_basename(filename);
-                desktop_icon_value_original = g_strdup_printf("%s", g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL));
+                desktop_icon_value_original = g_key_file_get_string(key_file_structure, "Desktop Entry", "Icon", NULL);
                 if(verbose)
                     fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
                 write_edited_desktop_file(key_file_structure, path, desktop_filename, 1, md5, verbose);
+
+                g_free(desktop_filename);
             }
             g_key_file_free(key_file_structure);
         }
@@ -803,6 +805,7 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
     archive_read_free(a);
     set_executable(path, verbose);
 
+    g_free(desktop_icon_value_original);
     g_free(md5);
     return TRUE;
 }
