@@ -176,8 +176,12 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
     }
     if(verbose)
         fprintf(stderr, "dest_dir %s\n", dest_dir);
-    
-    gchar* icon_dest_path = g_build_path("/", dest_dir, g_path_get_basename(icon_path), NULL);
+
+    gchar *basename = g_path_get_basename(icon_path);
+
+    gchar* icon_dest_path = g_build_path("/", dest_dir, basename, NULL);
+
+    g_free(basename);
     if(verbose)
         fprintf(stderr, "Move from %s to %s\n", icon_path, icon_dest_path);
     gchar *dirname = g_path_get_dirname(dest_dir);
