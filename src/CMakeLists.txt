@@ -57,7 +57,6 @@ target_link_libraries(libappimage
     ${GIO_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${CAIRO_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
 )
 
 add_dependencies(libappimage squashfuse)
@@ -106,7 +105,6 @@ target_link_libraries(libappimage_static
     ${GIO_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${CAIRO_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
 )
 
 add_dependencies(libappimage_static squashfuse)
