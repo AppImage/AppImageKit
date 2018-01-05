@@ -861,7 +861,8 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
     g_strfreev(str_array);
     
     /* Get relevant  file(s) */
-    gchar **str_array2 = squash_get_matching_files(&fs, "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)", desktop_icon_value_original, md5, verbose);
+    static char *const pattern = "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)";
+    gchar **str_array2 = squash_get_matching_files(&fs, pattern, desktop_icon_value_original, md5, verbose);
 
     sqfs_destroy(&fs);
 
