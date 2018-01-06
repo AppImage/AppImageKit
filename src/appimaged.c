@@ -207,6 +207,8 @@ void handle_event(struct inotify_event *event)
         }
     }
 
+    g_free(absolute_path);
+
     /* Too many FS events were received, some event notifications were potentially lost */
     if (event->mask & IN_Q_OVERFLOW){
         printf ("Warning: AN OVERFLOW EVENT OCCURRED\n");
