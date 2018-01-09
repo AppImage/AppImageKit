@@ -90,8 +90,9 @@ class AppImageTest : public testing::Test
             if (m != NULL)
                 found = true;
         }
+        g_dir_close(dir);
         g_free(apps_path);
-
+        g_free(sum);
         return found;
     }
 };
@@ -163,9 +164,9 @@ TEST_F(AppImageTest, get_md5)
     std::string expected = "128e476a7794288cad0eb2542f7c995b";
     gchar * sum = get_md5("/tmp/testfile");
 
-    std::cout << sum;
     int res = g_strcmp0(expected.c_str(), sum);
     ASSERT_EQ(res, 0);
+    g_free(sum);
 }
 
 TEST_F(AppImageTest, get_md5_invalid_file_path)
