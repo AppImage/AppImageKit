@@ -23,6 +23,9 @@ add_custom_command(OUTPUT data.o
 add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 
 
+# allow setting different path for mksquashfs after installation
+set(MKSQUASHFS_DIR "" CACHE STRING "Change target install directory for mksquashfs")
+
 add_library(libappimage
     ${PROJECT_SOURCE_DIR}/include/appimage/libappimage.h
     shared.c
@@ -97,6 +100,13 @@ target_compile_definitions(appimagetool
     PRIVATE -DENABLE_BINRELOC
 )
 
+if(MKSQUASHFS_DIR)
+    message(STATUS "Installing mksquashfs in path: ${MKSQUASHFS_DIR}")
+    target_compile_definitions(appimagetool
+        PRIVATE -DMKSQUASHFS_PATH="${MKSQUASHFS_DIR}/mksquashfs"
+    )
+endif()
+
 add_dependencies(appimagetool mksquashfs squashfuse)
 
 add_sanitizers(appimagetool)
@@ -162,9 +172,21 @@ add_sanitizers(digest)
 
 # install binaries
 install(
-    PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
+    PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/runtime
     DESTINATION bin
 )
+
+if(MKSQUASHFS_DIR)
+    install(
+        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs
+        DESTINATION ${MKSQUASHFS_DIR}
+    )
+else()
+    install(
+        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs
+        DESTINATION bin
+    )
+endif()
 
 install(
     TARGETS AppRun appimaged appimagetool digest validate
