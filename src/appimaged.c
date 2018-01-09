@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (c) 2004-17 Simon Peter
+ * Copyright (c) 2004-18 Simon Peter
  *
  * All Rights Reserved.
  *
