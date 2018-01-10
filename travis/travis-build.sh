@@ -31,7 +31,8 @@ mkdir -p ./out/
 # build AppImageKit
 docker run \
     --device /dev/fuse:mrw \
-    -e ARCH -e TRAVIS -i \
+    -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
+    -i \
     -v "${PWD}":/AppImageKit \
     -v "${PWD}"/travis/:/travis \
     "$DOCKER_IMAGE" \
@@ -45,7 +46,8 @@ find build/out/appimaged.AppDir/
 docker run \
     --cap-add SYS_ADMIN \
     --device /dev/fuse:mrw \
-    -e ARCH -i \
+    -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
+    -i \
     -v "${PWD}"/travis/:/travis \
     -v "${PWD}"/build:/build \
     -v $HOME/.gnupg:/root/.gnupg \

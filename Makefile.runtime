@@ -17,7 +17,7 @@ all: runtime
 
 # Compile runtime but do not link
 runtime.o: runtime.c
-	$(CC) -c $(CFLAGS) $^ -DVERSION_NUMBER=\"$(git describe --tags --always --abbrev=7)\" \
+	$(CC) -c $(CFLAGS) $^ -DGIT_COMMIT=\"$(git describe --tags --always --abbrev=7)\" \
 	-I./squashfuse/ -D_FILE_OFFSET_BITS=64
 
 # Add .upd_info and .sha256_sig sections
