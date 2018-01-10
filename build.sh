@@ -78,7 +78,7 @@ if [ $RUN_TESTS -ne 0 ]; then
 fi
 
 # build Debian packages
-cpack
+cpack -V
 
 xxd src/runtime | head -n 1
 
