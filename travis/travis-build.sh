@@ -72,7 +72,7 @@ sudo chown -R travis.travis .
 
 # remove binaries from output directory
 ls -al out/
-rm -r out/{appimaged,appimagetool,validate,digest,mksquashfs}
+rm -r out/{appimaged,appimagetool,validate,digest,mksquashfs,*.AppDir}
 
 # inspect runtime
 xxd out/runtime | head -n 1
