@@ -81,7 +81,7 @@ sudo rm -rf out/*.AppDir out/*.AppImage.digest
 
 # build Debian packages
 sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g' CPack*.cmake
-find _CPack_Packages -type f -exec sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g' \;
+find _CPack_Packages -type f -exec sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g' \; || true
 cpack -V || cat _CPack_Packages/Linux/DEB/PreinstallOutput.log && exit 1
 
 mv *.deb out/
