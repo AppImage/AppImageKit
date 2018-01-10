@@ -23,6 +23,10 @@ add_custom_command(OUTPUT data.o
 add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 
 
+# allow setting different path for mksquashfs after installation
+set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install directory for mksquashfs")
+
+
 add_library(libappimage SHARED
     ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     shared.c
@@ -36,13 +40,14 @@ set_target_properties(libappimage PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR
 
 target_compile_definitions(libappimage
     PRIVATE -D_FILE_OFFSET_BITS=64
-    PRIVATE -DVERSION_NUMBER="${GIT_VERSION}"
+    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
     PRIVATE -DENABLE_BINRELOC
 )
 
 target_include_directories(libappimage
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
-    INTERFACE $<INSTALL_INTERFACE:include/> )
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
 
 target_link_libraries(libappimage
     PRIVATE
@@ -56,7 +61,7 @@ target_link_libraries(libappimage
     ${GIO_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${CAIRO_LIBRARIES}
-    ${OPENSSL_LIBRARIES})
+)
 
 add_dependencies(libappimage squashfuse)
 
@@ -66,6 +71,54 @@ endif()
 
 if(NOT USE_SYSTEM_INOTIFY_TOOLS)
     add_dependencies(libappimage inotify-tools)
+endif()
+
+
+add_library(libappimage_static STATIC
+    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
+    shared.c
+    getsection.c
+    notify.c
+    elf.c
+)
+
+set_target_properties(libappimage_static PROPERTIES PREFIX "")
+set_target_properties(libappimage_static PROPERTIES LIBRARY_OUTPUT_NAME libappimage)
+set_target_properties(libappimage_static PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/appimage/appimage.h")
+
+target_compile_definitions(libappimage_static
+    PRIVATE -D_FILE_OFFSET_BITS=64
+    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
+    PRIVATE -DENABLE_BINRELOC
+)
+
+target_include_directories(libappimage_static
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
+
+target_link_libraries(libappimage_static
+    PRIVATE
+    ${squashfuse_LIBRARIES}
+    ${libarchive_LIBRARIES}
+    ${inotify-tools_LIBRARIES}
+    ${xz_LIBRARIES}
+    PUBLIC
+    pthread
+    ${GLIB_LIBRARIES}
+    ${GIO_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${CAIRO_LIBRARIES}
+)
+
+add_dependencies(libappimage_static squashfuse)
+
+if(NOT USE_SYSTEM_LIBARCHIVE)
+    add_dependencies(libappimage_static libarchive)
+endif()
+
+if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+    add_dependencies(libappimage_static inotify-tools)
 endif()
 
 
@@ -98,6 +151,13 @@ target_compile_definitions(appimagetool
     PRIVATE -DENABLE_BINRELOC
 )
 
+if(AUXILIARY_FILES_DESTINATION)
+    message(STATUS "Installing auxiliary files in path: ${AUXILIARY_FILES_DESTINATION}")
+    target_compile_definitions(appimagetool
+        PRIVATE -DAUXILIARY_FILES_DESTINATION="${AUXILIARY_FILES_DESTINATION}"
+    )
+endif()
+
 add_dependencies(appimagetool mksquashfs squashfuse)
 
 add_sanitizers(appimagetool)
@@ -120,7 +180,6 @@ target_link_libraries(appimaged
 
 target_compile_definitions(appimaged
     PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
-    PRIVATE -DVERSION_NUMBER="${GIT_COMMIT}"  # legacy variable
     PRIVATE -DBUILD_NUMBER="${BUILD_NUMBER}"
     PRIVATE -DBUILD_DATE="${DATE}"
     PRIVATE -D_FILE_OFFSET_BITS=64
@@ -162,11 +221,19 @@ add_sanitizers(digest)
 
 
 # install binaries
-install(
-    PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
-    DESTINATION bin
-    COMPONENT applications
-)
+if(AUXILIARY_FILES_DESTINATION)
+    install(
+        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
+        DESTINATION ${AUXILIARY_FILES_DESTINATION}
+        COMPONENT applications
+    )
+else()
+    install(
+        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
+        DESTINATION bin
+        COMPONENT applications
+    )
+endif()
 
 install(
     TARGETS appimaged

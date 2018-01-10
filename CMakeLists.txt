@@ -16,7 +16,7 @@ include(CTest)
 execute_process(
     COMMAND git describe --tags --always --abbrev=7
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_VERSION
+    OUTPUT_VARIABLE GIT_COMMIT
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 

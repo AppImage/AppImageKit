@@ -1,6 +1,6 @@
 /**************************************************************************
  *
- * Copyright (c) 2004-17 Simon Peter
+ * Copyright (c) 2004-18 Simon Peter
  *
  * All Rights Reserved.
  *
@@ -206,6 +206,8 @@ void handle_event(struct inotify_event *event)
             pthread_join(some_thread, NULL);
         }
     }
+
+    g_free(absolute_path);
 
     /* Too many FS events were received, some event notifications were potentially lost */
     if (event->mask & IN_Q_OVERFLOW){
