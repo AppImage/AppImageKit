@@ -40,7 +40,7 @@ set_target_properties(libappimage PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR
 
 target_compile_definitions(libappimage
     PRIVATE -D_FILE_OFFSET_BITS=64
-    PRIVATE -DVERSION_NUMBER="${GIT_VERSION}"
+    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
     PRIVATE -DENABLE_BINRELOC
 )
 
@@ -88,7 +88,7 @@ set_target_properties(libappimage_static PROPERTIES PUBLIC_HEADER "${PROJECT_SOU
 
 target_compile_definitions(libappimage_static
     PRIVATE -D_FILE_OFFSET_BITS=64
-    PRIVATE -DVERSION_NUMBER="${GIT_VERSION}"
+    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
     PRIVATE -DENABLE_BINRELOC
 )
 
@@ -180,7 +180,6 @@ target_link_libraries(appimaged
 
 target_compile_definitions(appimaged
     PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
-    PRIVATE -DVERSION_NUMBER="${GIT_COMMIT}"  # legacy variable
     PRIVATE -DBUILD_NUMBER="${BUILD_NUMBER}"
     PRIVATE -DBUILD_DATE="${DATE}"
     PRIVATE -D_FILE_OFFSET_BITS=64
