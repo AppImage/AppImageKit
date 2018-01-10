@@ -81,8 +81,8 @@ sudo rm -rf out/*.AppDir out/*.AppImage.digest
 
 # build Debian packages
 cp CPackConfig.cmake CPackConfig.cmake.pre
-sed -i 's|/AppImageKit|'$(dirname "$PWD")'|' CPackConfig.cmake
-diff -u CPackConfig.cmake.pre CPack*.cmake
+sed -i 's|/AppImageKit|'$(dirname "$PWD")'|' CPack*.cmake
+diff -u CPackConfig.cmake.pre CPackConfig.cmake
 cpack -V
 
 mv *.deb out/
