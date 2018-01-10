@@ -80,9 +80,8 @@ mv out/runtime out/runtime-"$ARCH"
 sudo rm -rf out/*.AppDir out/*.AppImage.digest
 
 # build Debian packages
-cp CPackConfig.cmake CPackConfig.cmake.pre
 sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g' CPack*.cmake
-diff -u CPackConfig.cmake.pre CPackConfig.cmake || true
+find _CPack_Packages -type f -exec sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g'
 cpack -V
 
 mv *.deb out/
