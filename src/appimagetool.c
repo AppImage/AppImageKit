@@ -87,6 +87,7 @@ gchar *sqfs_comp = "gzip";
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
 gchar *sign_args = NULL;
+gchar *pathToMksquashfs = NULL;
 
 // #####################################################################
 
@@ -142,7 +143,11 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
 
         int i = 0;
+#ifndef AUXILIARY_FILES_DESTINATION
         args[i++] = "mksquashfs";
+#else
+        args[i++] = pathToMksquashfs;
+#endif
         args[i++] = source;
         args[i++] = destination;
         args[i++] = "-offset";
@@ -191,7 +196,11 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         args[i++] = 0;
 
+#ifndef AUXILIARY_FILES_DESTINATION
         execvp("mksquashfs", args);
+#else
+        execvp(pathToMksquashfs, args);
+#endif
 
         perror("execlp");   // exec*() returns only on error
         return -1; // exec never returns
@@ -493,8 +502,27 @@ main (int argc, char *argv[])
     /* Check for dependencies here. Better fail early if they are not present. */
     if(! g_find_program_in_path ("file"))
         die("file command is missing but required, please install it");
+#ifndef AUXILIARY_FILES_DESTINATION
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs command is missing but required, please install it");
+#else
+    {
+        // build path relative to appimagetool binary
+        char *appimagetoolDirectory = dirname(realpath("/proc/self/exe", NULL));
+        if (!appimagetoolDirectory) {
+            g_print("Could not access /proc/self/exe\n");
+            exit(1);
+        }
+
+        pathToMksquashfs = g_build_filename(appimagetoolDirectory, "..", AUXILIARY_FILES_DESTINATION, "mksquashfs", NULL);
+
+        if (!g_file_test(pathToMksquashfs, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
+            g_printf("No such file or directory: %s\n", pathToMksquashfs);
+            g_free(pathToMksquashfs);
+            exit(1);
+        }
+    }
+#endif
     if(! g_find_program_in_path ("desktop-file-validate"))
         die("desktop-file-validate command is missing, please install it");
     if(! g_find_program_in_path ("zsyncmake"))
