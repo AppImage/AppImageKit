@@ -143,7 +143,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
 
         int i = 0;
-#ifndef MKSQUASHFS_PATH
+#ifndef AUXILIARY_FILES_DESTINATION
         args[i++] = "mksquashfs";
 #else
         args[i++] = pathToMksquashfs;
@@ -498,7 +498,7 @@ main (int argc, char *argv[])
     /* Check for dependencies here. Better fail early if they are not present. */
     if(! g_find_program_in_path ("file"))
         die("file command is missing but required, please install it");
-#ifndef MKSQUASHFS_PATH
+#ifndef AUXILIARY_FILES_DESTINATION
     if(! g_find_program_in_path ("mksquashfs"))
         die("mksquashfs command is missing but required, please install it");
 #else
@@ -510,7 +510,7 @@ main (int argc, char *argv[])
             exit(1);
         }
 
-        pathToMksquashfs = g_build_filename(appimagetoolDirectory, "..", MKSQUASHFS_PATH, NULL);
+        pathToMksquashfs = g_build_filename(appimagetoolDirectory, "..", AUXILIARY_FILES_DESTINATION, "mksquashfs", NULL);
 
         if (!g_file_test(pathToMksquashfs, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_EXECUTABLE)) {
             g_printf("No such file or directory: %s\n", pathToMksquashfs);

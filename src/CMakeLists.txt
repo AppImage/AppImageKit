@@ -24,7 +24,7 @@ add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 
 
 # allow setting different path for mksquashfs after installation
-set(MKSQUASHFS_DIR "" CACHE STRING "Change target install directory for mksquashfs")
+set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install directory for mksquashfs")
 
 
 add_library(libappimage SHARED
@@ -151,10 +151,10 @@ target_compile_definitions(appimagetool
     PRIVATE -DENABLE_BINRELOC
 )
 
-if(MKSQUASHFS_DIR)
-    message(STATUS "Installing mksquashfs in path: ${MKSQUASHFS_DIR}")
+if(AUXILIARY_FILES_DESTINATION)
+    message(STATUS "Installing auxiliary files in path: ${AUXILIARY_FILES_DESTINATION}")
     target_compile_definitions(appimagetool
-        PRIVATE -DMKSQUASHFS_PATH="${MKSQUASHFS_DIR}/mksquashfs"
+        PRIVATE -DAUXILIARY_FILES_DESTINATION="${AUXILIARY_FILES_DESTINATION}"
     )
 endif()
 
@@ -221,21 +221,17 @@ add_sanitizers(digest)
 
 
 # install binaries
-install(
-    PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/runtime
-    DESTINATION bin
-    COMPONENT applications
-)
-
-if(MKSQUASHFS_DIR)
+if(AUXILIARY_FILES_DESTINATION)
     install(
-        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs
-        DESTINATION ${MKSQUASHFS_DIR}
+        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
+        DESTINATION ${AUXILIARY_FILES_DESTINATION}
+        COMPONENT applications
     )
 else()
     install(
-        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs
+        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
         DESTINATION bin
+        COMPONENT applications
     )
 endif()
 
