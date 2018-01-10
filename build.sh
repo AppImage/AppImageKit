@@ -77,6 +77,9 @@ if [ $RUN_TESTS -ne 0 ]; then
   ctest -V
 fi
 
+# build Debian packages
+cpack
+
 xxd src/runtime | head -n 1
 
 # Do NOT strip runtime

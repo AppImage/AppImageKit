@@ -62,13 +62,10 @@ bash -x ../travis/test-appimages.sh
 
 # install more tools
 # (vim-common contains xxd)
-sudo apt-get install equivs vim-common
+sudo apt-get install vim-common
 
 # fix permissions
 sudo chown -R travis.travis .
-
-# build .deb
-(cd out ; equivs-build ../../appimaged.ctl)
 
 # remove binaries from output directory
 ls -al out/
