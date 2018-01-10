@@ -71,6 +71,7 @@ sudo chown -R travis.travis .
 (cd out ; equivs-build ../../appimaged.ctl)
 
 # remove binaries from output directory
+ls -al out/
 rm -r out/{appimaged,appimagetool,validate,digest,mksquashfs}
 
 # inspect runtime
