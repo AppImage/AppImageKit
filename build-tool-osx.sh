@@ -101,7 +101,7 @@ cp ../squashfs-tools/squashfs-tools/mksquashfs .
 
 # Compile appimagetool but do not link - glib version
 
-$CC -DGIT_COMMIT=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ \
+$CC -DGIT_VERSION=\"$(git describe --tags --always --abbrev=7)\" -D_FILE_OFFSET_BITS=64 -I../squashfuse/ \
     $(pkg-config --cflags glib-2.0) -g -Os ../getsection.c  -c ../appimagetool.c
 
 # Now statically link against libsquashfuse - glib version

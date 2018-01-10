@@ -16,7 +16,7 @@ include(CTest)
 execute_process(
     COMMAND git describe --tags --always --abbrev=7
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT
+    OUTPUT_VARIABLE GIT_VERSION
     OUTPUT_STRIP_TRAILING_WHITESPACE
 )
 
@@ -41,6 +41,9 @@ set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# write version information for CPack to files
+file(WRITE ${PROJECT_BINARY_DIR}/GIT_VERSION "${GIT_VERSION}")
 
 
 ##########################
