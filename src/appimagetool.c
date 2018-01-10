@@ -196,7 +196,11 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         args[i++] = 0;
 
+#ifndef AUXILIARY_FILES_DESTINATION
         execvp("mksquashfs", args);
+#else
+        execvp(pathToMksquashfs, args);
+#endif
 
         perror("execlp");   // exec*() returns only on error
         return -1; // exec never returns
