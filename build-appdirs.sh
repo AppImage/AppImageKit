@@ -12,12 +12,12 @@ mkdir -p appdirs/
 APPIMAGETOOL_APPDIR=appdirs/appimagetool.AppDir
 
 rm -rf "$APPIMAGETOOL_APPDIR" || true
-mkdir -p "$APPIMAGETOOL_APPDIR"/usr/bin
+mkdir -p "$APPIMAGETOOL_APPDIR"/usr/{bin,lib/appimagekit}
 cp -f install_prefix/usr/bin/appimagetool "$APPIMAGETOOL_APPDIR"/usr/bin
 
 cp ../resources/AppRun "$APPIMAGETOOL_APPDIR"
 cp install_prefix/usr/bin/appimagetool "$APPIMAGETOOL_APPDIR"/usr/bin/
-cp install_prefix/usr/bin/mksquashfs "$APPIMAGETOOL_APPDIR"/usr/bin/
+cp install_prefix/usr/lib/appimagekit/mksquashfs "$APPIMAGETOOL_APPDIR"/usr/lib/appimagekit/
 cp $(which desktop-file-validate) "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
 
