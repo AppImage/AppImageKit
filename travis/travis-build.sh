@@ -79,5 +79,10 @@ mv out/runtime out/runtime-"$ARCH"
 # remove unused files
 sudo rm -rf out/*.AppDir out/*.AppImage.digest
 
+# build Debian packages
+cpack -V
+
+mv *.deb out/
+
 # fix filename for upload
 sudo mv out/AppRun out/AppRun-"$ARCH"
