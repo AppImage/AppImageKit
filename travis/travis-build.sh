@@ -80,7 +80,7 @@ mv out/runtime out/runtime-"$ARCH"
 sudo rm -rf out/*.AppDir out/*.AppImage.digest
 
 # build Debian packages
-find . -maxdepth 0 -exec sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g' "{}" \;
+find . -maxdepth 1 -exec sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g' "{}" \;
 cpack -V || cat _CPack_Packages/Linux/DEB/PreinstallOutput.log && exit 1
 
 mv *.deb out/
