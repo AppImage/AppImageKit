@@ -26,7 +26,7 @@ File: /usr/lib/systemd/user/appimaged.service
  [Service]
  ExecStart=/usr/bin/appimaged
  Restart=always
- RestartSec=5s
+ RestartSec=60s
  StartLimitInterval=0
  
  [Install]
