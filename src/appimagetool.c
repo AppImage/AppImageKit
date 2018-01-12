@@ -415,19 +415,19 @@ bool readFile(char* filename, int* size, char** buffer) {
 
 static GOptionEntry entries[] =
 {
-    { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
-    { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
+    { "list SRC", 'l SRC', 0, G_OPTION_ARG_NONE, &list, "List files in SRC AppImage", NULL },
+    { "updateinformation STRING", 'u STRING', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
     { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI environment variables", NULL },
-    { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
-    { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
+    { "bintray-user NAME", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
+    { "bintray-repo REPO", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
-    { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
-    { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
-    { "sign-args", 0, 0, G_OPTION_ARG_STRING, &sign_args, "Extra arguments to use when signing with gpg[2]", NULL},
+    { "exclude-file FILE", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
+    { "runtime-file FILE", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
+    { "sign-args ARGS", 0, 0, G_OPTION_ARG_STRING, &sign_args, "Extra arguments to use when signing with gpg[2]", NULL},
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
 };
