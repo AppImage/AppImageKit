@@ -186,6 +186,7 @@ It will register the AppImages in with your system from the following places:
 * /isodevice/Applications
 * /isofrom/Applications
 * /run/archiso/img_dev/Applications
+* /lib/live/mount/findiso/Applications
 * /opt
 * /usr/local/bin
 
