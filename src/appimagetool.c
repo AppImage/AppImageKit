@@ -416,8 +416,7 @@ bool readFile(char* filename, int* size, char** buffer) {
 static GOptionEntry entries[] =
 {
     { "list SRC", 'l SRC', 0, G_OPTION_ARG_NONE, &list, "List files in SRC AppImage", NULL },
-    { "updateinformation STRING", 0, 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
-    { "u STRING", 0, 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
+    { "updateinformation STRING", 'u STRING', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
     { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI environment variables", NULL },
     { "bintray-user NAME", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo REPO", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
