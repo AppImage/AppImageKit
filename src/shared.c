@@ -1,19 +1,19 @@
 /**************************************************************************
- * 
+ *
  * Copyright (c) 2004-18 Simon Peter
- * 
+ *
  * All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,7 +21,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * 
+ *
  **************************************************************************/
 
 #ident "AppImage by Simon Peter, http://appimage.org/"
@@ -128,7 +128,7 @@ char *get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbos
 
 /* Move an icon file to the path where a given icon can be installed in $HOME.
  * This is needed because png and xpm icons cannot be installed in a generic
- * location but are only picked up in directories that have the size of 
+ * location but are only picked up in directories that have the size of
  * the icon as part of their directory name, as specified in the theme.index
  * See https://github.com/AppImage/AppImageKit/issues/258
  */
@@ -136,20 +136,20 @@ char *get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbos
 void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 {
     // FIXME: This default location is most likely wrong, but at least the icons with unknown size can go somewhere
-    gchar *dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps", NULL);;
-    
+    gchar *dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps/", NULL);
+
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
         g_free(dest_dir);
         dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
     }
- 
+
     if((g_str_has_suffix (icon_path, ".png")) || (g_str_has_suffix (icon_path, ".xpm"))) {
-        
+
         cairo_surface_t *image;
 
         int w = 0;
         int h = 0;
-        
+
         if(g_str_has_suffix (icon_path, ".xpm")) {
             // TODO: GdkPixbuf has a convenient way to load XPM data. Then you can call
             // gdk_cairo_set_source_pixbuf() to transfer the data to a Cairo surface.
@@ -163,15 +163,15 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
             h = cairo_image_surface_get_height (image);
             cairo_surface_destroy (image);
         }
-                    
-        // FIXME: The following sizes are taken from the hicolor icon theme. 
+
+        // FIXME: The following sizes are taken from the hicolor icon theme.
         // Probably the right thing to do would be to figure out at runtime which icon sizes are allowable.
         // Or could we put our own index.theme into .local/share/icons/ and have it observed?
         if((w != h) || ((w != 16) && (w != 24) && (w != 32) && (w != 36) && (w != 48) && (w != 64) && (w != 72) && (w != 96) && (w != 128) && (w != 192) && (w != 256) && (w != 512))){
             fprintf(stderr, "%s has nonstandard size w = %i, h = %i; please fix it\n", icon_path, w, h);
         } else {
             g_free(dest_dir);
-            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps", NULL);
+            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps/", NULL);
         }
     }
     if(verbose)
@@ -197,14 +197,14 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(icon_path);
     GFile *target_file = g_file_new_for_path(icon_dest_path);
-    if (!g_file_move (icon_file, target_file, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error)) {
+    if(!g_file_move(icon_file, target_file, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &error)){
         fprintf(stderr, "Error moving file: %s\n", error->message);
-        g_error_free (error);
+        g_error_free(error);
     }
-    g_object_unref(icon_file); 
+    g_object_unref(icon_file);
     g_object_unref(target_file);
     g_free(icon_dest_path);
-    
+
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
@@ -286,8 +286,8 @@ void squash_extract_inode_to_file(sqfs *fs, sqfs_inode *inode, const gchar *dest
 
 /* Find files in the squashfs matching to the regex pattern.
  * Returns a newly-allocated NULL-terminated array of strings.
- * Use g_strfreev() to free it. 
- * 
+ * Use g_strfreev() to free it.
+ *
  * The following is done within the sqfs_traverse run for performance reaons:
  * 1.) For found files that are in usr/share/icons, install those icons into the system
  * with a custom name that involves the md5 identifier to tie them to a particular
@@ -334,7 +334,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                     }
                     /* According to https://specifications.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html#install_icons
                      * share/pixmaps is ONLY searched in /usr but not in $XDG_DATA_DIRS and hence $HOME and this seems to be true at least in XFCE */
-                    if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){       
+                    if(g_str_has_prefix (trv.path, "usr/share/pixmaps/")){
                         gchar *dest_basename = g_strdup_printf("%s_%s_%s", vendorprefix, md5, g_path_get_basename(trv.path));
 
                         dest = g_build_path("/", "/tmp", dest_basename, NULL);
@@ -351,7 +351,7 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                         g_free(dest_basename);
                         g_free(ext);
                     }
-                    
+
                     if(dest){
                         if(verbose)
                             fprintf(stderr, "install: %s\n", dest);
@@ -365,10 +365,10 @@ gchar **squash_get_matching_files(sqfs *fs, char *pattern, gchar *desktop_icon_v
                         squash_extract_inode_to_file(fs, &inode, dest);
 
                         chmod (dest, 0644);
-                        
+
                         if(verbose)
                             fprintf(stderr, "Installed: %s\n", dest);
-                        
+
                         // If we were unsure about the size of an icon, we temporarily installed
                         // it to /tmp and now move it into the proper place
                         if(g_str_has_prefix (dest, "/tmp/")) {
@@ -420,11 +420,11 @@ gboolean g_key_file_load_from_squash(sqfs *fs, char *path, GKeyFile *key_file_st
             }
         }
     }
-    
+
     if (err)
         fprintf(stderr, "sqfs_traverse_next error\n");
     sqfs_traverse_close(&trv);
-    
+
     return success;
 }
 
@@ -437,13 +437,13 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, appimage_path);
     //gchar *tryexec_path = replace_str(appimage_path," ", "\\ "); // TryExec does not support blanks
     g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimage_path);
-    
+
     /* If firejail is on the $PATH, then use it to run AppImages */
     if(g_find_program_in_path ("firejail")){
         char *firejail_exec;
         firejail_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --noprofile --appimage '%s'", appimage_path);
         g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_exec);
-        
+
         gchar *firejail_profile_group = "Desktop Action FirejailProfile";
         gchar *firejail_profile_exec = g_strdup_printf("firejail --env=DESKTOPINTEGRATION=appimaged --private --appimage '%s'", appimage_path);
         gchar *firejail_tryexec = "firejail";
@@ -451,11 +451,11 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_EXEC, firejail_profile_exec);
         g_key_file_set_value(key_file_structure, firejail_profile_group, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, firejail_tryexec);
         g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "Actions", "FirejailProfile;");
-        
+
     }
-    
+
     /* Add AppImageUpdate desktop action
-     * https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s10.html 
+     * https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s10.html
      * This will only work if AppImageUpdate is on the user's $PATH.
      * TODO: we could have it call this appimaged instance instead of AppImageUpdate and let it
      * figure out how to update the AppImage */
@@ -523,36 +523,36 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         g_free(buf);
     }
 
-    
+
     /* https://specifications.freedesktop.org/menu-spec/menu-spec-latest.html#paths says:
-     * 
+     *
      * $XDG_DATA_DIRS/applications/
      * When two desktop entries have the same name, the one appearing earlier in the path is used.
-     * 
+     *
      * --
-     * 
+     *
      * https://developer.gnome.org/integration-guide/stable/desktop-files.html.en says:
-     * 
+     *
      * Place this file in the /usr/share/applications directory so that it is accessible
      * by everyone, or in ~/.local/share/applications if you only wish to make it accessible
      * to a single user. Which is used should depend on whether your application is
      * installed systemwide or into a user's home directory. GNOME monitors these directories
      * for changes, so simply copying the file to the right location is enough to register it
      * with the desktop.
-     * 
+     *
      * Note that the ~/.local/share/applications location is not monitored by versions of GNOME
      * prior to version 2.10 or on Fedora Core Linux, prior to version 2.8.
      * These versions of GNOME follow the now-deprecated vfolder standard,
      * and so desktop files must be installed to ~/.gnome2/vfolders/applications.
      * This location is not supported by GNOME 2.8 on Fedora Core nor on upstream GNOME 2.10
      * so for maximum compatibility with deployed desktops, put the file in both locations.
-     * 
+     *
      * Note that the KDE Desktop requires one to run kbuildsycoca to force a refresh of the menus.
-     * 
+     *
      * --
-     * 
+     *
      * https://specifications.freedesktop.org/menu-spec/menu-spec-latest.html says:
-     * 
+     *
      * To prevent that a desktop entry from one party inadvertently cancels out
      * the desktop entry from another party because both happen to get the same
      * desktop-file id it is recommended that providers of desktop-files ensure
@@ -562,12 +562,12 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
      * it could either add "gnome-" to all the desktop files it installs
      * in datadir/applications/ or it could install desktop files in a
      * datadir/applications/gnome subdirectory.
-     * 
+     *
      * --
-     * 
+     *
      * https://specifications.freedesktop.org/desktop-entry-spec/latest/ape.html says:
      * The desktop file ID is the identifier of an installed desktop entry file.
-     * 
+     *
      * To determine the ID of a desktop file, make its full path relative
      * to the $XDG_DATA_DIRS component in which the desktop file is installed,
      * remove the "applications/" prefix, and turn '/' into '-'.
@@ -579,19 +579,19 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
      * /usr/local/share:/usr/share, then /usr/local/share/applications/org.foo.bar.desktop
      * and /usr/share/applications/org.foo.bar.desktop both have the same desktop file ID
      * org.foo.bar.desktop, but only the first one will be used.
-     * 
+     *
      * --
-     * 
+     *
      * https://specifications.freedesktop.org/desktop-entry-spec/latest/ar01s07.html says:
-     * 
+     *
      * The application must name its desktop file in accordance with the naming
      * recommendations in the introduction section (e.g. the filename must be like
      * org.example.FooViewer.desktop). The application must have a D-Bus service
      * activatable at the well-known name that is equal to the desktop file name
      * with the .desktop portion removed (for our example, org.example.FooViewer).
-     * 
+     *
      * --
-     * 
+     *
      * Can it really be that no one thought about having multiple versions of the same
      * application installed? What are we supposed to do if we want
      * a) have desktop files installed by appimaged not interfere with desktop files
@@ -601,7 +601,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
      * c) the one installed by appimaged should have an AppImage vendor prefix to make
      *    it easy to distinguish it from system- or upstream-provided ones
      */
-    
+
     /* FIXME: The following is most likely not correct; see the comments above.
      * Open a GitHub issue or send a pull request if you would like to propose asolution. */
     /* TODO: Check for consistency of the id with the AppStream file, if it exists in the AppImage */
@@ -638,7 +638,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     g_io_channel_unref(file);
 
     g_free(buf);
-    
+
     /* GNOME shows the icon and name on the desktop file only if it is executable */
     chmod(destination, 0755);
 
@@ -651,14 +651,14 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
     gchar *desktop_icon_value_original = NULL;
     char *md5 = get_md5(path);
-    
+
     if(verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
-    
+
     struct archive *a;
     struct archive_entry *entry;
     int r;
-    
+
     a = archive_read_new();
     archive_read_support_format_iso9660(a);
     if ((r = archive_read_open_filename(a, path, 10240))) {
@@ -716,9 +716,9 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
 
         gchar *dest = NULL;
         /* Get icon file(s) and act on them in one go */
-        
+
         if(g_str_has_prefix(filename, "usr/share/icons/") || g_str_has_prefix(filename, "usr/share/pixmaps/") || (g_str_has_prefix(filename, "usr/share/mime/") && g_str_has_suffix(filename, ".xml"))){
-            gchar *t = replace_str(filename, "usr/share", g_get_user_data_dir());            
+            gchar *t = replace_str(filename, "usr/share", g_get_user_data_dir());
             gchar *dest_dirname = g_path_get_dirname(t);
             g_free(t);
 
@@ -751,7 +751,7 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
         g_free(filename);
 
         if(dest){
-        
+
             if(verbose)
                 fprintf(stderr, "install: %s\n", dest);
 
@@ -763,12 +763,12 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
 
             FILE *f;
             f = fopen(dest, "w+");
-            
+
             if (f == NULL){
                 fprintf(stderr, "fopen error\n");
                 break;
             }
-            
+
             int r;
             const void *buff;
             size_t size;
@@ -785,14 +785,14 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
                 }
                 fwrite(buff, 1, size, f);
             }
-            
+
             fclose(f);
             chmod (dest, 0644);
 
-            
+
             if(verbose)
                 fprintf(stderr, "Installed: %s\n", dest);
-            
+
             // If we were unsure about the size of an icon, we temporarily installed
             // it to /tmp and now move it into the proper place
             if(g_str_has_prefix (dest, "/tmp/")) {
@@ -834,10 +834,10 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         if(verbose)
             fprintf(stderr, "sqfs_open_image: %s\n", path);
     }
-    
+
     /* TOOO: Change so that only one run of squash_get_matching_files is needed in total,
      * this should hopefully improve performance */
-    
+
     /* Get desktop file(s) in the root directory of the AppImage */
     gchar **str_array = squash_get_matching_files(&fs, "(^[^/]*?.desktop$)", desktop_icon_value_original, md5, verbose); // Only in root dir
     // gchar **str_array = squash_get_matching_files(&fs, "(^.*?.desktop$)", md5, verbose); // Not only there
@@ -847,7 +847,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
         gboolean success = g_key_file_load_from_squash(&fs, str_array[i], key_file_structure, verbose);
         if(success){
             gchar *desktop_filename = g_path_get_basename(str_array[i]);
-            
+
             desktop_icon_value_original = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
             if(verbose)
                 fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
@@ -856,11 +856,11 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
             g_free(desktop_filename);
         }
         g_key_file_free(key_file_structure);
-        
+
     }
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev(str_array);
-    
+
     /* Get relevant  file(s) */
     static char *const pattern = "(^usr/share/(icons|pixmaps)/.*.(png|svg|svgz|xpm)$|^.DirIcon$|^usr/share/mime/packages/.*.xml$|^usr/share/appdata/.*metainfo.xml$|^[^/]*?.(png|svg|svgz|xpm)$)";
     gchar **str_array2 = squash_get_matching_files(&fs, pattern, desktop_icon_value_original, md5, verbose);
@@ -869,9 +869,9 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
 
     /* Free the NULL-terminated array of strings and its contents */
     g_strfreev(str_array2);
-    
+
     /* The above also gets AppStream metainfo file(s), TODO: Check if the id matches and do something with them*/
-    
+
     set_executable(path, verbose);
 
     g_free(md5);
@@ -901,15 +901,15 @@ int appimage_register_in_system(char *path, gboolean verbose)
             fprintf(stderr, "-> Skipping file %s\n", path);
         return 0;
     }
-    
+
     if(type == 1){
         appimage_type1_register_in_system(path, verbose);
     }
-    
+
     if(type == 2){
         appimage_type2_register_in_system(path, verbose);
     }
-    
+
     return 0;
 }
 
@@ -933,12 +933,12 @@ void unregister_using_md5_id(const char const *name, int level, char* md5, gbool
 {
     DIR *dir;
     struct dirent *entry;
-    
+
     if (!(dir = opendir(name)))
         return;
     if (!(entry = readdir(dir)))
         return;
-    
+
     do {
         if (entry->d_type == DT_DIR) {
             char path[1024];
@@ -948,7 +948,7 @@ void unregister_using_md5_id(const char const *name, int level, char* md5, gbool
                 continue;
             unregister_using_md5_id(path, level + 1, md5, verbose);
         }
-        
+
         else {
             gchar *needle = g_strdup_printf("%s_%s", vendorprefix, md5);
             if(strstr(entry->d_name, needle)) {
@@ -971,21 +971,21 @@ void unregister_using_md5_id(const char const *name, int level, char* md5, gbool
 int appimage_unregister_in_system(char *path, gboolean verbose)
 {
     char *md5 = get_md5(path);
-    
+
     /* The file is already gone by now, so we can't determine its type anymore */
     fprintf(stderr, "_________________________\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "-> UNREGISTER %s\n", path);
     /* Could use gnome_desktop_thumbnail_factory_lookup instead of the next line */
-    
+
     /* Delete the thumbnails if they exist */
     delete_thumbnail(path, "normal", verbose); // 128x128
     delete_thumbnail(path, "large", verbose); // 256x256
-    
+
     unregister_using_md5_id(g_get_user_data_dir(), 0, md5, verbose);
 
     g_free(md5);
-    
+
     return 0;
 }
 
