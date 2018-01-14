@@ -174,7 +174,7 @@ Or, if you are on a deb-based system:
 ```
 wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimaged_1.0_amd64.deb"
 sudo dpkg -i appimaged_*.deb
-systemctl --user enable appimaged
+systemctl --user add-wants default.target appimaged
 systemctl --user start appimaged
 ```
 
