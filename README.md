@@ -179,7 +179,7 @@ systemctl --user start appimaged
 ```
 
 It will register the AppImages in with your system from the following places:
-* $HOME/Downloads
+* $HOME/Downloads (or its localized equivalent, as determined by `G_USER_DIRECTORY_DOWNLOAD` in glib)
 * $HOME/.local/bin
 * $HOME/bin
 * /Applications
