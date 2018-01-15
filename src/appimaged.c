@@ -164,7 +164,7 @@ void initially_register(const char *name, int level)
     closedir(dir);
 }
 
-void add_dir_to_watch(char *directory)
+void add_dir_to_watch(const char *directory)
 {
     if (g_file_test (directory, G_FILE_TEST_IS_DIR)){
         if(!inotifytools_watch_recursively(directory, WR_EVENTS) ) {
@@ -319,9 +319,9 @@ int main(int argc, char ** argv) {
     }
 
     add_dir_to_watch(user_bin_dir);
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Downloads", NULL));
+    add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));    
+    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
     add_dir_to_watch(g_build_filename("/Applications", NULL));
     // Perhaps we should determine the following dynamically using something like
     // mount | grep -i iso | head -n 1 | cut -d ' ' -f 3
