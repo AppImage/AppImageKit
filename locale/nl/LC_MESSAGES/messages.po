@@ -8,46 +8,52 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2018-01-19 12:00+0000\n"
+"Last-Translator: killme <s3032392@mvrht.net>\n"
+"Language-Team: Dutch <https://translate.assassinate-"
+"you.net/projects/appimage/website/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2.17.1\n"
 "Generated-By: Babel 2.5.1\n"
 
 #: index.jinja2:7
 msgid "page_title"
-msgstr ""
+msgstr "AppImage | Linux apps die overal draaien"
 
 #: index.jinja2:17
 msgid "meta_description"
-msgstr ""
+msgstr "AppImage | Linux apps die overal draaien"
 
 #: index.jinja2:58
 msgid "docs_link_title"
-msgstr ""
+msgstr "Documentatie"
 
 #: index.jinja2:63
 msgid "source_link_title"
-msgstr ""
+msgstr "Broncode"
 
 #: index.jinja2:68
 msgid "wiki_link_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:73
 msgid "discourse_link_title"
-msgstr ""
+msgstr "Community"
 
 #: index.jinja2:139
 msgid "linux_apps_that_run_anywhere"
-msgstr ""
+msgstr "Linux apps die overal draaien"
 
 #: index.jinja2:143
 msgid "user_story_1"
 msgstr ""
+"Als een gebruiker wil ik applicaties van de originele auteur downloaden, en "
+"ze op mijn Linux desktop draaien net zoals ik dat zou doen met een Windows "
+"of Mac applicatie."
 
 #: index.jinja2:146
 msgid "user_story_2"
@@ -55,11 +61,14 @@ msgstr ""
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
-msgstr ""
+msgstr "Toonaangevende Linux-Distributies"
 
 #: index.jinja2:158
+#, fuzzy
 msgid "download_make_executable_run"
 msgstr ""
+"Download een applicatie, maak hem uitvoerbaar, en draaien maar! Installatie "
+"niet nodig. Zonder aanpassingen aan softwarebibliotheken of instellingen."
 
 #: index.jinja2:159
 #, python-format
@@ -68,39 +77,47 @@ msgid ""
 "                 can_run_in_sandboxes_like %(sandbox_name)s\n"
 "            "
 msgstr ""
+"\n"
+"                 Kan ook in een sandbox zoals %(sandbox_name)s draaien.\n"
+"            "
 
 #: index.jinja2:183
 msgid "distribute_linux_apps_as_appimage_and_win_users"
 msgstr ""
+"Verspreid uw Linux desktop applicatie in het Appimage formaat en win "
+"gebruikers van alle gangbare Linux distributies."
 
 #: index.jinja2:184
 msgid "package_once_and_run_everywhere"
 msgstr ""
 
 #: index.jinja2:185
+#, fuzzy
 msgid "reach_users_on_all_distros"
-msgstr ""
+msgstr "Bereik gebruikers op alle gangbare linux desktop distributies."
 
 #: index.jinja2:194
+#, fuzzy
 msgid "what_people_think"
-msgstr ""
+msgstr "Wat gebruikers vinden"
 
 #: index.jinja2:209
 msgid "torvalds_quote"
-msgstr ""
+msgstr "Dat is gewoon erg cool."
 
 #: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
 #: index.jinja2:429
 msgid "picture:"
-msgstr ""
+msgstr "Afbeelding:"
 
 #: index.jinja2:214 index.jinja2:233
 msgid "copyright_faces_of_open_source_/_peter_adams"
 msgstr ""
 
 #: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
+#, fuzzy
 msgid "licensed_under_CC-BY-NC-SA_4.0"
-msgstr ""
+msgstr "Gelicentieerd onder CC-BY-NC-SA 4.0."
 
 #: index.jinja2:217 index.jinja2:236
 msgid "original_picture"
@@ -108,23 +125,25 @@ msgstr ""
 
 #: index.jinja2:229
 msgid "hohndel_quote"
-msgstr ""
+msgstr "De AppImage aanpak is echt erg nuttig."
 
 #: index.jinja2:249
 msgid "shuttleworth_quote"
 msgstr ""
+"AppImages zijn een erg schone ervaring en ik bewonder het werk erachter."
 
 #: index.jinja2:254
 msgid "copyright_aaron_hockley"
 msgstr ""
 
 #: index.jinja2:255
+#, fuzzy
 msgid "licensed_under_CC-BY-SA_2.0"
-msgstr ""
+msgstr "Gelicentieerd onder CC-BY-SA 2.0."
 
 #: index.jinja2:267
 msgid "richard_brown_quote"
-msgstr ""
+msgstr "Ik hou van AppImage. Ik hou echt van AppImage."
 
 #: index.jinja2:272
 msgid "copyright_theassassin"
@@ -132,47 +151,48 @@ msgstr ""
 
 #: index.jinja2:299
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
-msgstr ""
+msgstr "Tekening: lewing@isc.tamu.edu Larry Ewing en The GIMP."
 
 #: index.jinja2:305
 msgid "logo:"
-msgstr ""
+msgstr "Logo:"
 
 #: index.jinja2:306
+#, fuzzy
 msgid "licensed_under_GPLv2"
-msgstr ""
+msgstr "Gelicentieerd onder de voorwaarden van de GPLv2."
 
 #: index.jinja2:308
 msgid "see_more"
-msgstr ""
+msgstr "Meer"
 
 #: index.jinja2:323
 msgid "see_it_in_action"
-msgstr ""
+msgstr "Zie het in actie"
 
 #: index.jinja2:325
 msgid "here_appimage_for_you_to_try"
-msgstr ""
+msgstr "Hier is een applicatie in het AppImage formaat voor u om te proberen."
 
 #: index.jinja2:326
 msgid "just_download_make_executable_run"
-msgstr ""
+msgstr "Download de applicatie, maak het uitvoerbaar, en draai het!"
 
 #: index.jinja2:327
 msgid "no_need_to_install"
-msgstr ""
+msgstr "Installatie niet nodig."
 
 #: index.jinja2:328
 msgid "runs_on_most_desktops"
-msgstr ""
+msgstr "Draait op de meeste 32-bit en 64-bit Linux-desktops."
 
 #: index.jinja2:333
 msgid "try_subsurface_64-bit"
-msgstr ""
+msgstr "Probeer Subsurface Appimage (64-bit)"
 
 #: index.jinja2:337
 msgid "try_subsurface_32-bit"
-msgstr ""
+msgstr "Probeer Subsurface Appimage (32-bit)"
 
 #: index.jinja2:340
 #, python-format
@@ -183,6 +203,11 @@ msgid ""
 "\n"
 "                    "
 msgstr ""
+"\n"
+"                    Veel upstream projecten zoals %(krita)s, Subsurface, "
+"MuseScore, KDevelop en digiKam zijn begonnen met het aanbieden van AppImages "
+"op hun download pagina’s.\n"
+"                    "
 
 #: index.jinja2:343
 #, python-format
@@ -193,10 +218,15 @@ msgid ""
 "\n"
 "                    "
 msgstr ""
+"\n"
+"                    Andere AppImages voor applicaties zoals Atom, Arduino, "
+"Blender, Chromium, Firefox, LibreOffice, en QCAD kunnen hier %(here)s 1 "
+"(64-bit) worden gedownload.\n"
+"                    "
 
 #: index.jinja2:357
 msgid "how_to_run_an_appimage?"
-msgstr ""
+msgstr "Hoe draai je een AppImage?"
 
 #: index.jinja2:365
 msgid "to_run_an_AppImage_simply:"
@@ -204,31 +234,36 @@ msgstr ""
 
 #: index.jinja2:368
 msgid "make_it_executable"
-msgstr ""
+msgstr "Maak het uitvoerbaar"
 
 #: index.jinja2:374
 msgid "and_run!"
-msgstr ""
+msgstr "en draai het!"
 
 #: index.jinja2:380
 msgid "that_was_easy_wasn't_it?"
-msgstr ""
+msgstr "Dat was makkelijk, nietwaar?"
 
 #: index.jinja2:384
 msgid "watch_how_it_works"
-msgstr ""
+msgstr "Bekijk hoe het werkt"
 
 #: index.jinja2:401
 msgid "buzzwords_easy_title"
-msgstr ""
+msgstr "Makkelijk."
 
 #: index.jinja2:404
+#, fuzzy
 msgid "buzzwords_easy_description"
 msgstr ""
+"Het belangrijkste idee van het AppImage formaat is <b>een app = een "
+"bestand</b>. Elke AppImage bevat een an app en alle bestanden die de app "
+"nodig heeft. In andere woorden, elke AppImage heeft geen andere "
+"afhankelijkheden dan wat wordt voorzien door het basis-besturingssysteem."
 
 #: index.jinja2:410
 msgid "buzzwords_trusted_title"
-msgstr ""
+msgstr "Vertrouwd."
 
 #: index.jinja2:413
 msgid "buzzwords_trusted_description"
@@ -236,11 +271,14 @@ msgstr ""
 
 #: index.jinja2:419
 msgid "buzzwords_fast_title"
-msgstr ""
+msgstr "Snel."
 
 #: index.jinja2:422
+#, fuzzy
 msgid "buzzwords_fast_description"
 msgstr ""
+"AppImages kunnen <b>zonder installatie</b> of root rechten gedownload en "
+"uitgevoerd worden."
 
 #: index.jinja2:430
 msgid "copyright_andis_rado"
@@ -251,36 +289,45 @@ msgid "buzzwords_open_source_title"
 msgstr ""
 
 #: index.jinja2:453
+#, fuzzy
 msgid "buzzwords_open_source_description"
 msgstr ""
+"Zoals Linux zelf is ook AppImageKit Open Source. Gebruik het om uw vrije or "
+"commerciële applicaties te verpakken."
 
 #: index.jinja2:464
 msgid "buzzwords_proven_title"
-msgstr ""
+msgstr "Bewezen."
 
 #: index.jinja2:467
 msgid "buzzwords_proven_description"
 msgstr ""
+"AppImageKit en zijn voorganger, klik, zijn al meer dan tien jaar in "
+"ontwikkeling."
 
 #: index.jinja2:477
 msgid "buzzwords_compatible_title"
 msgstr ""
 
 #: index.jinja2:480
+#, fuzzy
 msgid "buzzwords_compatible_description"
 msgstr ""
+"Werkt op de meeste redelijk recente Linux-desktopdistributies. Nou, bijna."
 
 #: index.jinja2:494
 msgid "get_started_title"
-msgstr ""
+msgstr "Begin met het verpakken van uw applicatie!"
 
 #: index.jinja2:497
 msgid "get_started_description"
 msgstr ""
+"Leer hoe u AppImageKit kunt gebruiken om uw eigen AppImages te maken op de "
+"AppImageKit Wiki."
 
 #: index.jinja2:500
 msgid "wiki_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:512
 msgid "forum_title"
@@ -296,7 +343,7 @@ msgstr ""
 
 #: index.jinja2:536
 msgid "live_chat_title"
-msgstr ""
+msgstr "Live-Chat"
 
 #: index.jinja2:539
 msgid "live_chat_description"
@@ -304,11 +351,11 @@ msgstr ""
 
 #: index.jinja2:542
 msgid "live_chat_join_us"
-msgstr ""
+msgstr "Ontmoet ons in #AppImage op irc.freenode.net"
 
 #: index.jinja2:548
 msgid "#AppImage_on_freenode"
-msgstr ""
+msgstr "#AppImage op irc.freenode.net"
 
 #: index.jinja2:563
 msgid "contact_probono"
@@ -316,7 +363,7 @@ msgstr ""
 
 #: index.jinja2:570
 msgid "github_title"
-msgstr ""
+msgstr "GitHub"
 
 #: index.jinja2:578
 msgid "e-mail_title"
