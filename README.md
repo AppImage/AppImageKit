@@ -214,7 +214,7 @@ If you have `AppImageUpdate` on your `$PATH`, then it can also do this neat tric
 
 ![screenshot from 2016-10-15 16-37-05](https://cloud.githubusercontent.com/assets/2480569/19410850/0390fe9c-92f6-11e6-9882-3ca6d360a190.jpg)
 
-Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases/download/continuous/ and put on your `$PATH`:
+Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases/tag/continuous and put on your `$PATH`:
 
 ```
 sudo mv "Downloads/AppImageUpdate-*.AppImage" /usr/local/bin/AppImageUpdate
