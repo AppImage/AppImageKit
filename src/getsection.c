@@ -55,14 +55,19 @@ void print_hex(char* fname, unsigned long offset, unsigned long length){
 
 void print_binary(char* fname, unsigned long offset, unsigned long length){
     uint8_t *data;   
-    unsigned long k;
+    unsigned long k, endpos;
+
     int fd = open(fname, O_RDONLY);
     data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
     close(fd);
-    for (k = offset; k < offset + length; k++) {
+
+    endpos = offset + length;
+
+    for (k = offset; k < endpos && data[k] != '\0'; k++) {
         printf("%c", data[k]);
-        }   
-        printf("\n");
+    }
+
+    printf("\n");
 }
 
 /*
