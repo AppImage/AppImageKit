@@ -49,6 +49,16 @@ if(BUILD_TESTING)
 
     target_include_directories(test_shared PRIVATE ../src/)
 
+    add_dependencies(test_shared squashfuse)
+
+    if(NOT USE_SYSTEM_LIBARCHIVE)
+        add_dependencies(test_shared libarchive)
+    endif()
+
+    if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+        add_dependencies(test_shared inotify-tools)
+    endif()
+
     if(NOT USE_SYSTEM_GTEST)
         add_dependencies(test_shared gtest)
     endif()
