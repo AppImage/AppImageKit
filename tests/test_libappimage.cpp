@@ -12,11 +12,13 @@
 #include <squashfuse.h>
 #include <gtest/gtest.h>
 
+#include "fixtures.h"
+
 
 namespace AppImageTests
 {
 
-class AppImageTest : public testing::Test
+class LibAppImageTest : public AppImageKitTest
 {
   protected:
     char tests_dir[250];
@@ -97,25 +99,25 @@ class AppImageTest : public testing::Test
     }
 };
 
-TEST_F(AppImageTest, check_appimage_type_invalid)
+TEST_F(LibAppImageTest, check_appimage_type_invalid)
 {
     int t = check_appimage_type("/tmp", 0);
     ASSERT_EQ(t, -1);
 }
 
-TEST_F(AppImageTest, check_appimage_type_1)
+TEST_F(LibAppImageTest, check_appimage_type_1)
 {
     int t = check_appimage_type(appImage_type_1_file_path.c_str(), 0);
     ASSERT_EQ(t, 1);
 }
 
-TEST_F(AppImageTest, check_appimage_type_2)
+TEST_F(LibAppImageTest, check_appimage_type_2)
 {
     int t = check_appimage_type(appImage_type_2_file_path.c_str(), 0);
     ASSERT_EQ(t, 2);
 }
 
-TEST_F(AppImageTest, appimage_register_in_system_with_type1)
+TEST_F(LibAppImageTest, appimage_register_in_system_with_type1)
 {
     int r = appimage_register_in_system(appImage_type_1_file_path.c_str(), true);
     ASSERT_EQ(r, 0);
@@ -125,7 +127,7 @@ TEST_F(AppImageTest, appimage_register_in_system_with_type1)
     appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
 }
 
-TEST_F(AppImageTest, appimage_register_in_system_with_type2)
+TEST_F(LibAppImageTest, appimage_register_in_system_with_type2)
 {
     int r = appimage_register_in_system(appImage_type_2_file_path.c_str(), true);
     ASSERT_EQ(r, 0);
@@ -135,7 +137,7 @@ TEST_F(AppImageTest, appimage_register_in_system_with_type2)
     appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
 }
 
-TEST_F(AppImageTest, appimage_type1_register_in_system)
+TEST_F(LibAppImageTest, appimage_type1_register_in_system)
 {
     bool r = appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false);
     ASSERT_TRUE(r);
@@ -145,7 +147,7 @@ TEST_F(AppImageTest, appimage_type1_register_in_system)
     appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
 }
 
-TEST_F(AppImageTest, appimage_type2_register_in_system)
+TEST_F(LibAppImageTest, appimage_type2_register_in_system)
 {
     bool r = appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false);
     ASSERT_TRUE(r);
@@ -154,12 +156,12 @@ TEST_F(AppImageTest, appimage_type2_register_in_system)
     appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
 }
 
-TEST_F(AppImageTest, appimage_unregister_in_system) {
+TEST_F(LibAppImageTest, appimage_unregister_in_system) {
     ASSERT_FALSE(areIntegrationFilesDeployed(appImage_type_1_file_path));
     ASSERT_FALSE(areIntegrationFilesDeployed(appImage_type_2_file_path));
 }
 
-TEST_F(AppImageTest, get_md5)
+TEST_F(LibAppImageTest, get_md5)
 {
     std::string expected = "128e476a7794288cad0eb2542f7c995b";
     gchar * sum = get_md5("/tmp/testfile");
@@ -169,7 +171,7 @@ TEST_F(AppImageTest, get_md5)
     g_free(sum);
 }
 
-TEST_F(AppImageTest, get_md5_invalid_file_path)
+TEST_F(LibAppImageTest, get_md5_invalid_file_path)
 {
     std::string expected = "";
     gchar * sum = get_md5("");
@@ -178,7 +180,7 @@ TEST_F(AppImageTest, get_md5_invalid_file_path)
     ASSERT_EQ(res, 0);
 }
 
-TEST_F(AppImageTest, create_thumbnail_appimage_type_1) {
+TEST_F(LibAppImageTest, create_thumbnail_appimage_type_1) {
     create_thumbnail(appImage_type_1_file_path.c_str());
 
     gchar *sum = get_md5(appImage_type_1_file_path.c_str());
@@ -194,7 +196,7 @@ TEST_F(AppImageTest, create_thumbnail_appimage_type_1) {
     rm_file(path);
 }
 
-TEST_F(AppImageTest, create_thumbnail_appimage_type_2) {
+TEST_F(LibAppImageTest, create_thumbnail_appimage_type_2) {
     create_thumbnail(appImage_type_2_file_path.c_str());
 
     gchar* sum = get_md5(appImage_type_2_file_path.c_str());
@@ -210,7 +212,7 @@ TEST_F(AppImageTest, create_thumbnail_appimage_type_2) {
     rm_file(path);
 }
 
-TEST_F(AppImageTest, extract_file_following_symlinks) {
+TEST_F(LibAppImageTest, extract_file_following_symlinks) {
         char * target_path = const_cast<char *>("/tmp/test_libappimage_tmp_file");
     extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path);
 

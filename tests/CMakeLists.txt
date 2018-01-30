@@ -11,6 +11,7 @@ if(BUILD_TESTING)
     # Link runTests with what we want to test and the GTest and pthread library
     add_executable(test_libappimage
         test_libappimage.cpp
+        fixtures.h
     )
 
     target_link_libraries(test_libappimage
@@ -28,6 +29,7 @@ if(BUILD_TESTING)
 
     add_executable(test_shared
         test_shared.cpp
+        fixtures.h
         ${PROJECT_SOURCE_DIR}/src/shared.c
         ${PROJECT_SOURCE_DIR}/src/elf.c
         ${PROJECT_SOURCE_DIR}/src/getsection.c
