@@ -431,10 +431,10 @@ gboolean g_key_file_load_from_squash(sqfs *fs, char *path, GKeyFile *key_file_st
 }
 
 /* Write a modified desktop file to disk that points to the AppImage */
-void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimage_path, gchar* desktop_filename, int appimage_type, char *md5, gboolean verbose){
+bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimage_path, gchar* desktop_filename, int appimage_type, char *md5, gboolean verbose){
     if(!g_key_file_has_key(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, NULL)){
         fprintf(stderr, "Desktop file has no Exec key\n");
-        return;
+        return false;
     }
 
     // parse [Try]Exec= value, replace executable by AppImage path, append parameters
@@ -449,7 +449,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
                 continue;
 
             fprintf(stderr, "%s entry missing in Desktop file\n", fields[i]);
-            return;
+            return false;
         };
 
         // saving a copy for later free() call
@@ -460,7 +460,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         // error handling
         if (executable == NULL) {
             fprintf(stderr, "Invalid value for Exec= entry in Desktop file\n");
-            return;
+            return false;
         }
 
         unsigned long new_exec_value_size = strlen(appimage_path);
@@ -662,7 +662,8 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     /* When appimaged sees itself, then do nothing here */
     if(strcmp ("appimaged.desktop", desktop_filename) == 0) {
         g_free(destination);
-        return;
+        fprintf(stderr, "appimaged's desktop file found -- not installing desktop file for myself\n");
+        return true;
     }
 
     if(verbose)
@@ -691,6 +692,8 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     chmod(destination, 0755);
 
     g_free(destination);
+
+    return true;
 }
 
 /* Register a type 1 AppImage in the system */
@@ -755,7 +758,10 @@ bool appimage_type1_register_in_system(const char *path, gboolean verbose)
                 desktop_icon_value_original = g_key_file_get_string(key_file_structure, "Desktop Entry", "Icon", NULL);
                 if(verbose)
                     fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
-                write_edited_desktop_file(key_file_structure, path, desktop_filename, 1, md5, verbose);
+                if (!write_edited_desktop_file(key_file_structure, path, desktop_filename, 1, md5, verbose)) {
+                    fprintf(stderr, "Failed to install desktop file\n");
+                    return false;
+                }
 
                 g_free(desktop_filename);
             }
@@ -899,7 +905,10 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
             desktop_icon_value_original = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
             if(verbose)
                 fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
-            write_edited_desktop_file(key_file_structure, path, desktop_filename, 2, md5, verbose);
+            if (!write_edited_desktop_file(key_file_structure, path, desktop_filename, 2, md5, verbose)) {
+                fprintf(stderr, "Failed to install desktop file\n");
+                return false;
+            }
 
             g_free(desktop_filename);
         }
