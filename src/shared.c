@@ -445,10 +445,10 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 
         // TryExec is not a mandatory field
         if (field_value == NULL) {
-            if (fields[i] != G_KEY_FILE_DESKTOP_KEY_TRY_EXEC)
+            if (fields[i] != G_KEY_FILE_DESKTOP_KEY_EXEC)
                 continue;
 
-            fprintf(stderr, "%s entry missing in Desktop file: ", fields[i]);
+            fprintf(stderr, "%s entry missing in Desktop file\n", fields[i]);
             return;
         };
 
@@ -459,7 +459,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 
         // error handling
         if (executable == NULL) {
-            fprintf(stderr, "Invalid value for Exec= entry in Desktop file");
+            fprintf(stderr, "Invalid value for Exec= entry in Desktop file\n");
             return;
         }
 
