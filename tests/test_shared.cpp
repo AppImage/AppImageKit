@@ -101,7 +101,8 @@ public:
         if (str.empty())
             return true;
 
-        for (const char chr : str) {
+        for (int i = 0; i < str.length(); i++) {
+            char chr = str[i];
             if (chr != ' ' && chr != '\t')
                 return false;
         }
