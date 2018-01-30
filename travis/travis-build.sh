@@ -39,7 +39,7 @@ docker run \
     /bin/bash -x "/travis/build-binaries.sh" --run-tests
 
 # inspect AppDirs
-find .
+find build/out/
 find build/out/appimagetool.AppDir/
 find build/out/appimaged.AppDir/
 
