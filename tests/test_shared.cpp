@@ -64,15 +64,17 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
 
     vector<string> originalLines = splitString(originalData.data(), '\n');
     vector<string> installedLines = splitString(installedData.data(), '\n');
+    // first of all, remove all empty lines
+    // ancient glib versions like the ones CentOS 6 provides tend to introduce a blank line before the
+    // [Desktop Entry] header, hence the blank lines need to be stripped out before the next step
+    originalLines.erase(std::remove_if(originalLines.begin(), originalLines.end(), isEmptyString), originalLines.end());
+    installedLines.erase(std::remove_if(installedLines.begin(), installedLines.end(), isEmptyString), installedLines.end());
     // first line should be "[Desktop Entry]" header
     ASSERT_EQ(originalLines.front(), "[Desktop Entry]");
     ASSERT_EQ(installedLines.front(), "[Desktop Entry]");
     // drop "[Desktop Entry]" header
     originalLines.erase(originalLines.begin());
     installedLines.erase(installedLines.begin());
-    // also remove all empty lines
-    originalLines.erase(std::remove_if(originalLines.begin(), originalLines.end(), isEmptyString), originalLines.end());
-    installedLines.erase(std::remove_if(installedLines.begin(), installedLines.end(), isEmptyString), installedLines.end());
 
     // now, create key-value maps
     map<string, string> entries;
