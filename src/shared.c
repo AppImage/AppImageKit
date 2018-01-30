@@ -436,9 +436,44 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         fprintf(stderr, "Desktop file has no Exec key\n");
         return;
     }
-    g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, appimage_path);
-    //gchar *tryexec_path = replace_str(appimage_path," ", "\\ "); // TryExec does not support blanks
-    g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimage_path);
+
+    // parse [Try]Exec= value, replace executable by AppImage path, append parameters
+    // TODO: should respect quoted strings within value
+    const char const* fields[2] = {G_KEY_FILE_DESKTOP_KEY_EXEC, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC};
+    for (int i = 0; i < 2; i++) {
+        char* field_value = g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, fields[i], NULL);
+
+        // TryExec is not a mandatory field
+        if (field_value == NULL) {
+            if (fields[i] != G_KEY_FILE_DESKTOP_KEY_TRY_EXEC)
+                continue;
+
+            fprintf(stderr, "%s entry missing in Desktop file: ", fields[i]);
+            return;
+        };
+
+        char* executable = strsep(&field_value, " ");
+
+        // error handling
+        if (executable == NULL) {
+            fprintf(stderr, "Invalid value for Exec= entry in Desktop file");
+            return;
+        }
+
+        char* new_exec_value = calloc(sizeof(appimage_path) + sizeof(field_value) + 2, 1);
+
+        // build new value
+        strcat(new_exec_value, appimage_path);
+
+        if (field_value != NULL && strlen(field_value) > 0) {
+            strcat(new_exec_value, " ");
+            strcat(new_exec_value, field_value);
+        }
+
+        g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, fields[i], new_exec_value);
+
+        free(new_exec_value);
+    }
 
     /* If firejail is on the $PATH, then use it to run AppImages */
     if(g_find_program_in_path ("firejail")){
