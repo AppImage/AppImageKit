@@ -185,28 +185,29 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     }
 
     // now, remove all entries found in installed desktop entry from entries
-    for (vector<string>::const_iterator line = installedLines.begin(); line != installedLines.end(); line++) {
+    for (vector<string>::iterator line = installedLines.begin(); line != installedLines.end();) {
         vector<string> lineSplit = splitString(*line, '=');
         ASSERT_EQ(lineSplit.size(), 2) << "Condition failed for line: " << *line;
 
         const string& key = lineSplit[0];
         const string& value = lineSplit[1];
 
-        map<string, string>::const_iterator entry = entries.find(key);
-
-        if (entry == entries.end()) {
-            EXPECT_PRED2(stringStartsWith, value, "X-AppImage-")
-                << "Entry " << key << " missing in original desktop file and not an AppImageKit specific one";
+        if (stringStartsWith(key, "X-AppImage-")) {
+            // skip this entry
+            line++;
+            continue;
         }
+
+        map<string, string>::const_iterator entry = entries.find(key);
 
         if (key == "Exec" || key == "TryExec") {
             vector<string> execSplit = splitString(value);
-            EXPECT_GT(execSplit.size(), 0);
-            EXPECT_EQ(execSplit[0], "testpath");
+            EXPECT_GT(execSplit.size(), 0) << "key: " << key;
+            EXPECT_EQ(execSplit[0], "testpath") << "key: " << key;
 
             vector<string> originalExecSplit = splitString((*entry).second);
             EXPECT_EQ(execSplit.size(), originalExecSplit.size())
-                << value << " and " << (*entry).second << " contain different number of parameters";
+                << key << ": " << value << " and " << (*entry).second << " contain different number of parameters";
 
             // the rest of the split parts should be equal
             for (int i = 1; i < execSplit.size(); i++) {
@@ -217,7 +218,11 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
         } else {
             EXPECT_EQ(value, (*entry).second);
         }
+
+        installedLines.erase(line);
     }
+
+    ASSERT_EQ(installedLines.size(), 0);
 }
 
 int main(int argc, char **argv) {
