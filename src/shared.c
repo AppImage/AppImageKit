@@ -43,9 +43,11 @@
 
 #include "squashfuse.h"
 #include <squashfs_fs.h>
-
-#include "elf.h"
 #include "getsection.h"
+#include "elf.h"
+
+// own header
+#include "shared.h"
 
 #if HAVE_LIBARCHIVE3 == 1 // CentOS
 # include <archive3.h>
@@ -90,7 +92,7 @@ gchar* replace_str(const gchar const *src, const gchar const *find, const gchar 
 /* Return the md5 hash constructed according to
  * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#THUMBSAVE
  * This can be used to identify files that are related to a given AppImage at a given location */
-char *get_md5(const char const *path)
+char *get_md5(const char *path)
 {
     gchar *uri = g_filename_to_uri (path, NULL, NULL);
     if (uri != NULL)
@@ -646,7 +648,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 }
 
 /* Register a type 1 AppImage in the system */
-bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
+bool appimage_type1_register_in_system(const char *path, gboolean verbose)
 {
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
     gchar *desktop_icon_value_original = NULL;
@@ -701,7 +703,7 @@ bool appimage_type1_register_in_system(const char const *path, gboolean verbose)
                 break;
             }
             GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
-            gboolean success = g_key_file_load_from_data (key_file_structure, buff, size, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+            gboolean success = g_key_file_load_from_data(key_file_structure, buff, size, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
             if(success){
                 gchar *desktop_filename = g_path_get_basename(filename);
                 desktop_icon_value_original = g_key_file_get_string(key_file_structure, "Desktop Entry", "Icon", NULL);
@@ -929,7 +931,7 @@ void delete_thumbnail(char *path, char *size, gboolean verbose)
 
 /* Recursively delete files in path and subdirectories that contain the given md5
  */
-void unregister_using_md5_id(const char const *name, int level, char* md5, gboolean verbose)
+void unregister_using_md5_id(const char *name, int level, char* md5, gboolean verbose)
 {
     DIR *dir;
     struct dirent *entry;
@@ -989,23 +991,9 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     return 0;
 }
 
-/* AppImage generic handler calback to be used in algorithms */
-typedef void (*traverse_cb)(void *handler, void *entry_data, void *user_data);
 
-/* AppImage generic handler to be used in algorithms */
-struct appimage_handler
-{
-    const gchar *path;
-    char* (*get_file_name) (struct appimage_handler *handler, void *entry);
-    void (*extract_file) (struct appimage_handler *handler, void *entry, const char const *target);
 
-    void (*traverse)(struct appimage_handler *handler, traverse_cb command, void *user_data);
-
-    void *cache;
-    bool is_open;
-} typedef appimage_handler;
-
-bool is_handler_valid(const appimage_handler const *handler) {
+bool is_handler_valid(const appimage_handler *handler) {
     if (!handler) {
         fprintf(stderr, "WARNING: Invalid handler found, you should take a look at this now!");
         return false;
@@ -1014,7 +1002,7 @@ bool is_handler_valid(const appimage_handler const *handler) {
     return true;
 }
 
-void mk_base_dir(const char const *target)
+void mk_base_dir(const char *target)
 {
     gchar *dirname = g_path_get_dirname(target);
     if(g_mkdir_with_parents(dirname, 0755))
@@ -1119,7 +1107,7 @@ char* appimage_type1_get_file_name (appimage_handler *handler, void *data) {
     return filename;
 }
 
-void appimage_type1_extract_file (appimage_handler *handler, void *data, const char const *target) {
+void appimage_type1_extract_file (appimage_handler *handler, void *data, const char *target) {
     (void) data;
 
     struct archive *a = handler->cache;
@@ -1249,7 +1237,7 @@ void appimage_type2_extract_symlink(sqfs *fs, sqfs_inode *inode, const char *tar
     }
 }
 
-void appimage_type2_extract_file (appimage_handler *handler, void *data, const char const *target) {
+void appimage_type2_extract_file (appimage_handler *handler, void *data, const char *target) {
     sqfs *fs = handler->cache;
     sqfs_traverse *trv = data;
 
@@ -1293,7 +1281,7 @@ appimage_handler create_appimage_handler(const char *const path) {
     return handler;
 }
 
-void move_file(const char const *source, const char const *target) {
+void move_file(const char *source, const char *target) {
     g_type_init();
     GError *error = NULL;
     GFile *icon_file = g_file_new_for_path(source);
@@ -1324,7 +1312,7 @@ void extract_appimage_file_command(void *handler_data, void *entry_data, void *u
     free(filename);
 }
 
-void extract_appimage_file(appimage_handler *h, const char const *path, const char const *destination) {
+void extract_appimage_file(appimage_handler *h, const char *path, const char *destination) {
     struct extract_appimage_file_command_data data;
     data.path = path;
     data.destination = destination;
@@ -1374,7 +1362,7 @@ void create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
 
 }
 
-void extract_file_following_symlinks(const gchar const *appimage_file_path, const char const *file_path, const char const *target_dir) {
+void extract_file_following_symlinks(const gchar const *appimage_file_path, const char *file_path, const char *target_dir) {
     appimage_handler handler = create_appimage_handler(appimage_file_path);
 
     extract_appimage_file(&handler, file_path, target_dir);
