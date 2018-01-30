@@ -9,6 +9,8 @@
 class AppImageKitTest : public ::testing::Test {
 private:
     char* oldHome;
+    char* oldXdgDataHome;
+    char* oldXdgConfigHome;
 
 public:
     std::string tempDir;
@@ -23,9 +25,20 @@ public:
         tempHome = tempDir + "/HOME";
 
         oldHome = getenv("HOME");
+        oldXdgDataHome = getenv("XDG_DATA_HOME");
+        oldXdgConfigHome = getenv("XDG_CONFIG_HOME");
+
         std::stringstream newHome;
         newHome << "HOME=" << tempHome;
         putenv(strdup(newHome.str().c_str()));
+
+        std::stringstream newXdgDataHome;
+        newXdgDataHome << "XDG_DATA_HOME=" << tempHome << "/.local/share";
+        putenv(strdup(newXdgDataHome.str().c_str()));
+
+        std::stringstream newXdgConfigHome;
+        newXdgDataHome << "XDG_CONFIG_HOME=" << tempHome << "/.config";
+        putenv(strdup(newXdgConfigHome.str().c_str()));
 
         mkdir(tempHome.c_str(), 0700);
     };
@@ -33,6 +46,30 @@ public:
     ~AppImageKitTest() {
         if (isDir(tempDir)) {
             rmTree(tempDir);
+        }
+
+        if (oldHome != NULL) {
+            std::stringstream newHome;
+            newHome << "HOME=" << oldHome;
+            putenv(strdup(newHome.str().c_str()));
+        } else {
+            unsetenv("XDG_DATA_HOME");
+        }
+
+        if (oldXdgDataHome != NULL) {
+            std::stringstream newXdgDataHome;
+            newXdgDataHome << "XDG_DATA_HOME=" << oldXdgDataHome;
+            putenv(strdup(newXdgDataHome.str().c_str()));
+        } else {
+            unsetenv("XDG_DATA_HOME");
+        }
+
+        if (oldXdgConfigHome != NULL) {
+            std::stringstream newXdgConfigHome;
+            newXdgConfigHome << "XDG_CONFIG_HOME=" << oldXdgConfigHome;
+            putenv(strdup(newXdgConfigHome.str().c_str()));
+        } else {
+            unsetenv("XDG_CONFIG_HOME");
         }
     }
 
