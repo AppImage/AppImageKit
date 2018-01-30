@@ -3,8 +3,6 @@
 #include <ftw.h>
 #include <unistd.h>
 
-using namespace std;
-
 
 // fixture providing a temporary directory, and a temporary home directory within that directory
 // overwrites HOME environment variable to ensure desktop files etc. are not installed in the system
@@ -13,8 +11,8 @@ private:
     char* oldHome;
 
 public:
-    string tempDir;
-    string tempHome;
+    std::string tempDir;
+    std::string tempHome;
 
 public:
     AppImageKitTest() {
@@ -25,7 +23,7 @@ public:
         tempHome = tempDir + "/HOME";
 
         oldHome = getenv("HOME");
-        stringstream newHome;
+        std::stringstream newHome;
         newHome << "HOME=" << tempHome;
         putenv(strdup(newHome.str().c_str()));
 
@@ -39,7 +37,7 @@ public:
     }
 
 private:
-    static int rmTree(const string& path) {
+    static int rmTree(const std::string& path) {
         return nftw(path.c_str(), unlinkCb, 64, FTW_DEPTH | FTW_PHYS);
     }
 
@@ -53,7 +51,7 @@ private:
     };
 
 public:
-    static const bool isFile(const string& path) {
+    static const bool isFile(const std::string& path) {
         struct stat st;
 
         if (stat(path.c_str(), &st) != 0) {
@@ -64,7 +62,7 @@ public:
         return S_ISREG(st.st_mode);
     }
 
-    static const bool isDir(const string& path) {
+    static const bool isDir(const std::string& path) {
         struct stat st;
 
         if (stat(path.c_str(), &st) != 0) {
@@ -88,7 +86,7 @@ public:
         return result;
     }
 
-    static bool isEmptyString(const string& str) {
+    static bool isEmptyString(const std::string& str) {
         // check whether string is empty beforehand, as the string is interpreted as C string and contains a trailing \0
         if (str.empty())
             return true;
@@ -102,7 +100,7 @@ public:
         return true;
     }
 
-    static bool stringStartsWith(const string& str, const string& prefix) {
+    static bool stringStartsWith(const std::string& str, const std::string& prefix) {
         for (int i = 0; i < prefix.length(); i++) {
             if (str[i] != prefix[i])
                 return false;
