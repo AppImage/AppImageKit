@@ -16,7 +16,11 @@ extern "C" {
 using namespace std;
 
 
-TEST_F(AppImageKitTest, test_write_desktop_file_exec) {
+// most simple derivative class for better naming of the tests in this file
+class SharedCTest : public AppImageKitTest {};
+
+
+TEST_F(SharedCTest, test_write_desktop_file_exec) {
     // install Cura desktop file into temporary HOME with some hardcoded paths
     stringstream pathToOriginalDesktopFile;
     pathToOriginalDesktopFile << TEST_DATA_DIR << "/" << "Cura.desktop";
