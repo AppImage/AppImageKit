@@ -1,0 +1,15 @@
+[Desktop Entry]
+Name=Ultimaker Cura
+Name[de]=Ultimaker Cura
+GenericName=3D Printing Software
+GenericName[de]=3D-Druck-Software
+Comment=Cura converts 3D models into paths for a 3D printer. It prepares your print for maximum accuracy, minimum printing time and good reliability with many extra features that make your print come out great.
+Comment[de]=Cura wandelt 3D-Modelle in Pfade für einen 3D-Drucker um. Es bereitet Ihren Druck für maximale Genauigkeit, minimale Druckzeit und guter Zuverlässigkeit mit vielen zusätzlichen Funktionen vor, damit Ihr Druck großartig wird.
+Exec=cura %F
+TryExec=cura
+Icon=cura-icon
+Terminal=false
+Type=Application
+MimeType=application/sla;application/vnd.ms-3mfdocument;application/prs.wavefront-obj;image/bmp;image/gif;image/jpeg;image/png;model/x3d+xml;
+Categories=Graphics;
+Keywords=3D;Printing;
