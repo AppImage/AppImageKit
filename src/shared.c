@@ -439,7 +439,7 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 
     // parse [Try]Exec= value, replace executable by AppImage path, append parameters
     // TODO: should respect quoted strings within value
-    const char const* fields[2] = {G_KEY_FILE_DESKTOP_KEY_EXEC, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC};
+    const gchar const* fields[2] = {G_KEY_FILE_DESKTOP_KEY_EXEC, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC};
     for (int i = 0; i < 2; i++) {
         char* field_value = g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, fields[i], NULL);
 
@@ -452,6 +452,9 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
             return;
         };
 
+        // saving a copy for later free() call
+        char* original_field_value = field_value;
+
         char* executable = strsep(&field_value, " ");
 
         // error handling
@@ -460,19 +463,27 @@ void write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
             return;
         }
 
-        char* new_exec_value = calloc(sizeof(appimage_path) + sizeof(field_value) + 2, 1);
+        unsigned long new_exec_value_size = strlen(appimage_path);
+
+        if (field_value != NULL)
+            new_exec_value_size += strlen(field_value) + 2;
+
+        gchar* new_exec_value = calloc(new_exec_value_size, 1);
 
         // build new value
-        strcat(new_exec_value, appimage_path);
+        strcpy(new_exec_value, appimage_path);
 
         if (field_value != NULL && strlen(field_value) > 0) {
             strcat(new_exec_value, " ");
             strcat(new_exec_value, field_value);
         }
 
+        if (original_field_value != NULL)
+            free(original_field_value);
+
         g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, fields[i], new_exec_value);
 
-        free(new_exec_value);
+        g_free(new_exec_value);
     }
 
     /* If firejail is on the $PATH, then use it to run AppImages */
