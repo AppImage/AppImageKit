@@ -463,12 +463,12 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
             return false;
         }
 
-        unsigned long new_exec_value_size = strlen(appimage_path);
+        unsigned long new_exec_value_size = strlen(appimage_path) + 1;
 
         if (field_value != NULL)
-            new_exec_value_size += strlen(field_value) + 2;
+            new_exec_value_size += strlen(field_value) + 1;
 
-        gchar* new_exec_value = calloc(new_exec_value_size, 1);
+        gchar* new_exec_value = calloc(new_exec_value_size, sizeof(gchar));
 
         // build new value
         strcpy(new_exec_value, appimage_path);
