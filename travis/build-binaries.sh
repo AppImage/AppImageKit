@@ -1,5 +1,8 @@
 #! /bin/bash
 
+set -e
+set -x
+
 cd /AppImageKit
 
 ./build.sh "$@"
