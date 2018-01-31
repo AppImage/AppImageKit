@@ -74,7 +74,7 @@ public:
     }
 
 private:
-    static int rmTree(const std::string& path) {
+    static const int rmTree(const std::string& path) {
         return nftw(path.c_str(), unlinkCb, 64, FTW_DEPTH | FTW_PHYS);
     }
 
@@ -110,7 +110,7 @@ public:
         return S_ISDIR(st.st_mode);
     }
 
-    static std::vector<std::string> splitString(const std::string& s, char delim = ' ') {
+    static const std::vector<std::string> splitString(const std::string& s, char delim = ' ') {
         std::vector<std::string> result;
 
         std::stringstream ss(s);
@@ -123,7 +123,7 @@ public:
         return result;
     }
 
-    static bool isEmptyString(const std::string& str) {
+    static const bool isEmptyString(const std::string& str) {
         // check whether string is empty beforehand, as the string is interpreted as C string and contains a trailing \0
         if (str.empty())
             return true;
@@ -137,7 +137,7 @@ public:
         return true;
     }
 
-    static bool stringStartsWith(const std::string& str, const std::string& prefix) {
+    static const bool stringStartsWith(const std::string& str, const std::string& prefix) {
         for (int i = 0; i < prefix.length(); i++) {
             if (str[i] != prefix[i])
                 return false;
