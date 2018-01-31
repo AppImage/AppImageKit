@@ -174,12 +174,12 @@ Or, if you are on a deb-based system:
 ```
 wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimaged_1.0_amd64.deb"
 sudo dpkg -i appimaged_*.deb
-systemctl --user enable appimaged
+systemctl --user add-wants default.target appimaged
 systemctl --user start appimaged
 ```
 
 It will register the AppImages in with your system from the following places:
-* $HOME/Downloads
+* $HOME/Downloads (or its localized equivalent, as determined by `G_USER_DIRECTORY_DOWNLOAD` in glib)
 * $HOME/.local/bin
 * $HOME/bin
 * /Applications
@@ -214,7 +214,7 @@ If you have `AppImageUpdate` on your `$PATH`, then it can also do this neat tric
 
 ![screenshot from 2016-10-15 16-37-05](https://cloud.githubusercontent.com/assets/2480569/19410850/0390fe9c-92f6-11e6-9882-3ca6d360a190.jpg)
 
-Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases/download/continuous/ and put on your `$PATH`:
+Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases/tag/continuous and put on your `$PATH`:
 
 ```
 sudo mv "Downloads/AppImageUpdate-*.AppImage" /usr/local/bin/AppImageUpdate

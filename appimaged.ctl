@@ -26,8 +26,9 @@ File: /usr/lib/systemd/user/appimaged.service
  [Service]
  ExecStart=/usr/bin/appimaged
  Restart=always
- RestartSec=60s
- StartLimitInterval=0
+ RestartSec=30
+ StartLimitIntervalSec=300
+ StartLimitBurst=3
  
  [Install]
  WantedBy=graphical.target
