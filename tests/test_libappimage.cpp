@@ -20,52 +20,14 @@ namespace AppImageTests
 
 class LibAppImageTest : public AppImageKitTest
 {
-  protected:
-    char tests_dir[250];
-    bool tests_dir_created = false;
-    std::string test_file_content;
+protected:
     std::string appImage_type_1_file_path;
     std::string appImage_type_2_file_path;
 
     virtual void SetUp()
     {
-        test_file_content = "Hello World\n";
-        createTestsDir();
-
         appImage_type_1_file_path = std::string(TEST_DATA_DIR) + "/AppImageExtract_6-x86_64.AppImage";
         appImage_type_2_file_path = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
-    }
-
-    virtual void TearDown()
-    {
-        removeTestsDir();
-    }
-
-    inline void createTestsDir()
-    {
-        sprintf(tests_dir, "/tmp/appimagelib_tests_dir_%d/", rand());
-
-        int result = mkdir(tests_dir, 0700);
-        tests_dir_created = !result;
-    }
-
-    inline void removeTestsDir()
-    {
-        rmdir(tests_dir);
-    }
-
-    std::string build_test_file_path(const std::string& name)
-    {
-        return tests_dir + name;
-    }
-
-    void mk_file(const std::string& path)
-    {
-
-        g_file_set_contents(path.c_str(),
-                            test_file_content.c_str(),
-                            test_file_content.size(),
-                            0);
     }
 
     void rm_file(const std::string& path)
