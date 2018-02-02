@@ -88,7 +88,7 @@ AppImage to the rescue!
 
 ## AppImage usage
 
-Running an AppImage mounts the filesystem image and transparently runs the contained application. So the usage of an AppImage normally should equal the usage of the application contained in it. However, there is special functionality, as described here. If an AppImgae you have received does not support these options, ask the author of the AppImage to recreate it using the latest `appimagetool` (or `linuxdeployqt`).
+Running an AppImage mounts the filesystem image and transparently runs the contained application. So the usage of an AppImage normally should equal the usage of the application contained in it. However, there is special functionality, as described here. If an AppImage you have received does not support these options, ask the author of the AppImage to recreate it using the latest `appimagetool` (or `linuxdeployqt`).
 
 ### Command line arguments
 
@@ -104,7 +104,7 @@ If you invoke an AppImage built with a recent version of AppImageKit with one of
 
 ### Special directories
 
-Normally the application contained inside an AppImage will store its configuration files whereever it normally stores them (most frequently somewhere inside `$HOME`). If you invoke an AppImage built with a recent version of AppImageKit and have one of these special directories in place, then the configuration files will be stored alongside the AppImage. This can be useful for portable use cases, e.g., carrying an AppImage on a USB stick, along with its data.
+Normally the application contained inside an AppImage will store its configuration files wherever it normally stores them (most frequently somewhere inside `$HOME`). If you invoke an AppImage built with a recent version of AppImageKit and have one of these special directories in place, then the configuration files will be stored alongside the AppImage. This can be useful for portable use cases, e.g., carrying an AppImage on a USB stick, along with its data.
 
 - If there is a directory with the same name as the AppImage plus `.home`, then `$HOME` will automatically be set to it before executing the payload application
 - If there is a directory with the same name as the AppImage plus `.config`, then `$XDG_CONFIG_HOME` will automatically be set to it before executing the payload application
