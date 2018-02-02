@@ -25,7 +25,7 @@ small_FLAGS="-Os -ffunction-sections -fdata-sections"
 small_LDFLAGS="-s -Wl,--gc-sections"
 
 cd $repo_root
-git_version="@GIT_VERSION@"
+git_version="@GIT_COMMIT@"
 
 cleanup() {
     [ -d $build_dir ] && rm -r "$build_dir"
