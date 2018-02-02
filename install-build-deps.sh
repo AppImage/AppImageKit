@@ -4,7 +4,7 @@ set -e
 
 # Install build dependencies; TODO: Support systems that do not use apt-get (Pull Requests welcome!)
 
-ARCH=$(uname -p)
+ARCH=$(uname -m)
 if [ "$ARCH" == "i686" ]; then
   ARCH=i386
 fi
