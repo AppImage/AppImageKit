@@ -5,7 +5,7 @@ set -x
 set +e
 
 TIMEOUT=3
-ARCH=${ARCH:-$(uname -p)}
+ARCH=${ARCH:-$(uname -m)}
 
 error() {
     echo "Error: command failed" >&2
