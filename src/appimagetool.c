@@ -136,7 +136,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         waitpid(pid, &status, 0);
     } else {
         // we are the child
-        gchar *offset_string;
+        gchar* offset_string;
         offset_string = g_strdup_printf("%i", offset);
 
         char* args[32];
@@ -154,7 +154,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = offset_string;
         args[i++] = "-comp";
 
-        if(use_xz)
+        if (use_xz)
             args[i++] = "xz";
         else
             args[i++] = sqfs_comp;
@@ -162,7 +162,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = "-root-owned";
         args[i++] = "-noappend";
 
-        if(use_xz) {
+        if (use_xz) {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
             args[i++] = "-Xdict-size";
@@ -172,7 +172,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         }
 
         // check if ignore file exists and use it if possible
-        if(access(APPIMAGEIGNORE, F_OK) >= 0) {
+        if (access(APPIMAGEIGNORE, F_OK) >= 0) {
             printf("Including %s", APPIMAGEIGNORE);
             args[i++] = "-wildcards";
             args[i++] = "-ef";
@@ -183,8 +183,8 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         }
 
         // if an exclude file has been passed on the command line, should be used, too
-        if(exclude_file != 0 && strlen(exclude_file) > 0) {
-            if(access(exclude_file, F_OK) < 0) {
+        if (exclude_file != 0 && strlen(exclude_file) > 0) {
+            if (access(exclude_file, F_OK) < 0) {
                 printf("WARNING: exclude file %s not found!", exclude_file);
                 return -1;
             }
@@ -194,7 +194,18 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
             args[i++] = exclude_file;
         }
 
+        args[i++] = "-mkfs-fixed-time";
+        args[i++] = "0";
+
         args[i++] = 0;
+
+        if (verbose) {
+            printf("mksquashfs commandline: ");
+            for (char** t = args; *t != 0; t++) {
+                printf("%s ", *t);
+            }
+            printf("\n");
+        }
 
 #ifndef AUXILIARY_FILES_DESTINATION
         execvp("mksquashfs", args);
