@@ -1,0 +1,57 @@
+>From 9575f13b1f865523f020bff460c5a37a078c2b6d Mon Sep 17 00:00:00 2001
+From: intrigeri <intrigeri@boum.org>
+Date: Sun, 20 Nov 2016 15:56:13 +0000
+Subject: [PATCH 1/2] Add a -mkfs-fixed-time <timestamp> option, to allow
+ overriding the filesystem creation time for reproducible builds.
+
+Based on a patch by Alexander Couzens <lynxis@fe...> posted on
+https://sourceforge.net/p/squashfs/mailman/message/34673610/
+
+Edited by @TheAssassin to work with the current development version of
+mksquashfs.
+---
+ squashfs-tools/mksquashfs.c | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/squashfs-tools/mksquashfs.c b/squashfs-tools/mksquashfs.c
+index 13d60f7..e21e251 100644
+--- a/squashfs-tools/mksquashfs.c	2018-02-05 23:26:27.882300146 +0100
++++ b/squashfs-tools/mksquashfs.c	2018-02-05 23:26:05.382276655 +0100
+@@ -131,6 +131,9 @@
+ /* inode lookup table */
+ squashfs_inode *inode_lookup_table = NULL;
+ 
++/* override filesystem creation time */
++time_t mkfs_fixed_time = -1;
++
+ /* in memory directory data */
+ #define I_COUNT_SIZE		128
+ #define DIR_ENTRIES		32
+@@ -5353,6 +5356,15 @@
+ 			force_progress = TRUE;
+ 		else if(strcmp(argv[i], "-no-exports") == 0)
+ 			exportable = FALSE;
++		else if(strcmp(argv[i], "-mkfs-fixed-time") == 0) {
++			if((++i == argc) || (mkfs_fixed_time =
++					strtoll(argv[i], &b, 10), *b != '\0')) {
++				ERROR("%s: -mkfs-fixed-time missing or invalid "
++					"timestamp\n", argv[0]);
++
++				exit(1);
++			}
++		}
+         else if(strcmp(argv[i], "-offset") == 0 ||
+ 				strcmp(argv[i], "-o") ==0) {
+ 			if(++i == argc) {
+@@ -6031,7 +6043,7 @@
+ 	sBlk.flags = SQUASHFS_MKFLAGS(noI, noD, noF, noX, no_fragments,
+ 		always_use_fragments, duplicate_checking, exportable,
+ 		no_xattrs, comp_opts);
+-	sBlk.mkfs_time = time(NULL);
++	sBlk.mkfs_time = mkfs_fixed_time != -1 ? mkfs_fixed_time : time(NULL);
+ 
+ 	disable_info();
+ 
+-- 
+2.10.2
+
