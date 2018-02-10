@@ -52,7 +52,7 @@ cd "$tempdir"
 log "create a sample AppDir"
 mkdir -p appimagetool.AppDir/usr/share/metainfo/
 cp "$thisdir"/resources/{appimagetool.*,AppRun} appimagetool.AppDir/
-cp "$thisdir"/resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
+#cp "$thisdir"/resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
 cp "$appimagetool" appimagetool.AppDir/
 mkdir -p appimagetool.AppDir/usr/share/applications
 cp appimagetool.AppDir/appimagetool.desktop appimagetool.AppDir/usr/share/applications
@@ -81,3 +81,13 @@ echo "to-be-ignored-too" > .appimageignore
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
 "$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || true
 "$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored-too || true
+
+log "check whether AppImages built from the exact same AppDir are the same files (reproducible builds, #625)"
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage.1
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage.2
+hash1=$(sha256sum appimagetool.AppImage.1 | awk '{print $1}')
+hash2=$(sha256sum appimagetool.AppImage.2 | awk '{print $1}')
+if [ "$hash1" != "$hash2" ]; then
+    echo "Hash $hash1 doesn't match hash $hash2!"
+    exit 1
+fi
