@@ -236,7 +236,7 @@ bash -ex build.sh
 
 ## Embedding into your project (CMake)
 
-The following example is based on the build.sh script above, but gives the possibility to build the AppImageKit together with your software. The section below is an snippet of an CMake script.
+The following example is based on the build.sh script above, but gives the possibility to build AppImageKit together with your software. The section below is an snippet of an CMake script.
 
 ```
 if(BUILD_OS_LINUX)
