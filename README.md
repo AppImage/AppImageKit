@@ -233,3 +233,20 @@ cd AppImageKit/
 sudo bash -ex install-build-deps.sh
 bash -ex build.sh
 ```
+
+## Embedding into your project (CMake)
+
+The following example is based on the build.sh script above, but gives the possibility to build the AppImageKit together with your software. The section below is an snipped of an CMake script.
+```
+if(BUILD_OS_LINUX)
+    ExternalProject_Add(AppImageKit
+        GIT_REPOSITORY https://github.com/AppImage/AppImageKit.git
+        GIT_TAG appimagetool/master
+        GIT_SUBMODULES ""
+        CMAKE_COMMAND ${CMAKE_COMMAND} -E env "PATH=${CMAKE_INSTALL_PREFIX}/bin/:$ENV{PATH}" "LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib/" "LDFLAGS=-L${CMAKE_INSTALL_PREFIX}/lib" "CPPFLAGS=-I${CMAKE_INSTALL_PREFIX}/include"  ${CMAKE_COMMAND}
+        CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_PREFIX_PATH=${CMAKE_INSTALL_PREFIX} -DBUILD_SHARED_LIBS=ON -DBUILD_TESTING=ON
+    )
+
+    SetProjectDependencies(TARGET AppImageKit DEPENDS glib libfuse cairo OpenSSL patch sed wget)
+endif()
+```
