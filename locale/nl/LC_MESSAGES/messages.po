@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-01-19 12:00+0000\n"
-"Last-Translator: killme <s3032392@mvrht.net>\n"
+"PO-Revision-Date: 2018-02-13 19:13+0000\n"
+"Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
 "Language-Team: Dutch <https://translate.assassinate-"
 "you.net/projects/appimage/website/nl/>\n"
 "Language: nl\n"
@@ -64,7 +64,6 @@ msgid "leading_linux_distributions"
 msgstr "Toonaangevende Linux-Distributies"
 
 #: index.jinja2:158
-#, fuzzy
 msgid "download_make_executable_run"
 msgstr ""
 "Download een applicatie, maak hem uitvoerbaar, en draaien maar! Installatie "
@@ -92,12 +91,10 @@ msgid "package_once_and_run_everywhere"
 msgstr ""
 
 #: index.jinja2:185
-#, fuzzy
 msgid "reach_users_on_all_distros"
 msgstr "Bereik gebruikers op alle gangbare linux desktop distributies."
 
 #: index.jinja2:194
-#, fuzzy
 msgid "what_people_think"
 msgstr "Wat gebruikers vinden"
 
@@ -115,7 +112,6 @@ msgid "copyright_faces_of_open_source_/_peter_adams"
 msgstr ""
 
 #: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
-#, fuzzy
 msgid "licensed_under_CC-BY-NC-SA_4.0"
 msgstr "Gelicentieerd onder CC-BY-NC-SA 4.0."
 
@@ -137,7 +133,6 @@ msgid "copyright_aaron_hockley"
 msgstr ""
 
 #: index.jinja2:255
-#, fuzzy
 msgid "licensed_under_CC-BY-SA_2.0"
 msgstr "Gelicentieerd onder CC-BY-SA 2.0."
 
@@ -158,7 +153,6 @@ msgid "logo:"
 msgstr "Logo:"
 
 #: index.jinja2:306
-#, fuzzy
 msgid "licensed_under_GPLv2"
 msgstr "Gelicentieerd onder de voorwaarden van de GPLv2."
 
@@ -253,7 +247,6 @@ msgid "buzzwords_easy_title"
 msgstr "Makkelijk."
 
 #: index.jinja2:404
-#, fuzzy
 msgid "buzzwords_easy_description"
 msgstr ""
 "Het belangrijkste idee van het AppImage formaat is <b>een app = een "
@@ -274,7 +267,6 @@ msgid "buzzwords_fast_title"
 msgstr "Snel."
 
 #: index.jinja2:422
-#, fuzzy
 msgid "buzzwords_fast_description"
 msgstr ""
 "AppImages kunnen <b>zonder installatie</b> of root rechten gedownload en "
@@ -289,7 +281,6 @@ msgid "buzzwords_open_source_title"
 msgstr ""
 
 #: index.jinja2:453
-#, fuzzy
 msgid "buzzwords_open_source_description"
 msgstr ""
 "Zoals Linux zelf is ook AppImageKit Open Source. Gebruik het om uw vrije or "
@@ -310,7 +301,6 @@ msgid "buzzwords_compatible_title"
 msgstr ""
 
 #: index.jinja2:480
-#, fuzzy
 msgid "buzzwords_compatible_description"
 msgstr ""
 "Werkt op de meeste redelijk recente Linux-desktopdistributies. Nou, bijna."
