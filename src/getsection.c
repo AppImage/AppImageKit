@@ -12,7 +12,7 @@ int get_elf_section_offset_and_length(const char* fname, const char* section_nam
     uint8_t* data;
     int i;
     int fd = open(fname, O_RDONLY);
-    data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
+    data = mmap(NULL, (size_t) lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
 
 // optionally add more architectures for 32-bit builds so that it doesn't fall back to Elf64_*
 // see e.g. https://sourceforge.net/p/predef/wiki/Architectures/ for more predefined macro names
@@ -45,7 +45,7 @@ void print_hex(char* fname, unsigned long offset, unsigned long length) {
     uint8_t* data;
     unsigned long k;
     int fd = open(fname, O_RDONLY);
-    data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
+    data = mmap(NULL, (size_t) lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
     close(fd);
     for (k = offset; k < offset + length; k++) {
         printf("%x", data[k]);
@@ -58,7 +58,7 @@ void print_binary(char* fname, unsigned long offset, unsigned long length) {
     unsigned long k, endpos;
 
     int fd = open(fname, O_RDONLY);
-    data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
+    data = mmap(NULL, (size_t) lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
     close(fd);
 
     endpos = offset + length;
