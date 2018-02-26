@@ -53,8 +53,8 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 # TODO: squashfuse_LIBRARIES is a semicolon separated list of values that has to be split during runtime of this script
 squashfuse_libs="@squashfuse_LIBRARIES@"
 $CC $small_FLAGS $small_LDFLAGS -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.c \
-    runtime3.o ${squashfuse_libs//;/ } -L"@xz_LIBRARIES_DIR@" \
-    -Wl,-Bdynamic -lpthread -lz -Wl,-Bstatic -llzma -Wl,-Bdynamic -ldl
+    runtime3.o ${squashfuse_libs//;/ } \
+    -Wl,-Bdynamic -lpthread -l"@ZLIB_LIBRARIES@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl
 $STRIP runtime
 
 # Test if we can read it back
