@@ -51,16 +51,15 @@ void print_hex(char* fname, unsigned long offset, unsigned long length) {
     unsigned long k;
 
     int fd = open(fname, O_RDONLY);
-    size_t map_size = (size_t) lseek(fd, 0, SEEK_END);
 
-    data = mmap(NULL, (size_t) lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
+    data = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
     close(fd);
 
-    for (k = offset; k < offset + length; k++) {
+    for (k = 0; k < length; k++) {
         printf("%x", data[k]);
     }
 
-    munmap(data, map_size);
+    munmap(data, length);
 
     printf("\n");
 }
@@ -70,18 +69,15 @@ void print_binary(char* fname, unsigned long offset, unsigned long length) {
     unsigned long k, endpos;
 
     int fd = open(fname, O_RDONLY);
-    size_t map_size = (size_t) lseek(fd, 0, SEEK_END);
 
-    data = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fd, 0);
+    data = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
     close(fd);
 
-    endpos = offset + length;
-
-    for (k = offset; k < endpos && data[k] != '\0'; k++) {
+    for (k = 0; k < length && data[k] != '\0'; k++) {
         printf("%c", data[k]);
     }
 
-    munmap(data, map_size);
+    munmap(data, length);
 
     printf("\n");
 }
