@@ -46,62 +46,38 @@ int get_elf_section_offset_and_length(const char* fname, const char* section_nam
     return (0);
 }
 
+char* read_file_offset_length(const char* fname, unsigned long offset, unsigned long length) {
+    FILE* f;
+    if ((f = fopen(fname, "r")) == NULL) {
+        return NULL;
+    }
+
+    fseek(f, offset, SEEK_SET);
+
+    char* buffer = calloc(length + 1, sizeof(char));
+    fread(buffer, length, sizeof(char), f);
+
+    fclose(f);
+
+    return buffer;
+}
+
 void print_hex(char* fname, unsigned long offset, unsigned long length) {
-    uint8_t* data;
-    unsigned long k;
+    char* data = read_file_offset_length(fname, offset, length);
 
-    int fd = open(fname, O_RDONLY);
-
-    data = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
-    close(fd);
-
-    for (k = 0; k < length; k++) {
+    for (long long k = 0; k < length && data[k] != '\0'; k++) {
         printf("%x", data[k]);
     }
 
-    munmap(data, length);
+    free(data);
 
     printf("\n");
 }
 
 void print_binary(char* fname, unsigned long offset, unsigned long length) {
-    uint8_t* data;
-    unsigned long k, endpos;
+    char* data = read_file_offset_length(fname, offset, length);
 
-    int fd = open(fname, O_RDONLY);
+    printf("%s\n", data);
 
-    data = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
-    close(fd);
-
-    for (k = 0; k < length && data[k] != '\0'; k++) {
-        printf("%c", data[k]);
-    }
-
-    munmap(data, length);
-
-    printf("\n");
+    free(data);
 }
-
-/*
-int main(int ac, char **av)
-{
-    unsigned long offset = 0;
-    unsigned long length = 0; // Where the function will store the result
-    char* segment_name;
-    segment_name = ".upd_info";
-    int res = get_elf_section_offset_and_lenghth(av[1], segment_name, &offset, &length);
-    printf("segment_name: %s\n", segment_name);
-    printf("offset: %lu\n", offset);
-    printf("length: %lu\n", length);
-    print_hex(av[1], offset, length);
-    print_binary(av[1], offset, length);
-    segment_name = ".sha256_sig";
-    printf("segment_name: %s\n", segment_name);
-    res = get_elf_section_offset_and_lenghth(av[1], segment_name, &offset, &length);
-    printf("offset: %lu\n", offset);
-    printf("length: %lu\n", length);
-    print_hex(av[1], offset, length);
-    print_binary(av[1], offset, length);
-    return res;
-}
-*/
