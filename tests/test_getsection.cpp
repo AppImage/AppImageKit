@@ -1,5 +1,10 @@
+// system headers
+#include <cmath>
+
+// library headers
 #include <gtest/gtest.h>
 
+// local headers
 #include "fixtures.h"
 
 extern "C" {
@@ -14,12 +19,31 @@ using namespace std;
 class GetSectionCTest : public AppImageKitTest {};
 
 
+bool isPowerOfTwo(int number) {
+    return (number & (number - 1)) == 0;
+}
+
+
+TEST_F(GetSectionCTest, test_get_elf_section_offset_and_length) {
+    std::string appImagePath = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
+
+    unsigned long offset, length;
+
+    ASSERT_EQ(get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length), 0);
+
+    EXPECT_GT(offset, 0);
+    EXPECT_GT(length, 0);
+
+    EXPECT_PRED1(isPowerOfTwo, length);
+}
+
+
 TEST_F(GetSectionCTest, test_print_binary) {
     std::string appImagePath = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
 
     unsigned long offset, length;
 
-    get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length);
+    ASSERT_EQ(get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length), 0);
 
     print_binary(appImagePath.c_str(), offset, length);
 }
