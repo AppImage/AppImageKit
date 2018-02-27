@@ -68,4 +68,48 @@ if(BUILD_TESTING)
     add_test(test_shared test_shared)
 
     target_compile_options(test_shared PRIVATE -fpermissive)
+
+
+    add_executable(test_getsection
+        test_getsection.cpp
+        fixtures.h
+        ${PROJECT_SOURCE_DIR}/src/light_elf.h
+        ${PROJECT_SOURCE_DIR}/src/light_byteswap.h
+        ${PROJECT_SOURCE_DIR}/src/elf.c
+        ${PROJECT_SOURCE_DIR}/src/getsection.c
+    )
+
+    target_link_libraries(test_getsection
+        PRIVATE
+        ${squashfuse_LIBRARIES}
+        ${libarchive_LIBRARIES}
+        ${inotify-tools_LIBRARIES}
+        ${xz_LIBRARIES}
+        pthread
+        ${GLIB_LIBRARIES}
+        ${GIO_LIBRARIES}
+        ${ZLIB_LIBRARIES}
+        ${CAIRO_LIBRARIES}
+        ${gtest_LIBRARIES}
+    )
+
+    target_include_directories(test_getsection PRIVATE ../src/)
+
+    add_dependencies(test_getsection squashfuse)
+
+    if(NOT USE_SYSTEM_LIBARCHIVE)
+        add_dependencies(test_getsection libarchive)
+    endif()
+
+    if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+        add_dependencies(test_getsection inotify-tools)
+    endif()
+
+    if(NOT USE_SYSTEM_GTEST)
+        add_dependencies(test_getsection gtest)
+    endif()
+
+    add_test(test_getsection test_shared)
+
+    target_compile_options(test_getsection PRIVATE -fpermissive)
 endif()
