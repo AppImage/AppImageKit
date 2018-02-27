@@ -1,16 +1,16 @@
 diff --git a/Makefile.am b/Makefile.am
-index f0d7cde..70c4aa0 100644
+index 1507525..8c193e3 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -14,6 +14,7 @@ bin_PROGRAMS =
+@@ -12,6 +12,7 @@ EXTRA_DIST = gen_swap.sh autogen.sh LICENSE CONFIGURATION PLATFORMS NEWS win
+ 
+ bin_PROGRAMS =
  noinst_PROGRAMS =
++noinst_LTLIBRARIES = libsquashfuse_ll.la
  
- noinst_LTLIBRARIES = libsquashfuse.la
-+noinst_LTLIBRARIES += libsquashfuse_ll.la
- 
- # Main library: libsquashfuse
- libsquashfuse_la_SOURCES = swap.c cache.c table.c dir.c file.c fs.c \
-@@ -46,10 +47,9 @@ endif
+ lib_LTLIBRARIES = libsquashfuse.la libfuseprivate.la
+ include_HEADERS = squashfuse.h squashfs_fs.h
+@@ -49,10 +50,9 @@ endif
  
  # Low-level squashfuse_ll, if supported
  if SQ_WANT_LOWLEVEL
@@ -23,7 +23,7 @@ index f0d7cde..70c4aa0 100644
 +libsquashfuse_ll_la_LIBADD = libsquashfuse.la libfuseprivate.la $(COMPRESSION_LIBS) \
    $(FUSE_LIBS)
  
- noinst_LTLIBRARIES += libfuseprivate.la
+ endif
 diff --git a/ll.c b/ll.c
 index a2c7902..8fcb3f4 100644
 --- a/ll.c
