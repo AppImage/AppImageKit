@@ -25,7 +25,7 @@ bool isPowerOfTwo(int number) {
 
 
 TEST_F(GetSectionCTest, test_get_elf_section_offset_and_length) {
-    std::string appImagePath = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
+    std::string appImagePath = std::string(TEST_DATA_DIR) + "/appimaged-x86_64.AppImage";
 
     unsigned long offset, length;
 
