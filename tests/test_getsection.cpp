@@ -39,13 +39,24 @@ TEST_F(GetSectionCTest, test_get_elf_section_offset_and_length) {
 
 
 TEST_F(GetSectionCTest, test_print_binary) {
-    std::string appImagePath = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
+    std::string appImagePath = std::string(TEST_DATA_DIR) + "/appimaged-x86_64.AppImage";
 
     unsigned long offset, length;
 
     ASSERT_EQ(get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length), 0);
 
     print_binary(appImagePath.c_str(), offset, length);
+}
+
+
+TEST_F(GetSectionCTest, test_print_hex) {
+    std::string appImagePath = std::string(TEST_DATA_DIR) + "/appimaged-x86_64.AppImage";
+
+    unsigned long offset, length;
+
+    ASSERT_EQ(get_elf_section_offset_and_length(appImagePath.c_str(), ".sha256_sig", &offset, &length), 0);
+
+    print_hex(appImagePath.c_str(), offset, length);
 }
 
 int main(int argc, char **argv) {
