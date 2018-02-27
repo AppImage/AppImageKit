@@ -109,7 +109,7 @@ if(BUILD_TESTING)
         add_dependencies(test_getsection gtest)
     endif()
 
-    add_test(test_getsection test_shared)
+    add_test(test_getsection test_getsection)
 
     target_compile_options(test_getsection PRIVATE -fpermissive)
 endif()
