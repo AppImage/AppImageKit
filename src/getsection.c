@@ -17,33 +17,45 @@ int get_elf_section_offset_and_length(const char* fname, const char* section_nam
     data = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fd, 0);
     close(fd);
 
-// optionally add more architectures for 32-bit builds so that it doesn't fall back to Elf64_*
-// see e.g. https://sourceforge.net/p/predef/wiki/Architectures/ for more predefined macro names
-#if __SIZEOF_POINTER__ == 4
-    Elf32_Ehdr *elf;
-    Elf32_Shdr *shdr;
-    elf = (Elf32_Ehdr *) data;
-    shdr = (Elf32_Shdr *) (data + elf->e_shoff);
-#elif __SIZEOF_POINTER__ == 8
-    Elf64_Ehdr* elf;
-    Elf64_Shdr* shdr;
-    elf = (Elf64_Ehdr*) data;
-    shdr = (Elf64_Shdr*) (data + elf->e_shoff);
-#else
-    #error Platforms other than 32-bit/64-bit are currently not supported!
-#endif
+    // this trick works as both 32 and 64 bit ELF files start with the e_ident[EI_NINDENT] section
+    unsigned char class = data[EI_CLASS];
 
-    char* strTab = (char*) (data + shdr[elf->e_shstrndx].sh_offset);
-    for (i = 0; i < elf->e_shnum; i++) {
-        if (strcmp(&strTab[shdr[i].sh_name], section_name) == 0) {
-            *offset = shdr[i].sh_offset;
-            *length = shdr[i].sh_size;
+    if (class == ELFCLASS32) {
+        Elf32_Ehdr* elf;
+        Elf32_Shdr* shdr;
+
+        elf = (Elf32_Ehdr*) data;
+        shdr = (Elf32_Shdr*) (data + ((Elf32_Ehdr*) elf)->e_shoff);
+
+        char* strTab = (char*) (data + shdr[elf->e_shstrndx].sh_offset);
+        for (i = 0; i < elf->e_shnum; i++) {
+            if (strcmp(&strTab[shdr[i].sh_name], section_name) == 0) {
+                *offset = shdr[i].sh_offset;
+                *length = shdr[i].sh_size;
+            }
         }
+    } else if (class == ELFCLASS64) {
+        Elf64_Ehdr* elf;
+        Elf64_Shdr* shdr;
+
+        elf = (Elf64_Ehdr*) data;
+        shdr = (Elf64_Shdr*) (data + elf->e_shoff);
+
+        char* strTab = (char*) (data + shdr[elf->e_shstrndx].sh_offset);
+        for (i = 0; i < elf->e_shnum; i++) {
+            if (strcmp(&strTab[shdr[i].sh_name], section_name) == 0) {
+                *offset = shdr[i].sh_offset;
+                *length = shdr[i].sh_size;
+            }
+        }
+    } else {
+        sprintf(stderr, "Platforms other than 32-bit/64-bit are currently not supported!");
+        munmap(data, map_size);
+        return 2;
     }
 
     munmap(data, map_size);
-
-    return (0);
+    return 0;
 }
 
 char* read_file_offset_length(const char* fname, unsigned long offset, unsigned long length) {
