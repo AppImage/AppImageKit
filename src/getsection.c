@@ -62,8 +62,11 @@ char* read_file_offset_length(const char* fname, unsigned long offset, unsigned 
     return buffer;
 }
 
-void print_hex(char* fname, unsigned long offset, unsigned long length) {
-    char* data = read_file_offset_length(fname, offset, length);
+int print_hex(char* fname, unsigned long offset, unsigned long length) {
+    char* data;
+    if ((data = read_file_offset_length(fname, offset, length)) == NULL) {
+        return 1;
+    }
 
     for (long long k = 0; k < length && data[k] != '\0'; k++) {
         printf("%x", data[k]);
@@ -72,12 +75,19 @@ void print_hex(char* fname, unsigned long offset, unsigned long length) {
     free(data);
 
     printf("\n");
+
+    return 0;
 }
 
-void print_binary(char* fname, unsigned long offset, unsigned long length) {
-    char* data = read_file_offset_length(fname, offset, length);
+int print_binary(char* fname, unsigned long offset, unsigned long length) {
+    char* data;
+    if ((data = read_file_offset_length(fname, offset, length)) == NULL) {
+        return 1;
+    }
 
     printf("%s\n", data);
 
     free(data);
+
+    return 0;
 }
