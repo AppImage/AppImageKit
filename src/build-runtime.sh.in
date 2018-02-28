@@ -54,7 +54,7 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
 squashfuse_libs="@squashfuse_LIBRARIES@"
 $CC $small_FLAGS $small_LDFLAGS -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.c \
     runtime3.o ${squashfuse_libs//;/ } \
-    -Wl,-Bdynamic -lpthread -l"@ZLIB_LIBRARIES@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl
+    -Wl,-Bdynamic -lpthread -l"@ZLIB_LIBRARIES@" -L"@ZLIB_LIBRARY_DIRS@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl
 $STRIP runtime
 
 # Test if we can read it back
