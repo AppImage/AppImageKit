@@ -17,91 +17,89 @@ int get_elf_section_offset_and_length(const char* fname, const char* section_nam
     data = mmap(NULL, map_size, PROT_READ, MAP_SHARED, fd, 0);
     close(fd);
 
-// optionally add more architectures for 32-bit builds so that it doesn't fall back to Elf64_*
-// see e.g. https://sourceforge.net/p/predef/wiki/Architectures/ for more predefined macro names
-#if __SIZEOF_POINTER__ == 4
-    Elf32_Ehdr *elf;
-    Elf32_Shdr *shdr;
-    elf = (Elf32_Ehdr *) data;
-    shdr = (Elf32_Shdr *) (data + elf->e_shoff);
-#elif __SIZEOF_POINTER__ == 8
-    Elf64_Ehdr* elf;
-    Elf64_Shdr* shdr;
-    elf = (Elf64_Ehdr*) data;
-    shdr = (Elf64_Shdr*) (data + elf->e_shoff);
-#else
-    #error Platforms other than 32-bit/64-bit are currently not supported!
-#endif
+    // this trick works as both 32 and 64 bit ELF files start with the e_ident[EI_NINDENT] section
+    unsigned char class = data[EI_CLASS];
 
-    char* strTab = (char*) (data + shdr[elf->e_shstrndx].sh_offset);
-    for (i = 0; i < elf->e_shnum; i++) {
-        if (strcmp(&strTab[shdr[i].sh_name], section_name) == 0) {
-            *offset = shdr[i].sh_offset;
-            *length = shdr[i].sh_size;
+    if (class == ELFCLASS32) {
+        Elf32_Ehdr* elf;
+        Elf32_Shdr* shdr;
+
+        elf = (Elf32_Ehdr*) data;
+        shdr = (Elf32_Shdr*) (data + ((Elf32_Ehdr*) elf)->e_shoff);
+
+        char* strTab = (char*) (data + shdr[elf->e_shstrndx].sh_offset);
+        for (i = 0; i < elf->e_shnum; i++) {
+            if (strcmp(&strTab[shdr[i].sh_name], section_name) == 0) {
+                *offset = shdr[i].sh_offset;
+                *length = shdr[i].sh_size;
+            }
         }
+    } else if (class == ELFCLASS64) {
+        Elf64_Ehdr* elf;
+        Elf64_Shdr* shdr;
+
+        elf = (Elf64_Ehdr*) data;
+        shdr = (Elf64_Shdr*) (data + elf->e_shoff);
+
+        char* strTab = (char*) (data + shdr[elf->e_shstrndx].sh_offset);
+        for (i = 0; i < elf->e_shnum; i++) {
+            if (strcmp(&strTab[shdr[i].sh_name], section_name) == 0) {
+                *offset = shdr[i].sh_offset;
+                *length = shdr[i].sh_size;
+            }
+        }
+    } else {
+        sprintf(stderr, "Platforms other than 32-bit/64-bit are currently not supported!");
+        munmap(data, map_size);
+        return 2;
     }
 
     munmap(data, map_size);
-
-    return (0);
+    return 0;
 }
 
-void print_hex(char* fname, unsigned long offset, unsigned long length) {
-    uint8_t* data;
-    unsigned long k;
+char* read_file_offset_length(const char* fname, unsigned long offset, unsigned long length) {
+    FILE* f;
+    if ((f = fopen(fname, "r")) == NULL) {
+        return NULL;
+    }
 
-    int fd = open(fname, O_RDONLY);
+    fseek(f, offset, SEEK_SET);
 
-    data = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
-    close(fd);
+    char* buffer = calloc(length + 1, sizeof(char));
+    fread(buffer, length, sizeof(char), f);
 
-    for (k = 0; k < length; k++) {
+    fclose(f);
+
+    return buffer;
+}
+
+int print_hex(char* fname, unsigned long offset, unsigned long length) {
+    char* data;
+    if ((data = read_file_offset_length(fname, offset, length)) == NULL) {
+        return 1;
+    }
+
+    for (long long k = 0; k < length && data[k] != '\0'; k++) {
         printf("%x", data[k]);
     }
 
-    munmap(data, length);
+    free(data);
 
     printf("\n");
+
+    return 0;
 }
 
-void print_binary(char* fname, unsigned long offset, unsigned long length) {
-    uint8_t* data;
-    unsigned long k, endpos;
-
-    int fd = open(fname, O_RDONLY);
-
-    data = mmap(NULL, length, PROT_READ, MAP_SHARED, fd, offset);
-    close(fd);
-
-    for (k = 0; k < length && data[k] != '\0'; k++) {
-        printf("%c", data[k]);
+int print_binary(char* fname, unsigned long offset, unsigned long length) {
+    char* data;
+    if ((data = read_file_offset_length(fname, offset, length)) == NULL) {
+        return 1;
     }
 
-    munmap(data, length);
+    printf("%s\n", data);
 
-    printf("\n");
-}
+    free(data);
 
-/*
-int main(int ac, char **av)
-{
-    unsigned long offset = 0;
-    unsigned long length = 0; // Where the function will store the result
-    char* segment_name;
-    segment_name = ".upd_info";
-    int res = get_elf_section_offset_and_lenghth(av[1], segment_name, &offset, &length);
-    printf("segment_name: %s\n", segment_name);
-    printf("offset: %lu\n", offset);
-    printf("length: %lu\n", length);
-    print_hex(av[1], offset, length);
-    print_binary(av[1], offset, length);
-    segment_name = ".sha256_sig";
-    printf("segment_name: %s\n", segment_name);
-    res = get_elf_section_offset_and_lenghth(av[1], segment_name, &offset, &length);
-    printf("offset: %lu\n", offset);
-    printf("length: %lu\n", length);
-    print_hex(av[1], offset, length);
-    print_binary(av[1], offset, length);
-    return res;
+    return 0;
 }
-*/
