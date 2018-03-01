@@ -35,10 +35,10 @@ out/appimaged-"$ARCH".AppImage --appimage-signature || error  # should not fail
 out/appimaged-"$ARCH".AppImage --appimage-offset || error  # should not fail
 
 # check creation of .home and .config files (even if never used by these tools)
-out/appimagetool-"$ARCH".AppImage --appimage-portable-home || error  # should not fail
-out/appimagetool-"$ARCH".AppImage --appimage-portable-config || error  # should not fail
-out/appimaged-"$ARCH".AppImage --appimage-portable-home || error  # should not fail
-out/appimaged-"$ARCH".AppImage --appimage-portable-config || error  # should not fail
+#out/appimagetool-"$ARCH".AppImage --appimage-portable-home || error  # should not fail
+#out/appimagetool-"$ARCH".AppImage --appimage-portable-config || error  # should not fail
+#out/appimaged-"$ARCH".AppImage --appimage-portable-home || error  # should not fail
+#out/appimaged-"$ARCH".AppImage --appimage-portable-config || error  # should not fail
 #[ -d out/appimagetool-"$ARCH".AppImage.home ] || error   # should not fail
 #[ -d out/appimagetool-"$ARCH".AppImage.config ] || error   # should not fail
 #[ -d out/appimaged-"$ARCH".AppImage.home ] || error   # should not fail
