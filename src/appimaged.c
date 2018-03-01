@@ -167,8 +167,8 @@ void initially_register(const char *name, int level)
 void add_dir_to_watch(const char *directory)
 {
     if (g_file_test (directory, G_FILE_TEST_IS_DIR)){
-        if(!inotifytools_watch_recursively(directory, WR_EVENTS) ) {
-            fprintf(stderr, "%s\n", strerror(inotifytools_error()));
+        if(!inotifytools_watch_file(directory, WR_EVENTS) ) {
+            fprintf(stderr, "%s: %s\n", directory, strerror(inotifytools_error()));
             exit(1);
 
         }
