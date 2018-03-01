@@ -93,5 +93,5 @@ if [ "$hash1" != "$hash2" ]; then
     echo "Hash $hash1 doesn't match hash $hash2!"
     exit 1
 else
-    echo "Hashes of *.AppImage.1 and *.AppImage.2 match"    # Explicit succcess message in Travis log is better than silence
+    echo "Hashes of *.AppImage.1/2 both are $hash1"
 fi
