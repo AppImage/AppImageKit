@@ -73,13 +73,15 @@ log "remove the default ignore file, and check if an explicitly passed one works
 rm .appimageignore
 echo "to-be-ignored" > ignore
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || false
-"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false   <= Isn't this line wrong? Should be like next:
+"$appimagetool" -l appimagetool.AppImage | grep -q ignore && false 
 
 log "check whether files in both .appimageignore and the explicitly passed file work"
 touch appimagetool.AppDir/to-be-ignored-too
 echo "to-be-ignored-too" > .appimageignore
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
-"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || true
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || true    <= Isn't this line wrong? Should be like next:
+"$appimagetool" -l appimagetool.AppImage | grep -q ignore || true
 "$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored-too || true
 
 log "check whether AppImages built from the exact same AppDir are the same files (reproducible builds, #625)"
@@ -90,4 +92,6 @@ hash2=$(sha256sum appimagetool.AppImage.2 | awk '{print $1}')
 if [ "$hash1" != "$hash2" ]; then
     echo "Hash $hash1 doesn't match hash $hash2!"
     exit 1
+else
+    echo "Hashes of *.AppImage.1 and *.AppImage.2 match"    # Explicit succcess message in Travis log is better than silence
 fi
