@@ -21,8 +21,8 @@
  * 
  */
 
-#ifndef _ELF_H
-#define _ELF_H 1
+#ifndef LIGHT_ELF_H
+#define LIGHT_ELF_H
 
 #include <inttypes.h>
 

@@ -322,6 +322,7 @@ int main(int argc, char ** argv) {
     add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
     add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
+    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Applications", NULL));
     add_dir_to_watch(g_build_filename("/Applications", NULL));
     // Perhaps we should determine the following dynamically using something like
     // mount | grep -i iso | head -n 1 | cut -d ' ' -f 3
