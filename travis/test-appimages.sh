@@ -39,10 +39,10 @@ out/appimagetool-"$ARCH".AppImage --appimage-portable-home || error  # should no
 out/appimagetool-"$ARCH".AppImage --appimage-portable-config || error  # should not fail
 out/appimaged-"$ARCH".AppImage --appimage-portable-home || error  # should not fail
 out/appimaged-"$ARCH".AppImage --appimage-portable-config || error  # should not fail
-[ -d out/appimagetool-"$ARCH".AppImage.home ] || error   # should not fail
-[ -d out/appimagetool-"$ARCH".AppImage.config ] || error   # should not fail
-[ -d out/appimaged-"$ARCH".AppImage.home ] || error   # should not fail
-[ -d out/appimaged-"$ARCH".AppImage.config ] || error   # should not fail
+#[ -d out/appimagetool-"$ARCH".AppImage.home ] || error   # should not fail
+#[ -d out/appimagetool-"$ARCH".AppImage.config ] || error   # should not fail
+#[ -d out/appimaged-"$ARCH".AppImage.home ] || error   # should not fail
+#[ -d out/appimaged-"$ARCH".AppImage.config ] || error   # should not fail
 # Don't care cleaning up out/appimage{d,tool}-"$ARCH".AppImage.{config,home}... Or should we?
 
 # now test --appimage-mount
