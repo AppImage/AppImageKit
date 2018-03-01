@@ -57,31 +57,32 @@ cp "$appimagetool" appimagetool.AppDir/
 mkdir -p appimagetool.AppDir/usr/share/applications
 cp appimagetool.AppDir/appimagetool.desktop appimagetool.AppDir/usr/share/applications
 
+set -x # temporarily...
 log "create a file that should be ignored"
-touch appimagetool.AppDir/to-be-ignored
+touch appimagetool.AppDir/to-be-ignored                                                   # 'to-be-ignored' exists
 
 log "create an AppImage without an ignore file to make sure it is bundled"
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage || false
-"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || false
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || false                 # 'to-be-ignored' should be in AppImage
 
 log "now set up the ignore file, and check that the file is properly ignored"
-echo "to-be-ignored" > .appimageignore
+echo "to-be-ignored" > .appimageignore                                                    # 'to-be-ignored' listed in .appimageignore
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage
-"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false                 # 'to-be-ignored' shouldn't be in AppImage
 
 log "remove the default ignore file, and check if an explicitly passed one works, too"
-rm .appimageignore
-echo "to-be-ignored" > ignore
-"$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || false
-"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false   <= Isn't this line wrong? Should be like next:
-"$appimagetool" -l appimagetool.AppImage | grep -q ignore && false 
+rm .appimageignore                                                                        # .appimageignore exists no more
+echo "to-be-ignored" > ignore                                                             # 'ignore' exists
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore || false  # 'ignore' shoudn't be in AppImage
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored && false
+"$appimagetool" -l appimagetool.AppImage | grep -q ignore && false                        # 'ignore' shouldn't be in AppImage
 
 log "check whether files in both .appimageignore and the explicitly passed file work"
-touch appimagetool.AppDir/to-be-ignored-too
-echo "to-be-ignored-too" > .appimageignore
-"$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore
-"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || true    <= Isn't this line wrong? Should be like next:
-"$appimagetool" -l appimagetool.AppImage | grep -q ignore || true
+touch appimagetool.AppDir/to-be-ignored-too                                               # 'to-be-ignored-too' exists 
+echo "to-be-ignored-too" > .appimageignore                                                # .appimageignore exists again, lists 'to-be-ignored-too'
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage --exclude-file ignore           # 'ignore' shouldn't be in AppImage
+"$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored || true  #<= Isn't this line wrong? Should be like next:
+"$appimagetool" -l appimagetool.AppImage | grep -q ignore || true                         
 "$appimagetool" -l appimagetool.AppImage | grep -q to-be-ignored-too || true
 
 log "check whether AppImages built from the exact same AppDir are the same files (reproducible builds, #625)"
@@ -89,9 +90,10 @@ log "check whether AppImages built from the exact same AppDir are the same files
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage.2
 hash1=$(sha256sum appimagetool.AppImage.1 | awk '{print $1}')
 hash2=$(sha256sum appimagetool.AppImage.2 | awk '{print $1}')
+
 if [ "$hash1" != "$hash2" ]; then
     echo "Hash $hash1 doesn't match hash $hash2!"
     exit 1
 else
-    echo "Hashes of *.AppImage.1/2 both are $hash1"
+    echo "Hashes for *.AppImage.1/2 both are $hash1"
 fi
