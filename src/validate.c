@@ -13,11 +13,11 @@
 #include <linux/limits.h>
 #include <unistd.h>
 #include <libgen.h>
-#include <elf.h>
 #include <fcntl.h>
 #include <sys/mman.h>
 
 #include "getsection.h"
+#include "light_elf.h"
 
 typedef unsigned char byte;      
 
@@ -128,20 +128,21 @@ int main(int argc,char **argv)	{
     char *signaturefile;
     signaturefile = g_strconcat("/tmp/", basename(g_strconcat(filename, ".sig", NULL)), NULL);
 
-    uint8_t *data;   
+    uint8_t *data;
     unsigned long k;
     int fd = open(filename, O_RDONLY);
-    data = mmap(NULL, lseek(fd, 0, SEEK_END), PROT_READ, MAP_SHARED, fd, 0);
+    data = mmap(NULL, skip_length, PROT_READ, MAP_SHARED, fd, skip_offset);
     close(fd);
     FILE *fpdst2 = fopen(signaturefile, "w");
     if (fpdst2 == NULL) {
         fprintf(stderr, "Not able to open the signature file for writing, aborting");
         exit(1);
     }
-    for (k = skip_offset; k < skip_offset + skip_length; k++) {
+    for (k = 0; k < skip_length; k++) {
         fprintf(fpdst2, "%c", data[k]);
     }   
-    fclose(fpdst2);   
+    fclose(fpdst2);
+    munmap(data, skip_length);
     
     struct stat st;
     stat(filename, &st);
