@@ -1203,7 +1203,7 @@ void appimage_type2_open(appimage_handler *handler) {
         sqfs_err err = sqfs_open_image(fs, handler->path, fs_offset);
         if (err != SQFS_OK){
             fprintf(stderr, "sqfs_open_image error: %s\n", handler->path);
-            sqfs_destroy(fs);
+            free(fs);
             handler->is_open = false;
             handler->cache = NULL;
         } else {
