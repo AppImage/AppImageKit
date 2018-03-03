@@ -13,7 +13,8 @@ script:
 
 
 after_success:
-  - ls -lh out/*
+  - ls -lh out/*   # <= wrong line: see https://travis-ci.org/AppImage/AppImageKit/jobs/347965050#L4211
+  - ls -lh build/out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
   - bash ./upload.sh build/out/*
 
