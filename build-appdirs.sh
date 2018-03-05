@@ -21,6 +21,8 @@ cp install_prefix/usr/lib/appimagekit/mksquashfs "$APPIMAGETOOL_APPDIR"/usr/lib/
 cp $(which desktop-file-validate) "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
 
+cp -f /usr/bin/file "$APPIMAGETOOL_APPDIR"/usr/bin
+
 cp ../resources/appimagetool.desktop "$APPIMAGETOOL_APPDIR"
 cp ../resources/appimagetool.svg "$APPIMAGETOOL_APPDIR"/appimagetool.svg
 ln -s "$APPIMAGETOOL_APPDIR"/appimagetool.svg "$APPIMAGETOOL_APPDIR"/.DirIcon
