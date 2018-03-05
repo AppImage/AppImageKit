@@ -128,11 +128,12 @@ int main(int argc,char **argv)	{
     char *signaturefile;
     signaturefile = g_strconcat("/tmp/", basename(g_strconcat(filename, ".sig", NULL)), NULL);
 
-    uint8_t *data;
+    uint8_t *data = malloc(skip_length);
     unsigned long k;
-    int fd = open(filename, O_RDONLY);
-    data = mmap(NULL, skip_length, PROT_READ, MAP_SHARED, fd, skip_offset);
-    close(fd);
+    FILE* fd = fopen(filename, "r");
+    fseek(fd, skip_offset, SEEK_SET);
+    fread(data, skip_length, sizeof(uint8_t), fd);
+    fclose(fd);
     FILE *fpdst2 = fopen(signaturefile, "w");
     if (fpdst2 == NULL) {
         fprintf(stderr, "Not able to open the signature file for writing, aborting");
@@ -142,7 +143,7 @@ int main(int argc,char **argv)	{
         fprintf(fpdst2, "%c", data[k]);
     }   
     fclose(fpdst2);
-    munmap(data, skip_length);
+    free(data);
     
     struct stat st;
     stat(filename, &st);
