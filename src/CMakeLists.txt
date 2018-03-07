@@ -10,6 +10,7 @@ configure_file(
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime
     COMMAND bash ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
     MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c
     DEPENDS squashfuse
 )
