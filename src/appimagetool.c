@@ -87,6 +87,7 @@ gchar *sqfs_comp = "gzip";
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
 gchar *sign_args = NULL;
+gchar *gpg_key = NULL;
 gchar *pathToMksquashfs = NULL;
 
 // #####################################################################
@@ -846,97 +847,135 @@ main (int argc, char *argv[])
         if(sign){
             bool using_gpg = FALSE;
             bool using_shasum = FALSE;
+
             /* The user has indicated that he wants to sign */
-            gchar *gpg2_path = g_find_program_in_path ("gpg2");
+            gchar *gpg2_path = g_find_program_in_path("gpg2");
+
             if (!gpg2_path) {
-                gpg2_path = g_find_program_in_path ("gpg");
+                gpg2_path = g_find_program_in_path("gpg");
                 using_gpg = TRUE;
             }
-            gchar *sha256sum_path = g_find_program_in_path ("sha256sum");
+
+            gchar *sha256sum_path = g_find_program_in_path("sha256sum");
+
             if (!sha256sum_path) {
-                sha256sum_path = g_find_program_in_path ("shasum");
+                sha256sum_path = g_find_program_in_path("shasum");
                 using_shasum = 1;
             }
-            if(!gpg2_path){
-                fprintf (stderr, "gpg2 or gpg is not installed, cannot sign\n");
-            }
-            else if(!sha256sum_path) {
+
+            if (!gpg2_path) {
+                fprintf(stderr, "gpg2 or gpg is not installed, cannot sign\n");
+            } else if (!sha256sum_path) {
                 fprintf(stderr, "sha256sum or shasum is not installed, cannot sign\n");
             } else {
                 fprintf(stderr, "%s and %s are installed and user requested to sign, "
                         "hence signing\n", using_gpg ? "gpg" : "gpg2",
-                        using_shasum ? "shasum" : "sha256sum");
-                char *digestfile;
+                    using_shasum ? "shasum" : "sha256sum");
+
+                char* digestfile;
                 digestfile = br_strcat(destination, ".digest");
-                char *ascfile;
+
+                char* ascfile;
                 ascfile = br_strcat(destination, ".digest.asc");
-                if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
+
+                if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
                     unlink(digestfile);
+
                 if (using_shasum)
-                    sprintf (command, "%s -a256 %s", sha256sum_path, destination);
+                    sprintf(command, "%s -a256 %s", sha256sum_path, destination);
                 else
-                    sprintf (command, "%s %s", sha256sum_path, destination);
-                if(verbose)
-                    fprintf (stderr, "%s\n", command);
+                    sprintf(command, "%s %s", sha256sum_path, destination);
+
+                if (verbose)
+                    fprintf(stderr, "%s\n", command);
+
                 fp = popen(command, "r");
+
                 if (fp == NULL)
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
+
                 char output[1024];
-                fgets(output, sizeof (output) - 1, fp);
+
+                fgets(output, sizeof(output) - 1, fp);
+
                 if (verbose)
                     printf("%s: %s\n", using_shasum ? "shasum" : "sha256sum",
                         g_strsplit_set(output, " ", -1)[0]);
-                FILE *fpx = fopen(digestfile, "w");
-                if (fpx != NULL)
-                {
+
+                FILE* fpx = fopen(digestfile, "w");
+
+                if (fpx != NULL) {
                     fputs(g_strsplit_set(output, " ", -1)[0], fpx);
                     fclose(fpx);
                 }
-                int shasum_exit_status = pclose(fp);
-                if(WEXITSTATUS(shasum_exit_status) != 0)
+
+                if (pclose(fp) != 0)
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
-                if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
+
+                fp = NULL;
+
+                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
-                sprintf (command, "%s --detach-sign --armor %s %s", gpg2_path, sign_args ? sign_args : "", digestfile);
-                if(verbose)
-                    fprintf (stderr, "%s\n", command);
+
+                sprintf(command, "%s --detach-sign --armor %s %s", gpg2_path, sign_args ? sign_args : "", digestfile);
+
+                if (verbose)
+                    fprintf(stderr, "%s\n", command);
+
                 fp = popen(command, "r");
-                int gpg_exit_status = pclose(fp);
-                if(WEXITSTATUS(gpg_exit_status) != 0) { 
-                    fprintf (stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
+
+                if (pclose(fp) != 0) {
+                    fprintf(stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
                 } else {
                     unsigned long sig_offset = 0;
                     unsigned long sig_length = 0;
+
                     get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
-                    if(verbose) {
+
+                    if (verbose) {
                         printf("sig_offset: %lu\n", sig_offset);
                         printf("sig_length: %lu\n", sig_length);
                     }
-                    if(sig_offset == 0) {
+
+                    if (sig_offset == 0) {
                         die("Could not determine offset for signature");
                     } else {
-                        FILE *fpdst3 = fopen(destination, "r+");
-                        if (fpdst3 == NULL)
+                        FILE* destionationfp = fopen(destination, "r+");
+
+                        if (destionationfp == NULL)
                             die("Not able to open the destination file for writing, aborting");
-    //                    if(strlen(updateinformation)>sig_length)
-    //                        die("signature does not fit into segment, aborting");
-                        fseek(fpdst3, sig_offset, SEEK_SET);
-                        FILE *fpsrc2 = fopen(ascfile, "rb");
-                        if (fpsrc2 == NULL) {
+
+                        //                    if(strlen(updateinformation)>sig_length)
+                        //                        die("signature does not fit into segment, aborting");
+
+                        fseek(destionationfp, sig_offset, SEEK_SET);
+
+                        FILE* ascfilefp = fopen(ascfile, "rb");
+
+                        if (ascfilefp == NULL) {
                             die("Not able to open the asc file for reading, aborting");
                         }
-                        char byte;
-                        while (!feof(fpsrc2))
-                        {
-                            fread(&byte, sizeof(char), 1, fpsrc2);
-                            fwrite(&byte, sizeof(char), 1, fpdst3);
+
+                        static const int bufsize = 1024;
+                        char buffer[bufsize];
+
+                        while (!feof(ascfilefp)) {
+                            size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
+                            size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destionationfp);
+
+                            if (bytesRead != bytesWritten) {
+                                char message[128];
+                                sprintf(message, "Bytes read and written differ: %lu != %lu", bytesRead, bytesWritten);
+                                die(message);
+                            }
                         }
-                        fclose(fpsrc2);
-                        fclose(fpdst3);
+
+                        fclose(ascfilefp);
+                        fclose(destionationfp);
                     }
-                    if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
+                    if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
                         unlink(ascfile);
-                    if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
+                    if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
                         unlink(digestfile);
                 }
             }
