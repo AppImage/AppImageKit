@@ -48,12 +48,17 @@ objcopy --add-section .upd_info=1024_blank_bytes \
 objcopy --add-section .sha256_sig=1024_blank_bytes \
         --set-section-flags .sha256_sig=noload,readonly runtime2.o runtime3.o
 
+cat 1024_blank_bytes 1024_blank_bytes 1024_blank_bytes 1024_blank_bytes > 4096_blank_bytes
+
+objcopy --add-section .sig_key=4096_blank_bytes \
+        --set-section-flags .sig_key=noload,readonly runtime3.o runtime4.o
+
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
 # and embed .upd_info and .sha256_sig sections
 # TODO: squashfuse_LIBRARIES is a semicolon separated list of values that has to be split during runtime of this script
 squashfuse_libs="@squashfuse_LIBRARIES@"
 $CC $small_FLAGS $small_LDFLAGS -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.c \
-    runtime3.o ${squashfuse_libs//;/ } \
+    runtime4.o ${squashfuse_libs//;/ } \
     -Wl,-Bdynamic -lpthread -l"@ZLIB_LIBRARIES@" -L"@ZLIB_LIBRARY_DIRS@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl
 $STRIP runtime
 
