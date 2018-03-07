@@ -1058,6 +1058,12 @@ main (int argc, char *argv[])
                 int exportexitcode = pclose(fp);
                 fp = NULL;
 
+                if (exportexitcode != 0) {
+                    char message[128];
+                    sprintf(message, "GPG key export failed: exit code %d", exportexitcode);
+                    die(message);
+                }
+
                 fclose(destinationfp);
             }
         }
