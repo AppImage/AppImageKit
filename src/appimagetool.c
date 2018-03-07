@@ -1002,7 +1002,7 @@ main (int argc, char *argv[])
 
                     if (bytesRead != bytesWritten) {
                         char message[128];
-                        sprintf(message, "Bytes read and written differ: %lu != %lu", bytesRead, bytesWritten);
+                        sprintf(message, "Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead, (long unsigned) bytesWritten);
                         die(message);
                     }
                 }
@@ -1050,7 +1050,7 @@ main (int argc, char *argv[])
 
                     if (bytesRead != bytesWritten) {
                         char message[128];
-                        sprintf(message, "Error: Bytes read and written differ: %lu != %lu", bytesRead, bytesWritten);
+                        sprintf(message, "Error: Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead, (long unsigned) bytesWritten);
                         die(message);
                     }
                 }
