@@ -930,58 +930,62 @@ main (int argc, char *argv[])
 
                 if (pclose(fp) != 0) {
                     fprintf(stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
-                } else {
-                    unsigned long sig_offset = 0;
-                    unsigned long sig_length = 0;
-
-                    get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
-
-                    if (verbose) {
-                        printf("sig_offset: %lu\n", sig_offset);
-                        printf("sig_length: %lu\n", sig_length);
-                    }
-
-                    if (sig_offset == 0) {
-                        die("Could not determine offset for signature");
-                    } else {
-                        FILE* destionationfp = fopen(destination, "r+");
-
-                        if (destionationfp == NULL)
-                            die("Not able to open the destination file for writing, aborting");
-
-                        //                    if(strlen(updateinformation)>sig_length)
-                        //                        die("signature does not fit into segment, aborting");
-
-                        fseek(destionationfp, sig_offset, SEEK_SET);
-
-                        FILE* ascfilefp = fopen(ascfile, "rb");
-
-                        if (ascfilefp == NULL) {
-                            die("Not able to open the asc file for reading, aborting");
-                        }
-
-                        static const int bufsize = 1024;
-                        char buffer[bufsize];
-
-                        while (!feof(ascfilefp)) {
-                            size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
-                            size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destionationfp);
-
-                            if (bytesRead != bytesWritten) {
-                                char message[128];
-                                sprintf(message, "Bytes read and written differ: %lu != %lu", bytesRead, bytesWritten);
-                                die(message);
-                            }
-                        }
-
-                        fclose(ascfilefp);
-                        fclose(destionationfp);
-                    }
-                    if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
-                        unlink(ascfile);
-                    if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
-                        unlink(digestfile);
+                    return 1;
                 }
+
+                fp = NULL;
+
+                unsigned long sig_offset = 0;
+                unsigned long sig_length = 0;
+
+                get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
+
+                if (verbose) {
+                    printf("sig_offset: %lu\n", sig_offset);
+                    printf("sig_length: %lu\n", sig_length);
+                }
+
+                if (sig_offset == 0) {
+                    die("Could not determine offset for signature");
+                }
+
+                FILE* destionationfp = fopen(destination, "r+");
+
+                if (destionationfp == NULL)
+                    die("Not able to open the destination file for writing, aborting");
+
+                // if(strlen(updateinformation)>sig_length)
+                //     die("signature does not fit into segment, aborting");
+
+                fseek(destionationfp, sig_offset, SEEK_SET);
+
+                FILE* ascfilefp = fopen(ascfile, "rb");
+
+                if (ascfilefp == NULL) {
+                    die("Not able to open the asc file for reading, aborting");
+                }
+
+                static const int bufsize = 1024;
+                char buffer[bufsize];
+
+                while (!feof(ascfilefp)) {
+                    size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
+                    size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destionationfp);
+
+                    if (bytesRead != bytesWritten) {
+                        char message[128];
+                        sprintf(message, "Bytes read and written differ: %lu != %lu", bytesRead, bytesWritten);
+                        die(message);
+                    }
+                }
+
+                fclose(ascfilefp);
+                fclose(destionationfp);
+
+                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(ascfile);
+                if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(digestfile);
             }
         }
         
