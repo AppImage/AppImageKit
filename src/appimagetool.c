@@ -994,7 +994,7 @@ main (int argc, char *argv[])
                     size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
                     totalBytesRead += bytesRead;
 
-                    if (totalBytesRead >= sig_length) {
+                    if (totalBytesRead > sig_length) {
                         die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
                     }
 
@@ -1036,7 +1036,7 @@ main (int argc, char *argv[])
                     size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
                     totalBytesRead += bytesRead;
 
-                    if (totalBytesRead >= key_length) {
+                    if (totalBytesRead > key_length) {
                         // read rest of process input to avoid broken pipe error
                         while (!feof(fp)) {
                             fread(buffer, sizeof(char), bufsize, fp);
