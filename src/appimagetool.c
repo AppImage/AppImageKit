@@ -1037,6 +1037,12 @@ main (int argc, char *argv[])
                     totalBytesRead += bytesRead;
 
                     if (totalBytesRead >= key_length) {
+                        // read rest of process input to avoid broken pipe error
+                        while (!feof(fp)) {
+                            fread(buffer, sizeof(char), bufsize, fp);
+                        }
+
+                        pclose(fp);
                         die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
                     }
 
