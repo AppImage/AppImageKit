@@ -918,9 +918,14 @@ main (int argc, char *argv[])
                 if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
 
-                char* key_arg = calloc(sizeof(char), strlen(sign_key) + strlen("--local-user ''"));
+                char* key_arg = NULL;
 
                 if (sign_key && strlen(sign_key) > 0) {
+                    key_arg = calloc(sizeof(char), strlen(sign_key) + strlen("--local-user ''"));
+
+                    if (key_arg == NULL)
+                        die("malloc() failed");
+
                     strcpy(key_arg, "--local-user '");
                     strcat(key_arg, sign_key);
                     strcat(key_arg, "'");
@@ -928,7 +933,7 @@ main (int argc, char *argv[])
 
                 sprintf(command,
                     "%s --detach-sign --armor %s %s %s",
-                    gpg2_path, key_arg, sign_args ? sign_args : "", digestfile
+                    gpg2_path, key_arg ? key_arg : "", sign_args ? sign_args : "", digestfile
                 );
 
                 free(key_arg);
