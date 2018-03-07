@@ -144,7 +144,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         int i = 0;
 #ifndef AUXILIARY_FILES_DESTINATION
-        args[i++] = "mksquashfs";
+        args[i++] = g_find_program_in_path("mksquashfs");
 #else
         args[i++] = pathToMksquashfs;
 #endif
@@ -902,7 +902,7 @@ main (int argc, char *argv[])
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
                 int gpg_exit_status = pclose(fp);
-                if(WEXITSTATUS(gpg_exit_status) != 0) { 
+                if(WEXITSTATUS(gpg_exit_status) != 0) {
                     fprintf (stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
                 } else {
                     unsigned long sig_offset = 0;
