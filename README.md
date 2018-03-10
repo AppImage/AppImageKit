@@ -2,7 +2,7 @@
 
 This branch contains the AppImage website code.
 
-The website is multilingual, and can be translated using [WebLate](https://translate.assassinate-you.net/projects/appimage/website/). Contributions welcome!
+The website is multilingual, and can be translated using [Weblate](https://translate.assassinate-you.net/projects/appimage/website/). Contributions welcome!
 
 
 ## Template
