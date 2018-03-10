@@ -1,4 +1,9 @@
-# [appimage.org](http://appimage.org) landing page
+# [appimage.org](https://appimage.org) home page
+
+This branch contains the AppImage website code.
+
+The website is multilingual, and can be translated using [WebLate](https://translate.assassinate-you.net/projects/appimage/website/). Contributions welcome!
+
 
 ## Template
 
