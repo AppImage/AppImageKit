@@ -84,7 +84,7 @@ find . -not -executable -type f -exec sed -i 's|/AppImageKit|'$(dirname "$PWD")'
 cmake --build . --target "preinstall"
 cpack -V || cat _CPack_Packages/Linux/DEB/PreinstallOutput.log && exit 1
 
-mv *.deb out/
+mv -v *.deb out/
 
 # fix filename for upload
 sudo mv out/AppRun out/AppRun-"$ARCH"
