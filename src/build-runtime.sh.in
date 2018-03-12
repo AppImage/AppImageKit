@@ -49,8 +49,9 @@ objcopy --add-section .sha256_sig=1024_blank_bytes \
         --set-section-flags .sha256_sig=noload,readonly runtime2.o runtime3.o
 
 cat 1024_blank_bytes 1024_blank_bytes 1024_blank_bytes 1024_blank_bytes > 4096_blank_bytes
+cat 4096_blank_bytes 4096_blank_bytes > 8192_blank_bytes
 
-objcopy --add-section .sig_key=4096_blank_bytes \
+objcopy --add-section .sig_key=8192_blank_bytes \
         --set-section-flags .sig_key=noload,readonly runtime3.o runtime4.o
 
 # Now statically link against libsquashfuse_ll, libsquashfuse and liblzma
