@@ -88,7 +88,7 @@ AppImage to the rescue!
 
 ## AppImage usage
 
-Running an AppImage mounts the filesystem image and transparently runs the contained application. So the usage of an AppImage normally should equal the usage of the application contained in it. However, there is special functionality, as described here. If an AppImgae you have received does not support these options, ask the author of the AppImage to recreate it using the latest `appimagetool` (or `linuxdeployqt`).
+Running an AppImage mounts the filesystem image and transparently runs the contained application. So the usage of an AppImage normally should equal the usage of the application contained in it. However, there is special functionality, as described here. If an AppImage you have received does not support these options, ask the author of the AppImage to recreate it using the latest `appimagetool` (or `linuxdeployqt`).
 
 ### Command line arguments
 
@@ -104,7 +104,7 @@ If you invoke an AppImage built with a recent version of AppImageKit with one of
 
 ### Special directories
 
-Normally the application contained inside an AppImage will store its configuration files whereever it normally stores them (most frequently somewhere inside `$HOME`). If you invoke an AppImage built with a recent version of AppImageKit and have one of these special directories in place, then the configuration files will be stored alongside the AppImage. This can be useful for portable use cases, e.g., carrying an AppImage on a USB stick, along with its data.
+Normally the application contained inside an AppImage will store its configuration files wherever it normally stores them (most frequently somewhere inside `$HOME`). If you invoke an AppImage built with a recent version of AppImageKit and have one of these special directories in place, then the configuration files will be stored alongside the AppImage. This can be useful for portable use cases, e.g., carrying an AppImage on a USB stick, along with its data.
 
 - If there is a directory with the same name as the AppImage plus `.home`, then `$HOME` will automatically be set to it before executing the payload application
 - If there is a directory with the same name as the AppImage plus `.config`, then `$XDG_CONFIG_HOME` will automatically be set to it before executing the payload application
@@ -174,18 +174,20 @@ Or, if you are on a deb-based system:
 ```
 wget -c "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimaged_1.0_amd64.deb"
 sudo dpkg -i appimaged_*.deb
-systemctl --user enable appimaged
+systemctl --user add-wants default.target appimaged
 systemctl --user start appimaged
 ```
 
 It will register the AppImages in with your system from the following places:
-* $HOME/Downloads
+* $HOME/Downloads (or its localized equivalent, as determined by `G_USER_DIRECTORY_DOWNLOAD` in glib)
 * $HOME/.local/bin
 * $HOME/bin
+* $HOME/Applications
 * /Applications
 * /isodevice/Applications
 * /isofrom/Applications
 * /run/archiso/img_dev/Applications
+* /lib/live/mount/findiso/Applications
 * /opt
 * /usr/local/bin
 
@@ -213,7 +215,7 @@ If you have `AppImageUpdate` on your `$PATH`, then it can also do this neat tric
 
 ![screenshot from 2016-10-15 16-37-05](https://cloud.githubusercontent.com/assets/2480569/19410850/0390fe9c-92f6-11e6-9882-3ca6d360a190.jpg)
 
-Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases/download/continuous/ and put on your `$PATH`:
+Download AppImageUpdate from https://github.com/AppImage/AppImageUpdate/releases/tag/continuous and put on your `$PATH`:
 
 ```
 sudo mv "Downloads/AppImageUpdate-*.AppImage" /usr/local/bin/AppImageUpdate

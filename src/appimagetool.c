@@ -87,6 +87,7 @@ gchar *sqfs_comp = "gzip";
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
 gchar *sign_args = NULL;
+gchar *sign_key = NULL;
 gchar *pathToMksquashfs = NULL;
 
 // #####################################################################
@@ -136,7 +137,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         waitpid(pid, &status, 0);
     } else {
         // we are the child
-        gchar *offset_string;
+        gchar* offset_string;
         offset_string = g_strdup_printf("%i", offset);
 
         char* args[32];
@@ -154,7 +155,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = offset_string;
         args[i++] = "-comp";
 
-        if(use_xz)
+        if (use_xz)
             args[i++] = "xz";
         else
             args[i++] = sqfs_comp;
@@ -162,7 +163,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = "-root-owned";
         args[i++] = "-noappend";
 
-        if(use_xz) {
+        if (use_xz) {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
             args[i++] = "-Xdict-size";
@@ -172,7 +173,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         }
 
         // check if ignore file exists and use it if possible
-        if(access(APPIMAGEIGNORE, F_OK) >= 0) {
+        if (access(APPIMAGEIGNORE, F_OK) >= 0) {
             printf("Including %s", APPIMAGEIGNORE);
             args[i++] = "-wildcards";
             args[i++] = "-ef";
@@ -183,8 +184,8 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         }
 
         // if an exclude file has been passed on the command line, should be used, too
-        if(exclude_file != 0 && strlen(exclude_file) > 0) {
-            if(access(exclude_file, F_OK) < 0) {
+        if (exclude_file != 0 && strlen(exclude_file) > 0) {
+            if (access(exclude_file, F_OK) < 0) {
                 printf("WARNING: exclude file %s not found!", exclude_file);
                 return -1;
             }
@@ -194,7 +195,18 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
             args[i++] = exclude_file;
         }
 
+        args[i++] = "-mkfs-fixed-time";
+        args[i++] = "0";
+
         args[i++] = 0;
+
+        if (verbose) {
+            printf("mksquashfs commandline: ");
+            for (char** t = args; *t != 0; t++) {
+                printf("%s ", *t);
+            }
+            printf("\n");
+        }
 
 #ifndef AUXILIARY_FILES_DESTINATION
         execvp("mksquashfs", args);
@@ -427,6 +439,7 @@ static GOptionEntry entries[] =
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
+    { "sign-key", 0, 0, G_OPTION_ARG_STRING, &sign_key, "Key ID to use for gpg[2] signatures", NULL},
     { "sign-args", 0, 0, G_OPTION_ARG_STRING, &sign_args, "Extra arguments to use when signing with gpg[2]", NULL},
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
@@ -835,99 +848,264 @@ main (int argc, char *argv[])
         if(sign){
             bool using_gpg = FALSE;
             bool using_shasum = FALSE;
+
             /* The user has indicated that he wants to sign */
-            gchar *gpg2_path = g_find_program_in_path ("gpg2");
+            gchar *gpg2_path = g_find_program_in_path("gpg2");
+
             if (!gpg2_path) {
-                gpg2_path = g_find_program_in_path ("gpg");
+                gpg2_path = g_find_program_in_path("gpg");
                 using_gpg = TRUE;
             }
-            gchar *sha256sum_path = g_find_program_in_path ("sha256sum");
+
+            gchar *sha256sum_path = g_find_program_in_path("sha256sum");
+
             if (!sha256sum_path) {
-                sha256sum_path = g_find_program_in_path ("shasum");
+                sha256sum_path = g_find_program_in_path("shasum");
                 using_shasum = 1;
             }
-            if(!gpg2_path){
-                fprintf (stderr, "gpg2 or gpg is not installed, cannot sign\n");
-            }
-            else if(!sha256sum_path) {
+
+            if (!gpg2_path) {
+                fprintf(stderr, "gpg2 or gpg is not installed, cannot sign\n");
+            } else if (!sha256sum_path) {
                 fprintf(stderr, "sha256sum or shasum is not installed, cannot sign\n");
             } else {
                 fprintf(stderr, "%s and %s are installed and user requested to sign, "
                         "hence signing\n", using_gpg ? "gpg" : "gpg2",
-                        using_shasum ? "shasum" : "sha256sum");
-                char *digestfile;
+                    using_shasum ? "shasum" : "sha256sum");
+
+                char* digestfile;
                 digestfile = br_strcat(destination, ".digest");
-                char *ascfile;
+
+                char* ascfile;
                 ascfile = br_strcat(destination, ".digest.asc");
-                if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
+
+                if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
                     unlink(digestfile);
+
                 if (using_shasum)
-                    sprintf (command, "%s -a256 %s", sha256sum_path, destination);
+                    sprintf(command, "%s -a256 %s", sha256sum_path, destination);
                 else
-                    sprintf (command, "%s %s", sha256sum_path, destination);
-                if(verbose)
-                    fprintf (stderr, "%s\n", command);
+                    sprintf(command, "%s %s", sha256sum_path, destination);
+
+                if (verbose)
+                    fprintf(stderr, "%s\n", command);
+
                 fp = popen(command, "r");
+
                 if (fp == NULL)
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
+
                 char output[1024];
-                fgets(output, sizeof (output) - 1, fp);
+
+                fgets(output, sizeof(output) - 1, fp);
+
                 if (verbose)
                     printf("%s: %s\n", using_shasum ? "shasum" : "sha256sum",
                         g_strsplit_set(output, " ", -1)[0]);
-                FILE *fpx = fopen(digestfile, "w");
-                if (fpx != NULL)
-                {
+
+                FILE* fpx = fopen(digestfile, "w");
+
+                if (fpx != NULL) {
                     fputs(g_strsplit_set(output, " ", -1)[0], fpx);
                     fclose(fpx);
                 }
-                int shasum_exit_status = pclose(fp);
-                if(WEXITSTATUS(shasum_exit_status) != 0)
+
+                if (pclose(fp) != 0)
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
-                if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
+
+                fp = NULL;
+
+                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
-                sprintf (command, "%s --detach-sign --armor %s %s", gpg2_path, sign_args ? sign_args : "", digestfile);
-                if(verbose)
-                    fprintf (stderr, "%s\n", command);
-                fp = popen(command, "r");
-                int gpg_exit_status = pclose(fp);
-                if(WEXITSTATUS(gpg_exit_status) != 0) { 
-                    fprintf (stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
-                } else {
-                    unsigned long sig_offset = 0;
-                    unsigned long sig_length = 0;
-                    get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
-                    if(verbose) {
-                        printf("sig_offset: %lu\n", sig_offset);
-                        printf("sig_length: %lu\n", sig_length);
-                    }
-                    if(sig_offset == 0) {
-                        die("Could not determine offset for signature");
-                    } else {
-                        FILE *fpdst3 = fopen(destination, "r+");
-                        if (fpdst3 == NULL)
-                            die("Not able to open the destination file for writing, aborting");
-    //                    if(strlen(updateinformation)>sig_length)
-    //                        die("signature does not fit into segment, aborting");
-                        fseek(fpdst3, sig_offset, SEEK_SET);
-                        FILE *fpsrc2 = fopen(ascfile, "rb");
-                        if (fpsrc2 == NULL) {
-                            die("Not able to open the asc file for reading, aborting");
-                        }
-                        char byte;
-                        while (!feof(fpsrc2))
-                        {
-                            fread(&byte, sizeof(char), 1, fpsrc2);
-                            fwrite(&byte, sizeof(char), 1, fpdst3);
-                        }
-                        fclose(fpsrc2);
-                        fclose(fpdst3);
-                    }
-                    if (g_file_test (ascfile, G_FILE_TEST_IS_REGULAR))
-                        unlink(ascfile);
-                    if (g_file_test (digestfile, G_FILE_TEST_IS_REGULAR))
-                        unlink(digestfile);
+
+                char* key_arg = NULL;
+
+                if (sign_key && strlen(sign_key) > 0) {
+                    key_arg = calloc(sizeof(char), strlen(sign_key) + strlen("--local-user ''"));
+
+                    if (key_arg == NULL)
+                        die("malloc() failed");
+
+                    strcpy(key_arg, "--local-user '");
+                    strcat(key_arg, sign_key);
+                    strcat(key_arg, "'");
                 }
+
+                sprintf(command,
+                    "%s --batch --detach-sign --armor %s %s %s",
+                    gpg2_path, key_arg ? key_arg : "", sign_args ? sign_args : "", digestfile
+                );
+
+                free(key_arg);
+                key_arg = NULL;
+
+                if (verbose)
+                    fprintf(stderr, "%s\n", command);
+
+                fp = popen(command, "r");
+
+                if (pclose(fp) != 0) {
+                    fprintf(stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
+                    return 1;
+                }
+
+                fp = NULL;
+
+                unsigned long sig_offset = 0;
+                unsigned long sig_length = 0;
+
+                int rv = get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
+
+                if (rv != 0 || sig_offset == 0 || sig_length == 0) {
+                    die("Could not find section .sig_key in runtime");
+                }
+
+                if (verbose) {
+                    printf("sig_offset: %lu\n", sig_offset);
+                    printf("sig_length: %lu\n", sig_length);
+                }
+
+                if (sig_offset == 0) {
+                    die("Could not determine offset for signature");
+                }
+
+                FILE* destinationfp = fopen(destination, "r+");
+
+                if (destinationfp == NULL)
+                    die("Not able to open the destination file for writing, aborting");
+
+                // if(strlen(updateinformation)>sig_length)
+                //     die("signature does not fit into segment, aborting");
+
+                fseek(destinationfp, sig_offset, SEEK_SET);
+
+                FILE* ascfilefp = fopen(ascfile, "rb");
+
+                if (ascfilefp == NULL) {
+                    die("Not able to open the asc file for reading, aborting");
+                }
+
+                static const int bufsize = 1024;
+                char buffer[bufsize];
+
+                size_t totalBytesRead = 0;
+
+                while (!feof(ascfilefp)) {
+                    size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
+                    totalBytesRead += bytesRead;
+
+                    if (totalBytesRead > sig_length) {
+                        die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
+                    }
+
+                    size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
+
+                    if (bytesRead != bytesWritten) {
+                        char message[128];
+                        sprintf(message, "Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead, (long unsigned) bytesWritten);
+                        die(message);
+                    }
+                }
+
+                fclose(ascfilefp);
+                if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(digestfile);
+
+                if (sign_key == NULL || strlen(sign_key) > 0) {
+                    // read which key was used to sign from signature
+                    sprintf(command, "%s --batch --list-packets %s", gpg2_path, ascfile);
+
+                    fp = popen(command, "r");
+
+                    if (fp == NULL)
+                        die("Failed to call gpg[2] to detect signature's key ID");
+
+                    while (!feof(fp)) {
+                        size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
+
+                        char* keyid_pos = strstr(buffer, "keyid");
+
+                        if (keyid_pos == NULL)
+                            continue;
+
+                        char* keyIDBegin = keyid_pos + strlen("keyid ");
+                        char* endOfKeyID = strstr(keyIDBegin, "\n");
+
+                        sign_key = calloc(endOfKeyID - keyIDBegin, sizeof(char));
+                        memcpy(sign_key, keyIDBegin, endOfKeyID - keyIDBegin);
+                    }
+
+                    // read rest of process input to avoid broken pipe error
+                    while (!feof(fp)) {
+                        fread(buffer, sizeof(char), bufsize, fp);
+                    }
+
+                    int retval = pclose(fp);
+                    fp = NULL;
+
+                    if (retval != 0)
+                        die("Failed to call gpg[2] to detect signature's key ID");
+                }
+
+                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(ascfile);
+
+                // export key and write into section
+                sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key);
+
+                unsigned long key_offset, key_length;
+                rv = get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
+
+                if (verbose) {
+                    printf("key_offset: %lu\n", key_offset);
+                    printf("key_length: %lu\n", key_length);
+                }
+
+                if (rv != 0 || key_offset == 0 || key_length == 0) {
+                    die("Could not find section .sig_key in runtime");
+                }
+
+                fseek(destinationfp, key_offset, SEEK_SET);
+
+                fp = popen(command, "r");
+
+                if (fp == NULL)
+                    die("Failed to call gpg[2] to export the signature key");
+
+                totalBytesRead = 0;
+                while (!feof(fp)) {
+                    size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
+                    totalBytesRead += bytesRead;
+
+                    if (totalBytesRead > key_length) {
+                        // read rest of process input to avoid broken pipe error
+                        while (!feof(fp)) {
+                            fread(buffer, sizeof(char), bufsize, fp);
+                        }
+
+                        pclose(fp);
+                        die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
+                    }
+
+                    size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
+
+                    if (bytesRead != bytesWritten) {
+                        char message[128];
+                        sprintf(message, "Error: Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead, (long unsigned) bytesWritten);
+                        die(message);
+                    }
+                }
+
+                int exportexitcode = pclose(fp);
+                fp = NULL;
+
+                if (exportexitcode != 0) {
+                    char message[128];
+                    sprintf(message, "GPG key export failed: exit code %d", exportexitcode);
+                    die(message);
+                }
+
+                fclose(destinationfp);
             }
         }
         
