@@ -932,7 +932,7 @@ main (int argc, char *argv[])
                 }
 
                 sprintf(command,
-                    "%s --detach-sign --armor %s %s %s",
+                    "%s --batch --detach-sign --armor %s %s %s",
                     gpg2_path, key_arg ? key_arg : "", sign_args ? sign_args : "", digestfile
                 );
 
@@ -1008,14 +1008,13 @@ main (int argc, char *argv[])
                 }
 
                 fclose(ascfilefp);
-
-                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
-                    unlink(ascfile);
                 if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
                     unlink(digestfile);
+                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
+                    unlink(ascfile);
 
                 // export key and write into section
-                sprintf(command, "%s --export --armor %s", gpg2_path, sign_key ? sign_key : "");
+                sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key ? sign_key : "");
 
                 unsigned long key_offset, key_length;
                 rv = get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
