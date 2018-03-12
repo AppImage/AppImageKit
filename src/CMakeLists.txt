@@ -244,6 +244,16 @@ install(
     INCLUDES DESTINATION include COMPONENT applications
 )
 
+install(
+    TARGETS appimaged
+    RUNTIME DESTINATION bin COMPONENT appimaged
+)
+
+install(
+    FILES ${CMAKE_SOURCE_DIR}/resources/appimaged.service
+    DESTINATION lib/systemd/user/
+    COMPONENT appimaged
+)
 
 # install libappimage
 install(TARGETS libappimage
