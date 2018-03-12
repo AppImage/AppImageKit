@@ -36,7 +36,7 @@ trap cleanup EXIT
 cd "$build_dir"
 
 # Compile runtime but do not link
-$CC -DGIT_VERSION=\"$git_version\" -I"@xz_INCLUDE_DIR@" -I"@squashfuse_INCLUDE_DIR@" \
+$CC -DGIT_COMMIT=\"$git_version\" -I"@xz_INCLUDE_DIR@" -I"@squashfuse_INCLUDE_DIR@" \
     -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
 
 # Prepare 1024 bytes of space for updateinformation

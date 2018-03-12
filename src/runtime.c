@@ -413,7 +413,7 @@ main (int argc, char *argv[])
     }
 
     if(arg && strcmp(arg,"appimage-version")==0) {
-        fprintf(stderr,"Version: %s\n", GIT_VERSION);
+        fprintf(stderr,"Version: %s\n", GIT_COMMIT);
         exit(0);
     }
 
@@ -445,7 +445,7 @@ main (int argc, char *argv[])
     // If there is an argument starting with appimage- (but not appimage-mount which is handled further down)
     // then stop here and print an error message
     if((arg && strncmp(arg, "appimage-", 8) == 0) && (arg && strcmp(arg,"appimage-mount")!=0)) {
-        fprintf(stderr,"--%s is not yet implemented in version %s\n", arg, GIT_VERSION);
+        fprintf(stderr,"--%s is not yet implemented in version %s\n", arg, GIT_COMMIT);
         exit(1);
     }
 
