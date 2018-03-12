@@ -1010,11 +1010,48 @@ main (int argc, char *argv[])
                 fclose(ascfilefp);
                 if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
                     unlink(digestfile);
+
+                if (sign_key == NULL || strlen(sign_key) > 0) {
+                    // read which key was used to sign from signature
+                    sprintf(command, "%s --batch --list-packets %s", gpg2_path, ascfile);
+
+                    fp = popen(command, "r");
+
+                    if (fp == NULL)
+                        die("Failed to call gpg[2] to detect signature's key ID");
+
+                    while (!feof(fp)) {
+                        size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
+
+                        char* keyid_pos = strstr(buffer, "keyid");
+
+                        if (keyid_pos == NULL)
+                            continue;
+
+                        char* keyIDBegin = keyid_pos + strlen("keyid ");
+                        char* endOfKeyID = strstr(keyIDBegin, "\n");
+
+                        sign_key = calloc(endOfKeyID - keyIDBegin, sizeof(char));
+                        memcpy(sign_key, keyIDBegin, endOfKeyID - keyIDBegin);
+                    }
+
+                    // read rest of process input to avoid broken pipe error
+                    while (!feof(fp)) {
+                        fread(buffer, sizeof(char), bufsize, fp);
+                    }
+
+                    int retval = pclose(fp);
+                    fp = NULL;
+
+                    if (retval != 0)
+                        die("Failed to call gpg[2] to detect signature's key ID");
+                }
+
                 if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
                     unlink(ascfile);
 
                 // export key and write into section
-                sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key ? sign_key : "");
+                sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key);
 
                 unsigned long key_offset, key_length;
                 rv = get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
