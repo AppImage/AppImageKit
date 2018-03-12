@@ -5,6 +5,7 @@ pkg_check_modules(GIO REQUIRED gio-2.0)
 pkg_check_modules(ZLIB REQUIRED zlib)
 pkg_check_modules(CAIRO REQUIRED cairo)
 pkg_check_modules(OPENSSL REQUIRED openssl)
+pkg_check_modules(FUSE REQUIRED fuse)
 
 
 set(USE_SYSTEM_XZ OFF CACHE BOOL "Use system xz/liblzma instead of building our own")
