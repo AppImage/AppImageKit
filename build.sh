@@ -93,4 +93,4 @@ bash -ex "$HERE/build-appdirs.sh"
 ls -lh
 
 mkdir -p out
-cp -r install_prefix/usr/{bin,lib/appimagekit}/* appdirs/*.AppDir *.deb out/
+cp -r install_prefix/usr/{bin,lib/appimagekit}/* appdirs/*.AppDir out/
