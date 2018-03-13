@@ -14,7 +14,7 @@ include(CTest)
 
 # determine Git commit ID
 execute_process(
-    COMMAND git describe --tags --always --abbrev=7
+    COMMAND git rev-parse --short HEAD
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -41,6 +41,9 @@ set(CMAKE_CXX_STANDARD 98)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# write version information for CPack to files
+file(WRITE ${PROJECT_BINARY_DIR}/GIT_COMMIT "${GIT_COMMIT}")
 
 
 ##########################
@@ -99,6 +102,10 @@ set(CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake/sanitizers-cmake/cmake" ${CMA
 
 add_subdirectory(src)
 
+################################
+#            packing           #
+################################
+include(cmake/cpack_debs.cmake)
 
 ################################
 # unit and functionality tests #

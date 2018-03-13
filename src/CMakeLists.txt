@@ -237,7 +237,17 @@ else()
 endif()
 
 install(
-    TARGETS AppRun appimaged appimagetool digest validate
+    TARGETS appimaged
+    RUNTIME DESTINATION bin COMPONENT appimaged
+)
+
+install(
+    FILES ${CMAKE_SOURCE_DIR}/resources/appimaged.service
+    DESTINATION lib/systemd/user/
+    COMPONENT appimaged
+)
+install(
+    TARGETS AppRun appimagetool digest validate
     RUNTIME DESTINATION bin COMPONENT applications
     LIBRARY DESTINATION lib COMPONENT applications
     ARCHIVE DESTINATION lib/static COMPONENT applications

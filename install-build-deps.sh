@@ -22,7 +22,7 @@ fi
 if [ -e /usr/bin/apt-get ] ; then
   sudo apt-get update
   sudo apt-get -y install zsync git libarchive-dev autoconf libtool make gcc g++ libtool libfuse-dev \
-  liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev equivs libcairo-dev desktop-file-utils cmake
+  liblzma-dev libglib2.0-dev libssl-dev libinotifytools0-dev liblz4-dev libcairo-dev desktop-file-utils cmake
   # libtool-bin might be required in newer distributions but is not available in precise
   sudo cp resources/liblz4.pc /usr/lib/$ARCH-linux-gnu/pkgconfig/
   if cat /etc/lsb-release | grep 14.04 2>&1 >/dev/null; then

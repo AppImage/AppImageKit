@@ -6,18 +6,13 @@ set -x
 case "$ARCH" in
     "x86_64")
         export ARCH="x86_64"
-        sed -i -e 's|%ARCH%|amd64|g' appimaged.ctl
         ;;
     "i386"|"i686")
         export ARCH="i686"
-        sed -i -e 's|%ARCH%|i386|g' appimaged.ctl
         # sleep so as not to overwrite during uploading (FIXME)
         sleep 60
         ;;
 esac
-
-# debug print
-grep Architecture appimaged.ctl
 
 # clean up and download data from GitHub
 rm -rf data.tar.g* .gnu* || true
@@ -29,7 +24,7 @@ wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.g
 mkdir -p ./out/
 
 # build AppImageKit
-docker run \
+docker run --rm \
     --device /dev/fuse:mrw \
     -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
     -i \
@@ -43,16 +38,16 @@ find build/out/appimagetool.AppDir/
 find build/out/appimaged.AppDir/
 
 # build AppImages
-docker run \
+docker run --rm \
     --cap-add SYS_ADMIN \
     --device /dev/fuse:mrw \
     -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
     -i \
+    -v "${PWD}":/AppImageKit \
     -v "${PWD}"/travis/:/travis \
-    -v "${PWD}"/build:/build \
     -v $HOME/.gnupg:/root/.gnupg \
     "$DOCKER_IMAGE" \
-    /bin/bash -x "/travis/build-appimages.sh"
+    /bin/bash -x "/travis/build-packages-and-appimages.sh"
 
 cd build/
 
@@ -62,13 +57,10 @@ bash -x ../travis/test-appimages.sh
 
 # install more tools
 # (vim-common contains xxd)
-sudo apt-get install equivs vim-common
+sudo apt-get install vim-common
 
 # fix permissions
 sudo chown -R travis.travis .
-
-# build .deb
-(cd out ; equivs-build ../../appimaged.ctl)
 
 # remove binaries from output directory
 ls -al out/
