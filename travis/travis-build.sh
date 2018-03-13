@@ -52,7 +52,7 @@ docker run --rm \
     -v "${PWD}"/build:/build \
     -v $HOME/.gnupg:/root/.gnupg \
     "$DOCKER_IMAGE" \
-    /bin/bash -x "/travis/build-appimages.sh" || true
+    /bin/bash -x "/travis/build-packages-and-appimages.sh" || true
 
 cd build/
 
@@ -78,11 +78,6 @@ mv out/runtime out/runtime-"$ARCH"
 
 # remove unused files
 sudo rm -rf out/*.AppDir out/*.AppImage.digest
-
-# build Debian packages
-find . -not -executable -type f -exec sed -i 's|/AppImageKit|'$(dirname "$PWD")'|g' "{}" \;
-#cmake --build . --target "preinstall"
-cpack -V || cat _CPack_Packages/Linux/DEB/PreinstallOutput.log && exit 1
 
 mv -v *.deb out/
 

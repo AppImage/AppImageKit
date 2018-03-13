@@ -1,5 +1,9 @@
 #! /bin/bash
 
+cd /build
+
+cpack -V || cat _CPack_Packages/Linux/DEB/PreinstallOutput.log && exit 1
+
 cd /build/out
 
 ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v \
