@@ -1,10 +1,11 @@
 #! /bin/bash
 
-cd /build
+cd /AppImageKit/build
 
 cpack -V || cat _CPack_Packages/Linux/DEB/PreinstallOutput.log && exit 1
+mv *.deb out/
 
-cd /build/out
+cd out/
 
 ./appimagetool.AppDir/AppRun ./appimagetool.AppDir/ -s -v \
     -u "gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-$ARCH.AppImage.zsync" \

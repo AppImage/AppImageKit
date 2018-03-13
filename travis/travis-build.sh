@@ -48,8 +48,8 @@ docker run --rm \
     --device /dev/fuse:mrw \
     -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
     -i \
+    -v "${PWD}":/AppImageKit \
     -v "${PWD}"/travis/:/travis \
-    -v "${PWD}"/build:/build \
     -v $HOME/.gnupg:/root/.gnupg \
     "$DOCKER_IMAGE" \
     /bin/bash -x "/travis/build-packages-and-appimages.sh" || true
@@ -78,8 +78,6 @@ mv out/runtime out/runtime-"$ARCH"
 
 # remove unused files
 sudo rm -rf out/*.AppDir out/*.AppImage.digest
-
-mv -v *.deb out/
 
 # fix filename for upload
 sudo mv out/AppRun out/AppRun-"$ARCH"
