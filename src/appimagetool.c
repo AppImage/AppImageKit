@@ -1117,15 +1117,39 @@ main (int argc, char *argv[])
             } else {
                 fprintf (stderr, "zsyncmake is available and updateinformation is provided, "
                 "hence generating zsync file\n");
-                sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
-                if(verbose)
-                    fprintf (stderr, "%s\n", command);
-                fp = popen(command, "r");
-                if (fp == NULL)
-                    die("Failed to run zsyncmake command");
-                int exitstatus = pclose(fp);
-                if (WEXITSTATUS(exitstatus) != 0)
-                    die("zsyncmake command did not succeed");
+
+                int pid = fork();
+
+                if (verbose)
+                    fprintf(stderr, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
+
+                if (pid == -1) {
+                    // fork error
+                    die("fork() failed");
+                } else if (pid == 0) {
+                    char* zsyncmake_command[] = {zsyncmake_path, destination, "-u", basename(destination), NULL};
+
+                    // redirect stdout/stderr to /dev/null
+                    int fd = open("/dev/null", O_WRONLY);
+
+                    dup2(fd, 1);
+                    dup2(fd, 2);
+                    close(fd);
+
+                    execv(zsyncmake_path, zsyncmake_command);
+
+                    die("execv() should not return");
+                } else {
+                    int exitstatus;
+
+                    if (waitpid(pid, &exitstatus, 0) == -1) {
+                        perror("waitpid() failed");
+                        exit(EXIT_FAILURE);
+                    }
+
+                    if (WEXITSTATUS(exitstatus) != 0)
+                        die("zsyncmake command did not succeed");
+                }
             }
          } 
          
