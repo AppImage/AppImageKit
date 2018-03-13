@@ -6,11 +6,9 @@ set -x
 case "$ARCH" in
     "x86_64")
         export ARCH="x86_64"
-        sed -i -e 's|%ARCH%|amd64|g' appimaged.ctl
         ;;
     "i386"|"i686")
         export ARCH="i686"
-        sed -i -e 's|%ARCH%|i386|g' appimaged.ctl
         # sleep so as not to overwrite during uploading (FIXME)
         sleep 60
         ;;
