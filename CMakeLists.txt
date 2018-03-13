@@ -74,6 +74,8 @@ check_program(libtoolize)
 check_program(patch)
 check_program(sed)
 check_program(wget)
+check_program(xxd)
+check_program(desktop-file-validate)
 # TODO: add checks for remaining commands
 
 
