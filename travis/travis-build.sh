@@ -29,7 +29,7 @@ wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.g
 mkdir -p ./out/
 
 # build AppImageKit
-docker run \
+docker run --rm \
     --device /dev/fuse:mrw \
     -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
     -i \
@@ -43,7 +43,7 @@ find build/out/appimagetool.AppDir/
 find build/out/appimaged.AppDir/
 
 # build AppImages
-docker run \
+docker run --rm \
     --cap-add SYS_ADMIN \
     --device /dev/fuse:mrw \
     -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
