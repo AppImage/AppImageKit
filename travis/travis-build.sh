@@ -52,7 +52,7 @@ docker run \
     -v "${PWD}"/build:/build \
     -v $HOME/.gnupg:/root/.gnupg \
     "$DOCKER_IMAGE" \
-    /bin/bash -x "/travis/build-appimages.sh"
+    /bin/bash -x "/travis/build-appimages.sh" || true
 
 cd build/
 
