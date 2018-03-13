@@ -14,7 +14,7 @@ include(CTest)
 
 # determine Git commit ID
 execute_process(
-    COMMAND git describe --tags --always --abbrev=7
+    COMMAND git rev-parse --short HEAD
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     OUTPUT_VARIABLE GIT_COMMIT
     OUTPUT_STRIP_TRAILING_WHITESPACE
