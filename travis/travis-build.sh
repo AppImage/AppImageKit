@@ -14,9 +14,6 @@ case "$ARCH" in
         ;;
 esac
 
-# debug print
-grep Architecture appimaged.ctl
-
 # clean up and download data from GitHub
 rm -rf data.tar.g* .gnu* || true
 wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
