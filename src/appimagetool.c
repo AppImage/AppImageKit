@@ -1117,7 +1117,7 @@ main (int argc, char *argv[])
             } else {
                 fprintf (stderr, "zsyncmake is available and updateinformation is provided, "
                 "hence generating zsync file\n");
-                sprintf (command, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
+                sprintf (command, "'%s' '%s' -u '%s'", zsyncmake_path, destination, basename(destination));
                 if(verbose)
                     fprintf (stderr, "%s\n", command);
                 fp = popen(command, "r");
