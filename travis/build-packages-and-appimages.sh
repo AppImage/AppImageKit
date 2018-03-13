@@ -1,8 +1,10 @@
 #! /bin/bash
 
+set -e
+
 cd /AppImageKit/build
 
-cpack -V || cat _CPack_Packages/Linux/DEB/PreinstallOutput.log && exit 1
+cpack -V
 mv *.deb out/
 
 cd out/
