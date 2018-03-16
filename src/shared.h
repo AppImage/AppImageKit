@@ -19,8 +19,8 @@ struct appimage_handler
     bool is_open;
 } typedef appimage_handler;
 
-void extract_file_following_symlinks(const gchar* appimage_file_path, const char* file_path,
-                                     const char* target_dir);
+void appimage_extract_file_following_symlinks(const gchar* appimage_file_path, const char* file_path,
+                                              const char* target_dir);
 
 void extract_appimage_icon(appimage_handler* h, gchar* target);
 
@@ -84,9 +84,7 @@ void delete_thumbnail(char* path, char* size, gboolean verbose);
 
 int appimage_register_in_system(char* path, gboolean verbose);
 
-void create_thumbnail(const gchar* appimage_file_path, gboolean verbose);
-
-void create_thumbnail(const gchar* appimage_file_path, gboolean verbose);
+void appimage_create_thumbnail(const gchar* appimage_file_path, gboolean verbose);
 
 bool appimage_type2_register_in_system(char* path, gboolean verbose);
 
@@ -101,13 +99,13 @@ gchar** squash_get_matching_files(sqfs* fs, char* pattern, gchar* desktop_icon_v
 
 void squash_extract_inode_to_file(sqfs* fs, sqfs_inode* inode, const gchar* dest);
 
-int check_appimage_type(const char* path, gboolean verbose);
+int appimage_get_type(const char* path, gboolean verbose);
 
 void move_icon_to_destination(gchar* icon_path, gboolean verbose);
 
 char* get_thumbnail_path(const char* path, char* thumbnail_size, gboolean verbose);
 
-char* get_md5(const char* path);
+char* appimage_get_md5(const char* path);
 
 gchar* replace_str(const gchar* src, const gchar* find, const gchar* replace);
 

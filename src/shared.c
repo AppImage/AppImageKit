@@ -92,7 +92,7 @@ gchar* replace_str(const gchar const *src, const gchar const *find, const gchar 
 /* Return the md5 hash constructed according to
  * https://specifications.freedesktop.org/thumbnail-spec/thumbnail-spec-latest.html#THUMBSAVE
  * This can be used to identify files that are related to a given AppImage at a given location */
-char *get_md5(const char *path)
+char *appimage_get_md5(const char* path)
 {
     gchar *uri = g_filename_to_uri (path, NULL, NULL);
     if (uri != NULL)
@@ -120,7 +120,7 @@ char *get_md5(const char *path)
  */
 char *get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbose)
 {
-    char *md5 = get_md5(path);
+    char *md5 = appimage_get_md5(path);
     char *file  = g_strconcat(md5, ".png", NULL);
     gchar *thumbnail_path = g_build_filename(g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
     g_free(file);
@@ -210,7 +210,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
-int check_appimage_type(const char *path, gboolean verbose)
+int appimage_get_type(const char* path, gboolean verbose)
 {
     FILE *f = fopen(path, "rt");
     if (f != NULL)
@@ -701,7 +701,7 @@ bool appimage_type1_register_in_system(const char *path, gboolean verbose)
 {
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
     gchar *desktop_icon_value_original = NULL;
-    char *md5 = get_md5(path);
+    char *md5 = appimage_get_md5(path);
 
     if(verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
@@ -870,7 +870,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
 {
     fprintf(stderr, "squashfs based type 2 AppImage\n");
     long unsigned int fs_offset; // The offset at which a squashfs image is expected
-    char *md5 = get_md5(path);
+    char *md5 = appimage_get_md5(path);
     GKeyFile *key_file_structure = g_key_file_new(); // A structure that will hold the information from the desktop file
     gchar *desktop_icon_value_original = "iDoNotMatchARegex"; // FIXME: otherwise the regex does weird stuff in the first run
     if(verbose)
@@ -937,7 +937,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose)
 }
 
 // forward declare function
-void create_thumbnail(const gchar *appimage_file_path, gboolean verbose);
+void appimage_create_thumbnail(const gchar *appimage_file_path, gboolean verbose);
 
 /* Register an AppImage in the system */
 int appimage_register_in_system(char *path, gboolean verbose)
@@ -949,10 +949,10 @@ int appimage_register_in_system(char *path, gboolean verbose)
         g_str_has_suffix(path, ".~")
     )
         return 0;
-    int type = check_appimage_type(path, verbose);
+    int type = appimage_get_type(path, verbose);
     if(type == 1 || type == 2) {
         fprintf(stderr, "\n-> Registering type %d AppImage: %s\n", type, path);
-        create_thumbnail(path, false);
+        appimage_create_thumbnail(path, false);
     } else {
         if (verbose)
             fprintf(stderr, "-> Skipping file %s\n", path);
@@ -1027,7 +1027,7 @@ void unregister_using_md5_id(const char *name, int level, char* md5, gboolean ve
 /* Unregister an AppImage in the system */
 int appimage_unregister_in_system(char *path, gboolean verbose)
 {
-    char *md5 = get_md5(path);
+    char *md5 = appimage_get_md5(path);
 
     /* The file is already gone by now, so we can't determine its type anymore */
     fprintf(stderr, "_________________________\n");
@@ -1315,7 +1315,7 @@ appimage_handler appimage_type_2_create_handler() {
 /* Factory function for creating the right appimage handler for
  * a given file. */
 appimage_handler create_appimage_handler(const char *const path) {
-    int appimage_type = check_appimage_type(path, 0);
+    int appimage_type = appimage_get_type(path, 0);
 
     appimage_handler handler;
     fprintf(stderr,"AppImage type: %d\n", appimage_type);
@@ -1393,7 +1393,7 @@ void extract_appimage_icon(appimage_handler *h, gchar *target) {
 /* Create AppImage thumbanil according to
  * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
  */
-void create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
+void appimage_create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
     // extract AppImage icon to /tmp
     appimage_handler handler = create_appimage_handler(appimage_file_path);
 
@@ -1417,7 +1417,8 @@ void create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
 
 }
 
-void extract_file_following_symlinks(const gchar const *appimage_file_path, const char *file_path, const char *target_dir) {
+void appimage_extract_file_following_symlinks(const gchar* appimage_file_path, const char* file_path,
+                                              const char* target_dir) {
     appimage_handler handler = create_appimage_handler(appimage_file_path);
 
     extract_appimage_file(&handler, file_path, target_dir);

@@ -37,7 +37,7 @@ protected:
 
     bool areIntegrationFilesDeployed(const std::string& path)
     {
-        gchar *sum = get_md5(path.c_str());
+        gchar *sum = appimage_get_md5(path.c_str());
 
         GDir *dir;
         GError *error;
@@ -61,21 +61,21 @@ protected:
     }
 };
 
-TEST_F(LibAppImageTest, check_appimage_type_invalid)
+TEST_F(LibAppImageTest, appimage_get_type_invalid)
 {
-    int t = check_appimage_type("/tmp", 0);
+    int t = appimage_get_type("/tmp", 0);
     ASSERT_EQ(t, -1);
 }
 
-TEST_F(LibAppImageTest, check_appimage_type_1)
+TEST_F(LibAppImageTest, appimage_get_type_1)
 {
-    int t = check_appimage_type(appImage_type_1_file_path.c_str(), 0);
+    int t = appimage_get_type(appImage_type_1_file_path.c_str(), 0);
     ASSERT_EQ(t, 1);
 }
 
-TEST_F(LibAppImageTest, check_appimage_type_2)
+TEST_F(LibAppImageTest, appimage_get_type_2)
 {
-    int t = check_appimage_type(appImage_type_2_file_path.c_str(), 0);
+    int t = appimage_get_type(appImage_type_2_file_path.c_str(), 0);
     ASSERT_EQ(t, 2);
 }
 
@@ -123,10 +123,10 @@ TEST_F(LibAppImageTest, appimage_unregister_in_system) {
     ASSERT_FALSE(areIntegrationFilesDeployed(appImage_type_2_file_path));
 }
 
-TEST_F(LibAppImageTest, get_md5)
+TEST_F(LibAppImageTest, appimage_get_md5)
 {
     std::string expected = "128e476a7794288cad0eb2542f7c995b";
-    gchar * sum = get_md5("/tmp/testfile");
+    gchar * sum = appimage_get_md5("/tmp/testfile");
 
     int res = g_strcmp0(expected.c_str(), sum);
     ASSERT_EQ(res, 0);
@@ -136,16 +136,16 @@ TEST_F(LibAppImageTest, get_md5)
 TEST_F(LibAppImageTest, get_md5_invalid_file_path)
 {
     std::string expected = "";
-    gchar * sum = get_md5("");
+    gchar * sum = appimage_get_md5("");
 
     int res = g_strcmp0(expected.c_str(), sum);
     ASSERT_EQ(res, 0);
 }
 
 TEST_F(LibAppImageTest, create_thumbnail_appimage_type_1) {
-    create_thumbnail(appImage_type_1_file_path.c_str());
+        appimage_create_thumbnail(appImage_type_1_file_path.c_str());
 
-    gchar *sum = get_md5(appImage_type_1_file_path.c_str());
+    gchar *sum = appimage_get_md5(appImage_type_1_file_path.c_str());
     std::string path = std::string(g_get_user_cache_dir())
                        + "/thumbnails/normal/"
                        + std::string(sum) + ".png";
@@ -159,9 +159,9 @@ TEST_F(LibAppImageTest, create_thumbnail_appimage_type_1) {
 }
 
 TEST_F(LibAppImageTest, create_thumbnail_appimage_type_2) {
-    create_thumbnail(appImage_type_2_file_path.c_str());
+        appimage_create_thumbnail(appImage_type_2_file_path.c_str());
 
-    gchar* sum = get_md5(appImage_type_2_file_path.c_str());
+    gchar* sum = appimage_get_md5(appImage_type_2_file_path.c_str());
     std::string path = std::string(g_get_user_cache_dir())
                        + "/thumbnails/normal/"
                        + std::string(sum) + ".png";
@@ -174,9 +174,9 @@ TEST_F(LibAppImageTest, create_thumbnail_appimage_type_2) {
     rm_file(path);
 }
 
-TEST_F(LibAppImageTest, extract_file_following_symlinks) {
+TEST_F(LibAppImageTest, appimage_extract_file_following_symlinks) {
         char * target_path = const_cast<char *>("/tmp/test_libappimage_tmp_file");
-    extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path);
+        appimage_extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path);
 
     char *expected = const_cast<char *>("[Desktop Entry]\n"
                     "Version=1.0\n"
