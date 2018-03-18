@@ -59,7 +59,7 @@ msgstr ""
 msgid "user_story_2"
 msgstr ""
 "As an application author, I want to provide packages for Linux desktop "
-"systems, without the need to get it \\'into\\' a distribution and without "
+"systems, without the need to get it 'into' a distribution and without "
 "having to build for gazillions of different distributions."
 
 #: index.jinja2:156
