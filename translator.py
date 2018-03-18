@@ -51,7 +51,9 @@ def render_pages():
     if os.path.exists(index_html_path):
         os.unlink(index_html_path)
 
-    os.symlink(os.path.join(out_dir, "index.en.html"), index_html_path)
+    index_en_html_path = "index.en.html"
+
+    os.symlink(index_en_html_path, index_html_path)
 
     return True
 
