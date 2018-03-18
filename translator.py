@@ -18,6 +18,7 @@ for entry in os.listdir(os.path.join(this_dir, "locale")):
 
 def render_pages():
     localedir = os.path.join(this_dir, "locale")
+    out_dir = os.path.join(this_dir, "www")
 
     for locale in os.listdir(localedir):
         jinja_env = jinja2.Environment(
@@ -37,20 +38,24 @@ def render_pages():
 
         jinja_env.install_gettext_translations(translation)
 
-        if locale == "en":
-            filename = "index.html"
-        else:
-            filename = "index.%s.html" % locale
+        filename = "index.%s.html" % locale
 
         print("Rendering page %s for locale %s" % (filename, locale))
 
-        with open(os.path.join(this_dir, "www", filename), "w") as f:
+        with open(os.path.join(out_dir, filename), "w") as f:
             html = template.render(languages=[locale])
             f.write(html)
 
+    index_html_path = os.path.join(out_dir, "index.html")
+
+    if os.path.exists(index_html_path):
+        os.unlink(index_html_path)
+
+    os.symlink(os.path.join(out_dir, "index.en.html"), index_html_path)
+
     return True
 
-
+u
 class cd:
     def __init__(self, cd_to):
         self.orig_cwd = None
