@@ -82,6 +82,8 @@ void unregister_using_md5_id(const char* name, int level, char* md5, gboolean ve
 
 void delete_thumbnail(char* path, char* size, gboolean verbose);
 
+bool appimage_is_registered_in_system(const char* path);
+
 int appimage_register_in_system(char* path, gboolean verbose);
 
 void appimage_create_thumbnail(const gchar* appimage_file_path, gboolean verbose);
@@ -95,7 +97,9 @@ bool write_edited_desktop_file(GKeyFile* key_file_structure, const char* appimag
 
 gboolean g_key_file_load_from_squash(sqfs* fs, char* path, GKeyFile* key_file_structure, gboolean verbose);
 
-gchar** squash_get_matching_files(sqfs* fs, char* pattern, gchar* desktop_icon_value_original, char* md5, gboolean verbose);
+gchar** squash_get_matching_files_install_icons_and_mime_data(sqfs* fs, char* pattern,
+                                                              gchar* desktop_icon_value_original, char* md5,
+                                                              gboolean verbose);
 
 void squash_extract_inode_to_file(sqfs* fs, sqfs_inode* inode, const gchar* dest);
 
