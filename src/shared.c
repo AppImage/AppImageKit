@@ -714,12 +714,10 @@ bool appimage_type1_get_desktop_filename_and_key_file(struct archive** a, gchar*
     // must not be freed
     struct archive_entry* entry;
 
-    int r = -1;
-
     gchar* filename;
 
     for (;;) {
-        r = archive_read_next_header(*a, &entry);
+        int r = archive_read_next_header(*a, &entry);
 
         if (r == ARCHIVE_EOF) {
             return false;
@@ -1164,8 +1162,7 @@ bool appimage_is_registered_in_system(const char* path) {
         case 1:
             {
                 // open AppImage as ISO9660 file
-                struct archive *a = NULL;
-                a = archive_read_new();
+                struct archive *a = archive_read_new();
 
                 if (archive_read_support_format_iso9660(a) != ARCHIVE_OK ||
                     archive_read_open_filename(a, path, 10240) != ARCHIVE_OK) {
