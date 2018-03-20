@@ -12,6 +12,8 @@ char *appimage_get_md5(char const* path);
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
 int appimage_get_type(const char* path, bool verbose);
 
+bool appimage_is_registered_in_system(const char* path);
+
 /* Register a type 1 AppImage in the system */
 bool appimage_type1_register_in_system(const char *path, bool verbose);
 

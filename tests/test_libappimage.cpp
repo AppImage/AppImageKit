@@ -63,26 +63,22 @@ protected:
 
 TEST_F(LibAppImageTest, appimage_get_type_invalid)
 {
-    int t = appimage_get_type("/tmp", 0);
-    ASSERT_EQ(t, -1);
+    ASSERT_EQ(appimage_get_type("/tmp", false), -1);
 }
 
 TEST_F(LibAppImageTest, appimage_get_type_1)
 {
-    int t = appimage_get_type(appImage_type_1_file_path.c_str(), 0);
-    ASSERT_EQ(t, 1);
+    ASSERT_EQ(appimage_get_type(appImage_type_1_file_path.c_str(), false), 1);
 }
 
 TEST_F(LibAppImageTest, appimage_get_type_2)
 {
-    int t = appimage_get_type(appImage_type_2_file_path.c_str(), 0);
-    ASSERT_EQ(t, 2);
+    ASSERT_EQ(appimage_get_type(appImage_type_2_file_path.c_str(), false), 2);
 }
 
 TEST_F(LibAppImageTest, appimage_register_in_system_with_type1)
 {
-    int r = appimage_register_in_system(appImage_type_1_file_path.c_str(), true);
-    ASSERT_EQ(r, 0);
+    ASSERT_EQ(appimage_register_in_system(appImage_type_1_file_path.c_str(), true), 0);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
 
@@ -91,8 +87,7 @@ TEST_F(LibAppImageTest, appimage_register_in_system_with_type1)
 
 TEST_F(LibAppImageTest, appimage_register_in_system_with_type2)
 {
-    int r = appimage_register_in_system(appImage_type_2_file_path.c_str(), true);
-    ASSERT_EQ(r, 0);
+    ASSERT_EQ(appimage_register_in_system(appImage_type_2_file_path.c_str(), true), 0);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
 
@@ -101,8 +96,7 @@ TEST_F(LibAppImageTest, appimage_register_in_system_with_type2)
 
 TEST_F(LibAppImageTest, appimage_type1_register_in_system)
 {
-    bool r = appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false);
-    ASSERT_TRUE(r);
+    ASSERT_TRUE(appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false));
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
 
@@ -111,8 +105,7 @@ TEST_F(LibAppImageTest, appimage_type1_register_in_system)
 
 TEST_F(LibAppImageTest, appimage_type2_register_in_system)
 {
-    bool r = appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false);
-    ASSERT_TRUE(r);
+    ASSERT_TRUE(appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false));
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
     appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
@@ -175,16 +168,16 @@ TEST_F(LibAppImageTest, create_thumbnail_appimage_type_2) {
 }
 
 TEST_F(LibAppImageTest, appimage_extract_file_following_symlinks) {
-        char * target_path = const_cast<char *>("/tmp/test_libappimage_tmp_file");
-        appimage_extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path);
+    const char target_path[] = "/tmp/test_libappimage_tmp_file";
+    appimage_extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path);
 
-    char *expected = const_cast<char *>("[Desktop Entry]\n"
-                    "Version=1.0\n"
-                    "Type=Application\n"
-                    "Name=Echo\n"
-                    "Comment=Just echo.\n"
-                    "Exec=echo %F\n"
-                    "Icon=utilities-terminal\n");
+    const char expected[] = ("[Desktop Entry]\n"
+                             "Version=1.0\n"
+                             "Type=Application\n"
+                             "Name=Echo\n"
+                             "Comment=Just echo.\n"
+                             "Exec=echo %F\n"
+                             "Icon=utilities-terminal\n");
 
     ASSERT_TRUE(g_file_test(target_path, G_FILE_TEST_EXISTS));
 
@@ -192,7 +185,7 @@ TEST_F(LibAppImageTest, appimage_extract_file_following_symlinks) {
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
 
-    std::vector<char> buffer(size);
+    std::vector<char> buffer(static_cast<unsigned long>(size));
     if (file.read(buffer.data(), size))
         ASSERT_TRUE( strncmp(expected, buffer.data(), strlen(expected)) == 0 );
     else
@@ -200,6 +193,34 @@ TEST_F(LibAppImageTest, appimage_extract_file_following_symlinks) {
 
     // Clean
     remove(target_path);
+}
+
+bool test_appimage_is_registered_in_system(const std::string& pathToAppImage, bool integrateAppImage) {
+    if (integrateAppImage) {
+        EXPECT_EQ(appimage_register_in_system(pathToAppImage.c_str(), false), 0);
+    }
+
+    return appimage_is_registered_in_system(pathToAppImage.c_str());
+}
+
+TEST_F(LibAppImageTest, appimage_is_registered_in_system) {
+    // make sure tested AppImages are not registered
+    appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
+    appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
+
+    // if the test order is false -> true, cleanup isn't necessary
+
+    // type 1 tests
+    EXPECT_FALSE(test_appimage_is_registered_in_system(appImage_type_1_file_path, false));
+    EXPECT_TRUE(test_appimage_is_registered_in_system(appImage_type_1_file_path, true));
+
+    // type 2 tests
+    EXPECT_FALSE(test_appimage_is_registered_in_system(appImage_type_2_file_path, false));
+    EXPECT_TRUE(test_appimage_is_registered_in_system(appImage_type_2_file_path, true));
+
+    // cleanup
+    appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
+    appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
 }
 
 } // namespace
