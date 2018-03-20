@@ -794,10 +794,8 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
 
     bool errored = false;
 
-    int r = -1;
-
     for (;;) {
-        r = archive_read_next_header(*a, &entry);
+        int r = archive_read_next_header(*a, &entry);
 
         if (r == ARCHIVE_EOF) {
             break;
