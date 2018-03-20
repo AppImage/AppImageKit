@@ -105,9 +105,9 @@ TEST_F(LibAppImageTest, appimage_type1_register_in_system)
 
 TEST_F(LibAppImageTest, appimage_type2_register_in_system)
 {
-    ASSERT_TRUE(appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false));
+    EXPECT_TRUE(appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false));
 
-    ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
+    EXPECT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
     appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
 }
 
@@ -118,12 +118,15 @@ TEST_F(LibAppImageTest, appimage_unregister_in_system) {
 
 TEST_F(LibAppImageTest, appimage_get_md5)
 {
-    std::string expected = "128e476a7794288cad0eb2542f7c995b";
-    gchar * sum = appimage_get_md5("/tmp/testfile");
+    std::string pathToTestFile = "/some/fixed/path";
 
-    int res = g_strcmp0(expected.c_str(), sum);
-    ASSERT_EQ(res, 0);
+    std::string expected = "972f4824b8e6ea26a55e9af60a285af7";
+
+    gchar* sum = appimage_get_md5(pathToTestFile.c_str());
+    EXPECT_EQ(sum, expected);
     g_free(sum);
+
+    unlink(pathToTestFile.c_str());
 }
 
 TEST_F(LibAppImageTest, get_md5_invalid_file_path)
