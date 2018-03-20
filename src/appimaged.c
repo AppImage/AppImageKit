@@ -50,6 +50,7 @@
 
 #include <glib.h>
 #include <glib/gprintf.h>
+#include <glib/gstrfuncs.h>
 
 #include "shared.c"
 
@@ -174,6 +175,24 @@ void add_dir_to_watch(const char *directory)
         }
         initially_register(directory, 0);
     }
+}
+
+void add_default_watch_dirs(gchar *user_bin_dir)
+{
+    add_dir_to_watch(user_bin_dir);
+    add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
+    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
+    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
+    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Applications", NULL));
+    add_dir_to_watch(g_build_filename("/Applications", NULL));
+    // Perhaps we should determine the following dynamically using something like
+    // mount | grep -i iso | head -n 1 | cut -d ' ' -f 3
+    add_dir_to_watch(g_build_filename("/isodevice/Applications", NULL)); // Ubuntu Live media
+    add_dir_to_watch(g_build_filename("/isofrom/Applications", NULL)); // openSUSE Live media
+    add_dir_to_watch(g_build_filename("/run/archiso/img_dev/Applications", NULL)); // Antergos Live media
+    add_dir_to_watch(g_build_filename("/lib/live/mount/findiso/Applications", NULL)); // Manjaro Live media
+    add_dir_to_watch(g_build_filename("/opt", NULL));
+    add_dir_to_watch(g_build_filename("/usr/local/bin", NULL));
 }
 
 void handle_event(struct inotify_event *event)
@@ -318,20 +337,16 @@ int main(int argc, char ** argv) {
         }
     }
 
-    add_dir_to_watch(user_bin_dir);
-    add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Applications", NULL));
-    add_dir_to_watch(g_build_filename("/Applications", NULL));
-    // Perhaps we should determine the following dynamically using something like
-    // mount | grep -i iso | head -n 1 | cut -d ' ' -f 3
-    add_dir_to_watch(g_build_filename("/isodevice/Applications", NULL)); // Ubuntu Live media
-    add_dir_to_watch(g_build_filename("/isofrom/Applications", NULL)); // openSUSE Live media
-    add_dir_to_watch(g_build_filename("/run/archiso/img_dev/Applications", NULL)); // Antergos Live media
-    add_dir_to_watch(g_build_filename("/lib/live/mount/findiso/Applications", NULL)); // Manjaro Live media
-    add_dir_to_watch(g_build_filename("/opt", NULL));
-    add_dir_to_watch(g_build_filename("/usr/local/bin", NULL));
+    const gchar *search_path = g_getenv("APPIMAGED_PATH");
+    if (search_path) {
+        gchar **search_dirs = g_strsplit(search_path, ":", -1);
+        for (guint i = 0; i < g_strv_length(search_dirs); ++i)
+            add_dir_to_watch(search_dirs[i]);
+        size_t search_path_len = strlen(search_path);
+        if (search_path_len > 0 && search_path[search_path_len - 1] == ':')
+            add_default_watch_dirs(user_bin_dir);
+    } else
+        add_default_watch_dirs(user_bin_dir);
 
     struct inotify_event * event = inotifytools_next_event(-1);
     while (event) {
