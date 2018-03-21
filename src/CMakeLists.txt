@@ -242,7 +242,7 @@ install(
 )
 
 install(
-    FILES ${CMAKE_SOURCE_DIR}/resources/appimaged.service
+    FILES ${PROJECT_SOURCE_DIR}/resources/appimaged.service
     DESTINATION lib/systemd/user/
     COMPONENT appimaged
 )
