@@ -94,7 +94,15 @@ gchar* replace_str(const gchar const *src, const gchar const *find, const gchar 
  * This can be used to identify files that are related to a given AppImage at a given location */
 char *appimage_get_md5(const char* path)
 {
-    gchar *uri = g_filename_to_uri (path, NULL, NULL);
+    char* absolute_path;
+
+    if ((absolute_path = realpath(path, NULL)) == NULL)
+        absolute_path = strdup(path);
+
+    gchar *uri = g_filename_to_uri(absolute_path, NULL, NULL);
+
+    free(absolute_path);
+
     if (uri != NULL)
     {
         GChecksum *checksum;
