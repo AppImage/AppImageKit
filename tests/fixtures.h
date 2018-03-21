@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cerrno>
 #include <ftw.h>
 #include <unistd.h>
 
@@ -20,7 +21,7 @@ public:
     AppImageKitTest() {
         char* tmpl = strdup("/tmp/AppImageKit-unit-tests-XXXXXX");
         tempDir = mkdtemp(tmpl);
-        free(tmpl);
+        delete[] tmpl;
 
         tempHome = tempDir + "/HOME";
 
@@ -75,14 +76,30 @@ public:
 
 private:
     static const int rmTree(const std::string& path) {
-        return nftw(path.c_str(), unlinkCb, 64, FTW_DEPTH | FTW_PHYS);
+        int rv = nftw(path.c_str(), unlinkCb, 64, FTW_DEPTH|FTW_MOUNT|FTW_PHYS);
+
+        if (rv != 0) {
+            int error = errno;
+            std::cerr << "nftw() in rmTree(" << path << ") failed: " << strerror(error) << std::endl;
+            return rv;
+        }
+
+        return 0;
     }
 
     static int unlinkCb(const char* fpath, const struct stat* sb, int typeflag, struct FTW* ftwbuf) {
-        int rv = remove(fpath);
+        int rv;
 
-        if (rv)
-            perror(fpath);
+        switch (typeflag) {
+            case FTW_D:
+            case FTW_DNR:
+            case FTW_DP:
+                rv = rmdir(fpath);
+                break;
+            default:
+                rv = unlink(fpath);
+                break;
+        }
 
         return rv;
     };

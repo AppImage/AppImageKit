@@ -78,7 +78,7 @@ TEST_F(LibAppImageTest, appimage_get_type_2)
 
 TEST_F(LibAppImageTest, appimage_register_in_system_with_type1)
 {
-    ASSERT_EQ(appimage_register_in_system(appImage_type_1_file_path.c_str(), true), 0);
+    ASSERT_EQ(appimage_register_in_system(appImage_type_1_file_path.c_str(), false), 0);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
 
@@ -87,7 +87,7 @@ TEST_F(LibAppImageTest, appimage_register_in_system_with_type1)
 
 TEST_F(LibAppImageTest, appimage_register_in_system_with_type2)
 {
-    ASSERT_EQ(appimage_register_in_system(appImage_type_2_file_path.c_str(), true), 0);
+    ASSERT_EQ(appimage_register_in_system(appImage_type_2_file_path.c_str(), false), 0);
 
     ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
 
@@ -139,7 +139,7 @@ TEST_F(LibAppImageTest, get_md5_invalid_file_path)
 }
 
 TEST_F(LibAppImageTest, create_thumbnail_appimage_type_1) {
-        appimage_create_thumbnail(appImage_type_1_file_path.c_str());
+    appimage_create_thumbnail(appImage_type_1_file_path.c_str());
 
     gchar *sum = appimage_get_md5(appImage_type_1_file_path.c_str());
     std::string path = std::string(g_get_user_cache_dir())
@@ -155,7 +155,7 @@ TEST_F(LibAppImageTest, create_thumbnail_appimage_type_1) {
 }
 
 TEST_F(LibAppImageTest, create_thumbnail_appimage_type_2) {
-        appimage_create_thumbnail(appImage_type_2_file_path.c_str());
+    appimage_create_thumbnail(appImage_type_2_file_path.c_str());
 
     gchar* sum = appimage_get_md5(appImage_type_2_file_path.c_str());
     std::string path = std::string(g_get_user_cache_dir())
@@ -171,8 +171,8 @@ TEST_F(LibAppImageTest, create_thumbnail_appimage_type_2) {
 }
 
 TEST_F(LibAppImageTest, appimage_extract_file_following_symlinks) {
-    const char target_path[] = "/tmp/test_libappimage_tmp_file";
-    appimage_extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path);
+    std::string target_path = tempDir + "test_libappimage_tmp_file";
+    appimage_extract_file_following_symlinks(appImage_type_2_file_path.c_str(), "echo.desktop", target_path.c_str());
 
     const char expected[] = ("[Desktop Entry]\n"
                              "Version=1.0\n"
@@ -182,9 +182,9 @@ TEST_F(LibAppImageTest, appimage_extract_file_following_symlinks) {
                              "Exec=echo %F\n"
                              "Icon=utilities-terminal\n");
 
-    ASSERT_TRUE(g_file_test(target_path, G_FILE_TEST_EXISTS));
+    ASSERT_TRUE(g_file_test(target_path.c_str(), G_FILE_TEST_EXISTS));
 
-    std::ifstream file(target_path, std::ios::binary | std::ios::ate);
+    std::ifstream file(target_path.c_str(), std::ios::binary | std::ios::ate);
     std::streamsize size = file.tellg();
     file.seekg(0, std::ios::beg);
 
@@ -195,7 +195,7 @@ TEST_F(LibAppImageTest, appimage_extract_file_following_symlinks) {
         FAIL();
 
     // Clean
-    remove(target_path);
+    remove(target_path.c_str());
 }
 
 bool test_appimage_is_registered_in_system(const std::string& pathToAppImage, bool integrateAppImage) {
