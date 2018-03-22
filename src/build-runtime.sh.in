@@ -73,7 +73,9 @@ HEXLENGTH=$(objdump -h runtime | grep .upd_info | awk '{print $3}')
 dd bs=1 if=runtime skip=$(($(echo 0x$HEXOFFSET)+0)) count=$(($(echo 0x$HEXLENGTH)+0)) | xxd
 
 # Insert AppImage magic bytes
-printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
+if [ "@APPIMAGEKIT_EMBED_MAGIC_BYTES@" == "ON" ]; then
+    printf '\x41\x49\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
+fi
 
 # Convert runtime into a data object that can be embedded into appimagetool
 ld -r -b binary -o data.o runtime

@@ -1,6 +1,10 @@
 find_package(Sanitizers)
 
 # set up build script
+
+# if set to anything but ON, the magic bytes won't be embedded
+set(APPIMAGEKIT_EMBED_MAGIC_BYTES ON CACHE BOOL "")
+
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/build-runtime.sh.in
     ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
