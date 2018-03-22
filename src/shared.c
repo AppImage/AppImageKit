@@ -1262,7 +1262,10 @@ bool appimage_is_registered_in_system(const char* path) {
     return rv;
 }
 
-/* Register an AppImage in the system */
+/*
+ * Register an AppImage in the system
+ * Returns 0 on success, non-0 otherwise.
+ */
 int appimage_register_in_system(char *path, gboolean verbose)
 {
     if((g_str_has_suffix(path, ".part")) ||
