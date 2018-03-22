@@ -221,81 +221,89 @@ target_link_libraries(digest
 add_sanitizers(digest)
 
 
-# install binaries
-if(AUXILIARY_FILES_DESTINATION)
+set(APPIMAGEKIT_INSTALL FALSE CACHE BOOL "")
+
+if(NOT APPIMAGEKIT_INSTALL)
+    message(STATUS "NOT installing AppImageKit files")
+else(NOT APPIMAGEKIT_INSTALL)
+    message(STATUS "Installing AppImageKit files")
+
+    # install binaries
+    if(AUXILIARY_FILES_DESTINATION)
+        install(
+            PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
+            DESTINATION ${AUXILIARY_FILES_DESTINATION}
+            COMPONENT applications
+        )
+    else()
+        install(
+            PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
+            DESTINATION bin
+            COMPONENT applications
+        )
+    endif()
+
     install(
-        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
-        DESTINATION ${AUXILIARY_FILES_DESTINATION}
-        COMPONENT applications
+        TARGETS appimaged
+        RUNTIME DESTINATION bin COMPONENT appimaged
     )
-else()
+
     install(
-        PROGRAMS ${mksquashfs_INSTALL_DIR}/mksquashfs ${CMAKE_CURRENT_BINARY_DIR}/runtime
-        DESTINATION bin
-        COMPONENT applications
+        FILES ${PROJECT_SOURCE_DIR}/resources/appimaged.service
+        DESTINATION lib/systemd/user/
+        COMPONENT appimaged
     )
-endif()
-
-install(
-    TARGETS appimaged
-    RUNTIME DESTINATION bin COMPONENT appimaged
-)
-
-install(
-    FILES ${PROJECT_SOURCE_DIR}/resources/appimaged.service
-    DESTINATION lib/systemd/user/
-    COMPONENT appimaged
-)
-install(
-    TARGETS AppRun appimagetool digest validate
-    RUNTIME DESTINATION bin COMPONENT applications
-    LIBRARY DESTINATION lib COMPONENT applications
-    ARCHIVE DESTINATION lib/static COMPONENT applications
-    INCLUDES DESTINATION include COMPONENT applications
-)
+    install(
+        TARGETS AppRun appimagetool digest validate
+        RUNTIME DESTINATION bin COMPONENT applications
+        LIBRARY DESTINATION lib COMPONENT applications
+        ARCHIVE DESTINATION lib/static COMPONENT applications
+        INCLUDES DESTINATION include COMPONENT applications
+    )
 
 
-# install libappimage
-install(TARGETS libappimage
-    EXPORT AppImageKitTargets
-    LIBRARY DESTINATION lib COMPONENT libappimage
-    ARCHIVE DESTINATION lib/static COMPONENT libappimage
-    PUBLIC_HEADER DESTINATION include/appimage COMPONENT libappimage-dev
-)
+    # install libappimage
+    install(TARGETS libappimage
+        EXPORT AppImageKitTargets
+        LIBRARY DESTINATION lib COMPONENT libappimage
+        ARCHIVE DESTINATION lib/static COMPONENT libappimage
+        PUBLIC_HEADER DESTINATION include/appimage COMPONENT libappimage-dev
+    )
 
-# Add all targets to the build-tree export set
-export(
-    TARGETS libappimage
-    FILE "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitTargets.cmake"
-)
+    # Add all targets to the build-tree export set
+    export(
+        TARGETS libappimage
+        FILE "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitTargets.cmake"
+    )
 
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
-export(PACKAGE AppImageKit)
+    # Export the package for use from the build-tree
+    # (this registers the build-tree with a global CMake-registry)
+    export(PACKAGE AppImageKit)
 
-# Create the AppImageConfig.cmake and AppImageConfigVersion files
-configure_file(
-    "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfig.cmake.in"
-    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
-    @ONLY
-)
-# ... for both
-configure_file(
-    "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfigVersion.cmake.in"
-    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
-    @ONLY
-)
+    # Create the AppImageConfig.cmake and AppImageConfigVersion files
+    configure_file(
+        "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfig.cmake.in"
+        "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
+        @ONLY
+    )
+    # ... for both
+    configure_file(
+        "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfigVersion.cmake.in"
+        "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
+        @ONLY
+    )
 
-# Install the AppImageConfig.cmake and AppImageConfigVersion.cmake
-install(FILES
-    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
-    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
-    DESTINATION "lib/cmake/AppImageKit"
-    COMPONENT libappimage-dev
-)
+    # Install the AppImageConfig.cmake and AppImageConfigVersion.cmake
+    install(FILES
+        "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
+        "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
+        DESTINATION "lib/cmake/AppImageKit"
+        COMPONENT libappimage-dev
+    )
 
-# Install the export set for use with the install-tree
-install(EXPORT AppImageKitTargets
-    DESTINATION "lib/cmake/AppImageKit"
-    COMPONENT libappimage-dev
-)
+    # Install the export set for use with the install-tree
+    install(EXPORT AppImageKitTargets
+        DESTINATION "lib/cmake/AppImageKit"
+        COMPONENT libappimage-dev
+    )
+endif(NOT APPIMAGEKIT_INSTALL)
