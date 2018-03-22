@@ -20,7 +20,10 @@ bool appimage_type1_register_in_system(const char *path, bool verbose);
 /* Register a type 2 AppImage in the system */
 bool appimage_type2_register_in_system(const char *path, bool verbose);
 
-/* Register an AppImage in the system */
+/*
+ * Register an AppImage in the system
+ * Returns 0 on success, non-0 otherwise.
+ */
 int appimage_register_in_system(const char *path, bool verbose);
 
 /* Unregister an AppImage in the system */
