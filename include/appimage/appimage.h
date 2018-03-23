@@ -45,6 +45,7 @@ void appimage_create_thumbnail(const char* appimage_file_path);
  * */
 char** appimage_list_files(const char* path);
 
+/* Releases memory of a string list (a.k.a. list of pointers to char arrays allocated in heap memory). */
 void appimage_string_list_free(char** list);
 
 #ifdef __cplusplus
