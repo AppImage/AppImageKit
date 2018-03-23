@@ -41,13 +41,12 @@ void appimage_create_thumbnail(const char* appimage_file_path);
 /* List files contained in the AppImage file.
  * Returns: a newly allocated char** ended at NULL. If no files ware found also is returned a {NULL}
  *
- * You should ALWAYS take care of releasing this structure like this:
- * char **list;
- * for (char **ptr = list; *ptr != null; ptr ++)
- *   free(*ptr)
- * free(list);
+ * You should ALWAYS take care of releasing this using `appimage_string_list_free`.
  * */
 char** appimage_list_files(const char* path);
+
+void appimage_string_list_free(char** list);
+
 #ifdef __cplusplus
 }
 #endif

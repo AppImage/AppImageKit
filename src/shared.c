@@ -1804,3 +1804,10 @@ char** appimage_list_files(const char *path) {
 
     return result;
 }
+
+void appimage_string_list_free(char** list) {
+    for (char **ptr = list; ptr != NULL && *ptr != NULL; ptr ++)
+        free(*ptr);
+
+    free(list);
+}

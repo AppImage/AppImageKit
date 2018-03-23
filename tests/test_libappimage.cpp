@@ -219,12 +219,11 @@ namespace AppImageTests {
         char *expected[] = {NULL};
 
         int i = 0;
-        for (; files[i] != NULL && expected[i] != NULL; i++) {
+        for (; files[i] != NULL && expected[i] != NULL; i++)
             EXPECT_STREQ(files[i], expected[i]);
-            free(files[i]);
-        }
 
-        free(files);
+        appimage_string_list_free(files);
+
         if (i != 0)
             FAIL();
     }
@@ -246,12 +245,10 @@ namespace AppImageTests {
                 NULL};
 
         int i = 0;
-        for (; files[i] != NULL && expected[i] != NULL; i++) {
+        for (; files[i] != NULL && expected[i] != NULL; i++)
             EXPECT_STREQ(files[i], expected[i]);
-            free(files[i]);
-        }
 
-        free(files);
+        appimage_string_list_free(files);
         if (i != 9)
             FAIL();
     }
@@ -271,12 +268,10 @@ namespace AppImageTests {
                 NULL};
 
         int i = 0;
-        for (; files[i] != NULL && expected[i] != NULL; i++) {
+        for (; files[i] != NULL && expected[i] != NULL; i++)
             EXPECT_STREQ(files[i], expected[i]);
-            free(files[i]);
-        }
 
-        free(files);
+        appimage_string_list_free(files);
         if (i != 7)
             FAIL();
     }
