@@ -65,7 +65,7 @@ fi
 if [ -e /usr/bin/pacman ] ; then
   echo "Checking arch package provides and installed packages" "cmake"
   declare -a arr=("zsync" "git" "libarchive" "autoconf" "libtool" "make"
-    "libtool" "fuse2" "xz" "glib2" "openssl" "inotify-tools" "lz4" "gcc" "g++")
+    "libtool" "fuse2" "xz" "glib2" "openssl" "inotify-tools" "lz4" "gcc" "cmake")
   for i in "${arr[@]}"
   do
       if [ ! "$(package-query -Q $i || package-query --qprovides $i -Q)" ]; then
