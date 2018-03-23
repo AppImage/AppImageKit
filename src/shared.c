@@ -1766,3 +1766,41 @@ void appimage_extract_file_following_symlinks(const gchar* appimage_file_path, c
 
     extract_appimage_file(&handler, file_path, target_dir);
 }
+
+void extract_appimage_file_name(void *handler_data, void *entry_data, void *user_data) {
+    appimage_handler *h = handler_data;
+    struct archive_entry *entry = entry_data;
+    GList **list = user_data;
+
+    char *filename = h->get_file_name(h, entry);
+
+    GList* ptr = g_list_find_custom (*list, filename, g_strcmp0);
+
+    if (ptr == NULL)
+        *list = g_list_append(*list, filename);
+    else
+        free(filename);
+}
+
+
+char** appimage_list_files(const char *path) {
+    GList *list = NULL;
+    appimage_handler handler = create_appimage_handler(path);
+
+    handler.traverse(&handler, extract_appimage_file_name, &list);
+
+    int n = g_list_length(list);
+    char **result = malloc(sizeof(char*) * (n+1) );
+    result[n] = NULL;
+
+    GList *itr = list;
+    for (int i = 0; i < n; i ++) {
+        result[i] = (char *) itr->data;
+        itr = itr->next;
+    }
+
+
+    g_list_free(list);
+
+    return result;
+}
