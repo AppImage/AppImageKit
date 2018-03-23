@@ -63,9 +63,9 @@ fi
 
 # Install dependencies for Arch Linux
 if [ -e /usr/bin/pacman ] ; then
-  echo "Checking arch package provides and installed packages" "cmake"
-  declare -a arr=("zsync" "git" "libarchive" "autoconf" "libtool" "make"
-    "libtool" "fuse2" "xz" "glib2" "openssl" "inotify-tools" "lz4" "gcc" "cmake")
+  echo "Checking arch package provides and installed packages"
+  declare -a arr=("zsync" "git" "libarchive" "autoconf" "libtool" "libtool" "fuse2" "xz" "glib2" "openssl"
+                  "inotify-tools" "lz4" "gcc" "cmake" "wget" "vim" "desktop-file-utils" "cairo")
   for i in "${arr[@]}"
   do
       if [ ! "$(package-query -Q $i || package-query --qprovides $i -Q)" ]; then
