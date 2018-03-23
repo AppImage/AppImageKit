@@ -64,7 +64,7 @@ fi
 # Install dependencies for Arch Linux
 if [ -e /usr/bin/pacman ] ; then
   echo "Checking arch package provides and installed packages"
-  declare -a arr=("zsync" "git" "libarchive" "autoconf" "libtool" "libtool" "fuse2" "xz" "glib2" "openssl"
+  declare -a arr=("zsync" "git" "libarchive" "autoconf" "libtool" "fuse2" "xz" "glib2" "openssl"
                   "inotify-tools" "lz4" "gcc" "cmake" "wget" "vim" "desktop-file-utils" "cairo")
   for i in "${arr[@]}"
   do
