@@ -8,6 +8,19 @@ pkg_check_modules(OPENSSL REQUIRED openssl)
 pkg_check_modules(FUSE REQUIRED fuse)
 
 
+if(USE_CCACHE)
+    message(STATUS "Using CCache to build AppImageKit dependencies")
+    # TODO: find way to use find_program with all possible paths
+    # (might differ from distro to distro)
+    # these work on Debian and Ubuntu:
+    set(CC "/usr/lib/ccache/gcc")
+    set(CXX "/usr/lib/ccache/g++")
+else()
+    set(CC "${CMAKE_C_COMPILER}")
+    set(CXX "${CMAKE_CXX_COMPILER}")
+endif()
+
+
 set(USE_SYSTEM_XZ OFF CACHE BOOL "Use system xz/liblzma instead of building our own")
 
 if(NOT USE_SYSTEM_XZ)
@@ -16,7 +29,7 @@ if(NOT USE_SYSTEM_XZ)
     ExternalProject_Add(xz
         URL https://tukaani.org/xz/xz-5.2.3.tar.gz
         URL_HASH SHA512=a5eb4f707cf31579d166a6f95dbac45cf7ea181036d1632b4f123a4072f502f8d57cd6e7d0588f0bf831a07b8fc4065d26589a25c399b95ddcf5f73435163da6
-        CONFIGURE_COMMAND CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
         BUILD_COMMAND make
         INSTALL_COMMAND make install
     )
@@ -68,7 +81,7 @@ ExternalProject_Add(squashfuse
               COMMAND automake --force-missing --add-missing
               COMMAND autoreconf -fi || true
               COMMAND sed -i "/PKG_CHECK_MODULES.*/,/,:./d" configure  # https://github.com/vasi/squashfuse/issues/12
-              COMMAND ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib --with-xz=${xz_PREFIX}
+              COMMAND CC=${CC} CXX=${CXX} ./configure --disable-demo --disable-high-level --without-lzo --without-lz4 --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib --with-xz=${xz_PREFIX}
               COMMAND sed -i "s|XZ_LIBS = -llzma |XZ_LIBS = -Bstatic ${xz_LIBRARIES}/|g" Makefile
     BUILD_COMMAND make
     BUILD_IN_SOURCE ON
@@ -103,7 +116,7 @@ ExternalProject_Add(mksquashfs
               COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/squashfs-tools/Makefile
               COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
               COMMAND sed -i "/cp unsquashfs/d" squashfs-tools/Makefile
-    BUILD_COMMAND make -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
+    BUILD_COMMAND CC=${CC} CXX=${CXX} make -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
     # make install unfortunately expects unsquashfs to be built as well, hence can't install the binary
     # therefore using built file in SOURCE_DIR
     # TODO: implement building out of source
@@ -132,7 +145,7 @@ if(NOT USE_SYSTEM_INOTIFY_TOOLS)
         PATCH_COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.guess$<SEMICOLON>hb=HEAD"
               COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.sub$<SEMICOLON>hb=HEAD"
         UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-        CONFIGURE_COMMAND <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
         BUILD_COMMAND make
         BUILD_IN_SOURCE ON
         INSTALL_COMMAND make install
@@ -166,7 +179,7 @@ if(NOT USE_SYSTEM_LIBARCHIVE)
     ExternalProject_Add(libarchive
         URL https://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
         URL_HASH SHA512=90702b393b6f0943f42438e277b257af45eee4fa82420431f6a4f5f48bb846f2a72c8ff084dc3ee9c87bdf8b57f4d8dddf7814870fe2604fe86c55d8d744c164
-        CONFIGURE_COMMAND CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
         BUILD_COMMAND make
         INSTALL_COMMAND make install
     )
