@@ -116,3 +116,5 @@ gchar* replace_str(const gchar* src, const gchar* find, const gchar* replace);
 void set_executable(const char* path, gboolean verbose);
 
 extern char* vendorprefix;
+
+char** appimage_list_files(const char* path);
