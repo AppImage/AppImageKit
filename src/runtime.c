@@ -592,15 +592,11 @@ main (int argc, char *argv[])
             setenv( "OWD", cwd, 1 );
         }
 
-        /* If we are operating on an AppImage different from this file,
-         * then we do not execute the payload */
-        if(getenv("TARGET_APPIMAGE") == NULL){
-            /* TODO: Find a way to get the exit status and/or output of this */
-            execv (filename, real_argv);
-            /* Error if we continue here */
-            perror ("execv error");
-            exit (1);
-        }
+        /* TODO: Find a way to get the exit status and/or output of this */
+        execv (filename, real_argv);
+        /* Error if we continue here */
+        perror("execv error");
+        exit(1);
     }
 
     return 0;
