@@ -993,10 +993,9 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
 
                 if ((fwrite(buff, size, 1, f) != size) || ferror(f) || feof(f)) {
 #ifdef STANDALONE
-                    fprintf(stderr, "Failed to copy icon: %s\n", strerror(error));
                     int error = errno;
+                    fprintf(stderr, "Failed to copy icon: %s\n", strerror(error));
 #endif
-
                     errored = true;
                     break;
                 }
