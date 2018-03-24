@@ -189,6 +189,7 @@ target_compile_definitions(appimaged
     PRIVATE -DBUILD_DATE="${DATE}"
     PRIVATE -D_FILE_OFFSET_BITS=64
     PRIVATE -DHAVE_LIBARCHIVE3=0
+    PRIVATE -DSTANDALONE=1
 )
 
 add_dependencies(appimaged squashfuse)

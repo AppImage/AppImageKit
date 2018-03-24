@@ -230,26 +230,36 @@ int appimage_get_type(const char* path, gboolean verbose)
         fread(buffer, 1, 3, f);
         fclose(f);
         if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x01)){
+#ifdef STANDALONE
             fprintf(stderr, "_________________________\n");
+#endif
             if(verbose){
                 fprintf(stderr, "AppImage type 1\n");
             }
             return 1;
         } else if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x02)){
+#ifdef STANDALONE
             fprintf(stderr, "_________________________\n");
+#endif
             if(verbose){
                 fprintf(stderr, "AppImage type 2\n");
             }
             return 2;
         } else {
             if((g_str_has_suffix(path,".AppImage")) || (g_str_has_suffix(path,".appimage"))) {
+#ifdef STANDALONE
                 fprintf(stderr, "_________________________\n");
-                fprintf(stderr, "Blindly assuming AppImage type 1\n");
-                fprintf(stderr, "The author of this AppImage should embed the magic bytes, see https://github.com/AppImage/AppImageSpec\n");
+#endif
+                if (verbose) {
+                    fprintf(stderr, "Blindly assuming AppImage type 1\n");
+                    fprintf(stderr, "The author of this AppImage should embed the magic bytes, see https://github.com/AppImage/AppImageSpec\n");
+                }
                 return 1;
             } else {
+#ifdef STANDALONE
+                fprintf(stderr, "_________________________\n");
+#endif
                 if(verbose){
-                    fprintf(stderr, "_________________________\n");
                     fprintf(stderr, "Unrecognized file '%s'\n", path);
                 }
                 return -1;
@@ -681,7 +691,9 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     /* When appimaged sees itself, then do nothing here */
     if(strcmp ("appimaged.desktop", desktop_filename) == 0) {
         g_free(destination);
+#ifdef STANDALONE
         fprintf(stderr, "appimaged's desktop file found -- not installing desktop file for myself\n");
+#endif
         return true;
     }
 
@@ -689,8 +701,11 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         fprintf(stderr, "install: %s\n", destination);
 
     gchar *dirname = g_path_get_dirname(destination);
-    if(g_mkdir_with_parents(dirname, 0755))
+    if(g_mkdir_with_parents(dirname, 0755)) {
+#ifdef STANDALONE
         fprintf(stderr, "Could not create directory: %s\n", dirname);
+#endif
+    }
     g_free(dirname);
 
     // g_key_file_save_to_file(key_file_structure, destination, NULL);
@@ -744,7 +759,9 @@ bool appimage_type1_get_desktop_filename_and_key_file(struct archive** a, gchar*
 
         /* Get desktop file(s) in the root directory of the AppImage and act on it in one go */
         if ((g_str_has_suffix(filename, ".desktop") && (NULL == strstr(filename, "/")))) {
+#ifdef STANDALONE
             fprintf(stderr, "Got root desktop: %s\n", filename);
+#endif
 
             const void* buff;
 
@@ -1049,7 +1066,9 @@ bool appimage_type2_get_desktop_filename_and_key_file(sqfs* fs, gchar** desktop_
     // gchar **str_array = squash_get_matching_files(&fs, "(^.*?.desktop$)", md5, verbose); // Not only there
     /* Work trough the NULL-terminated array of strings */
     for (int i = 0; str_array[i]; ++i) {
+#ifdef STANDALONE
         fprintf(stderr, "Got root desktop: %s\n", str_array[i]);
+#endif
 
         if (!g_key_file_load_from_squash(fs, str_array[i], *key_file, verbose))
             errored = true;
@@ -1373,9 +1392,11 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     char *md5 = appimage_get_md5(path);
 
     /* The file is already gone by now, so we can't determine its type anymore */
+#ifdef STANDALONE
     fprintf(stderr, "_________________________\n");
     fprintf(stderr, "\n");
     fprintf(stderr, "-> UNREGISTER %s\n", path);
+#endif
     /* Could use gnome_desktop_thumbnail_factory_lookup instead of the next line */
 
     /* Delete the thumbnails if they exist */
