@@ -142,7 +142,7 @@ target_link_libraries(appimagetool
 )
 
 target_link_libraries(appimagetool
-    dl
+    ${CMAKE_DL_LIBS}
     pthread
     ${ZLIB_LIBRARIES}
     ${xz_LIBRARIES}
@@ -172,7 +172,7 @@ add_executable(appimaged appimaged.c notify.c elf.c getsection.c)
 
 target_link_libraries(appimaged
     pthread
-    dl
+    ${CMAKE_DL_LIBS}
     ${CAIRO_LIBRARIES}
     ${GLIB_LIBRARIES}
     ${GIO_LIBRARIES}
