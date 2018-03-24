@@ -15,7 +15,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime
     COMMAND bash ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
-    MAIN_DEPENDENCY ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c
+    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c
     DEPENDS squashfuse
 )
 
@@ -223,6 +223,38 @@ target_link_libraries(digest
 )
 
 add_sanitizers(digest)
+
+
+add_executable(runtime-debug EXCLUDE_FROM_ALL elf.c notify.c getsection.c runtime.c)
+
+target_link_libraries(runtime-debug
+    PRIVATE
+    ${squashfuse_LIBRARIES}
+    ${libarchive_LIBRARIES}
+    ${xz_LIBRARIES}
+    PUBLIC
+    pthread
+    ${GLIB_LIBRARIES}
+    ${GIO_LIBRARIES}
+    ${ZLIB_LIBRARIES}
+    ${CAIRO_LIBRARIES}
+    ${CMAKE_DL_LIBS}
+)
+
+set(_RUNTIME_FLAGS -g -O0 -ffunction-sections -fdata-sections -s -Wl,--gc-sections -DGIT_COMMIT='${GIT_COMMIT}' -D_FILE_OFFSET_BITS=64)
+
+set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "${_RUNTIME_FLAGS}")
+
+target_compile_options(runtime-debug
+    PUBLIC "${_RUNTIME_FLAGS}"
+)
+
+if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+    add_dependencies(runtime-debug inotify-tools)
+endif()
+if(NOT USE_SYSTEM_LIBARCHIVE)
+    add_dependencies(runtime-debug libarchive)
+endif()
 
 
 # install binaries
