@@ -38,6 +38,11 @@ public:
         setenv("XDG_DATA_HOME", newXdgDataHome.c_str(), true);
         setenv("XDG_CONFIG_HOME", newXdgConfigHome.c_str(), true);
 
+        // reset GLib internal caches
+        // "might" leak memory, according to docs, hence nothing we could fix
+        // https://developer.gnome.org/glib/stable/glib-Miscellaneous-Utility-Functions.html#g-reload-user-special-dirs-cache
+        g_reload_user_special_dirs_cache();
+
         EXPECT_EQ(getenv("HOME"), tempHome);
         EXPECT_EQ(tempHome, g_get_home_dir());
         EXPECT_EQ(newXdgDataHome, g_get_user_data_dir());
