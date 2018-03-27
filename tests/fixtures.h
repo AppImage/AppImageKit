@@ -25,23 +25,23 @@ public:
 
         tempHome = tempDir + "/HOME";
 
+        mkdir(tempHome.c_str(), 0700);
+
         oldHome = getenv("HOME");
         oldXdgDataHome = getenv("XDG_DATA_HOME");
         oldXdgConfigHome = getenv("XDG_CONFIG_HOME");
 
-        std::stringstream newHome;
-        newHome << "HOME=" << tempHome;
-        putenv(strdup(newHome.str().c_str()));
+        std::string newXdgDataHome = tempHome + "/.local/share";
+        std::string newXdgConfigHome = tempHome + "/.config";
 
-        std::stringstream newXdgDataHome;
-        newXdgDataHome << "XDG_DATA_HOME=" << tempHome << "/.local/share";
-        putenv(strdup(newXdgDataHome.str().c_str()));
+        setenv("HOME", tempHome.c_str(), true);
+        setenv("XDG_DATA_HOME", newXdgDataHome.c_str(), true);
+        setenv("XDG_CONFIG_HOME", newXdgConfigHome.c_str(), true);
 
-        std::stringstream newXdgConfigHome;
-        newXdgDataHome << "XDG_CONFIG_HOME=" << tempHome << "/.config";
-        putenv(strdup(newXdgConfigHome.str().c_str()));
-
-        mkdir(tempHome.c_str(), 0700);
+        EXPECT_EQ(getenv("HOME"), tempHome);
+        EXPECT_EQ(tempHome, g_get_home_dir());
+        EXPECT_EQ(newXdgDataHome, g_get_user_data_dir());
+        EXPECT_EQ(newXdgConfigHome, g_get_user_config_dir());
     };
 
     ~AppImageKitTest() {
@@ -50,25 +50,19 @@ public:
         }
 
         if (oldHome != NULL) {
-            std::stringstream newHome;
-            newHome << "HOME=" << oldHome;
-            putenv(strdup(newHome.str().c_str()));
+            setenv("HOME", oldHome, true);
         } else {
-            unsetenv("XDG_DATA_HOME");
+            unsetenv("HOME");
         }
 
         if (oldXdgDataHome != NULL) {
-            std::stringstream newXdgDataHome;
-            newXdgDataHome << "XDG_DATA_HOME=" << oldXdgDataHome;
-            putenv(strdup(newXdgDataHome.str().c_str()));
+            setenv("XDG_DATA_HOME", oldXdgDataHome, true);
         } else {
             unsetenv("XDG_DATA_HOME");
         }
 
         if (oldXdgConfigHome != NULL) {
-            std::stringstream newXdgConfigHome;
-            newXdgConfigHome << "XDG_CONFIG_HOME=" << oldXdgConfigHome;
-            putenv(strdup(newXdgConfigHome.str().c_str()));
+            setenv("XDG_CONFIG_HOME", oldXdgConfigHome, true);
         } else {
             unsetenv("XDG_CONFIG_HOME");
         }
