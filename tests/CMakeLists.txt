@@ -17,6 +17,7 @@ if(BUILD_TESTING)
     target_link_libraries(test_libappimage
         pthread
         libappimage
+        xdg-basedir
         ${gtest_LIBRARIES}
     )
 
@@ -41,6 +42,7 @@ if(BUILD_TESTING)
         ${libarchive_LIBRARIES}
         ${inotify-tools_LIBRARIES}
         ${xz_LIBRARIES}
+        xdg-basedir
         pthread
         ${GLIB_LIBRARIES}
         ${GIO_LIBRARIES}
@@ -85,6 +87,7 @@ if(BUILD_TESTING)
         ${libarchive_LIBRARIES}
         ${inotify-tools_LIBRARIES}
         ${xz_LIBRARIES}
+        xdg-basedir
         pthread
         ${GLIB_LIBRARIES}
         ${GIO_LIBRARIES}

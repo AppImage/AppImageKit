@@ -28,6 +28,10 @@ add_custom_command(OUTPUT data.o
 add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 
 
+# include XDG basedir library
+add_subdirectory(xdg-basedir)
+
+
 # allow setting different path for mksquashfs after installation
 set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install directory for mksquashfs")
 
@@ -60,6 +64,7 @@ target_link_libraries(libappimage
     ${libarchive_LIBRARIES}
     ${inotify-tools_LIBRARIES}
     ${xz_LIBRARIES}
+    xdg-basedir
     PUBLIC
     pthread
     ${GLIB_LIBRARIES}
@@ -108,6 +113,7 @@ target_link_libraries(libappimage_static
     ${libarchive_LIBRARIES}
     ${inotify-tools_LIBRARIES}
     ${xz_LIBRARIES}
+    xdg-basedir
     PUBLIC
     pthread
     ${GLIB_LIBRARIES}
@@ -146,6 +152,7 @@ target_link_libraries(appimagetool
     pthread
     ${ZLIB_LIBRARIES}
     ${xz_LIBRARIES}
+    xdg-basedir
 )
 
 target_compile_definitions(appimagetool
@@ -181,6 +188,7 @@ target_link_libraries(appimaged
     ${xz_LIBRARIES}
     ${ZLIB_LIBRARIES}
     ${libarchive_LIBRARIES}
+    xdg-basedir
 )
 
 target_compile_definitions(appimaged
@@ -233,6 +241,7 @@ target_link_libraries(runtime-debug
     ${squashfuse_LIBRARIES}
     ${libarchive_LIBRARIES}
     ${xz_LIBRARIES}
+    xdg-basedir
     PUBLIC
     pthread
     ${GLIB_LIBRARIES}

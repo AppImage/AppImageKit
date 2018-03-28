@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <ftw.h>
 #include <unistd.h>
+#include <xdg-basedir.h>
 
 
 // fixture providing a temporary directory, and a temporary home directory within that directory
@@ -21,7 +22,7 @@ public:
     AppImageKitTest() {
         char* tmpl = strdup("/tmp/AppImageKit-unit-tests-XXXXXX");
         tempDir = mkdtemp(tmpl);
-        delete[] tmpl;
+        free(tmpl);
 
         tempHome = tempDir + "/HOME";
 
@@ -38,15 +39,15 @@ public:
         setenv("XDG_DATA_HOME", newXdgDataHome.c_str(), true);
         setenv("XDG_CONFIG_HOME", newXdgConfigHome.c_str(), true);
 
-        // reset GLib internal caches
-        // "might" leak memory, according to docs, hence nothing we could fix
-        // https://developer.gnome.org/glib/stable/glib-Miscellaneous-Utility-Functions.html#g-reload-user-special-dirs-cache
-        g_reload_user_special_dirs_cache();
+        char* xdgDataHome = xdg_data_home();
+        char* xdgConfigHome = xdg_config_home();
 
         EXPECT_EQ(getenv("HOME"), tempHome);
-        EXPECT_EQ(tempHome, g_get_home_dir());
-        EXPECT_EQ(newXdgDataHome, g_get_user_data_dir());
-        EXPECT_EQ(newXdgConfigHome, g_get_user_config_dir());
+        EXPECT_EQ(newXdgDataHome, xdgDataHome);
+        EXPECT_EQ(newXdgConfigHome, xdgConfigHome);
+
+        free(xdgDataHome);
+        free(xdgConfigHome);
     };
 
     ~AppImageKitTest() {

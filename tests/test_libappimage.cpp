@@ -35,20 +35,24 @@ namespace AppImageTests {
             gchar *sum = appimage_get_md5(path.c_str());
 
             GDir *dir;
-            GError *error;
-            const gchar *filename;
+            GError *error = NULL;
+            const gchar *filename = NULL;
 
-            char *apps_path = g_strconcat(g_get_user_data_dir(), "/applications/", NULL);
+            char *data_home = xdg_data_home();
+            char *apps_path = g_strconcat(data_home, "/applications/", NULL);
+            free(data_home);
 
             bool found = false;
             dir = g_dir_open(apps_path, 0, &error);
-            while ((filename = g_dir_read_name(dir))) {
-                gchar *m = g_strrstr(filename, sum);
+            if (dir != NULL) {
+                while ((filename = g_dir_read_name(dir))) {
+                    gchar* m = g_strrstr(filename, sum);
 
-                if (m != NULL)
-                    found = true;
+                    if (m != NULL)
+                        found = true;
+                }
+                g_dir_close(dir);
             }
-            g_dir_close(dir);
             g_free(apps_path);
             g_free(sum);
             return found;
@@ -127,10 +131,13 @@ namespace AppImageTests {
         appimage_create_thumbnail(appImage_type_1_file_path.c_str());
 
         gchar *sum = appimage_get_md5(appImage_type_1_file_path.c_str());
-        std::string path = std::string(g_get_user_cache_dir())
+
+        char *cache_home = xdg_cache_home();
+        std::string path = std::string(cache_home)
                            + "/thumbnails/normal/"
                            + std::string(sum) + ".png";
 
+        g_free(cache_home);
         g_free(sum);
 
         ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));
@@ -143,10 +150,13 @@ namespace AppImageTests {
         appimage_create_thumbnail(appImage_type_2_file_path.c_str());
 
         gchar *sum = appimage_get_md5(appImage_type_2_file_path.c_str());
-        std::string path = std::string(g_get_user_cache_dir())
+
+        char* cache_home = xdg_cache_home();
+        std::string path = std::string(cache_home)
                            + "/thumbnails/normal/"
                            + std::string(sum) + ".png";
 
+        g_free(cache_home);
         g_free(sum);
 
         ASSERT_TRUE(g_file_test(path.c_str(), G_FILE_TEST_EXISTS));

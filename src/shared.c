@@ -46,6 +46,8 @@
 #include "getsection.h"
 #include "elf.h"
 
+#include "xdg-basedir.h"
+
 // own header
 #include "shared.h"
 
@@ -132,7 +134,9 @@ char *get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbos
 {
     char *md5 = appimage_get_md5(path);
     char *file  = g_strconcat(md5, ".png", NULL);
-    gchar *thumbnail_path = g_build_filename(g_get_user_cache_dir(), "thumbnails", thumbnail_size, file, NULL);
+    char* cache_home = xdg_cache_home();
+    gchar *thumbnail_path = g_build_filename(cache_home, "thumbnails", thumbnail_size, file, NULL);
+    g_free(cache_home);
     g_free(file);
     g_free(md5);
     return thumbnail_path;
@@ -148,12 +152,14 @@ char *get_thumbnail_path(const char *path, char *thumbnail_size, gboolean verbos
 void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 {
     // FIXME: This default location is most likely wrong, but at least the icons with unknown size can go somewhere
-    gchar *dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/48x48/apps/", NULL);
+    char* data_home = xdg_data_home();
+    gchar *dest_dir = g_build_path("/", data_home, "/icons/hicolor/48x48/apps/", NULL);
 
     if((g_str_has_suffix (icon_path, ".svg")) || (g_str_has_suffix (icon_path, ".svgz"))) {
         g_free(dest_dir);
-        dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/scalable/apps/", NULL);
+        dest_dir = g_build_path("/", data_home, "/icons/hicolor/scalable/apps/", NULL);
     }
+    g_free(data_home);
 
     if((g_str_has_suffix (icon_path, ".png")) || (g_str_has_suffix (icon_path, ".xpm"))) {
 
@@ -186,7 +192,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 #endif
         } else {
             g_free(dest_dir);
-            dest_dir = g_build_path("/", g_get_user_data_dir(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps/", NULL);
+            dest_dir = g_build_path("/", xdg_data_home(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps/", NULL);
         }
     }
     if(verbose)
@@ -364,7 +370,7 @@ gchar **squash_get_matching_files_install_icons_and_mime_data(sqfs* fs, char* pa
                 gchar *dest = NULL;
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
                     if(g_str_has_prefix(trv.path, "usr/share/icons/") || g_str_has_prefix(trv.path, "usr/share/pixmaps/") || (g_str_has_prefix(trv.path, "usr/share/mime/") && g_str_has_suffix(trv.path, ".xml"))){
-                        gchar *path = replace_str(trv.path, "usr/share", g_get_user_data_dir());
+                        gchar *path = replace_str(trv.path, "usr/share", xdg_data_home());
                         char *dest_dirname = g_path_get_dirname(path);
                         g_free(path);
                         gchar *base_name = g_path_get_basename(trv.path);
@@ -487,8 +493,9 @@ gchar *build_installed_desktop_file_path(gchar* md5, gchar* desktop_filename) {
     gchar *partial_path;
     partial_path = g_strdup_printf("applications/appimagekit_%s-%s", md5, desktop_filename);
 
-    gchar *destination;
-    destination = g_build_filename(g_get_user_data_dir(), partial_path, NULL);
+    char *data_home = xdg_data_home();
+    gchar *destination = g_build_filename(data_home, partial_path, NULL);
+    g_free(data_home);
 
     g_free(partial_path);
 
@@ -829,7 +836,7 @@ bool appimage_type1_get_desktop_filename_and_key_file(struct archive** a, gchar*
                 break;
             }
 
-            *desktop_filename = g_strdup(g_path_get_basename(filename));
+            *desktop_filename = g_path_get_basename(filename);
 
             // a structure that will hold the information from the desktop file
             *key_file = g_key_file_new();
@@ -896,7 +903,7 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
             || (g_str_has_prefix(filename, "usr/share/mime/") && g_str_has_suffix(filename, ".xml"))
             ) {
 
-            gchar* dest_path = replace_str(filename, "usr/share", g_get_user_data_dir());
+            gchar* dest_path = replace_str(filename, "usr/share", xdg_data_home());
             gchar* dest_dirname = g_path_get_dirname(dest_path);
             g_free(dest_path);
 
@@ -1344,6 +1351,7 @@ bool appimage_is_registered_in_system(const char* path) {
     g_free(thumbnail_path);
     g_free(md5);
     g_free(desktop_filename);
+    g_free(desktop_file_path);
     g_key_file_free(key_file);
 
     return rv;
@@ -1475,7 +1483,9 @@ int appimage_unregister_in_system(char *path, gboolean verbose)
     delete_thumbnail(path, "normal", verbose); // 128x128
     delete_thumbnail(path, "large", verbose); // 256x256
 
-    unregister_using_md5_id(g_get_user_data_dir(), 0, md5, verbose);
+    char* data_home = xdg_data_home();
+    unregister_using_md5_id(data_home, 0, md5, verbose);
+    g_free(data_home);
 
     g_free(md5);
 
