@@ -286,6 +286,79 @@ namespace AppImageTests {
             FAIL();
     }
 
+    TEST_F(LibAppImageTest, test_appimage_registered_desktop_file_path_not_registered) {
+        EXPECT_TRUE(appimage_registered_desktop_file_path(appImage_type_1_file_path.c_str(), NULL, false) == NULL);
+        EXPECT_TRUE(appimage_registered_desktop_file_path(appImage_type_2_file_path.c_str(), NULL, false) == NULL);
+    }
+
+    TEST_F(LibAppImageTest, test_appimage_registered_desktop_file_path_type1) {
+        EXPECT_TRUE(appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false));
+
+        char* desktop_file_path = appimage_registered_desktop_file_path(appImage_type_1_file_path.c_str(), NULL, false);
+
+        EXPECT_TRUE(desktop_file_path != NULL);
+
+        free(desktop_file_path);
+    }
+
+    TEST_F(LibAppImageTest, test_appimage_registered_desktop_file_path_type2) {
+        EXPECT_TRUE(appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false));
+
+        char* desktop_file_path = appimage_registered_desktop_file_path(appImage_type_2_file_path.c_str(), NULL, false);
+
+        EXPECT_TRUE(desktop_file_path != NULL);
+
+        free(desktop_file_path);
+    }
+
+    TEST_F(LibAppImageTest, test_appimage_registered_desktop_file_path_type1_precalculated_md5) {
+        EXPECT_TRUE(appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false));
+
+        char* md5 = appimage_get_md5(appImage_type_1_file_path.c_str());
+        char* desktop_file_path = appimage_registered_desktop_file_path(appImage_type_1_file_path.c_str(), md5, false);
+        free(md5);
+
+        EXPECT_TRUE(desktop_file_path != NULL);
+
+        free(desktop_file_path);
+    }
+
+    TEST_F(LibAppImageTest, test_appimage_registered_desktop_file_path_type2_precalculated_md5) {
+        EXPECT_TRUE(appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false));
+
+        char* md5 = appimage_get_md5(appImage_type_2_file_path.c_str());
+        char* desktop_file_path = appimage_registered_desktop_file_path(appImage_type_2_file_path.c_str(), md5, false);
+        free(md5);
+
+        EXPECT_TRUE(desktop_file_path != NULL);
+
+        free(desktop_file_path);
+    }
+
+    TEST_F(LibAppImageTest, test_appimage_registered_desktop_file_path_type1_wrong_md5) {
+        EXPECT_TRUE(appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false));
+
+        char* md5 = strdup("abcdefg");
+        char* desktop_file_path = appimage_registered_desktop_file_path(appImage_type_1_file_path.c_str(), md5, false);
+        free(md5);
+
+        EXPECT_TRUE(desktop_file_path == NULL);
+
+        free(desktop_file_path);
+    }
+
+    TEST_F(LibAppImageTest, test_appimage_registered_desktop_file_path_type2_wrong_md5) {
+        EXPECT_TRUE(appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false));
+
+        char* md5 = strdup("abcdefg");
+        char* desktop_file_path = appimage_registered_desktop_file_path(appImage_type_2_file_path.c_str(), md5, false);
+        free(md5);
+
+        EXPECT_TRUE(desktop_file_path == NULL);
+
+        free(desktop_file_path);
+    }
+
 } // namespace
 
 int main(int argc, char **argv) {
