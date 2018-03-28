@@ -88,15 +88,12 @@ int appimage_register_in_system(char* path, gboolean verbose);
 
 void appimage_create_thumbnail(const gchar* appimage_file_path, gboolean verbose);
 
-bool appimage_type2_register_in_system_get_desktop_file_path(const char* path, gboolean verbose, char** desktop_file_path);
-
-bool appimage_type2_register_in_system(const char* path, gboolean verbose);
-
-bool appimage_type1_register_in_system_get_desktop_file_path(const char* path, gboolean verbose, char** desktop_file_path);
+bool appimage_type2_register_in_system(char* path, gboolean verbose);
 
 bool appimage_type1_register_in_system(const char* path, gboolean verbose);
 
-bool write_edited_desktop_file(GKeyFile* key_file_structure, const char* appimage_path, gchar* desktop_filename, int appimage_type, char* md5, gboolean verbose, char** desktop_file_path);
+bool write_edited_desktop_file(GKeyFile* key_file_structure, const char* appimage_path, gchar* desktop_filename,
+                               int appimage_type, char* md5, gboolean verbose);
 
 gboolean g_key_file_load_from_squash(sqfs* fs, char* path, GKeyFile* key_file_structure, gboolean verbose);
 

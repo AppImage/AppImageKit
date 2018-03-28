@@ -38,7 +38,7 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     gboolean success = g_key_file_load_from_data(keyFile, buffer.data(), buffer.size(), G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
 
     if (success) {
-        write_edited_desktop_file(keyFile, "testpath", strdup("abc"), 1, strdup("def"), false, NULL);
+        write_edited_desktop_file(keyFile, "testpath", strdup("abc"), 1, strdup("def"), false);
     }
 
     g_key_file_free(keyFile);

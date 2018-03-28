@@ -12,38 +12,19 @@ char *appimage_get_md5(char const* path);
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
 int appimage_get_type(const char* path, bool verbose);
 
-/*
- * Checks whether an AppImage is registered in system by checking whether the files have been copied to the right locations
- */
 bool appimage_is_registered_in_system(const char* path);
 
 /* Register a type 1 AppImage in the system */
 bool appimage_type1_register_in_system(const char *path, bool verbose);
-/*
- * Register a type 1 AppImage in the system
- * desktop_file_path will be set to the path of the integrated desktop file, unless it is NULL.
- */
-bool appimage_type1_register_in_system_get_desktop_file_path(const char *path, bool verbose, char **desktop_file_path);
 
 /* Register a type 2 AppImage in the system */
 bool appimage_type2_register_in_system(const char *path, bool verbose);
-/*
- * Register a type 2 AppImage in the system
- * desktop_file_path will be set to the path of the integrated desktop file, unless it is NULL.
- */
-bool appimage_type2_register_in_system_get_desktop_file_path(const char *path, bool verbose, char **desktop_file_path);
 
 /*
  * Register an AppImage in the system
  * Returns 0 on success, non-0 otherwise.
  */
 int appimage_register_in_system(const char *path, bool verbose);
-/*
- * Register an AppImage in the system
- * Set app_for_removal to add a [Desktop Action] for removing the AppImage using that executable.
- * desktop_file_path will be set to the path of the integrated desktop file, unless it is NULL.
- */
-int appimage_register_in_system_get_desktop_file_path(const char *path, bool verbose, char **desktop_file_path);
 
 /* Unregister an AppImage in the system */
 int appimage_unregister_in_system(const char *path, bool verbose);
