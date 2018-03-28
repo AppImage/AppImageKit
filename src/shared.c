@@ -192,7 +192,9 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 #endif
         } else {
             g_free(dest_dir);
-            dest_dir = g_build_path("/", xdg_data_home(), "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps/", NULL);
+            char* data_home = xdg_data_home();
+            dest_dir = g_build_path("/", data_home, "/icons/hicolor/", g_strdup_printf("%ix%i", w, h), "/apps/", NULL);
+            free(data_home);
         }
     }
     if(verbose)
@@ -370,7 +372,9 @@ gchar **squash_get_matching_files_install_icons_and_mime_data(sqfs* fs, char* pa
                 gchar *dest = NULL;
                 if(inode.base.inode_type == SQUASHFS_REG_TYPE) {
                     if(g_str_has_prefix(trv.path, "usr/share/icons/") || g_str_has_prefix(trv.path, "usr/share/pixmaps/") || (g_str_has_prefix(trv.path, "usr/share/mime/") && g_str_has_suffix(trv.path, ".xml"))){
-                        gchar *path = replace_str(trv.path, "usr/share", xdg_data_home());
+                        char* data_home = xdg_data_home();
+                        gchar *path = replace_str(trv.path, "usr/share", data_home);
+                        free(data_home);
                         char *dest_dirname = g_path_get_dirname(path);
                         g_free(path);
                         gchar *base_name = g_path_get_basename(trv.path);
