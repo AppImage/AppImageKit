@@ -256,7 +256,9 @@ int main(int argc, char ** argv) {
     gchar *global_autostart_file = "/etc/xdg/autostart/appimaged.desktop";
     gchar *global_systemd_file = "/usr/lib/systemd/user/appimaged.service";
     gchar *partial_path = g_strdup_printf("autostart/appimagekit-appimaged.desktop");
-    gchar *destination = g_build_filename(g_get_user_config_dir(), partial_path, NULL);
+    char* config_home = xdg_config_home();
+    gchar *destination = g_build_filename(config_home, partial_path, NULL);
+    free(config_home);
 
     if(uninstall){
             if(g_file_test (installed_appimaged_location, G_FILE_TEST_EXISTS))

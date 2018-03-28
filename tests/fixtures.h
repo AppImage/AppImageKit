@@ -3,6 +3,7 @@
 #include <cerrno>
 #include <ftw.h>
 #include <unistd.h>
+#include <xdg-basedir.h>
 
 
 // fixture providing a temporary directory, and a temporary home directory within that directory
@@ -21,27 +22,32 @@ public:
     AppImageKitTest() {
         char* tmpl = strdup("/tmp/AppImageKit-unit-tests-XXXXXX");
         tempDir = mkdtemp(tmpl);
-        delete[] tmpl;
+        free(tmpl);
 
         tempHome = tempDir + "/HOME";
+
+        mkdir(tempHome.c_str(), 0700);
 
         oldHome = getenv("HOME");
         oldXdgDataHome = getenv("XDG_DATA_HOME");
         oldXdgConfigHome = getenv("XDG_CONFIG_HOME");
 
-        std::stringstream newHome;
-        newHome << "HOME=" << tempHome;
-        putenv(strdup(newHome.str().c_str()));
+        std::string newXdgDataHome = tempHome + "/.local/share";
+        std::string newXdgConfigHome = tempHome + "/.config";
 
-        std::stringstream newXdgDataHome;
-        newXdgDataHome << "XDG_DATA_HOME=" << tempHome << "/.local/share";
-        putenv(strdup(newXdgDataHome.str().c_str()));
+        setenv("HOME", tempHome.c_str(), true);
+        setenv("XDG_DATA_HOME", newXdgDataHome.c_str(), true);
+        setenv("XDG_CONFIG_HOME", newXdgConfigHome.c_str(), true);
 
-        std::stringstream newXdgConfigHome;
-        newXdgDataHome << "XDG_CONFIG_HOME=" << tempHome << "/.config";
-        putenv(strdup(newXdgConfigHome.str().c_str()));
+        char* xdgDataHome = xdg_data_home();
+        char* xdgConfigHome = xdg_config_home();
 
-        mkdir(tempHome.c_str(), 0700);
+        EXPECT_EQ(getenv("HOME"), tempHome);
+        EXPECT_EQ(newXdgDataHome, xdgDataHome);
+        EXPECT_EQ(newXdgConfigHome, xdgConfigHome);
+
+        free(xdgDataHome);
+        free(xdgConfigHome);
     };
 
     ~AppImageKitTest() {
@@ -50,25 +56,19 @@ public:
         }
 
         if (oldHome != NULL) {
-            std::stringstream newHome;
-            newHome << "HOME=" << oldHome;
-            putenv(strdup(newHome.str().c_str()));
+            setenv("HOME", oldHome, true);
         } else {
-            unsetenv("XDG_DATA_HOME");
+            unsetenv("HOME");
         }
 
         if (oldXdgDataHome != NULL) {
-            std::stringstream newXdgDataHome;
-            newXdgDataHome << "XDG_DATA_HOME=" << oldXdgDataHome;
-            putenv(strdup(newXdgDataHome.str().c_str()));
+            setenv("XDG_DATA_HOME", oldXdgDataHome, true);
         } else {
             unsetenv("XDG_DATA_HOME");
         }
 
         if (oldXdgConfigHome != NULL) {
-            std::stringstream newXdgConfigHome;
-            newXdgConfigHome << "XDG_CONFIG_HOME=" << oldXdgConfigHome;
-            putenv(strdup(newXdgConfigHome.str().c_str()));
+            setenv("XDG_CONFIG_HOME", oldXdgConfigHome, true);
         } else {
             unsetenv("XDG_CONFIG_HOME");
         }
