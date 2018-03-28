@@ -249,9 +249,12 @@ int main(int argc, char ** argv) {
         exit(1);
     }
 
-    char* home_dir = user_home();
-    gchar *user_bin_dir = g_build_filename(home_dir, "/.local/bin", NULL);
-    free(home_dir);
+    gchar *user_bin_dir;
+    {
+        char* home_dir = user_home();
+        user_bin_dir = g_build_filename(home_dir, "/.local/bin", NULL);
+        free(home_dir);
+    }
 
     gchar *installed_appimaged_location = g_build_filename(user_bin_dir, "appimaged", NULL);
     const gchar *appimage_location = g_getenv("APPIMAGE");
@@ -327,11 +330,13 @@ int main(int argc, char ** argv) {
     add_dir_to_watch(user_bin_dir);
     add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
 
-    char* home_dir = user_home();
-    add_dir_to_watch(g_build_filename(home_dir, "/bin", NULL));
-    add_dir_to_watch(g_build_filename(home_dir, "/.bin", NULL));
-    add_dir_to_watch(g_build_filename(home_dir, "/Applications", NULL));
-    free(home_dir);
+    {
+        char* home_dir = user_home();
+        add_dir_to_watch(g_build_filename(home_dir, "/bin", NULL));
+        add_dir_to_watch(g_build_filename(home_dir, "/.bin", NULL));
+        add_dir_to_watch(g_build_filename(home_dir, "/Applications", NULL));
+        free(home_dir);
+    }
 
     add_dir_to_watch(g_build_filename("/Applications", NULL));
     // Perhaps we should determine the following dynamically using something like
