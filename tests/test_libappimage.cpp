@@ -1,5 +1,6 @@
 #include "appimage/appimage.h"
 
+#include <glob.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -16,7 +17,6 @@
 
 
 namespace AppImageTests {
-
     class LibAppImageTest : public AppImageKitTest {
     protected:
         std::string appImage_type_1_file_path;
@@ -57,6 +57,10 @@ namespace AppImageTests {
             g_free(sum);
             return found;
         }
+
+        static bool compareStrings(const char* str1, const char* str2) {
+            return strcmp(str1, str2) == 0;
+        }
     };
 
     TEST_F(LibAppImageTest, appimage_get_type_invalid) {
@@ -87,6 +91,22 @@ namespace AppImageTests {
         appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
     }
 
+    TEST_F(LibAppImageTest, appimage_register_in_system_with_type1_get_desktop_file_path) {
+        ASSERT_EQ(appimage_register_in_system(appImage_type_1_file_path.c_str(), false), 0);
+
+        ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_1_file_path));
+
+        appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
+    }
+
+    TEST_F(LibAppImageTest, appimage_register_in_system_with_type2_get_desktop_file_path) {
+        ASSERT_EQ(appimage_register_in_system(appImage_type_2_file_path.c_str(), false), 0);
+
+        ASSERT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
+
+        appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
+    }
+
     TEST_F(LibAppImageTest, appimage_type1_register_in_system) {
         ASSERT_TRUE(appimage_type1_register_in_system(appImage_type_1_file_path.c_str(), false));
 
@@ -99,6 +119,52 @@ namespace AppImageTests {
         EXPECT_TRUE(appimage_type2_register_in_system(appImage_type_2_file_path.c_str(), false));
 
         EXPECT_TRUE(areIntegrationFilesDeployed(appImage_type_2_file_path));
+        appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
+    }
+
+    TEST_F(LibAppImageTest, appimage_type1_register_in_system_get_desktop_file_path) {
+        char* desktop_file_path = NULL;
+        EXPECT_TRUE(appimage_type1_register_in_system_get_desktop_file_path(appImage_type_1_file_path.c_str(), false, &desktop_file_path));
+        EXPECT_TRUE(desktop_file_path != NULL);
+
+        glob_t pglob;
+
+        char* data_home = xdg_data_home();
+        std::string dirPath = std::string(data_home) + "/applications/*.desktop";
+        free(data_home);
+
+        EXPECT_EQ(glob(dirPath.c_str(), GLOB_NOSORT, NULL, &pglob), 0);
+        EXPECT_EQ(pglob.gl_pathc, 1);
+
+        if (pglob.gl_pathc >= 1) {
+            EXPECT_PRED2(compareStrings, pglob.gl_pathv[0], desktop_file_path);
+        }
+
+        globfree(&pglob);
+
+        appimage_unregister_in_system(appImage_type_1_file_path.c_str(), false);
+}
+
+    TEST_F(LibAppImageTest, appimage_type2_register_in_system_get_desktop_file_path) {
+        char* desktop_file_path = NULL;
+        EXPECT_TRUE(appimage_type2_register_in_system_get_desktop_file_path(appImage_type_2_file_path.c_str(), false, &desktop_file_path));
+        EXPECT_TRUE(desktop_file_path != NULL);
+
+        glob_t pglob;
+
+        char* data_home = xdg_data_home();
+        std::string dirPath = std::string(data_home) + "/applications/*.desktop";
+        free(data_home);
+
+        EXPECT_EQ(glob(dirPath.c_str(), GLOB_NOSORT, NULL, &pglob), 0);
+        EXPECT_EQ(pglob.gl_pathc, 1);
+
+        if (pglob.gl_pathc >= 1) {
+            EXPECT_PRED2(compareStrings, pglob.gl_pathv[0], desktop_file_path);
+        }
+
+        globfree(&pglob);
+
         appimage_unregister_in_system(appImage_type_2_file_path.c_str(), false);
     }
 
