@@ -249,7 +249,10 @@ int main(int argc, char ** argv) {
         exit(1);
     }
 
-    gchar *user_bin_dir = g_build_filename(g_get_home_dir(), "/.local/bin", NULL);
+    char* home_dir = user_home();
+    gchar *user_bin_dir = g_build_filename(home_dir, "/.local/bin", NULL);
+    free(home_dir);
+
     gchar *installed_appimaged_location = g_build_filename(user_bin_dir, "appimaged", NULL);
     const gchar *appimage_location = g_getenv("APPIMAGE");
     gchar *own_desktop_file_location = g_build_filename(g_getenv("APPDIR"), "/appimaged.desktop", NULL);
@@ -320,11 +323,16 @@ int main(int argc, char ** argv) {
         }
     }
 
+
     add_dir_to_watch(user_bin_dir);
     add_dir_to_watch(g_get_user_special_dir(G_USER_DIRECTORY_DOWNLOAD));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/bin", NULL));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/.bin", NULL));
-    add_dir_to_watch(g_build_filename(g_get_home_dir(), "/Applications", NULL));
+
+    char* home_dir = user_home();
+    add_dir_to_watch(g_build_filename(home_dir, "/bin", NULL));
+    add_dir_to_watch(g_build_filename(home_dir, "/.bin", NULL));
+    add_dir_to_watch(g_build_filename(home_dir, "/Applications", NULL));
+    free(home_dir);
+
     add_dir_to_watch(g_build_filename("/Applications", NULL));
     // Perhaps we should determine the following dynamically using something like
     // mount | grep -i iso | head -n 1 | cut -d ' ' -f 3

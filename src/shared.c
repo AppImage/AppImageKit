@@ -507,7 +507,7 @@ gchar *build_installed_desktop_file_path(gchar* md5, gchar* desktop_filename) {
 }
 
 /* Write a modified desktop file to disk that points to the AppImage */
-bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimage_path, gchar* desktop_filename, int appimage_type, char *md5, gboolean verbose){
+bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimage_path, gchar* desktop_filename, int appimage_type, char *md5, gboolean verbose, char **desktop_file_path) {
     if(!g_key_file_has_key(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, NULL)){
 #ifdef STANDALONE
         fprintf(stderr, "Desktop file has no Exec key\n");
@@ -783,6 +783,11 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     /* GNOME shows the icon and name on the desktop file only if it is executable */
     chmod(destination, 0755);
 
+    // set desktop_file_path if possible
+    if (desktop_file_path != NULL) {
+        *desktop_file_path = strdup(destination);
+    }
+
     g_free(destination);
 
     return true;
@@ -1034,7 +1039,7 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
 }
 
 /* Register a type 1 AppImage in the system */
-bool appimage_type1_register_in_system(const char *path, gboolean verbose)
+bool appimage_type1_register_in_system_get_desktop_file_path(const char *path, gboolean verbose, char **desktop_file_path)
 {
 #ifdef STANDALONE
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
@@ -1083,7 +1088,7 @@ bool appimage_type1_register_in_system(const char *path, gboolean verbose)
         if (verbose)
             fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
 
-        if (!write_edited_desktop_file(key_file, path, desktop_filename, 1, md5, verbose)) {
+        if (!write_edited_desktop_file(key_file, path, desktop_filename, 1, md5, verbose, desktop_file_path)) {
 #ifdef STANDALONE
             fprintf(stderr, "Failed to install desktop file\n");
 #endif
@@ -1124,6 +1129,10 @@ bool appimage_type1_register_in_system(const char *path, gboolean verbose)
     return !errored;
 }
 
+bool appimage_type1_register_in_system(const char* path, gboolean verbose) {
+    return appimage_type1_register_in_system_get_desktop_file_path(path, verbose, NULL);
+}
+
 bool appimage_type2_get_desktop_filename_and_key_file(sqfs* fs, gchar** desktop_filename, gchar* md5, GKeyFile** key_file, gboolean verbose) {
     /* TOOO: Change so that only one run of squash_get_matching_files is needed in total,
      * this should hopefully improve performance */
@@ -1154,7 +1163,7 @@ bool appimage_type2_get_desktop_filename_and_key_file(sqfs* fs, gchar** desktop_
 }
 
 /* Register a type 2 AppImage in the system */
-bool appimage_type2_register_in_system(char *path, gboolean verbose) {
+bool appimage_type2_register_in_system_get_desktop_file_path(const char* path, gboolean verbose, char** desktop_file_path) {
 #ifdef STANDALONE
     fprintf(stderr, "squashfs based type 2 AppImage\n");
 #endif
@@ -1203,7 +1212,7 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose) {
         } else {
             if (verbose)
                 fprintf(stderr, "desktop_icon_value_original: %s\n", desktop_icon_value_original);
-            if (!write_edited_desktop_file(key_file, path, desktop_filename, 2, md5, verbose)) {
+            if (!write_edited_desktop_file(key_file, path, desktop_filename, 2, md5, verbose, desktop_file_path)) {
 #ifdef STANDALONE
                 fprintf(stderr, "Failed to install desktop file\n");
 #endif
@@ -1233,6 +1242,10 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose) {
     g_free(md5);
     g_free(desktop_icon_value_original);
     return TRUE;
+}
+
+bool appimage_type2_register_in_system(const char* path, gboolean verbose) {
+    return appimage_type2_register_in_system_get_desktop_file_path(path, verbose, NULL);
 }
 
 /* Check whether AppImage is registered in the system already */
@@ -1364,8 +1377,9 @@ bool appimage_is_registered_in_system(const char* path) {
 /*
  * Register an AppImage in the system
  * Returns 0 on success, non-0 otherwise.
+ * Set app_for_removal to add a [Desktop Action] for removing the AppImage using that executable.
  */
-int appimage_register_in_system(char *path, gboolean verbose)
+int appimage_register_in_system_get_desktop_file_path(const char* path, gboolean verbose, const char* get_desktop_file_path)
 {
     if((g_str_has_suffix(path, ".part")) ||
         g_str_has_suffix(path, ".tmp") ||
@@ -1391,10 +1405,12 @@ int appimage_register_in_system(char *path, gboolean verbose)
 
     switch (type) {
         case 1:
-            appimage_type1_register_in_system(path, verbose);
+            if (!appimage_type1_register_in_system_get_desktop_file_path(path, verbose, get_desktop_file_path))
+                return 1;
             break;
         case 2:
-            appimage_type2_register_in_system(path, verbose);
+            if (!appimage_type2_register_in_system_get_desktop_file_path(path, verbose, get_desktop_file_path))
+                return 1;
             break;
         default:
 #ifdef STANDALONE
@@ -1403,17 +1419,15 @@ int appimage_register_in_system(char *path, gboolean verbose)
             return 1;
     }
 
-    if (type == 1) {
-        if (!appimage_type1_register_in_system(path, verbose))
-            return 1;
-    }
-
-    if (type == 2) {
-        if (!appimage_type2_register_in_system(path, verbose))
-            return 1;
-    }
-
     return 0;
+}
+
+/*
+ * Register an AppImage in the system
+ * Returns 0 on success, non-0 otherwise.
+ */
+int appimage_register_in_system(char* path, gboolean verbose) {
+    return appimage_register_in_system_get_desktop_file_path(path, verbose, NULL);
 }
 
 /* Delete the thumbnail for a given file and size if it exists */
@@ -1529,15 +1543,21 @@ void dummy_traverse_func(appimage_handler *handler, traverse_cb command, void *d
     (void) command;
     (void) data;
 
+#ifdef STANDALONE
     fprintf(stderr, "Called %s\n", __FUNCTION__);
+#endif
 }
 
 char* dummy_get_file_name (appimage_handler *handler, void *data) {
+#ifdef STANDALONE
     fprintf(stderr, "Called %s\n", __FUNCTION__);
+#endif
 }
 
 void dummy_extract_file(struct appimage_handler *handler, void *data, char *target) {
+#ifdef STANDALONE
     fprintf(stderr, "Called %s\n", __FUNCTION__);
+#endif
 }
 
 /*
