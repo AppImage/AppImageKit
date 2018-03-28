@@ -3,7 +3,11 @@ find_package(Sanitizers)
 # set up build script
 
 # if set to anything but ON, the magic bytes won't be embedded
+# CAUTION: the magic bytes are a hard requirement for type 2 AppImages! This option should NEVER be used unless you are
+# 100% sure what you are doing here!
 set(APPIMAGEKIT_EMBED_MAGIC_BYTES ON CACHE BOOL "")
+# mark as advanced so it won't show up in CMake GUIs etc., to prevent users from accidentally using this option
+mark_as_advanced(APPIMAGEKIT_EMBED_MAGIC_BYTES)
 
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/build-runtime.sh.in
@@ -252,6 +256,7 @@ target_link_libraries(runtime-debug
 )
 
 set(_RUNTIME_FLAGS -g -O0 -ffunction-sections -fdata-sections -s -Wl,--gc-sections -DGIT_COMMIT='${GIT_COMMIT}' -D_FILE_OFFSET_BITS=64)
+mark_as_advanced(_RUNTIME_FLAGS)
 
 set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "${_RUNTIME_FLAGS}")
 

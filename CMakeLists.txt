@@ -36,11 +36,13 @@ execute_process(
 
 # set version and build number
 set(VERSION 1-alpha)
+mark_as_advanced(VERSION)
 if("$ENV{TRAVIS_BUILD_NUMBER}" STREQUAL "")
     set(BUILD_NUMBER "<local dev build>")
 else()
     set(BUILD_NUMBER "$ENV{TRAVIS_BUILD_NUMBER}")
 endif()
+mark_as_advanced(BUILD_NUMBER)
 
 # get current date
 execute_process(
