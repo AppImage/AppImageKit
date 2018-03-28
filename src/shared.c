@@ -60,6 +60,7 @@
 #endif
 
 #include <regex.h>
+#include <glob.h>
 
 #include <cairo.h> // To get the size of icons, move_icon_to_destination()
 
@@ -1235,6 +1236,42 @@ bool appimage_type2_register_in_system(char *path, gboolean verbose) {
     return TRUE;
 }
 
+char* appimage_registered_desktop_file_path(const char *path, char *md5, bool verbose) {
+    glob_t pglob = {};
+
+    // if md5 has been calculated before, we can just use it to save these extra calculations
+    // if not, we need to calculate it here
+    if (md5 == NULL)
+        md5 = appimage_get_md5(path);
+
+    char *data_home = xdg_data_home();
+
+    // TODO: calculate this value exactly
+    char *glob_pattern = malloc(PATH_MAX);
+    sprintf(glob_pattern, "%s/applications/appimagekit_%s-*.desktop", data_home, md5);
+
+    glob(glob_pattern, 0, NULL, &pglob);
+
+    char* rv = NULL;
+
+    if (pglob.gl_pathc <= 0) {
+        if (verbose) {
+            fprintf(stderr, "No results found by glob()");
+        }
+    } else if (pglob.gl_pathc >= 1) {
+        if (pglob.gl_pathc > 1 && verbose) {
+            fprintf(stderr, "Too many results returned by glob(), returning first result found");
+        }
+
+        // need to copy value to be able to globfree() later on
+        rv = strdup(pglob.gl_pathv[0]);
+    }
+
+    globfree(&pglob);
+
+    return rv;
+};
+
 /* Check whether AppImage is registered in the system already */
 bool appimage_is_registered_in_system(const char* path) {
     // there's two criteria whether an AppImage has been registered in the system:
@@ -1255,97 +1292,8 @@ bool appimage_is_registered_in_system(const char* path) {
 
     gchar* md5 = appimage_get_md5(path);
 
-    int appimage_type = appimage_get_type(path, false);
-
     GKeyFile* key_file = g_key_file_new();
-    gchar* desktop_filename = NULL;
-
-    switch (appimage_type) {
-        case 1:
-            {
-                // open AppImage as ISO9660 file
-                struct archive *a = archive_read_new();
-
-                if (archive_read_support_format_iso9660(a) != ARCHIVE_OK ||
-                    archive_read_open_filename(a, path, 10240) != ARCHIVE_OK) {
-
-                    // cleanup
-                    archive_read_free(a);
-                    g_free(thumbnail_path);
-                    g_free(md5);
-                    g_free(desktop_filename);
-                    g_key_file_free(key_file);
-
-                    return false;
-                }
-
-                bool rv = appimage_type1_get_desktop_filename_and_key_file(&a, &desktop_filename, &key_file);
-
-                archive_read_free(a);
-
-                if (!rv) {
-                    // cleanup
-                    g_free(thumbnail_path);
-                    g_free(md5);
-                    g_key_file_free(key_file);
-                    g_free(desktop_filename);
-
-                    return false;
-                }
-            }
-            break;
-        case 2:
-            {
-                long unsigned int fs_offset; // The offset at which a squashfs image is expected
-                fs_offset = get_elf_size(path);
-
-                sqfs fs;
-                sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
-
-                if (err != SQFS_OK) {
-#ifdef STANDALONE
-                    fprintf(stderr, "sqfs_open_image error: %s\n", path);
-#endif
-
-                    // cleanup
-                    sqfs_destroy(&fs);
-                    g_free(thumbnail_path);
-                    g_free(md5);
-                    g_free(desktop_filename);
-                    g_key_file_free(key_file);
-
-                    return false;
-                }
-
-                bool rv = appimage_type2_get_desktop_filename_and_key_file(&fs, &desktop_filename, md5, &key_file, false);
-
-                sqfs_destroy(&fs);
-
-                if (!rv) {
-                    // cleanup
-                    g_free(thumbnail_path);
-                    g_free(md5);
-                    g_free(desktop_filename);
-                    g_key_file_free(key_file);
-
-                    return false;
-                }
-            }
-
-            break;
-        default:
-            // type not recognized
-
-            // cleanup
-            g_free(thumbnail_path);
-            g_free(md5);
-            g_key_file_free(key_file);
-            g_free(desktop_filename);
-
-            return false;
-    }
-
-    gchar* desktop_file_path = build_installed_desktop_file_path(md5, desktop_filename);
+    gchar* desktop_file_path = appimage_registered_desktop_file_path(path, md5, false);
 
     bool rv = true;
 
@@ -1354,7 +1302,6 @@ bool appimage_is_registered_in_system(const char* path) {
 
     g_free(thumbnail_path);
     g_free(md5);
-    g_free(desktop_filename);
     g_free(desktop_file_path);
     g_key_file_free(key_file);
 

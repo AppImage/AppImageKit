@@ -12,6 +12,15 @@ char *appimage_get_md5(char const* path);
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
 int appimage_get_type(const char* path, bool verbose);
 
+/*
+ * Finds the desktop file of a registered AppImage and returns the path
+ * Returns NULL if the desktop file can't be found, which should only occur when the AppImage hasn't been registered yet
+ */
+char* appimage_registered_desktop_file_path(const char* path, char* md5, bool verbose);
+
+/*
+ * Check whether an AppImage has been registered in the system
+ */
 bool appimage_is_registered_in_system(const char* path);
 
 /* Register a type 1 AppImage in the system */

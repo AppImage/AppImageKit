@@ -82,6 +82,8 @@ void unregister_using_md5_id(const char* name, int level, char* md5, gboolean ve
 
 void delete_thumbnail(char* path, char* size, gboolean verbose);
 
+char* appimage_registered_desktop_file_path(const char* path, char* md5, bool verbose);
+
 bool appimage_is_registered_in_system(const char* path);
 
 int appimage_register_in_system(char* path, gboolean verbose);
