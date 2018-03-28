@@ -7,9 +7,9 @@ char* user_home() {
 }
 
 char* xdg_config_home()  {
-    char* config_home;
+    char* config_home = getenv("XDG_CONFIG_HOME");
 
-    if ((config_home = getenv("XDG_CONFIG_HOME")) == NULL) {
+    if (config_home == NULL) {
         char* home = user_home();
         static const char const* suffix = "/.config";
 
@@ -27,9 +27,9 @@ char* xdg_config_home()  {
 }
 
 char* xdg_data_home() {
-    char* data_home;
+    char* data_home = getenv("XDG_DATA_HOME");
 
-    if ((data_home = getenv("XDG_DATA_HOME")) == NULL) {
+    if (data_home == NULL) {
         char* home = user_home();
         static const char const* suffix = "/.local/share";
 
@@ -47,9 +47,9 @@ char* xdg_data_home() {
 }
 
 char* xdg_cache_home() {
-    char* cache_home;
+    char* cache_home = getenv("XDG_CACHE_HOME");
 
-    if ((cache_home = getenv("XDG_CACHE_HOME")) == NULL) {
+    if (cache_home == NULL) {
         char* home = user_home();
         static const char const* suffix = "/.cache";
 
