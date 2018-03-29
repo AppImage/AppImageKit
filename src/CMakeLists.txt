@@ -202,7 +202,9 @@ target_compile_definitions(appimaged
     PRIVATE -D_FILE_OFFSET_BITS=64
     PRIVATE -DHAVE_LIBARCHIVE3=0
     PRIVATE -DSTANDALONE=1
+    PRIVATE -DAPPIMAGED=1
 )
+# TODO: remove -DAPPIMAGED=1, move these code snippets to appimaged's source code files
 
 add_dependencies(appimaged squashfuse)
 
