@@ -51,7 +51,14 @@ if(BUILD_TESTING)
         ${gtest_LIBRARIES}
     )
 
-    target_include_directories(test_shared PRIVATE ../src/)
+    target_include_directories(test_shared
+        # used to include shared.h
+        PRIVATE ${PROJECT_SOURCE_DIR}/src/
+        # need to include libappimage's header directory as well
+        # as we're building this test manually from the source files, we need to replicate the build settings of
+        # libappimage, appimagetool, ...
+        PRIVATE ${PROJECT_SOURCE_DIR}/include/
+    )
 
     add_dependencies(test_shared squashfuse)
 
