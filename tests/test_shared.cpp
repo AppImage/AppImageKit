@@ -141,6 +141,30 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     ASSERT_EQ(installedLines.size(), 0);
 }
 
+TEST_F(SharedCTest, test_appimage_type1_is_no_display) {
+    // TODO: create type 1 AppImage with NoDisplay=true
+    //EXPECT_EQ(appimage_type1_is_no_display(appImage_type_1_no_display_file_path.c_str()), 1);
+    EXPECT_EQ(appimage_type1_is_no_display(appImage_type_1_file_path.c_str()), 0);
+    EXPECT_EQ(appimage_type1_is_no_display(appImage_type_2_file_path.c_str()), -1);
+    EXPECT_EQ(appimage_type1_is_no_display("/invalid/path"), -1);
+}
+
+TEST_F(SharedCTest, test_appimage_type2_is_no_display) {
+    EXPECT_EQ(appimage_type2_is_no_display(appImage_type_1_file_path.c_str()), -1);
+    EXPECT_EQ(appimage_type2_is_no_display(appImage_type_2_no_display_file_path.c_str()), 1);
+    EXPECT_EQ(appimage_type2_is_no_display(appImage_type_2_file_path.c_str()), 0);
+    EXPECT_EQ(appimage_type2_is_no_display("/invalid/path"), -1);
+}
+
+TEST_F(SharedCTest, test_appimage_is_no_display) {
+    EXPECT_EQ(appimage_is_no_display(appImage_type_1_file_path.c_str()), 0);
+    EXPECT_EQ(appimage_is_no_display(appImage_type_2_file_path.c_str()), 0);
+    // TODO: create type 1 AppImage with NoDisplay=true
+    //EXPECT_EQ(appimage_is_no_display(appImage_type_1_no_display_file_path.c_str()), 1);
+    EXPECT_EQ(appimage_is_no_display(appImage_type_2_no_display_file_path.c_str()), 1);
+    EXPECT_EQ(appimage_is_no_display("/invalid/path"), -1);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
