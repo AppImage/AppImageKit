@@ -3,6 +3,9 @@
 #include <glib.h>
 #include <squashfuse.h>
 
+// include public header to avoid duplicate definitions of functions
+#include "appimage/appimage.h"
+
 /* AppImage generic handler calback to be used in algorithms */
 typedef void (*traverse_cb)(void *handler, void *entry_data, void *user_data);
 
@@ -18,9 +21,6 @@ struct appimage_handler
     void *cache;
     bool is_open;
 } typedef appimage_handler;
-
-void appimage_extract_file_following_symlinks(const gchar* appimage_file_path, const char* file_path,
-                                              const char* target_dir);
 
 void extract_appimage_icon(appimage_handler* h, gchar* target);
 
@@ -41,8 +41,6 @@ void appimage_type2_extract_file(appimage_handler* handler, void* data, const ch
 void appimage_type2_extract_file_following_symlinks(sqfs* fs, sqfs_inode* inode, const char* target);
 
 void appimage_type2_extract_regular_file(sqfs* fs, sqfs_inode* inode, const char* target);
-
-void appimage_type2_extract_symlink(sqfs* fs, sqfs_inode* inode, const char* target);
 
 void appimage_type2_extract_symlink(sqfs* fs, sqfs_inode* inode, const char* target);
 
@@ -76,23 +74,9 @@ void mk_base_dir(const char* target);
 
 bool is_handler_valid(const appimage_handler* handler);
 
-int appimage_unregister_in_system(char* path, gboolean verbose);
-
 void unregister_using_md5_id(const char* name, int level, char* md5, gboolean verbose);
 
 void delete_thumbnail(char* path, char* size, gboolean verbose);
-
-char* appimage_registered_desktop_file_path(const char* path, char* md5, bool verbose);
-
-bool appimage_is_registered_in_system(const char* path);
-
-int appimage_register_in_system(char* path, gboolean verbose);
-
-void appimage_create_thumbnail(const gchar* appimage_file_path, gboolean verbose);
-
-bool appimage_type2_register_in_system(char* path, gboolean verbose);
-
-bool appimage_type1_register_in_system(const char* path, gboolean verbose);
 
 bool write_edited_desktop_file(GKeyFile* key_file_structure, const char* appimage_path, gchar* desktop_filename,
                                int appimage_type, char* md5, gboolean verbose);
@@ -105,18 +89,12 @@ gchar** squash_get_matching_files_install_icons_and_mime_data(sqfs* fs, char* pa
 
 void squash_extract_inode_to_file(sqfs* fs, sqfs_inode* inode, const gchar* dest);
 
-int appimage_get_type(const char* path, gboolean verbose);
-
 void move_icon_to_destination(gchar* icon_path, gboolean verbose);
 
 char* get_thumbnail_path(const char* path, char* thumbnail_size, gboolean verbose);
-
-char* appimage_get_md5(const char* path);
 
 gchar* replace_str(const gchar* src, const gchar* find, const gchar* replace);
 
 void set_executable(const char* path, gboolean verbose);
 
 extern char* vendorprefix;
-
-char** appimage_list_files(const char* path);

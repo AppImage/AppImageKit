@@ -237,7 +237,7 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 }
 
 /* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
-int appimage_get_type(const char* path, gboolean verbose)
+int appimage_get_type(const char* path, bool verbose)
 {
     FILE *f = fopen(path, "rt");
     if (f != NULL)
@@ -1037,7 +1037,7 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
 }
 
 /* Register a type 1 AppImage in the system */
-bool appimage_type1_register_in_system(const char *path, gboolean verbose)
+bool appimage_type1_register_in_system(const char *path, bool verbose)
 {
 #ifdef STANDALONE
     fprintf(stderr, "ISO9660 based type 1 AppImage\n");
@@ -1157,7 +1157,7 @@ bool appimage_type2_get_desktop_filename_and_key_file(sqfs* fs, gchar** desktop_
 }
 
 /* Register a type 2 AppImage in the system */
-bool appimage_type2_register_in_system(char *path, gboolean verbose) {
+bool appimage_type2_register_in_system(const char *path, bool verbose) {
 #ifdef STANDALONE
     fprintf(stderr, "squashfs based type 2 AppImage\n");
 #endif
@@ -1314,7 +1314,7 @@ bool appimage_is_registered_in_system(const char* path) {
  * Register an AppImage in the system
  * Returns 0 on success, non-0 otherwise.
  */
-int appimage_register_in_system(char *path, gboolean verbose)
+int appimage_register_in_system(const char *path, bool verbose)
 {
     if((g_str_has_suffix(path, ".part")) ||
         g_str_has_suffix(path, ".tmp") ||
@@ -1420,7 +1420,7 @@ void unregister_using_md5_id(const char *name, int level, char* md5, gboolean ve
 
 
 /* Unregister an AppImage in the system */
-int appimage_unregister_in_system(char *path, gboolean verbose)
+int appimage_unregister_in_system(const char *path, bool verbose)
 {
     char *md5 = appimage_get_md5(path);
 
@@ -1838,7 +1838,7 @@ void extract_appimage_icon(appimage_handler *h, gchar *target) {
 /* Create AppImage thumbanil according to
  * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
  */
-void appimage_create_thumbnail(const gchar *appimage_file_path, gboolean verbose) {
+void appimage_create_thumbnail(const char *appimage_file_path, bool verbose) {
     // extract AppImage icon to /tmp
     appimage_handler handler = create_appimage_handler(appimage_file_path);
 

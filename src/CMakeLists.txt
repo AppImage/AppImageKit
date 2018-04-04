@@ -36,6 +36,10 @@ add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
 add_subdirectory(xdg-basedir)
 
 
+# include public include directory to avoid having to maintain definitions in two places
+include_directories(${PROJECT_SOURCE_DIR}/include)
+
+
 # allow setting different path for mksquashfs after installation
 set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install directory for mksquashfs")
 
