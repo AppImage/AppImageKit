@@ -45,7 +45,7 @@ void appimage_extract_file_following_symlinks(const char* appimage_file_path, co
 /* Create AppImage thumbnail according to
  * https://specifications.freedesktop.org/thumbnail-spec/0.8.0/index.html
  */
-void appimage_create_thumbnail(const char* appimage_file_path);
+void appimage_create_thumbnail(const char* appimage_file_path, bool verbose);
 
 /* List files contained in the AppImage file.
  * Returns: a newly allocated char** ended at NULL. If no files ware found also is returned a {NULL}

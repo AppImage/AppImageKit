@@ -41,7 +41,6 @@ set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install d
 
 
 add_library(libappimage SHARED
-    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     shared.c
     getsection.c
     notify.c
@@ -205,6 +204,11 @@ target_compile_definitions(appimaged
     PRIVATE -DAPPIMAGED=1
 )
 # TODO: remove -DAPPIMAGED=1, move these code snippets to appimaged's source code files
+
+target_include_directories(appimaged
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
 
 add_dependencies(appimaged squashfuse)
 
