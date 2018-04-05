@@ -58,9 +58,6 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-# write version information for CPack to files
-file(WRITE ${PROJECT_BINARY_DIR}/GIT_COMMIT "${GIT_COMMIT}")
-
 
 ##########################
 # configure dependencies #
