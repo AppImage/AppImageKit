@@ -1238,6 +1238,190 @@ bool appimage_type2_register_in_system(const char *path, bool verbose) {
     return TRUE;
 }
 
+int appimage_type1_is_terminal_app(const char* path) {
+    // check if file exists
+    if (!g_file_test(path, G_FILE_TEST_IS_REGULAR))
+        return -1;
+
+    // check if file is of correct type
+    if (appimage_get_type(path, false) != 1)
+        return -1;
+
+    char* md5 = appimage_get_md5(path);
+
+    if (md5 == NULL)
+        return -1;
+
+    // open ISO9660 image using libarchive
+    struct archive *a = archive_read_new();
+    archive_read_support_format_iso9660(a);
+
+    // libarchive status int -- passed to called functions
+    int r;
+
+    if ((r = archive_read_open_filename(a, path, 10240)) != ARCHIVE_OK) {
+        // cleanup
+        free(md5);
+        archive_read_free(a);
+
+        return -1;
+    }
+    // search image for root desktop file, and read it into key file structure so it can be edited eventually
+    gchar *desktop_filename = NULL;
+    GKeyFile *key_file = NULL;
+
+    if (!appimage_type1_get_desktop_filename_and_key_file(&a, &desktop_filename, &key_file)) {
+        // cleanup
+        free(md5);
+        archive_read_free(a);
+        g_free(desktop_filename);
+        g_key_file_free(key_file);
+
+        return -1;
+    }
+
+    // validate that both have been set to a non-NULL value
+    if (desktop_filename == NULL || key_file == NULL) {
+        // cleanup
+        free(md5);
+        archive_read_free(a);
+        g_free(desktop_filename);
+        g_key_file_free(key_file);
+
+        return -1;
+    }
+
+    GError *error = NULL;
+    gboolean rv = g_key_file_get_boolean(key_file, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NO_DISPLAY, &error);
+
+    // cleanup
+    free(md5);
+    archive_read_free(a);
+    g_free(desktop_filename);
+    g_key_file_free(key_file);
+
+    int result;
+
+    if (!rv) {
+        // if the key file hasn't been found and the error is not set to NOT_FOUND, return an error
+        if (error == G_KEY_FILE_ERROR_NOT_FOUND)
+            result = -1;
+        else
+            result = 0;
+    } else {
+        result = 1;
+    }
+
+    if (error != NULL)
+        g_error_free(error);
+
+    return result;
+};
+
+int appimage_type2_is_terminal_app(const char* path) {
+    // check if file exists
+    if (!g_file_test(path, G_FILE_TEST_IS_REGULAR))
+        return -1;
+
+    // check if file is of correct type
+    if (appimage_get_type(path, false) != 2)
+        return -1;
+
+    char* md5 = appimage_get_md5(path);
+
+    if (md5 == NULL)
+        return -1;
+
+    unsigned long fs_offset = get_elf_size(path);
+
+    sqfs fs;
+
+    sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
+
+    if (err != SQFS_OK) {
+        free(md5);
+        sqfs_destroy(&fs);
+        return -1;
+    }
+
+    gchar* desktop_filename = NULL;
+
+    // a structure that will hold the information from the desktop file
+    GKeyFile* key_file = g_key_file_new();
+
+    if (!appimage_type2_get_desktop_filename_and_key_file(&fs, &desktop_filename, md5, &key_file, false)) {
+        // cleanup
+        free(md5);
+        free(desktop_filename);
+        sqfs_destroy(&fs);
+        g_key_file_free(key_file);
+
+        return -1;
+    }
+
+    // validate that both have been set to a non-NULL value
+    if (desktop_filename == NULL || key_file == NULL) {
+        // cleanup
+        free(md5);
+        sqfs_destroy(&fs);
+        g_free(desktop_filename);
+        g_key_file_free(key_file);
+
+        return -1;
+    }
+
+    // no longer used
+    free(md5);
+
+    GError *error = NULL;
+    gboolean rv = g_key_file_get_boolean(key_file, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TERMINAL, &error);
+
+    // cleanup
+    free(desktop_filename);
+    sqfs_destroy(&fs);
+    g_key_file_free(key_file);
+
+    int result;
+
+    if (!rv) {
+        // if the key file hasn't been found and the error is not set to NOT_FOUND, return an error
+        if (error != NULL && error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND)
+            result = -1;
+        else
+            result = 0;
+    } else {
+            result = 1;
+    }
+
+    if (error != NULL)
+        g_error_free(error);
+
+    return result;
+};
+
+/*
+ * Checks whether an AppImage's desktop file has set NoDisplay=true.
+ * Useful to check whether the author of an AppImage doesn't want it to be integrated.
+ *
+ * Returns >0 if set, 0 if not set, <0 on errors.
+ */
+int appimage_is_terminal_app(const char *path) {
+    // check if file exists
+    if (!g_file_test(path, G_FILE_TEST_IS_REGULAR))
+        return -1;
+
+    int type = appimage_get_type(path, false);
+
+    switch (type) {
+        case 1:
+            return appimage_type1_is_terminal_app(path);
+        case 2:
+            return appimage_type2_is_terminal_app(path);
+        default:
+            return -1;
+    }
+}
+
 char* appimage_registered_desktop_file_path(const char *path, char *md5, bool verbose) {
     glob_t pglob = {};
 

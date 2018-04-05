@@ -18,6 +18,11 @@ public:
     std::string tempDir;
     std::string tempHome;
 
+protected:
+    std::string appImage_type_1_file_path;
+    std::string appImage_type_2_file_path;
+    std::string appImage_type_2_terminal_file_path;
+
 public:
     AppImageKitTest() {
         char* tmpl = strdup("/tmp/AppImageKit-unit-tests-XXXXXX");
@@ -48,6 +53,10 @@ public:
 
         free(xdgDataHome);
         free(xdgConfigHome);
+
+        appImage_type_1_file_path = std::string(TEST_DATA_DIR) + "/AppImageExtract_6-x86_64.AppImage";
+        appImage_type_2_file_path = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
+        appImage_type_2_terminal_file_path = std::string(TEST_DATA_DIR) + "/appimagetool-x86_64.AppImage";
     };
 
     ~AppImageKitTest() {
