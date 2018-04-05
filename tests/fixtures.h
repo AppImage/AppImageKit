@@ -21,6 +21,7 @@ public:
 protected:
     std::string appImage_type_1_file_path;
     std::string appImage_type_2_file_path;
+    std::string appImage_type_2_terminal_file_path;
 
 public:
     AppImageKitTest() {
@@ -55,6 +56,7 @@ public:
 
         appImage_type_1_file_path = std::string(TEST_DATA_DIR) + "/AppImageExtract_6-x86_64.AppImage";
         appImage_type_2_file_path = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
+        appImage_type_2_terminal_file_path = std::string(TEST_DATA_DIR) + "/appimagetool-x86_64.AppImage";
     };
 
     ~AppImageKitTest() {

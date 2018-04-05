@@ -141,6 +141,30 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     ASSERT_EQ(installedLines.size(), 0);
 }
 
+TEST_F(SharedCTest, test_appimage_type1_is_terminal_app) {
+    // TODO: add type 1 AppImage with Terminal=true
+    //EXPECT_EQ(appimage_is_terminal_app(appImage_type_1_terminal_file_path.c_str()), 1);
+    EXPECT_EQ(appimage_type1_is_terminal_app(appImage_type_1_file_path.c_str()), 0);
+    EXPECT_EQ(appimage_type1_is_terminal_app(appImage_type_2_file_path.c_str()), -1);
+    EXPECT_EQ(appimage_type1_is_terminal_app("/invalid/path"), -1);
+}
+
+TEST_F(SharedCTest, test_appimage_type2_is_terminal_app) {
+    EXPECT_EQ(appimage_type2_is_terminal_app(appImage_type_1_file_path.c_str()), -1);
+    EXPECT_EQ(appimage_type2_is_terminal_app(appImage_type_2_terminal_file_path.c_str()), 1);
+    EXPECT_EQ(appimage_type2_is_terminal_app(appImage_type_2_file_path.c_str()), 0);
+    EXPECT_EQ(appimage_type2_is_terminal_app("/invalid/path"), -1);
+}
+
+TEST_F(SharedCTest, test_appimage_is_terminal_app) {
+    EXPECT_EQ(appimage_is_terminal_app(appImage_type_1_file_path.c_str()), 0);
+    EXPECT_EQ(appimage_is_terminal_app(appImage_type_2_file_path.c_str()), 0);
+    // TODO: add type 1 AppImage with Terminal=true
+    //EXPECT_EQ(appimage_is_terminal_app(appImage_type_1_terminal_file_path.c_str()), 1);
+    //EXPECT_EQ(appimage_is_terminal_app(appImage_type_2_terminal_file_path.c_str()), 1);
+    EXPECT_EQ(appimage_is_terminal_app("/invalid/path"), -1);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
