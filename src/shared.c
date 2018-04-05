@@ -1340,25 +1340,17 @@ int appimage_register_in_system(const char *path, bool verbose)
 
     switch (type) {
         case 1:
-            appimage_type1_register_in_system(path, verbose);
+            if (!appimage_type1_register_in_system(path, verbose))
+                return 1;
             break;
         case 2:
-            appimage_type2_register_in_system(path, verbose);
+            if (!appimage_type2_register_in_system(path, verbose))
+                return 1;
             break;
         default:
 #ifdef STANDALONE
             fprintf(stderr, "Error: unknown AppImage type %d\n", type);
 #endif
-            return 1;
-    }
-
-    if (type == 1) {
-        if (!appimage_type1_register_in_system(path, verbose))
-            return 1;
-    }
-
-    if (type == 2) {
-        if (!appimage_type2_register_in_system(path, verbose))
             return 1;
     }
 
