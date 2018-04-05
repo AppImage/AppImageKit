@@ -1,13 +1,21 @@
 # required for DEB-DEFAULT to work as intended
 cmake_minimum_required(VERSION 3.6)
 
-set(PROJECT_VERSION 1.0)
 set(CPACK_GENERATOR "DEB")
 
-set(CPACK_DEBIAN_PACKAGE_VERSION ${PROJECT_VERSION})
-file(READ ${PROJECT_BINARY_DIR}/GIT_COMMIT GIT_COMMIT)
-message("GIT_COMMIT: ${GIT_COMMIT}")
+# versioning
+# it appears setting CPACK_DEBIAN_PACKAGE_VERSION doesn't work, hence setting CPACK_PACKAGE_VERSION
+set(CPACK_PACKAGE_VERSION ${VERSION})
+
+# use git hash as package release
 set(CPACK_DEBIAN_PACKAGE_RELEASE "git${GIT_COMMIT}")
+
+# append build ID, similar to AppImage naming
+if(DEFINED ENV{TRAVIS_BUILD_NUMBER})
+    set(CPACK_DEBIAN_PACKAGE_RELEASE "${CPACK_DEBIAN_PACKAGE_RELEASE}~travis$ENV{TRAVIS_BUILD_NUMBER}")
+else()
+    set(CPACK_DEBIAN_PACKAGE_RELEASE "${CPACK_DEBIAN_PACKAGE_RELEASE}~local")
+endif()
 
 if(DEFINED ENV{ARCH})
     set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE $ENV{ARCH})
