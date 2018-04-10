@@ -634,6 +634,63 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     }
 #endif
 
+    {
+        char* appimage_version = g_key_file_get_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "X-AppImage-Version", NULL);
+
+        if (appimage_version != NULL) {
+            // TODO: support for multiple locales
+            // the following code snippet is prepared for multiple locales, we just need to add all possible locales
+            // NULL refers to the key without the locale tag
+            static const gchar* locales[] = {NULL};
+
+            for (int i = 0; i < (sizeof(locales) / sizeof(gchar*)); i++) {
+                const gchar* locale = locales[i];
+
+                // check whether the key is set at all
+                gchar* old_contents;
+
+                // it's a little annoying that the GLib functions don't simply work with NULL as the locale, that'd
+                // make the following if-else construct unnecessary
+                if (locale == NULL) {
+                    old_contents = g_key_file_get_string(
+                        key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, NULL
+                    );
+                } else {
+                    old_contents = g_key_file_get_locale_string(
+                        key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, locale, NULL
+                    );
+                }
+
+                // continue to next key if not set
+                if (old_contents == NULL) {
+                    continue;
+                }
+
+                // copy key's original contents
+                static const gchar old_key[] = "X-AppImage-Old-Name";
+
+                // append AppImage version
+                gchar* new_contents = g_strdup_printf("%s (%s)", old_contents, appimage_version);
+
+                // see comment for above if-else construct
+                if (locale == NULL) {
+                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, old_contents);
+                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, new_contents);
+                } else {
+                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, locale, old_contents);
+                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, locale, new_contents);
+                }
+
+                // cleanup
+                g_free(old_contents);
+                g_free(new_contents);
+            }
+        }
+
+        // cleanup
+        g_free(appimage_version);
+    }
+
     gchar *icon_path = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
     gchar *basename = g_path_get_basename(icon_path);
 
@@ -664,7 +721,6 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         fprintf(stderr, "%s", buf);
         g_free(buf);
     }
-
 
     /* https://specifications.freedesktop.org/menu-spec/menu-spec-latest.html#paths says:
      *
