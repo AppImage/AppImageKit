@@ -634,10 +634,11 @@ main (int argc, char *argv[])
             
             if (version_env!=NULL)
                 sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename, version_env, arch);
-            
-            destination = dest_path;
+
+            destination = strdup(dest_path);
             replacestr(destination, " ", "_");
         }
+
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
         /* Check if the Icon file is how it is expected */
         gchar* icon_name = get_desktop_entry(kf, "Icon");
