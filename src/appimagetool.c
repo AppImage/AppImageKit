@@ -581,7 +581,7 @@ main (int argc, char *argv[])
 
         /* Read information from .desktop file */
         GKeyFile *kf = g_key_file_new ();
-        if (!g_key_file_load_from_file (kf, desktop_file, 0, NULL))
+        if (!g_key_file_load_from_file (kf, desktop_file, G_KEY_FILE_KEEP_TRANSLATIONS | G_KEY_FILE_KEEP_COMMENTS, NULL))
             die(".desktop file cannot be parsed");
         
         if(verbose){
@@ -627,13 +627,19 @@ main (int argc, char *argv[])
             /* No destination has been specified, to let's construct one
             * TODO: Find out the architecture and use a $VERSION that might be around in the env */
             char dest_path[PATH_MAX];
-            sprintf (dest_path, "%s-%s.AppImage", app_name_for_filename, arch);
-            
-            if(verbose)
-                fprintf (stderr,"dest_path: %s\n", dest_path);
-            
-            if (version_env!=NULL)
-                sprintf (dest_path, "%s-%s-%s.AppImage", app_name_for_filename, version_env, arch);
+            sprintf(dest_path, "%s-%s.AppImage", app_name_for_filename, arch);
+
+            if (version_env != NULL) {
+                sprintf(dest_path, "%s-%s-%s.AppImage", app_name_for_filename, version_env, arch);
+
+                // set VERSION in desktop file and save it
+                g_key_file_set_string(kf, G_KEY_FILE_DESKTOP_GROUP, "X-AppImage-Version", version_env);
+
+                if (!g_key_file_save_to_file(kf, desktop_file, NULL)) {
+                    fprintf(stderr, "Could not save modified desktop file\n");
+                    exit(1);
+                }
+            }
 
             destination = strdup(dest_path);
             replacestr(destination, " ", "_");
