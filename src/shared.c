@@ -1360,7 +1360,7 @@ int appimage_type1_is_terminal_app(const char* path) {
 
     if (!rv) {
         // if the key file hasn't been found and the error is not set to NOT_FOUND, return an error
-        if (error == G_KEY_FILE_ERROR_NOT_FOUND)
+        if (error->code != G_KEY_FILE_ERROR_NOT_FOUND)
             result = -1;
         else
             result = 0;
