@@ -76,6 +76,10 @@ cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_T
 make -j$JOBS
 make install DESTDIR=install_prefix/
 
+if [ -d /deps/lib ]; then
+    export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/deps/lib/
+fi
+
 if [ $RUN_TESTS -ne 0 ]; then
   ctest -V
 fi
