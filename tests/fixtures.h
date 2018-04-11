@@ -59,6 +59,11 @@ public:
         appImage_type_2_file_path = std::string(TEST_DATA_DIR) + "/Echo-x86_64.AppImage";
         appImage_type_2_versioned_path = std::string(TEST_DATA_DIR) + "/Echo-test1234-x86_64.AppImage";
         appImage_type_2_terminal_file_path = std::string(TEST_DATA_DIR) + "/appimagetool-x86_64.AppImage";
+
+        EXPECT_TRUE(isFile(appImage_type_1_file_path));
+        EXPECT_TRUE(isFile(appImage_type_2_file_path));
+        EXPECT_TRUE(isFile(appImage_type_2_versioned_path));
+        EXPECT_TRUE(isFile(appImage_type_2_terminal_file_path));
     };
 
     ~AppImageKitTest() {
