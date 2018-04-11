@@ -1,11 +1,19 @@
 # find required system dependencies via pkg-config
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GLIB REQUIRED glib-2.0)
-pkg_check_modules(GIO REQUIRED gio-2.0)
+pkg_check_modules(GLIB REQUIRED glib-2.0>=2.40)
+pkg_check_modules(GIO REQUIRED gio-2.0>=2.40)
 pkg_check_modules(ZLIB REQUIRED zlib)
 pkg_check_modules(CAIRO REQUIRED cairo)
 pkg_check_modules(OPENSSL REQUIRED openssl)
 pkg_check_modules(FUSE REQUIRED fuse)
+
+if(GLIB_LIBRARY_DIRS)
+    link_directories(${GLIB_LIBRARY_DIRS})
+endif()
+
+if(GIO_LIBRARY_DIRS)
+    link_directories(${GLIB_LIBRARY_DIRS})
+endif()
 
 
 if(USE_CCACHE)

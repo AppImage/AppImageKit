@@ -7,6 +7,7 @@
 #include <cstring>
 #include <fstream>
 
+#include <glib.h>
 #include <glib/gstdio.h>
 
 #include <squashfuse.h>
@@ -349,6 +350,67 @@ namespace AppImageTests {
         EXPECT_TRUE(desktop_file_path == NULL);
 
         free(desktop_file_path);
+    }
+
+    TEST_F(LibAppImageTest, test_appimage_type2_appimage_version) {
+        EXPECT_TRUE(appimage_type2_register_in_system(appImage_type_2_versioned_path.c_str(), false));
+
+        char* desktopFilePath = appimage_registered_desktop_file_path(appImage_type_2_versioned_path.c_str(), NULL, false);
+
+        GKeyFile *desktopFile = g_key_file_new();
+
+        GError* error = NULL;
+
+        gboolean loaded = g_key_file_load_from_file(desktopFile, desktopFilePath, G_KEY_FILE_KEEP_TRANSLATIONS, &error);
+
+        if (!loaded) {
+            g_key_file_free(desktopFile);
+            ADD_FAILURE() << "Failed to read desktop file: " << error->message;
+            g_error_free(error);
+            return;
+        }
+
+        const std::string versionKey = "X-AppImage-Version";
+        const std::string oldNameKey = "X-AppImage-Old-Name";
+
+        std::string expectedVersion = "test1234";
+        gchar* actualVersion = g_key_file_get_string(desktopFile, G_KEY_FILE_DESKTOP_GROUP, versionKey.c_str(), &error);
+
+        if (actualVersion == NULL) {
+            g_key_file_free(desktopFile);
+            ADD_FAILURE() << "Failed to get " << versionKey << " key: " << error->message;
+            g_error_free(error);
+            return;
+        }
+
+        EXPECT_EQ(expectedVersion, std::string(actualVersion));
+
+        gchar* oldName = g_key_file_get_string(desktopFile, G_KEY_FILE_DESKTOP_GROUP, oldNameKey.c_str(), &error);
+
+        if (oldName == NULL) {
+            g_key_file_free(desktopFile);
+            ADD_FAILURE() << "Failed to get " << oldNameKey << " key: " << error->message;
+            g_error_free(error);
+            return;
+        }
+
+        gchar* newName = g_key_file_get_string(desktopFile, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, &error);
+
+        if (newName == NULL) {
+            g_key_file_free(desktopFile);
+            ADD_FAILURE() << "Failed to get " << G_KEY_FILE_DESKTOP_KEY_NAME << " key: " << error->message;
+            g_error_free(error);
+            return;
+        }
+
+        std::string expectedName = std::string(oldName) + " (" + expectedVersion + ")";
+
+        EXPECT_EQ(expectedName, std::string(newName));
+
+        // cleanup
+        g_key_file_free(desktopFile);
+        if (error != NULL)
+            g_error_free(error);
     }
 
 } // namespace
