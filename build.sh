@@ -80,6 +80,8 @@ if [ -d /deps/lib ]; then
     export LD_LIBRARY_PATH="$LD_LIBRARY_PATH":/deps/lib/
 fi
 
+ldd tests/test_*
+
 if [ $RUN_TESTS -ne 0 ]; then
   ctest -V
 fi
