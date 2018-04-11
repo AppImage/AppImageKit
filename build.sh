@@ -69,6 +69,9 @@ git submodule update --init --recursive
 mkdir build
 cd build
 
+# make sure that deps in separate install tree are found
+export PKG_CONFIG_PATH=/deps/lib/pkgconfig/
+
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DAPPIMAGEKIT_PACKAGE_DEBS=ON
 make -j$JOBS
 make install DESTDIR=install_prefix/
