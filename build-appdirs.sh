@@ -29,6 +29,12 @@ ln -s "$APPIMAGETOOL_APPDIR"/appimagetool.svg "$APPIMAGETOOL_APPDIR"/.DirIcon
 mkdir -p "$APPIMAGETOOL_APPDIR"/usr/share/metainfo
 cp ../resources/usr/share/metainfo/appimagetool.appdata.xml "$APPIMAGETOOL_APPDIR"/usr/share/metainfo/
 
+if [ -d /deps/ ]; then
+    # deploy glib
+    mkdir -p "$APPIMAGETOOL_APPDIR"/usr/lib/
+    cp /deps/lib/libglib-2.0.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
+fi
+
 #######################################################################
 
 # build appimaged AppDir
@@ -48,3 +54,9 @@ cp ../resources/AppRun "$APPIMAGED_APPDIR"/
 cp ../resources/appimaged.desktop "$APPIMAGED_APPDIR"/
 cp ../resources/appimagetool.svg "$APPIMAGED_APPDIR"/appimaged.svg
 ( cd "$APPIMAGED_APPDIR"/ ; ln -s appimaged.svg .DirIcon )
+
+if [ -d /deps/ ]; then
+    # deploy glib
+    mkdir -p "$APPIMAGED_APPDIR"/usr/lib/
+    cp /deps/lib/libglib-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
+fi
