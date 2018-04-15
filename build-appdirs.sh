@@ -32,9 +32,7 @@ cp ../resources/usr/share/metainfo/appimagetool.appdata.xml "$APPIMAGETOOL_APPDI
 if [ -d /deps/ ]; then
     # deploy glib
     mkdir -p "$APPIMAGETOOL_APPDIR"/usr/lib/
-    cp /deps/lib/libglib*-2.0.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
-    cp /deps/lib/libgio*-2.0.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
-    cp /deps/lib/libgobject*-2.0.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
+    cp /deps/lib/lib*.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
 fi
 
 #######################################################################
@@ -60,7 +58,5 @@ cp ../resources/appimagetool.svg "$APPIMAGED_APPDIR"/appimaged.svg
 if [ -d /deps/ ]; then
     # deploy glib
     mkdir -p "$APPIMAGED_APPDIR"/usr/lib/
-    cp /deps/lib/libglib*-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
-    cp /deps/lib/libgio*-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
-    cp /deps/lib/libgobject*-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
+    cp /deps/lib/lib*.so* "$APPIMAGED_APPDIR"/usr/lib/
 fi
