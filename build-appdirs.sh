@@ -33,6 +33,10 @@ if [ -d /deps/ ]; then
     # deploy glib
     mkdir -p "$APPIMAGETOOL_APPDIR"/usr/lib/
     cp /deps/lib/lib*.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
+    # libffi is a runtime dynamic dependency
+    # see this thread for more information on the topic:
+    # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
+    cp /usr/lib*/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
 fi
 
 #######################################################################
@@ -59,4 +63,8 @@ if [ -d /deps/ ]; then
     # deploy glib
     mkdir -p "$APPIMAGED_APPDIR"/usr/lib/
     cp /deps/lib/lib*.so* "$APPIMAGED_APPDIR"/usr/lib/
+    # libffi is a runtime dynamic dependency
+    # see this thread for more information on the topic:
+    # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
+    cp /usr/lib*/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
 fi
