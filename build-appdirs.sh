@@ -36,7 +36,11 @@ if [ -d /deps/ ]; then
     # libffi is a runtime dynamic dependency
     # see this thread for more information on the topic:
     # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
-    cp /usr/lib*/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
+    if [ "$ARCH" == "x86_64" ]; then
+        cp /usr/lib64/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    else
+        cp /usr/lib/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    fi
 fi
 
 #######################################################################
@@ -66,5 +70,9 @@ if [ -d /deps/ ]; then
     # libffi is a runtime dynamic dependency
     # see this thread for more information on the topic:
     # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
-    cp /usr/lib*/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
+    if [ "$ARCH" == "x86_64" ]; then
+        cp /usr/lib64/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
+    else
+        cp /usr/lib/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
+    fi
 fi
