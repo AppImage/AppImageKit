@@ -60,5 +60,7 @@ cp ../resources/appimagetool.svg "$APPIMAGED_APPDIR"/appimaged.svg
 if [ -d /deps/ ]; then
     # deploy glib
     mkdir -p "$APPIMAGED_APPDIR"/usr/lib/
-    cp /deps/lib/libglib-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
+    cp /deps/lib/libglib*-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
+    cp /deps/lib/libgio*-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
+    cp /deps/lib/libgobject*-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
 fi
