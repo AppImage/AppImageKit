@@ -32,7 +32,15 @@ cp ../resources/usr/share/metainfo/appimagetool.appdata.xml "$APPIMAGETOOL_APPDI
 if [ -d /deps/ ]; then
     # deploy glib
     mkdir -p "$APPIMAGETOOL_APPDIR"/usr/lib/
-    cp /deps/lib/libglib-2.0.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
+    cp /deps/lib/lib*.so* "$APPIMAGETOOL_APPDIR"/usr/lib/
+    # libffi is a runtime dynamic dependency
+    # see this thread for more information on the topic:
+    # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
+    if [ "$ARCH" == "x86_64" ]; then
+        cp /usr/lib64/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    else
+        cp /usr/lib/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    fi
 fi
 
 #######################################################################
@@ -58,5 +66,13 @@ cp ../resources/appimagetool.svg "$APPIMAGED_APPDIR"/appimaged.svg
 if [ -d /deps/ ]; then
     # deploy glib
     mkdir -p "$APPIMAGED_APPDIR"/usr/lib/
-    cp /deps/lib/libglib-2.0.so* "$APPIMAGED_APPDIR"/usr/lib/
+    cp /deps/lib/lib*.so* "$APPIMAGED_APPDIR"/usr/lib/
+    # libffi is a runtime dynamic dependency
+    # see this thread for more information on the topic:
+    # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
+    if [ "$ARCH" == "x86_64" ]; then
+        cp /usr/lib64/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
+    else
+        cp /usr/lib/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
+    fi
 fi
