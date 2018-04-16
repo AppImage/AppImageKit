@@ -59,7 +59,6 @@ void appimage_string_list_free(char** list);
 
 /*
  * Checks whether a type 1 AppImage's desktop file has set Terminal=true.
- * Useful to check whether the author of an AppImage doesn't want it to be integrated.
  *
  * Returns >0 if set, 0 if not set, <0 on errors.
  */
@@ -67,7 +66,6 @@ int appimage_type1_is_terminal_app(const char* path);
 
 /*
  * Checks whether a type 2 AppImage's desktop file has set Terminal=true.
- * Useful to check whether the author of an AppImage doesn't want it to be integrated.
  *
  * Returns >0 if set, 0 if not set, <0 on errors.
  */
@@ -75,11 +73,34 @@ int appimage_type2_is_terminal_app(const char* path);
 
 /*
  * Checks whether an AppImage's desktop file has set Terminal=true.
- * Useful to check whether the author of an AppImage doesn't want it to be integrated.
  *
  * Returns >0 if set, 0 if not set, <0 on errors.
  */
 int appimage_is_terminal_app(const char* path);
+
+/*
+ * Checks whether a type 1 AppImage's desktop file has set X-AppImage-Version=false.
+ * Useful to check whether the author of an AppImage doesn't want it to be integrated.
+ *
+ * Returns >0 if set, 0 if not set, <0 on errors.
+ */
+int appimage_type1_shall_not_be_integrated(const char* path);
+
+/*
+ * Checks whether a type 2 AppImage's desktop file has set X-AppImage-Version=false.
+ * Useful to check whether the author of an AppImage doesn't want it to be integrated.
+ *
+ * Returns >0 if set, 0 if not set, <0 on errors.
+ */
+int appimage_type2_shall_not_be_integrated(const char* path);
+
+/*
+ * Checks whether an AppImage's desktop file has set X-AppImage-Version=false.
+ * Useful to check whether the author of an AppImage doesn't want it to be integrated.
+ *
+ * Returns >0 if set, 0 if not set, <0 on errors.
+ */
+int appimage_shall_not_be_integrated(const char* path);
 
 #ifdef __cplusplus
 }
