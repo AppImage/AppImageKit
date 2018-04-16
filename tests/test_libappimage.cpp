@@ -235,17 +235,17 @@ namespace AppImageTests {
 
         char **files = appimage_list_files(appImage_type_1_file_path.c_str());
 
-        char *expected[] = {
-                (char *) "AppImageExtract.desktop",
-                (char *) ".DirIcon",
-                (char *) "AppImageExtract.png",
-                (char *) "usr/bin/appimageextract",
-                (char *) "usr/bin/xorriso",
-                (char *) "usr/lib/libisofs.so.6",
-                (char *) "usr/lib/libisoburn.so.1",
-                (char *) "usr/lib/libburn.so.4",
-                (char *) "AppRun",
-                NULL};
+        const char *expected[] = {
+            (char *) "AppImageExtract.desktop",
+            (char *) ".DirIcon",
+            (char *) "AppImageExtract.png",
+            (char *) "usr/bin/appimageextract",
+            (char *) "AppRun",
+            (char *) "usr/bin/xorriso",
+            (char *) "usr/lib/libburn.so.4",
+            (char *) "usr/lib/libisoburn.so.1",
+            (char *) "usr/lib/libisofs.so.6",
+            NULL};
 
         int i = 0;
         for (; files[i] != NULL && expected[i] != NULL; i++)
