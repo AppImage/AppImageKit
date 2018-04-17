@@ -36,7 +36,7 @@ trap cleanup EXIT
 cd "$build_dir"
 
 # Compile runtime but do not link
-$CC -DGIT_COMMIT=\"$git_version\" -I"@xz_INCLUDE_DIR@" -I"@squashfuse_INCLUDE_DIR@" \
+$CC -DGIT_COMMIT=\"$git_version\" -I"@xz_INCLUDE_DIRS@" -I"@squashfuse_INCLUDE_DIRS@" \
     -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
 
 # Prepare 1024 bytes of space for updateinformation
@@ -60,7 +60,7 @@ objcopy --add-section .sig_key=8192_blank_bytes \
 squashfuse_libs="@squashfuse_LIBRARIES@"
 $CC $small_FLAGS $small_LDFLAGS -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.c \
     runtime4.o ${squashfuse_libs//;/ } \
-    -Wl,-Bdynamic -lpthread -l"@ZLIB_LIBRARIES@" -L"@ZLIB_LIBRARY_DIRS@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl
+    -Wl,-Bdynamic -lpthread -l"@libzlib_LIBRARIES@" -L"@libzlib_LIBRARY_DIRS@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl
 $STRIP runtime
 
 # Test if we can read it back

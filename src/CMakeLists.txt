@@ -63,28 +63,18 @@ target_include_directories(libappimage
 
 target_link_libraries(libappimage
     PRIVATE
-    ${squashfuse_LIBRARIES}
-    ${libarchive_LIBRARIES}
-    ${inotify-tools_LIBRARIES}
-    ${xz_LIBRARIES}
+    squashfuse
+    libarchive
+    inotify-tools
+    xz
     xdg-basedir
     PUBLIC
     pthread
-    ${GLIB_LIBRARIES}
-    ${GIO_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${CAIRO_LIBRARIES}
+    libglib
+    libgio
+    libzlib
+    libcairo
 )
-
-add_dependencies(libappimage squashfuse)
-
-if(NOT USE_SYSTEM_LIBARCHIVE)
-    add_dependencies(libappimage libarchive)
-endif()
-
-if(NOT USE_SYSTEM_INOTIFY_TOOLS)
-    add_dependencies(libappimage inotify-tools)
-endif()
 
 
 add_library(libappimage_static STATIC
@@ -112,28 +102,18 @@ target_include_directories(libappimage_static
 
 target_link_libraries(libappimage_static
     PRIVATE
-    ${squashfuse_LIBRARIES}
-    ${libarchive_LIBRARIES}
-    ${inotify-tools_LIBRARIES}
-    ${xz_LIBRARIES}
+    squashfuse
+    libarchive
+    inotify-tools
+    xz
     xdg-basedir
     PUBLIC
     pthread
-    ${GLIB_LIBRARIES}
-    ${GIO_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${CAIRO_LIBRARIES}
+    libglib
+    libgio
+    libzlib
+    libcairo
 )
-
-add_dependencies(libappimage_static squashfuse)
-
-if(NOT USE_SYSTEM_LIBARCHIVE)
-    add_dependencies(libappimage_static libarchive)
-endif()
-
-if(NOT USE_SYSTEM_INOTIFY_TOOLS)
-    add_dependencies(libappimage_static inotify-tools)
-endif()
 
 
 add_executable(appimagetool
@@ -145,16 +125,16 @@ add_executable(appimagetool
 )
 
 target_link_libraries(appimagetool
-    ${GLIB_LIBRARIES}
-    ${squashfuse_LIBRARIES}
-    ${ZLIB_LIBRARIES}
+    libglib
+    libzlib
+    squashfuse
 )
 
 target_link_libraries(appimagetool
     ${CMAKE_DL_LIBS}
     pthread
-    ${ZLIB_LIBRARIES}
-    ${xz_LIBRARIES}
+    libzlib
+    xz
     xdg-basedir
 )
 
@@ -183,14 +163,14 @@ add_executable(appimaged appimaged.c notify.c elf.c getsection.c)
 target_link_libraries(appimaged
     pthread
     ${CMAKE_DL_LIBS}
-    ${CAIRO_LIBRARIES}
-    ${GLIB_LIBRARIES}
-    ${GIO_LIBRARIES}
-    ${inotify-tools_LIBRARIES}
-    ${squashfuse_LIBRARIES}
-    ${xz_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${libarchive_LIBRARIES}
+    libcairo
+    libglib
+    libgio
+    inotify-tools
+    squashfuse
+    xz
+    libzlib
+    libarchive
     xdg-basedir
 )
 
@@ -210,15 +190,6 @@ target_include_directories(appimaged
     INTERFACE $<INSTALL_INTERFACE:include/>
 )
 
-add_dependencies(appimaged squashfuse)
-
-if(NOT USE_SYSTEM_INOTIFY_TOOLS)
-    add_dependencies(appimaged inotify-tools)
-endif()
-if(NOT USE_SYSTEM_LIBARCHIVE)
-    add_dependencies(appimaged libarchive)
-endif()
-
 add_sanitizers(appimaged)
 
 
@@ -230,15 +201,15 @@ add_sanitizers(AppRun)
 add_executable(validate validate.c getsection.c)
 
 target_link_libraries(validate
-    ${GLIB_LIBRARIES}
-    ${OPENSSL_LIBRARIES}
+    libglib
+    libopenssl
 )
 
 
 add_executable(digest digest.c getsection.c)
 
 target_link_libraries(digest
-    ${OPENSSL_LIBRARIES}
+    libopenssl
 )
 
 add_sanitizers(digest)
@@ -248,16 +219,16 @@ add_executable(runtime-debug EXCLUDE_FROM_ALL elf.c notify.c getsection.c runtim
 
 target_link_libraries(runtime-debug
     PRIVATE
-    ${squashfuse_LIBRARIES}
-    ${libarchive_LIBRARIES}
-    ${xz_LIBRARIES}
+    squashfuse
+    libarchive
+    xz
     xdg-basedir
     PUBLIC
     pthread
-    ${GLIB_LIBRARIES}
-    ${GIO_LIBRARIES}
-    ${ZLIB_LIBRARIES}
-    ${CAIRO_LIBRARIES}
+    libglib
+    libgio
+    libzlib
+    libcairo
     ${CMAKE_DL_LIBS}
 )
 
@@ -269,13 +240,6 @@ set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "${_RUNTIME_FLAGS}")
 target_compile_options(runtime-debug
     PUBLIC "${_RUNTIME_FLAGS}"
 )
-
-if(NOT USE_SYSTEM_INOTIFY_TOOLS)
-    add_dependencies(runtime-debug inotify-tools)
-endif()
-if(NOT USE_SYSTEM_LIBARCHIVE)
-    add_dependencies(runtime-debug libarchive)
-endif()
 
 
 # install binaries

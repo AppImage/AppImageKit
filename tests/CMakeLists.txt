@@ -1,7 +1,5 @@
 # build and add test only if tests are enabled
 if(BUILD_TESTING)
-    include_directories(${gtest_INCLUDE_DIRS})
-
     add_definitions(
         -DTEST_DATA_DIR="${CMAKE_CURRENT_SOURCE_DIR}/data/"
         -DGIT_COMMIT="AppImageKit unit tests"
@@ -18,12 +16,8 @@ if(BUILD_TESTING)
         pthread
         libappimage
         xdg-basedir
-        ${gtest_LIBRARIES}
+        gtest
     )
-
-    if(NOT USE_SYSTEM_GTEST)
-        add_dependencies(test_libappimage gtest)
-    endif()
 
     add_test(test_libappimage test_libappimage)
 
@@ -38,17 +32,17 @@ if(BUILD_TESTING)
 
     target_link_libraries(test_shared
         PRIVATE
-        ${squashfuse_LIBRARIES}
-        ${libarchive_LIBRARIES}
-        ${inotify-tools_LIBRARIES}
-        ${xz_LIBRARIES}
+        squashfuse
+        libarchive
+        inotify-tools
+        xz
         xdg-basedir
         pthread
-        ${GLIB_LIBRARIES}
-        ${GIO_LIBRARIES}
-        ${ZLIB_LIBRARIES}
-        ${CAIRO_LIBRARIES}
-        ${gtest_LIBRARIES}
+        libglib
+        libgio
+        libzlib
+        libcairo
+        gtest
     )
 
     target_include_directories(test_shared
@@ -59,20 +53,6 @@ if(BUILD_TESTING)
         # libappimage, appimagetool, ...
         PRIVATE ${PROJECT_SOURCE_DIR}/include/
     )
-
-    add_dependencies(test_shared squashfuse)
-
-    if(NOT USE_SYSTEM_LIBARCHIVE)
-        add_dependencies(test_shared libarchive)
-    endif()
-
-    if(NOT USE_SYSTEM_INOTIFY_TOOLS)
-        add_dependencies(test_shared inotify-tools)
-    endif()
-
-    if(NOT USE_SYSTEM_GTEST)
-        add_dependencies(test_shared gtest)
-    endif()
 
     add_test(test_shared test_shared)
 
@@ -90,34 +70,22 @@ if(BUILD_TESTING)
 
     target_link_libraries(test_getsection
         PRIVATE
-        ${squashfuse_LIBRARIES}
-        ${libarchive_LIBRARIES}
-        ${inotify-tools_LIBRARIES}
-        ${xz_LIBRARIES}
+        squashfuse
+        libarchive
+        inotify-tools
+        xz
         xdg-basedir
         pthread
-        ${GLIB_LIBRARIES}
-        ${GIO_LIBRARIES}
-        ${ZLIB_LIBRARIES}
-        ${CAIRO_LIBRARIES}
-        ${gtest_LIBRARIES}
+        libglib
+        libgio
+        libzlib
+        libcairo
+        gtest
     )
 
     target_include_directories(test_getsection PRIVATE ../src/)
 
     add_dependencies(test_getsection squashfuse)
-
-    if(NOT USE_SYSTEM_LIBARCHIVE)
-        add_dependencies(test_getsection libarchive)
-    endif()
-
-    if(NOT USE_SYSTEM_INOTIFY_TOOLS)
-        add_dependencies(test_getsection inotify-tools)
-    endif()
-
-    if(NOT USE_SYSTEM_GTEST)
-        add_dependencies(test_getsection gtest)
-    endif()
 
     add_test(test_getsection test_getsection)
 
