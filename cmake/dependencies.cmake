@@ -1,19 +1,170 @@
 # find required system dependencies via pkg-config
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(GLIB REQUIRED glib-2.0>=2.40)
-pkg_check_modules(GIO REQUIRED gio-2.0>=2.40)
-pkg_check_modules(ZLIB REQUIRED zlib)
-pkg_check_modules(CAIRO REQUIRED cairo)
-pkg_check_modules(OPENSSL REQUIRED openssl)
-pkg_check_modules(FUSE REQUIRED fuse)
 
-if(GLIB_LIBRARY_DIRS)
-    link_directories(${GLIB_LIBRARY_DIRS})
-endif()
 
-if(GIO_LIBRARY_DIRS)
-    link_directories(${GLIB_LIBRARY_DIRS})
-endif()
+# imports a library from the standard set of variables CMake creates when using its pkg-config module or find_package
+# this is code shared by import_pkgconfig_target and import_external_project, hence it's been extracted into a separate
+# CMake function
+#
+# partly inspired by https://github.com/Kitware/CMake/blob/master/Modules/FindPkgConfig.cmake#L187
+#
+# positional parameters:
+#  - target_name: name of the target that should be created
+#  - variable_prefix: prefix of the variable that should be used to create the target from
+function(import_library_from_prefix target_name variable_prefix)
+    message(STATUS "Importing target ${target_name} from variable prefix ${variable_prefix}")
+
+    if(TARGET ${target_name})
+        message(WARNING "Target exists already, skipping")
+        return()
+    endif()
+
+    add_library(${target_name} INTERFACE IMPORTED)
+
+    # FIXME: the following line produces CMake errors "directory not found"
+    # CMake does, however, not complain if the INCLUDE_DIRECTORIES property contains missing directories
+    # possibly related: https://cmake.org/Bug/view.php?id=15052
+    #set_property(TARGET ${target_name} PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${variable_prefix}_INCLUDE_DIRS)
+    include_directories(${${variable_prefix}_INCLUDE_DIRS})
+
+    set_property(TARGET ${target_name} PROPERTY INTERFACE_LINK_LIBRARIES ${${variable_prefix}_LIBRARIES})
+
+    if(${variable_prefix}_CFLAGS_OTHER)
+        set_property(TARGET ${target_name} PROPERTY INTERFACE_COMPILE_OPTIONS ${${variable_prefix}_CFLAGS_OTHER})
+    endif()
+
+    if(${variable_prefix}_LIBRARY_DIRS)
+        link_directories(${${variable_prefix}_LIBRARY_DIRS})
+    endif()
+
+    # export some of the imported properties with the target name as prefix
+    # this is necessary to allow the other external projects, which are not built with CMake or not within the same
+    # CMake context, to link to the libraries built as external projects (or the system ones, depending on the build
+    # configuration)
+    set(${target_name}_INCLUDE_DIRS ${${variable_prefix}_INCLUDE_DIRS} CACHE INTERNAL "")
+    set(${target_name}_LIBRARIES ${${variable_prefix}_LIBRARIES} CACHE INTERNAL "")
+    set(${target_name}_LIBRARY_DIRS ${${variable_prefix}_LIBRARY_DIRS} CACHE INTERNAL "")
+    # TODO: the following might not always apply
+    set(${target_name}_PREFIX ${CMAKE_INSTALL_PREFIX}/lib CACHE INTERNAL "")
+
+    message(STATUS "${variable_prefix}_LIBRARIES: ${${variable_prefix}_LIBRARIES}")
+endfunction()
+
+
+# imports a library using pkg-config
+#
+# positional parameters:
+#  - target_name: name of the target that we shall create for you
+#  - pkg_config_target: librar(y name to pass to pkg-config (may include a version)
+function(import_pkgconfig_target target_name pkg_config_target)
+    message(STATUS "Importing target ${target_name} via pkg-config (${pkg_config_target})")
+
+    pkg_check_modules(${target_name}-IMPORTED REQUIRED ${pkg_config_target})
+
+    import_library_from_prefix(${target_name} ${target_name}-IMPORTED)
+endfunction()
+
+function(import_find_pkg_target target_name pkg_name variable_prefix)
+    message(STATUS "Importing target ${target_name} via find_package (${pkg_name})")
+
+    find_package(${pkg_name})
+    if(NOT ${pkg_name}_FOUND)
+        message(FATAL_ERROR "${pkg_name} could not be found on the system. You will have to either install it, or use the bundled package.")
+    endif()
+
+    import_library(${prefix})
+endfunction()
+
+
+# imports a library from an existing external project
+#
+# required parameters:
+#  - TARGET_NAME:
+function(import_external_project)
+    set(oneValueArgs TARGET_NAME EXT_PROJECT_NAME)
+    set(multiValueArgs LIBRARIES INCLUDE_DIRS LIBRARY_DIRS)
+    cmake_parse_arguments(IMPORT_EXTERNAL_PROJECT "" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}")
+
+    # check whether parameters have been set
+    if(NOT IMPORT_EXTERNAL_PROJECT_TARGET_NAME)
+        message(FATAL_ERROR "TARGET_NAME parameter missing, but is required")
+    endif()
+    if(NOT IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME)
+        message(FATAL_ERROR "EXT_PROJECT_NAME parameter missing, but is required")
+    endif()
+    if(NOT IMPORT_EXTERNAL_PROJECT_LIBRARIES)
+        message(FATAL_ERROR "LIBRARIES parameter missing, but is required")
+    endif()
+    if(NOT IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS)
+        message(FATAL_ERROR "INCLUDE_DIRS parameter missing, but is required")
+    endif()
+
+    message(STATUS "Importing target ${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} from external project ${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME}")
+
+    if(TARGET ${target_name})
+        message(WARNING "Target exists already, skipping")
+        return()
+    endif()
+
+    add_library(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} INTERFACE IMPORTED)
+
+    ExternalProject_Get_Property(${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME} SOURCE_DIR)
+    ExternalProject_Get_Property(${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME} INSTALL_DIR)
+
+    # "evaluate" patterns in the passed arguments by using some string replacing magic
+    # this makes it easier to use this function, as some external project properties don't need to be evaluated and
+    # passed beforehand, and should reduce the amount of duplicate code in this file
+    foreach(item ITEMS
+        IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME
+        IMPORT_EXTERNAL_PROJECT_LIBRARIES
+        IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS
+        IMPORT_EXTERNAL_PROJECT_LIBRARY_DIRS)
+
+        # create new variable with fixed string...
+        string(REPLACE "<SOURCE_DIR>" "${SOURCE_DIR}" ${item}-out "${${item}}")
+        # ... and set the original value to the new value
+        set(${item} "${${item}-out}")
+
+        # create new variable with fixed string...
+        string(REPLACE "<INSTALL_DIR>" "${INSTALL_DIR}" ${item}-out "${${item}}")
+        # ... and set the original value to the new value
+        set(${item} "${${item}-out}")
+    endforeach()
+
+    set_property(TARGET ${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} PROPERTY INTERFACE_LINK_LIBRARIES "${IMPORT_EXTERNAL_PROJECT_LIBRARIES}")
+
+    # FIXME: the following line produces CMake errors "directory not found"
+    # CMake does, however, not complain if the INCLUDE_DIRECTORIES property contains missing directories
+    # possibly related: https://cmake.org/Bug/view.php?id=15052
+    #set_property(TARGET ${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS})
+    include_directories(${IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS})
+
+    if(${IMPORT_EXTERNAL_PROJECT_LIBRARY_DIRS})
+        link_directories(${IMPORT_EXTERNAL_PROJECT_LIBRARY_DIRS})
+    endif()
+
+    # finally, add a depenceny on the external project to make sure it's built
+    add_dependencies(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} "${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME}")
+
+    # read external project properties, and export them with the target name as prefix
+    # this is necessary to allow the other external projects, which are not built with CMake or not within the same
+    # CMake context, to link to the libraries built as external projects (or the system ones, depending on the build
+    # configuration)
+    set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_INCLUDE_DIRS "${IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS}" CACHE INTERNAL "")
+    set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_LIBRARIES "${IMPORT_EXTERNAL_PROJECT_LIBRARIES}" CACHE INTERNAL "")
+    set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_PREFIX ${INSTALL_DIR} CACHE INTERNAL "")
+endfunction()
+
+
+# the names of the targets need to differ from the library filenames
+# this is especially an issue with libcairo, where the library is called libcairo
+# therefore, all libs imported this way have been prefixed with lib
+import_pkgconfig_target(libglib glib-2.0>=2.40)
+import_pkgconfig_target(libgio gio-2.0>=2.40)
+import_pkgconfig_target(libzlib zlib)
+import_pkgconfig_target(libcairo cairo)
+import_pkgconfig_target(libopenssl openssl)
+import_pkgconfig_target(libfuse fuse)
 
 
 if(USE_CCACHE)
@@ -34,7 +185,7 @@ set(USE_SYSTEM_XZ OFF CACHE BOOL "Use system xz/liblzma instead of building our 
 if(NOT USE_SYSTEM_XZ)
     message(STATUS "Downloading and building xz")
 
-    ExternalProject_Add(xz
+    ExternalProject_Add(xz-EXTERNAL
         URL https://tukaani.org/xz/xz-5.2.3.tar.gz
         URL_HASH SHA512=a5eb4f707cf31579d166a6f95dbac45cf7ea181036d1632b4f123a4072f502f8d57cd6e7d0588f0bf831a07b8fc4065d26589a25c399b95ddcf5f73435163da6
         CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
@@ -42,31 +193,17 @@ if(NOT USE_SYSTEM_XZ)
         INSTALL_COMMAND make install
     )
 
-    ExternalProject_Get_Property(xz SOURCE_DIR)
-    ExternalProject_Get_Property(xz INSTALL_DIR)
-    set(xz_SOURCE_DIR "${SOURCE_DIR}")
-    set(xz_INSTALL_DIR "${INSTALL_DIR}")
-    mark_as_advanced(xz_SOURCE_DIR xz_INSTALL_DIR)
-
-    set(xz_INCLUDE_DIR "${xz_SOURCE_DIR}/src/liblzma/api/")
-    set(xz_LIBRARIES_DIR "${xz_INSTALL_DIR}/lib")
-    set(xz_LIBRARIES "${xz_LIBRARIES_DIR}/liblzma.a")
-
-    set(xz_PREFIX "${xz_INSTALL_DIR}")
+    import_external_project(
+        TARGET_NAME xz
+        EXT_PROJECT_NAME xz-EXTERNAL
+        LIBRARIES "<INSTALL_DIR>/lib/liblzma.a"
+        INCLUDE_DIRS "<SOURCE_DIR>/src/liblzma/api/"
+    )
 else()
     message(STATUS "Using system xz")
 
-    find_package(LibLZMA)
-    if(NOT LIBLZMA_FOUND)
-        message(FATAL_ERROR "liblzma could not be found on the system. You will have to either install it, or use the bundled xz.")
-    endif()
-
-    set(xz_INCLUDE_DIR "${LIBLZMA_INCLUDE_DIRS}")
-    set(xz_LIBRARIES "${LIBLZMA_LIBRARIES}")
-    set(xz_PREFIX "/usr/lib")
+    import_find_pkg_target(xz LibLZMA LIBLZMA)
 endif()
-
-mark_as_advanced(xz_INCLUDE_DIR xz_LIBRARIES_DIR xz_LIBRARIES xz_PREFIX)
 
 
 # as distros don't provide suitable squashfuse and squashfs-tools, those dependencies are bundled in, can, and should
@@ -78,7 +215,7 @@ configure_file(
     @ONLY
 )
 
-ExternalProject_Add(squashfuse
+ExternalProject_Add(squashfuse-EXTERNAL
     GIT_REPOSITORY https://github.com/vasi/squashfuse/
     GIT_TAG 1f98030
     UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
@@ -97,22 +234,94 @@ ExternalProject_Add(squashfuse
     INSTALL_COMMAND make install
 )
 
-ExternalProject_Get_Property(squashfuse SOURCE_DIR)
-ExternalProject_Get_Property(squashfuse INSTALL_DIR)
-set(squashfuse_SOURCE_DIR "${SOURCE_DIR}")
-set(squashfuse_INSTALL_DIR "${INSTALL_DIR}")
-mark_as_advanced(squashfuse_SOURCE_DIR squashfuse_INSTALL_DIR)
+import_external_project(
+    TARGET_NAME squashfuse
+    EXT_PROJECT_NAME squashfuse-EXTERNAL
+    LIBRARIES "<SOURCE_DIR>/.libs/libsquashfuse.a;<SOURCE_DIR>/.libs/libsquashfuse_ll.a;<SOURCE_DIR>/.libs/libfuseprivate.a"
+    INCLUDE_DIRS "<SOURCE_DIR>"
+)
 
-set(squashfuse_LIBRARY_DIR ${squashfuse_SOURCE_DIR}/.libs)
-set(squashfuse_INCLUDE_DIR ${squashfuse_SOURCE_DIR})
 
-set(libsquashfuse ${squashfuse_LIBRARY_DIR}/libsquashfuse.a)
-set(libsquashfuse_ll ${squashfuse_LIBRARY_DIR}/libsquashfuse_ll.a)
-set(libfuseprivate ${squashfuse_LIBRARY_DIR}/libfuseprivate.a)
-set(squashfuse_LIBRARIES ${libsquashfuse} ${libsquashfuse_ll} ${libfuseprivate})
-mark_as_advanced(libsquashfuse libfuseprivate)
+set(USE_SYSTEM_INOTIFY_TOOLS OFF CACHE BOOL "Use system libinotifytools instead of building our own")
 
-mark_as_advanced(squashfuse_LIBRARY_DIR squashfuse_LIBRARIES squashfuse_INCLUDE_DIR)
+if(NOT USE_SYSTEM_INOTIFY_TOOLS)
+    message(STATUS "Downloading and building inotify-tools")
+
+    # TODO: build out of source
+    ExternalProject_Add(inotify-tools-EXTERNAL
+        URL https://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
+        URL_HASH SHA512=6074d510e89bba5da0d7c4d86f2562c662868666ba0a7ea5d73e53c010a0050dd1fc01959b22cffdb9b8a35bd1b0b43c04d02d6f19927520f05889e8a9297dfb
+        PATCH_COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.guess$<SEMICOLON>hb=HEAD"
+              COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.sub$<SEMICOLON>hb=HEAD"
+        UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
+        BUILD_COMMAND make
+        BUILD_IN_SOURCE ON
+        INSTALL_COMMAND make install
+    )
+
+    import_external_project(
+        TARGET_NAME inotify-tools
+        EXT_PROJECT_NAME inotify-tools-EXTERNAL
+        LIBRARIES "<INSTALL_DIR>/lib/libinotifytools.a"
+        INCLUDE_DIRS "<INSTALL_DIR>/include/"
+    )
+else()
+    message(STATUS "Using system inotify-tools")
+
+    import_find_pkg_target(inotify-tools INotify INOTIFYTOOLS)
+endif()
+
+
+set(USE_SYSTEM_LIBARCHIVE OFF CACHE BOOL "Use system libarchive instead of building our own")
+
+if(NOT USE_SYSTEM_LIBARCHIVE)
+    message(STATUS "Downloading and building libarchive")
+
+    ExternalProject_Add(libarchive-EXTERNAL
+        URL https://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
+        URL_HASH SHA512=90702b393b6f0943f42438e277b257af45eee4fa82420431f6a4f5f48bb846f2a72c8ff084dc3ee9c87bdf8b57f4d8dddf7814870fe2604fe86c55d8d744c164
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
+        BUILD_COMMAND make
+        INSTALL_COMMAND make install
+    )
+
+    import_external_project(
+        TARGET_NAME libarchive
+        EXT_PROJECT_NAME libarchive-EXTERNAL
+        LIBRARIES "<INSTALL_DIR>/lib/libarchive.a"
+        INCLUDE_DIRS "<INSTALL_DIR>/include/"
+    )
+else()
+    message(STATUS "Using system libarchive")
+
+    import_find_pkg_target(libarchive LibArchive LibArchive)
+endif()
+
+
+set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system GTest instead of downloading and building GTest")
+
+if(NOT USE_SYSTEM_GTEST)
+    message(STATUS "Downloading and building GTest")
+
+    ExternalProject_Add(gtest-EXTERNAL
+        GIT_REPOSITORY https://github.com/google/googletest.git
+        GIT_TAG release-1.8.0
+        UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
+        CONFIGURE_COMMAND ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
+    )
+
+    import_external_project(
+        TARGET_NAME gtest
+        EXT_PROJECT_NAME gtest-EXTERNAL
+        LIBRARIES "<INSTALL_DIR>/lib/libgtest.a;<INSTALL_DIR>/lib/libgtest_main.a"
+        INCLUDE_DIRS "<INSTALL_DIR>/include/"
+    )
+else()
+    message(STATUS "Using system GTest")
+
+    import_find_pkg_target(gtest GTest GTEST)
+endif()
 
 
 # TODO: allow using system wide mksquashfs
@@ -121,10 +330,10 @@ ExternalProject_Add(mksquashfs
     GIT_TAG 5be5d61
     UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
     PATCH_COMMAND patch -N -p1 < ${PROJECT_SOURCE_DIR}/src/mksquashfs-mkfs-fixed-timestamp.patch || true
-    CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIR}|g" <SOURCE_DIR>/squashfs-tools/Makefile
-              COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/squashfs-tools/Makefile
-              COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
-              COMMAND sed -i "/cp unsquashfs/d" squashfs-tools/Makefile
+    CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIRS}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+    COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+    COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
+    COMMAND sed -i "/cp unsquashfs/d" squashfs-tools/Makefile
     BUILD_COMMAND CC=${CC} CXX=${CXX} make -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
     # make install unfortunately expects unsquashfs to be built as well, hence can't install the binary
     # therefore using built file in SOURCE_DIR
@@ -142,108 +351,10 @@ set(mksquashfs_BINARY "${mksquashfs_INSTALL_DIR}/mksquashfs")
 mark_as_advanced(mksquashfs_BINARY)
 
 
-set(USE_SYSTEM_INOTIFY_TOOLS OFF CACHE BOOL "Use system libinotifytools instead of building our own")
-
-if(NOT USE_SYSTEM_INOTIFY_TOOLS)
-    message(STATUS "Downloading and building inotify-tools")
-
-    # TODO: build out of source
-    ExternalProject_Add(inotify-tools
-        URL https://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
-        URL_HASH SHA512=6074d510e89bba5da0d7c4d86f2562c662868666ba0a7ea5d73e53c010a0050dd1fc01959b22cffdb9b8a35bd1b0b43c04d02d6f19927520f05889e8a9297dfb
-        PATCH_COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.guess$<SEMICOLON>hb=HEAD"
-              COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.sub$<SEMICOLON>hb=HEAD"
-        UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
-        BUILD_COMMAND make
-        BUILD_IN_SOURCE ON
-        INSTALL_COMMAND make install
-    )
-
-    ExternalProject_Get_Property(inotify-tools INSTALL_DIR)
-    set(inotify-tools_INSTALL_DIR "${INSTALL_DIR}")
-    mark_as_advanced(inotify-tools_INSTALL_DIR)
-
-    set(inotify-tools_INCLUDE_DIR ${inotify-tools_INSTALL_DIR}/include/)
-    set(inotify-tools_LIBRARY_DIR ${inotify-tools_INSTALL_DIR}/lib)
-    set(inotify-tools_LIBRARIES ${inotify-tools_LIBRARY_DIR}/libinotifytools.a)
-    mark_as_advanced(inotify-tools_LIBRARY_DIR)
-else()
-    message(STATUS "Using system inotify-tools")
-
-    find_package(INotify REQUIRED)
-
-    set(inotify-tools_INCLUDE_DIR ${INOTIFYTOOLS_INCLUDE_DIRS})
-    set(inotify-tools_LIBRARIES ${INOTIFYTOOLS_LIBRARY})
-endif()
-
-mark_as_advanced(inotify-tools_LIBRARIES inotify-tools_INCLUDE_DIR)
-
-
-set(USE_SYSTEM_LIBARCHIVE OFF CACHE BOOL "Use system libarchive instead of building our own")
-
-if(NOT USE_SYSTEM_LIBARCHIVE)
-    message(STATUS "Downloading and building libarchive")
-
-    ExternalProject_Add(libarchive
-        URL https://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
-        URL_HASH SHA512=90702b393b6f0943f42438e277b257af45eee4fa82420431f6a4f5f48bb846f2a72c8ff084dc3ee9c87bdf8b57f4d8dddf7814870fe2604fe86c55d8d744c164
-        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
-        BUILD_COMMAND make
-        INSTALL_COMMAND make install
-    )
-
-    ExternalProject_Get_Property(libarchive INSTALL_DIR)
-    set(libarchive_INSTALL_DIR "${INSTALL_DIR}")
-    mark_as_advanced(libarchive_INSTALL_DIR)
-
-    set(libarchive_INCLUDE_DIR ${libarchive_INSTALL_DIR}/include)
-    set(libarchive_LIBRARY_DIR ${libarchive_INSTALL_DIR}/lib)
-    set(libarchive_LIBRARIES ${libarchive_LIBRARY_DIR}/libarchive.a)
-    mark_as_advanced(libarchive_LIBRARY_DIR libarchive_LIBRARIES libarchive_INCLUDE_DIR)
-else()
-    message(STATUS "Using system libarchive")
-
-    find_package(LibArchive REQUIRED)
-
-    set(libarchive_INCLUDE_DIR ${LibArchive_INCLUDE_DIR})
-    set(libarchive_LIBRARIES ${LibArchive_LIBRARY})
-endif()
-
+#### build dependency configuration ####
 
 # only have to build custom xz when not using system libxz
 if(NOT USE_SYSTEM_XZ)
     add_dependencies(squashfuse xz)
     add_dependencies(mksquashfs xz)
-endif()
-
-
-set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system GTest instead of downloading and building GTest")
-
-if(NOT USE_SYSTEM_GTEST)
-    message(STATUS "Downloading and building GTest")
-
-    ExternalProject_Add(gtest
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.8.0
-        UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
-    )
-
-    ExternalProject_Get_Property(gtest SOURCE_DIR)
-    ExternalProject_Get_Property(gtest INSTALL_DIR)
-    set(gtest_SOURCE_DIR "${SOURCE_DIR}")
-    set(gtest_INSTALL_DIR "${INSTALL_DIR}")
-    mark_as_advanced(gtest_SOURCE_DIR gtest_INSTALL_DIR)
-
-    set(gtest_INCLUDE_DIRS "${gtest_INSTALL_DIR}/include/")
-    set(gtest_LIBRARIES_DIR "${gtest_INSTALL_DIR}/lib")
-    set(gtest_LIBRARIES "${gtest_LIBRARIES_DIR}/libgtest.a" "${gtest_LIBRARIES_DIR}/libgtest_main.a")
-else()
-    message(STATUS "Using system GTest")
-
-    find_package(GTest REQUIRED)
-
-    set(gtest_INCLUDE_DIRS "${GTEST_INCLUDE_DIRS}")
-    set(gtest_LIBRARIES "${GTEST_LIBRARIES}")
 endif()
