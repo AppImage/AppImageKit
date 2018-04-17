@@ -333,7 +333,7 @@ ExternalProject_Add(mksquashfs
     GIT_TAG 5be5d61
     UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
     PATCH_COMMAND patch -N -p1 < ${PROJECT_SOURCE_DIR}/src/mksquashfs-mkfs-fixed-timestamp.patch || true
-    CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIR}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+    CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIRS}|g" <SOURCE_DIR>/squashfs-tools/Makefile
     COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/squashfs-tools/Makefile
     COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
     COMMAND sed -i "/cp unsquashfs/d" squashfs-tools/Makefile
