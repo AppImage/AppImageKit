@@ -17,6 +17,11 @@ find_package(PkgConfig REQUIRED)
 function(import_library_from_prefix target_name variable_prefix)
     message(STATUS "Importing target ${target_name} from variable prefix ${variable_prefix}")
 
+    if(TARGET ${target_name})
+        message(WARNING "Target exists already, skipping")
+        return()
+    endif()
+
     add_library(${target_name} INTERFACE IMPORTED)
 
     # FIXME: the following line produces CMake errors "directory not found"
@@ -98,6 +103,11 @@ function(import_external_project)
     endif()
 
     message(STATUS "Importing target ${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} from external project ${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME}")
+
+    if(TARGET ${target_name})
+        message(WARNING "Target exists already, skipping")
+        return()
+    endif()
 
     add_library(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} INTERFACE IMPORTED)
 
