@@ -1,6 +1,3 @@
-# required for pkg-config's IMPORTED_TARGET
-cmake_minimum_required(VERSION 3.6)
-
 # find required system dependencies via pkg-config
 find_package(PkgConfig REQUIRED)
 
