@@ -518,21 +518,9 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 
     // parse [Try]Exec= value, replace executable by AppImage path, append parameters
     // TODO: should respect quoted strings within value
-    const gchar const* fields[] = {G_KEY_FILE_DESKTOP_KEY_EXEC, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC};
 
-    for (int i = 0; i < (sizeof(fields) / sizeof(gchar*)); i++) {
-        char* field_value = g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, fields[i], NULL);
-
-        // TryExec is not a mandatory field
-        if (field_value == NULL) {
-            if (fields[i] != G_KEY_FILE_DESKTOP_KEY_EXEC)
-                continue;
-
-#ifdef STANDALONE
-            fprintf(stderr, "%s entry missing in Desktop file\n", fields[i]);
-#endif
-            return false;
-        };
+    {
+        char* field_value = g_key_file_get_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, NULL);
 
         // saving a copy for later free() call
         char* original_field_value = field_value;
@@ -565,10 +553,13 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         if (original_field_value != NULL)
             free(original_field_value);
 
-        g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, fields[i], new_exec_value);
+        g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_EXEC, new_exec_value);
 
         g_free(new_exec_value);
     }
+
+    // force add a TryExec= key
+    g_key_file_set_value(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, appimage_path);
 
 #ifdef APPIMAGED
     /* If firejail is on the $PATH, then use it to run AppImages */

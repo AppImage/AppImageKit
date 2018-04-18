@@ -413,6 +413,38 @@ namespace AppImageTests {
             g_error_free(error);
     }
 
+    TEST_F(LibAppImageTest, test_try_exec_key_exists_type_1) {
+        const std::string& pathToAppImage = appImage_type_1_file_path;
+
+        ASSERT_EQ(appimage_register_in_system(pathToAppImage.c_str(), false), 0);
+
+        GKeyFile* kf = g_key_file_new();
+
+        const char* desktopFilePath = appimage_registered_desktop_file_path(pathToAppImage.c_str(), NULL, false);
+
+        ASSERT_TRUE(g_key_file_load_from_file(kf, desktopFilePath, G_KEY_FILE_NONE, NULL));
+
+        const char* expectedTryExecValue = g_key_file_get_string(kf, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, NULL);
+
+        EXPECT_EQ(expectedTryExecValue, pathToAppImage);
+    }
+
+    TEST_F(LibAppImageTest, test_try_exec_key_exists_type_2) {
+        const std::string& pathToAppImage = appImage_type_2_file_path;
+
+        ASSERT_EQ(appimage_register_in_system(pathToAppImage.c_str(), false), 0);
+
+        GKeyFile* kf = g_key_file_new();
+
+        const char* desktopFilePath = appimage_registered_desktop_file_path(pathToAppImage.c_str(), NULL, false);
+
+        ASSERT_TRUE(g_key_file_load_from_file(kf, desktopFilePath, G_KEY_FILE_NONE, NULL));
+
+        const char* expectedTryExecValue = g_key_file_get_string(kf, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_TRY_EXEC, NULL);
+
+        EXPECT_EQ(expectedTryExecValue, pathToAppImage);
+    }
+
 } // namespace
 
 int main(int argc, char **argv) {
