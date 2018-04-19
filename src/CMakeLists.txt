@@ -218,12 +218,10 @@ add_sanitizers(digest)
 add_executable(runtime-debug EXCLUDE_FROM_ALL elf.c notify.c getsection.c runtime.c)
 
 target_link_libraries(runtime-debug
-    PRIVATE
     squashfuse
     libarchive
     xz
     xdg-basedir
-    PUBLIC
     pthread
     libglib
     libgio

@@ -281,8 +281,10 @@ main (int argc, char *argv[])
      */
     if(getenv("TARGET_APPIMAGE") == NULL){
         sprintf(appimage_path, "/proc/self/exe");
+        sprintf(argv0_path, argv[0]);
     } else {
         sprintf(appimage_path, "%s", getenv("TARGET_APPIMAGE"));
+        sprintf(argv0_path, getenv("TARGET_APPIMAGE"));
     }
 
     sprintf(argv0_path, argv[0]);
