@@ -354,7 +354,5 @@ mark_as_advanced(mksquashfs_BINARY)
 #### build dependency configuration ####
 
 # only have to build custom xz when not using system libxz
-if(NOT USE_SYSTEM_XZ)
-    add_dependencies(squashfuse xz)
-    add_dependencies(mksquashfs xz)
-endif()
+add_dependencies(squashfuse xz)
+add_dependencies(mksquashfs xz)
