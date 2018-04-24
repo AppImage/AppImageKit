@@ -215,7 +215,7 @@ target_link_libraries(digest
 add_sanitizers(digest)
 
 
-add_executable(runtime-debug EXCLUDE_FROM_ALL elf.c notify.c getsection.c runtime.c)
+add_executable(runtime-debug EXCLUDE_FROM_ALL elf.c notify.c getsection.c ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c)
 
 target_link_libraries(runtime-debug
     squashfuse
