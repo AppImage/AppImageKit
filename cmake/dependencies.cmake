@@ -46,8 +46,6 @@ function(import_library_from_prefix target_name variable_prefix)
     set(${target_name}_LIBRARY_DIRS ${${variable_prefix}_LIBRARY_DIRS} CACHE INTERNAL "")
     # TODO: the following might not always apply
     set(${target_name}_PREFIX ${CMAKE_INSTALL_PREFIX}/lib CACHE INTERNAL "")
-
-    message(STATUS "${variable_prefix}_LIBRARIES: ${${variable_prefix}_LIBRARIES}")
 endfunction()
 
 
