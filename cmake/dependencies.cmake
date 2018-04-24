@@ -95,8 +95,6 @@ function(import_external_project)
         message(FATAL_ERROR "INCLUDE_DIRS parameter missing, but is required")
     endif()
 
-    message(STATUS "Importing target ${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} from external project ${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME}")
-
     if(TARGET ${target_name})
         message(WARNING "Target exists already, skipping")
         return()
