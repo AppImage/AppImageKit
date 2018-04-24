@@ -12,8 +12,6 @@ find_package(PkgConfig REQUIRED)
 #  - target_name: name of the target that should be created
 #  - variable_prefix: prefix of the variable that should be used to create the target from
 function(import_library_from_prefix target_name variable_prefix)
-    message(STATUS "Importing target ${target_name} from variable prefix ${variable_prefix}")
-
     if(TARGET ${target_name})
         message(WARNING "Target exists already, skipping")
         return()
@@ -46,8 +44,6 @@ function(import_library_from_prefix target_name variable_prefix)
     set(${target_name}_LIBRARY_DIRS ${${variable_prefix}_LIBRARY_DIRS} CACHE INTERNAL "")
     # TODO: the following might not always apply
     set(${target_name}_PREFIX ${CMAKE_INSTALL_PREFIX}/lib CACHE INTERNAL "")
-
-    message(STATUS "${variable_prefix}_LIBRARIES: ${${variable_prefix}_LIBRARIES}")
 endfunction()
 
 
@@ -98,8 +94,6 @@ function(import_external_project)
     if(NOT IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS)
         message(FATAL_ERROR "INCLUDE_DIRS parameter missing, but is required")
     endif()
-
-    message(STATUS "Importing target ${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} from external project ${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME}")
 
     if(TARGET ${target_name})
         message(WARNING "Target exists already, skipping")
