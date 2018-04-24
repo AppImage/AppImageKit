@@ -12,8 +12,6 @@ find_package(PkgConfig REQUIRED)
 #  - target_name: name of the target that should be created
 #  - variable_prefix: prefix of the variable that should be used to create the target from
 function(import_library_from_prefix target_name variable_prefix)
-    message(STATUS "Importing target ${target_name} from variable prefix ${variable_prefix}")
-
     if(TARGET ${target_name})
         message(WARNING "Target exists already, skipping")
         return()
