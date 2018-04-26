@@ -153,8 +153,6 @@ if(AUXILIARY_FILES_DESTINATION)
     )
 endif()
 
-add_dependencies(appimagetool mksquashfs squashfuse)
-
 add_sanitizers(appimagetool)
 
 
@@ -230,13 +228,10 @@ target_link_libraries(runtime-debug
     ${CMAKE_DL_LIBS}
 )
 
-set(_RUNTIME_FLAGS -g -O0 -ffunction-sections -fdata-sections -s -Wl,--gc-sections -DGIT_COMMIT='${GIT_COMMIT}' -D_FILE_OFFSET_BITS=64)
-mark_as_advanced(_RUNTIME_FLAGS)
-
-set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "${_RUNTIME_FLAGS}")
+set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -fdata-sections -s -Wl,--gc-sections")
 
 target_compile_options(runtime-debug
-    PUBLIC "${_RUNTIME_FLAGS}"
+    PUBLIC -DGIT_COMMIT='${GIT_COMMIT}' -D_FILE_OFFSET_BITS=64
 )
 
 
