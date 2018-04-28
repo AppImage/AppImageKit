@@ -37,10 +37,6 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#ifdef ENABLE_SETPROCTITLE
-    #include <sys/types.h>
-    #include <bsd/unistd.h>
-#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <signal.h>
@@ -284,26 +280,46 @@ main (int argc, char *argv[])
      * functionality specifically for builds used by appimaged.
      */
     if (getenv("TARGET_APPIMAGE") == NULL) {
-        sprintf(appimage_path, "/proc/self/exe");
-        sprintf(argv0_path, argv[0]);
+        strcpy(appimage_path, "/proc/self/exe");
+        strcpy(argv0_path, argv[0]);
     } else {
-        sprintf(appimage_path, "%s", getenv("TARGET_APPIMAGE"));
-        sprintf(argv0_path, getenv("TARGET_APPIMAGE"));
+        strcpy(appimage_path, getenv("TARGET_APPIMAGE"));
+        strcpy(argv0_path, getenv("TARGET_APPIMAGE"));
 
 #ifdef ENABLE_SETPROCTITLE
-        char buffer[1024];
-        strcpy(buffer, getenv("TARGET_APPIMAGE"));
-        for (int i = 1; i < argc; i++) {
-            strcat(buffer, " ");
-            strcat(buffer, argv[i]);
-        }
+        // load libbsd dynamically to change proc title
+        // this is an optional feature, therefore we don't hard require it
+        void* libbsd = dlopen("libbsd.so", RTLD_NOW);
 
-        setproctitle_init(argc, argv, environ);
-        setproctitle("%s", buffer);
+        if (libbsd != NULL) {
+            // clear error state
+            dlerror();
+
+            // try to load the two required symbols
+            void (*setproctitle_init)(int, char**, char**) = dlsym(libbsd, "setproctitle_init");
+
+            char* error;
+
+            if ((error = dlerror()) == NULL) {
+                void (*setproctitle)(const char*, char*) = dlsym(libbsd, "setproctitle");
+
+                if (dlerror() == NULL) {
+                    char buffer[1024];
+                    strcpy(buffer, getenv("TARGET_APPIMAGE"));
+                    for (int i = 1; i < argc; i++) {
+                        strcat(buffer, " ");
+                        strcat(buffer, argv[i]);
+                    }
+
+                    (*setproctitle_init)(argc, argv, environ);
+                    (*setproctitle)("%s", buffer);
+                }
+            }
+
+            dlclose(libbsd);
+        }
 #endif
     }
-
-    sprintf(argv0_path, argv[0]);
 
     fs_offset = get_elf_size(appimage_path);
 
