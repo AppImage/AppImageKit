@@ -37,8 +37,10 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/types.h>
-#include <bsd/unistd.h>
+#ifdef ENABLE_SETPROCTITLE
+    #include <sys/types.h>
+    #include <bsd/unistd.h>
+#endif
 #include <fcntl.h>
 #include <stdio.h>
 #include <signal.h>
