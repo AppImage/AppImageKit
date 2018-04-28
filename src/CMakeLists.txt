@@ -234,7 +234,7 @@ target_link_libraries(runtime-debug
 set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -fdata-sections -Wl,--gc-sections")
 
 target_compile_options(runtime-debug
-    PUBLIC -DGIT_COMMIT='${GIT_COMMIT}' -D_FILE_OFFSET_BITS=64
+    PUBLIC -DGIT_COMMIT="${GIT_COMMIT}" -D_FILE_OFFSET_BITS=64
 )
 
 if(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE)
