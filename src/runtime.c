@@ -37,6 +37,8 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <bsd/unistd.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <signal.h>
@@ -279,12 +281,22 @@ main (int argc, char *argv[])
      * change any time. Do not rely on it being present. We might even limit this
      * functionality specifically for builds used by appimaged.
      */
-    if(getenv("TARGET_APPIMAGE") == NULL){
+    if (getenv("TARGET_APPIMAGE") == NULL) {
         sprintf(appimage_path, "/proc/self/exe");
         sprintf(argv0_path, argv[0]);
     } else {
         sprintf(appimage_path, "%s", getenv("TARGET_APPIMAGE"));
         sprintf(argv0_path, getenv("TARGET_APPIMAGE"));
+
+        char buffer[1024];
+        strcpy(buffer, getenv("TARGET_APPIMAGE"));
+        for (int i = 1; i < argc; i++) {
+            strcat(buffer, " ");
+            strcat(buffer, argv[i]);
+        }
+
+        setproctitle_init(argc, argv, environ);
+        setproctitle("%s", buffer);
     }
 
     sprintf(argv0_path, argv[0]);
