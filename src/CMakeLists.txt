@@ -231,7 +231,7 @@ target_link_libraries(runtime-debug
     bsd
 )
 
-set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -fdata-sections -s -Wl,--gc-sections")
+set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -fdata-sections -Wl,--gc-sections")
 
 target_compile_options(runtime-debug
     PUBLIC -DGIT_COMMIT='${GIT_COMMIT}' -D_FILE_OFFSET_BITS=64
