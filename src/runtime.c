@@ -288,6 +288,7 @@ main (int argc, char *argv[])
         sprintf(appimage_path, "%s", getenv("TARGET_APPIMAGE"));
         sprintf(argv0_path, getenv("TARGET_APPIMAGE"));
 
+#ifdef ENABLE_SETPROCTITLE
         char buffer[1024];
         strcpy(buffer, getenv("TARGET_APPIMAGE"));
         for (int i = 1; i < argc; i++) {
@@ -297,6 +298,7 @@ main (int argc, char *argv[])
 
         setproctitle_init(argc, argv, environ);
         setproctitle("%s", buffer);
+#endif
     }
 
     sprintf(argv0_path, argv[0]);

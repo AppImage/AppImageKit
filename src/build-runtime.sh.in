@@ -24,6 +24,11 @@ repo_root="@CMAKE_CURRENT_SOURCE_DIR@"
 small_FLAGS="-Os -ffunction-sections -fdata-sections"
 small_LDFLAGS="-s -Wl,--gc-sections"
 
+if [ "@APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE@" == "ON" ]; then
+    small_FLAGS="$SMALL_FLAGS -DENABLE_SETPROCTITLE"
+    small_LDFLAGS="$SMALL_LDFLAGS -lbsd"
+fi
+
 cd $repo_root
 git_version="@GIT_COMMIT@"
 
@@ -60,7 +65,7 @@ objcopy --add-section .sig_key=8192_blank_bytes \
 squashfuse_libs="@squashfuse_LIBRARIES@"
 $CC $small_FLAGS $small_LDFLAGS -o runtime "$repo_root"/elf.c "$repo_root"/notify.c "$repo_root"/getsection.c \
     runtime4.o ${squashfuse_libs//;/ } \
-    -Wl,-Bdynamic -lpthread -l"@libzlib_LIBRARIES@" -L"@libzlib_LIBRARY_DIRS@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl -lbsd
+    -Wl,-Bdynamic -lpthread -l"@libzlib_LIBRARIES@" -L"@libzlib_LIBRARY_DIRS@" -Wl,-Bstatic "@xz_LIBRARIES@" -Wl,-Bdynamic -ldl
 $STRIP runtime
 
 # Test if we can read it back

@@ -1,5 +1,7 @@
 find_package(Sanitizers)
 
+set(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE OFF CACHE BOOL "Useful for $TARGET_APPIMAGE; see issue #763")
+
 # set up build script
 
 # if set to anything but ON, the magic bytes won't be embedded
@@ -234,6 +236,12 @@ set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -
 target_compile_options(runtime-debug
     PUBLIC -DGIT_COMMIT='${GIT_COMMIT}' -D_FILE_OFFSET_BITS=64
 )
+
+if(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE)
+    target_compile_definitions(runtime-debug
+        PUBLIC -DENABLE_SETPROCTITLE
+    )
+endif()
 
 
 # install binaries
