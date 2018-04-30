@@ -24,6 +24,11 @@ repo_root="@CMAKE_CURRENT_SOURCE_DIR@"
 small_FLAGS="-Os -ffunction-sections -fdata-sections"
 small_LDFLAGS="-s -Wl,--gc-sections"
 
+if [ "@APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE@" == "ON" ]; then
+    small_FLAGS="$SMALL_FLAGS -DENABLE_SETPROCTITLE"
+    small_LDFLAGS="$SMALL_LDFLAGS -lbsd"
+fi
+
 cd $repo_root
 git_version="@GIT_COMMIT@"
 
