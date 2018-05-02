@@ -321,7 +321,7 @@ main (int argc, char *argv[])
 #endif
     }
 
-    fs_offset = get_elf_size(appimage_path);
+    fs_offset = appimage_get_elf_size(appimage_path);
 
     // error check
     if (fs_offset < 0) {
