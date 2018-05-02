@@ -1,5 +1,8 @@
 #pragma once
 
+#include <unistd.h>
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
