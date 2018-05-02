@@ -61,7 +61,7 @@ extern int notify(char *title, char *body, int timeout);
 
 struct stat st;
 
-static long unsigned int fs_offset; // The offset at which a filesystem image is expected = end of this ELF
+static ssize_t fs_offset; // The offset at which a filesystem image is expected = end of this ELF
 
 static void die(const char *msg) {
     fprintf(stderr, "%s\n", msg);
@@ -321,7 +321,13 @@ main (int argc, char *argv[])
 #endif
     }
 
-    fs_offset = get_elf_size(appimage_path);
+    fs_offset = appimage_get_elf_size(appimage_path);
+
+    // error check
+    if (fs_offset < 0) {
+        printf("Failed to get fs offset for %s\n", appimage_path);
+        exit(EXIT_FAILURE);
+    }
 
     arg=getArg(argc,argv,'-');
 

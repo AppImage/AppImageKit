@@ -56,6 +56,7 @@
 
 #include "elf.h"
 #include "getsection.h"
+#include "appimage/appimage.h"
 
 #ifdef __linux__
 #define HAVE_BINARY_RUNTIME
@@ -104,8 +105,12 @@ int sfs_ls(char* image) {
     sqfs_traverse trv;
     sqfs fs;
     
-    unsigned long fs_offset = get_elf_size(image);
-    
+    ssize_t fs_offset = appimage_get_elf_size(image);
+
+    // error check
+    if (fs_offset < 0)
+        die("failed to read elf size");
+
     if ((err = sqfs_open_image(&fs, image, fs_offset)))
         die("sqfs_open_image error");
     
