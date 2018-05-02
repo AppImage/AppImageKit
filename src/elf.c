@@ -109,7 +109,7 @@ static ssize_t read_elf64(int fd)
 	return sht_end > last_section_end ? sht_end : last_section_end;
 }
 
-ssize_t get_elf_size(const char* fname) {
+ssize_t appimage_get_elf_size(const char* fname) {
 	ssize_t ret;
 	int fd;
 	ssize_t size = -1;

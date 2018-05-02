@@ -1220,7 +1220,7 @@ bool appimage_type2_register_in_system(const char *path, bool verbose) {
     if (verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
 
-    ssize_t fs_offset = get_elf_size(path);
+    ssize_t fs_offset = appimage_get_elf_size(path);
 
     if (fs_offset < 0) {
         if (verbose)
@@ -1356,7 +1356,7 @@ int appimage_type1_is_terminal_app(const char* path) {
 
     if (!rv) {
         // if the key file hasn't been found and the error is not set to NOT_FOUND, return an error
-        if (error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND)
+        if (error != NULL && error->code != G_KEY_FILE_ERROR_KEY_NOT_FOUND)
             result = -1;
         else
             result = 0;
@@ -1384,7 +1384,7 @@ int appimage_type2_is_terminal_app(const char* path) {
     if (md5 == NULL)
         return -1;
 
-    ssize_t fs_offset = get_elf_size(path);
+    ssize_t fs_offset = appimage_get_elf_size(path);
 
     // error check
     if (fs_offset < 0)
@@ -1577,7 +1577,7 @@ int appimage_type2_shall_not_be_integrated(const char* path) {
     if (md5 == NULL)
         return -1;
 
-    ssize_t fs_offset = get_elf_size(path);
+    ssize_t fs_offset = appimage_get_elf_size(path);
 
     if (fs_offset < 0)
         return -1;
@@ -2039,7 +2039,7 @@ void appimage_type2_open(appimage_handler *handler) {
         fprintf(stderr, "Opening %s as Type 2 AppImage\n", handler->path);
 #endif
         // The offset at which a squashfs image is expected
-        ssize_t fs_offset = get_elf_size(handler->path);
+        ssize_t fs_offset = appimage_get_elf_size(handler->path);
 
         if (fs_offset < 0) {
 #ifdef STANDALONE

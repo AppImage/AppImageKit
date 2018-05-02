@@ -116,7 +116,7 @@ int appimage_shall_not_be_integrated(const char* path);
  *
  * e_shoff + ( e_shentsize * e_shnum ) =	126584
  */
-ssize_t get_elf_size(const char *fname);
+ssize_t appimage_get_elf_size(const char* fname);
 
 #ifdef __cplusplus
 }
