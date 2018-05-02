@@ -1210,7 +1210,6 @@ bool appimage_type2_register_in_system(const char *path, bool verbose) {
 #endif
 
     // the offset at which a squashfs image is expected
-    long unsigned int fs_offset;
     char* md5 = appimage_get_md5(path);
 
     // a structure that will hold the information from the desktop file
@@ -1221,14 +1220,20 @@ bool appimage_type2_register_in_system(const char *path, bool verbose) {
     if (verbose)
         fprintf(stderr, "md5 of URI RFC 2396: %s\n", md5);
 
-    fs_offset = get_elf_size(path);
+    ssize_t fs_offset = get_elf_size(path);
+
+    if (fs_offset < 0) {
+        if (verbose)
+            fprintf(stderr, "failed to read fs_offset\n");
+        return false;
+    }
 
     if (verbose)
         fprintf(stderr, "fs_offset: %lu\n", fs_offset);
 
     sqfs fs;
 
-    sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
+    sqfs_err err = sqfs_open_image(&fs, path, (size_t) fs_offset);
 
     if (err != SQFS_OK) {
         sqfs_destroy(&fs);
@@ -1379,11 +1384,15 @@ int appimage_type2_is_terminal_app(const char* path) {
     if (md5 == NULL)
         return -1;
 
-    unsigned long fs_offset = get_elf_size(path);
+    ssize_t fs_offset = get_elf_size(path);
+
+    // error check
+    if (fs_offset < 0)
+        return -1;
 
     sqfs fs;
 
-    sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
+    sqfs_err err = sqfs_open_image(&fs, path, (size_t) fs_offset);
 
     if (err != SQFS_OK) {
         free(md5);
@@ -1568,11 +1577,14 @@ int appimage_type2_shall_not_be_integrated(const char* path) {
     if (md5 == NULL)
         return -1;
 
-    unsigned long fs_offset = get_elf_size(path);
+    ssize_t fs_offset = get_elf_size(path);
+
+    if (fs_offset < 0)
+        return -1;
 
     sqfs fs;
 
-    sqfs_err err = sqfs_open_image(&fs, path, fs_offset);
+    sqfs_err err = sqfs_open_image(&fs, path, (size_t) fs_offset);
 
     if (err != SQFS_OK) {
         free(md5);
@@ -2026,11 +2038,20 @@ void appimage_type2_open(appimage_handler *handler) {
 #ifdef STANDALONE
         fprintf(stderr, "Opening %s as Type 2 AppImage\n", handler->path);
 #endif
-        long unsigned int fs_offset; // The offset at which a squashfs image is expected
-        fs_offset = get_elf_size(handler->path);
+        // The offset at which a squashfs image is expected
+        ssize_t fs_offset = get_elf_size(handler->path);
+
+        if (fs_offset < 0) {
+#ifdef STANDALONE
+            fprintf(stderr, "get_elf_size error\n");
+#endif
+            handler->is_open = false;
+            handler->cache = NULL;
+            return;
+        }
 
         sqfs *fs = malloc(sizeof(sqfs));
-        sqfs_err err = sqfs_open_image(fs, handler->path, fs_offset);
+        sqfs_err err = sqfs_open_image(fs, handler->path, (size_t) fs_offset);
         if (err != SQFS_OK){
 #ifdef STANDALONE
             fprintf(stderr, "sqfs_open_image error: %s\n", handler->path);

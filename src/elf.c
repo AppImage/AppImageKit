@@ -43,7 +43,7 @@ static uint64_t file64_to_cpu(uint64_t val)
 	return val;
 }
 
-static unsigned long read_elf32(int fd)
+static ssize_t read_elf32(int fd)
 {
 	Elf32_Ehdr ehdr32;
 	Elf32_Shdr shdr32;
@@ -55,7 +55,7 @@ static unsigned long read_elf32(int fd)
 	if (ret < 0 || (size_t)ret != sizeof(ehdr32)) {
 		fprintf(stderr, "Read of ELF header from %s failed: %s\n",
 			fname, strerror(errno));
-		exit(10);
+		return -1;
 	}
 
 	ehdr.e_shoff		= file32_to_cpu(ehdr32.e_shoff);
@@ -67,7 +67,7 @@ static unsigned long read_elf32(int fd)
 	if (ret < 0 || (size_t)ret != sizeof(shdr32)) {
 		fprintf(stderr, "Read of ELF section header from %s failed: %s\n",
 			fname, strerror(errno));
-		exit(10);
+		return -1;
 	}
 
 	/* ELF ends either with the table of section headers (SHT) or with a section. */
@@ -76,7 +76,7 @@ static unsigned long read_elf32(int fd)
 	return sht_end > last_section_end ? sht_end : last_section_end;
 }
 
-static unsigned long read_elf64(int fd)
+static ssize_t read_elf64(int fd)
 {
 	Elf64_Ehdr ehdr64;
 	Elf64_Shdr shdr64;
@@ -88,7 +88,7 @@ static unsigned long read_elf64(int fd)
 	if (ret < 0 || (size_t)ret != sizeof(ehdr64)) {
 		fprintf(stderr, "Read of ELF header from %s failed: %s\n",
 			fname, strerror(errno));
-		exit(10);
+		return -1;
 	}
 
 	ehdr.e_shoff		= file64_to_cpu(ehdr64.e_shoff);
@@ -100,7 +100,7 @@ static unsigned long read_elf64(int fd)
 	if (ret < 0 || (size_t)ret != sizeof(shdr64)) {
 		fprintf(stderr, "Read of ELF section header from %s failed: %s\n",
 			fname, strerror(errno));
-		exit(10);
+		return -1;
 	}
 
 	/* ELF ends either with the table of section headers (SHT) or with a section. */
@@ -109,38 +109,36 @@ static unsigned long read_elf64(int fd)
 	return sht_end > last_section_end ? sht_end : last_section_end;
 }
 
-unsigned long get_elf_size(const char *fname)
-{
+ssize_t get_elf_size(const char* fname) {
 	ssize_t ret;
 	int fd;
-	static unsigned long size = 0;
+	ssize_t size = -1;
 
 	fd = open(fname, O_RDONLY);
 	if (fd < 0) {
 		fprintf(stderr, "Cannot open %s: %s\n",
 			fname, strerror(errno));
-		return(1);
+		return -1;
 	}
 	ret = pread(fd, ehdr.e_ident, EI_NIDENT, 0);
 	if (ret != EI_NIDENT) {
 		fprintf(stderr, "Read of e_ident from %s failed: %s\n",
 			fname, strerror(errno));
-		return(1);
+		return -1;
 	}
 	if ((ehdr.e_ident[EI_DATA] != ELFDATA2LSB) &&
-	    (ehdr.e_ident[EI_DATA] != ELFDATA2MSB))
-	{
+		(ehdr.e_ident[EI_DATA] != ELFDATA2MSB)) {
 		fprintf(stderr, "Unkown ELF data order %u\n",
 			ehdr.e_ident[EI_DATA]);
-		return(1);
+		return -1;
 	}
-	if(ehdr.e_ident[EI_CLASS] == ELFCLASS32) {
+	if (ehdr.e_ident[EI_CLASS] == ELFCLASS32) {
 		size = read_elf32(fd);
-	} else if(ehdr.e_ident[EI_CLASS] == ELFCLASS64) {
+	} else if (ehdr.e_ident[EI_CLASS] == ELFCLASS64) {
 		size = read_elf64(fd);
 	} else {
 		fprintf(stderr, "Unknown ELF class %u\n", ehdr.e_ident[EI_CLASS]);
-		return(1);
+		return -1;
 	}
 
 	close(fd);

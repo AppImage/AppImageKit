@@ -16,6 +16,6 @@ e_shoff + ( e_shentsize * e_shnum ) =	126584
 #ifndef ELFSIZE_H
 #define ELFSIZE_H
 
-unsigned long get_elf_size(const char *fname);
+ssize_t get_elf_size(const char *fname);
 
 #endif /* ELFSIZE_H */
