@@ -126,6 +126,11 @@ add_executable(appimagetool
     data.o
 )
 
+target_include_directories(appimagetool
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
+
 target_link_libraries(appimagetool
     libglib
     libzlib
