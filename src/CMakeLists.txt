@@ -154,6 +154,11 @@ target_compile_definitions(appimagetool
     PRIVATE -DENABLE_BINRELOC
 )
 
+target_include_directories(appimagetool
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
+
 if(AUXILIARY_FILES_DESTINATION)
     message(STATUS "Installing auxiliary files in path: ${AUXILIARY_FILES_DESTINATION}")
     target_compile_definitions(appimagetool
