@@ -857,19 +857,19 @@ main (int argc, char *argv[])
             }
         }
 
-        if(sign){
+        if (sign) {
             bool using_gpg = FALSE;
             bool using_shasum = FALSE;
 
             /* The user has indicated that he wants to sign */
-            gchar *gpg2_path = g_find_program_in_path("gpg2");
+            gchar* gpg2_path = g_find_program_in_path("gpg2");
 
             if (!gpg2_path) {
                 gpg2_path = g_find_program_in_path("gpg");
                 using_gpg = TRUE;
             }
 
-            gchar *sha256sum_path = g_find_program_in_path("sha256sum");
+            gchar* sha256sum_path = g_find_program_in_path("sha256sum");
 
             if (!sha256sum_path) {
                 sha256sum_path = g_find_program_in_path("shasum");
@@ -882,7 +882,7 @@ main (int argc, char *argv[])
                 fprintf(stderr, "sha256sum or shasum is not installed, cannot sign\n");
             } else {
                 fprintf(stderr, "%s and %s are installed and user requested to sign, "
-                        "hence signing\n", using_gpg ? "gpg" : "gpg2",
+                                "hence signing\n", using_gpg ? "gpg" : "gpg2",
                     using_shasum ? "shasum" : "sha256sum");
 
                 char* digestfile;
@@ -1130,15 +1130,15 @@ main (int argc, char *argv[])
                 }
             }
         }
-        
+
         /* If updateinformation was provided, then we also generate the zsync file (after having signed the AppImage) */
-        if(updateinformation != NULL){
-            gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
-            if(!zsyncmake_path){
-                fprintf (stderr, "zsyncmake is not installed/bundled, skipping\n");
+        if (updateinformation != NULL) {
+            gchar* zsyncmake_path = g_find_program_in_path("zsyncmake");
+            if (!zsyncmake_path) {
+                fprintf(stderr, "zsyncmake is not installed/bundled, skipping\n");
             } else {
-                fprintf (stderr, "zsyncmake is available and updateinformation is provided, "
-                "hence generating zsync file\n");
+                fprintf(stderr, "zsyncmake is available and updateinformation is provided, "
+                                "hence generating zsync file\n");
 
                 int pid = fork();
 
@@ -1173,13 +1173,13 @@ main (int argc, char *argv[])
                         die("zsyncmake command did not succeed");
                 }
             }
-         } 
-         
-        fprintf (stderr, "Success\n\n");
-        fprintf (stderr, "Please consider submitting your AppImage to AppImageHub, the crowd-sourced\n");
-        fprintf (stderr, "central directory of available AppImages, by opening a pull request\n");
-        fprintf (stderr, "at https://github.com/AppImage/appimage.github.io\n");
         }
+
+        fprintf(stderr, "Success\n\n");
+        fprintf(stderr, "Please consider submitting your AppImage to AppImageHub, the crowd-sourced\n");
+        fprintf(stderr, "central directory of available AppImages, by opening a pull request\n");
+        fprintf(stderr, "at https://github.com/AppImage/appimage.github.io\n");
+    }
     
     /* If the first argument is a regular file, then we assume that we should unpack it */
     if (g_file_test (remaining_args[0], G_FILE_TEST_IS_REGULAR)){
