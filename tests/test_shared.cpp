@@ -188,6 +188,33 @@ TEST_F(SharedCTest, test_appimage_shall_not_integrate) {
     EXPECT_EQ(appimage_is_terminal_app("/invalid/path"), -1);
 }
 
+static bool test_strcmp(char* a, char* b) {
+    return strcmp(a, b) == 0;
+}
+
+TEST_F(SharedCTest, test_appimage_hexlify) {
+    {
+        char bytesIn[] = "\x00\x01\x02\x03\x04\x05\x06\x07";
+        char expectedHex[] = "0001020304050607";
+
+        char* hexlified = appimage_hexlify(bytesIn, 8);
+        EXPECT_PRED2(test_strcmp, hexlified, expectedHex);
+
+        // cleanup
+        free(hexlified);
+    }
+    {
+        char bytesIn[] = "\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
+        char expectedHex[] = "f8f9fafbfcfdfeff";
+
+        char* hexlified = appimage_hexlify(bytesIn, 8);
+        EXPECT_PRED2(test_strcmp, hexlified, expectedHex);
+
+        // cleanup
+        free(hexlified);
+    }
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

@@ -121,6 +121,12 @@ int appimage_shall_not_be_integrated(const char* path);
  */
 ssize_t appimage_get_elf_size(const char* fname);
 
+/*
+ * Creates hexadecimal representation of a byte array. Allocates a new char array (string) with the correct size that
+ * needs to be free()d.
+ */
+char* appimage_hexlify(const char* bytes, size_t numBytes);
+
 #ifdef __cplusplus
 }
 #endif
