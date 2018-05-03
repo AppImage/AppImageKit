@@ -44,15 +44,21 @@ cd "$build_dir"
 $CC -DGIT_COMMIT=\"$git_version\" -I"@xz_INCLUDE_DIRS@" -I"@squashfuse_INCLUDE_DIRS@" \
     -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
 
-# Prepare 1024 bytes of space for updateinformation
+# Prepare 16 bytes of space for MD5 digest section
+printf '\0%.0s' {0..1023} > 16_blank_bytes
+objcopy --add-section .digest_md5=16_blank_bytes \
+        --set-section-flags .digest_md5=noload,readonly runtime.o runtime1.o
+
+# Prepare 1024 bytes of space for update information section
 printf '\0%.0s' {0..1023} > 1024_blank_bytes
 
 objcopy --add-section .upd_info=1024_blank_bytes \
-        --set-section-flags .upd_info=noload,readonly runtime.o runtime2.o
+        --set-section-flags .upd_info=noload,readonly runtime1.o runtime2.o
 
 objcopy --add-section .sha256_sig=1024_blank_bytes \
         --set-section-flags .sha256_sig=noload,readonly runtime2.o runtime3.o
 
+# prepare 8192 bytes of space for key section
 cat 1024_blank_bytes 1024_blank_bytes 1024_blank_bytes 1024_blank_bytes > 4096_blank_bytes
 cat 4096_blank_bytes 4096_blank_bytes > 8192_blank_bytes
 
