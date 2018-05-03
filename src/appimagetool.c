@@ -969,7 +969,7 @@ main (int argc, char *argv[])
                 int rv = get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
 
                 if (rv != 0 || sig_offset == 0 || sig_length == 0) {
-                    die("Could not find section .sig_key in runtime");
+                    die("Could not find section .sha256_sig in runtime");
                 }
 
                 if (verbose) {
