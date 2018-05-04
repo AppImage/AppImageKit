@@ -234,3 +234,5 @@ cd AppImageKit/
 sudo bash -ex install-build-deps.sh
 bash -ex build.sh
 ```
+
+Please note: It is not recommended nor supported to build AppImageKit on any newer build system than the oldest still-supported versions of major distributions for reasons outlined [here](https://github.com/AppImage/AppImageKit/wiki/Creating-AppImages#creating-appimages-that-are-compatible-with-many-systems). Currently we are targeting CentOS 6.x and Ubuntu 14.04 as build systems and we are not interested to build AppImageKit on newer versions anytime soon. Binaries built on those systems will run just fine on newer (later) target systems (distributions).
