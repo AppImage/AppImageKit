@@ -1,3 +1,7 @@
+# >= 3.2 required for ExternalProject_Add_StepDependencies
+cmake_minimum_required(VERSION 3.2)
+
+
 # find required system dependencies via pkg-config
 find_package(PkgConfig REQUIRED)
 
@@ -349,6 +353,10 @@ mark_as_advanced(mksquashfs_BINARY)
 
 # only have to build custom xz when not using system libxz
 if(TARGET xz-EXTERNAL)
-    add_dependencies(squashfuse-EXTERNAL xz-EXTERNAL)
-    add_dependencies(mksquashfs xz-EXTERNAL)
+    if(TARGET squashfuse-EXTERNAL)
+        ExternalProject_Add_StepDependencies(squashfuse-EXTERNAL configure xz-EXTERNAL)
+    endif()
+    if(TARGET mksquashfs)
+        ExternalProject_Add_StepDependencies(mksquashfs configure xz-EXTERNAL)
+    endif()
 endif()
