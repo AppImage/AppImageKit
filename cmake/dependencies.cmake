@@ -64,11 +64,11 @@ function(import_find_pkg_target target_name pkg_name variable_prefix)
     message(STATUS "Importing target ${target_name} via find_package (${pkg_name})")
 
     find_package(${pkg_name})
-    if(NOT ${pkg_name}_FOUND)
+    if(NOT ${variable_prefix}_FOUND)
         message(FATAL_ERROR "${pkg_name} could not be found on the system. You will have to either install it, or use the bundled package.")
     endif()
 
-    import_library(${prefix})
+    import_library_from_prefix(${target_name} ${variable_prefix})
 endfunction()
 
 
