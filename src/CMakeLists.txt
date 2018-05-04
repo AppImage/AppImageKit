@@ -132,15 +132,11 @@ target_include_directories(appimagetool
 )
 
 target_link_libraries(appimagetool
+    ${CMAKE_DL_LIBS}
+    pthread
     libglib
     libzlib
     squashfuse
-)
-
-target_link_libraries(appimagetool
-    ${CMAKE_DL_LIBS}
-    pthread
-    libzlib
     xz
     xdg-basedir
 )
