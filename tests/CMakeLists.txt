@@ -77,7 +77,6 @@ if(BUILD_TESTING)
         xdg-basedir
         pthread
         libglib
-        libgio
         libzlib
         libcairo
         gtest
