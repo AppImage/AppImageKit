@@ -158,6 +158,7 @@ endfunction()
 # this is especially an issue with libcairo, where the library is called libcairo
 # therefore, all libs imported this way have been prefixed with lib
 import_pkgconfig_target(libglib glib-2.0>=2.40)
+import_pkgconfig_target(libgobject gobject-2.0>=2.40)
 import_pkgconfig_target(libgio gio-2.0>=2.40)
 import_pkgconfig_target(libzlib zlib)
 import_pkgconfig_target(libcairo cairo)

@@ -73,6 +73,7 @@ target_link_libraries(libappimage
     PUBLIC
     pthread
     libglib
+    libgobject
     libgio
     libzlib
     libcairo
@@ -112,6 +113,7 @@ target_link_libraries(libappimage_static
     PUBLIC
     pthread
     libglib
+    libgobject
     libgio
     libzlib
     libcairo
@@ -142,7 +144,7 @@ target_link_libraries(appimagetool
     PUBLIC
     pthread
     libglib
-    libgio
+    libgobject
     libzlib
 )
 
@@ -167,17 +169,20 @@ add_sanitizers(appimagetool)
 add_executable(appimaged appimaged.c notify.c elf.c getsection.c)
 
 target_link_libraries(appimaged
-    pthread
+    PRIVATE
     ${CMAKE_DL_LIBS}
+    pthread
     libcairo
-    libglib
-    libgio
     inotify-tools
     squashfuse
     xz
     libzlib
     libarchive
     xdg-basedir
+    PUBLIC
+    libglib
+    libgio
+    libgobject
 )
 
 target_compile_definitions(appimaged
@@ -230,7 +235,6 @@ target_link_libraries(runtime-debug
     xdg-basedir
     pthread
     libglib
-    libgio
     libzlib
     libcairo
     ${CMAKE_DL_LIBS}
