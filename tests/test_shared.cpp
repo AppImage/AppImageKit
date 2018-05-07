@@ -226,11 +226,11 @@ bool test_compare_bytes(const char* buf1, const char* buf2, int size) {
     return true;
 }
 
-TEST_F(SharedCTest, test_appimage_digest_md5) {
+TEST_F(SharedCTest, appimage_type2_digest_md5) {
     char digest[16];
     char expectedDigest[] = {-20, 92, -89, 99, -47, -62, 14, 36, -5, -127, 65, -126, 116, -41, -33, -121};
 
-    EXPECT_TRUE(appimage_digest_md5(appImage_type_2_file_path.c_str(), digest));
+    EXPECT_TRUE(appimage_type2_digest_md5(appImage_type_2_file_path.c_str(), digest));
     EXPECT_PRED3(test_compare_bytes, digest, expectedDigest, 16);
 }
 

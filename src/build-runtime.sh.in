@@ -45,7 +45,7 @@ $CC -DGIT_COMMIT=\"$git_version\" -I"@xz_INCLUDE_DIRS@" -I"@squashfuse_INCLUDE_D
     -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
 
 # Prepare 16 bytes of space for MD5 digest section
-printf '\0%.0s' {0..1023} > 16_blank_bytes
+printf '\0%.0s' {0..15} > 16_blank_bytes
 objcopy --add-section .digest_md5=16_blank_bytes \
         --set-section-flags .digest_md5=noload,readonly runtime.o runtime1.o
 

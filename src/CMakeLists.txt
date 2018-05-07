@@ -43,10 +43,12 @@ set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install d
 
 
 add_library(libappimage SHARED
+    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     shared.c
     getsection.c
     notify.c
     elf.c
+    appimagetool_shared.c
 )
 
 set_target_properties(libappimage PROPERTIES PREFIX "")
@@ -85,6 +87,7 @@ add_library(libappimage_static STATIC
     getsection.c
     notify.c
     elf.c
+    appimagetool_shared.c
 )
 
 set_target_properties(libappimage_static PROPERTIES PREFIX "")
@@ -119,11 +122,13 @@ target_link_libraries(libappimage_static
 
 
 add_executable(appimagetool
+    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     appimagetool.c
     getsection.c
     binreloc.c
     elf.c
     data.o
+    appimagetool_shared.c
 )
 
 target_include_directories(appimagetool
@@ -169,7 +174,7 @@ endif()
 add_sanitizers(appimagetool)
 
 
-add_executable(appimaged appimaged.c notify.c elf.c getsection.c)
+add_executable(appimaged appimaged.c notify.c elf.c getsection.c appimagetool_shared.c)
 
 target_link_libraries(appimaged
     pthread
@@ -253,6 +258,21 @@ if(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE)
         PUBLIC -DENABLE_SETPROCTITLE
     )
 endif()
+
+
+# digest_md5 demo application
+# can be used to verify AppImages' MD5 digest
+add_executable(digest_md5 EXCLUDE_FROM_ALL digest_md5.c getsection.c appimagetool_shared.c)
+
+target_include_directories(digest_md5
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
+
+target_link_libraries(digest_md5
+    PRIVATE
+    libglib
+)
 
 
 # install binaries
