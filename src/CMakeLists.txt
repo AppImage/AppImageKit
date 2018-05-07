@@ -131,18 +131,19 @@ target_include_directories(appimagetool
     INTERFACE $<INSTALL_INTERFACE:include/>
 )
 
+# trick: list libraries on which imported static ones depend on in the PUBLIC section
+# CMake then adds them after the PRIVATE ones in the linker command
 target_link_libraries(appimagetool
-    libglib
-    libzlib
-    squashfuse
-)
-
-target_link_libraries(appimagetool
+    PRIVATE
     ${CMAKE_DL_LIBS}
-    pthread
-    libzlib
+    squashfuse
     xz
     xdg-basedir
+    PUBLIC
+    pthread
+    libglib
+    libgio
+    libzlib
 )
 
 target_compile_definitions(appimagetool
