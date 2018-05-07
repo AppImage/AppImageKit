@@ -857,6 +857,57 @@ main (int argc, char *argv[])
             }
         }
 
+        // calculate and embed MD5 digest
+        {
+            fprintf(stderr, "Embedding MD5 digest\n");
+
+            unsigned long digest_md5_offset = 0;
+            unsigned long digest_md5_length = 0;
+
+            int rv = get_elf_section_offset_and_length(destination, ".sha256_sig", &digest_md5_offset, &digest_md5_length);
+
+            if (rv != 0 || digest_md5_offset == 0 || digest_md5_length == 0) {
+                die("Could not find section .digest_md5 in runtime");
+            }
+
+            static const unsigned long section_size = 16;
+
+            if (digest_md5_length < section_size) {
+                fprintf(
+                    stderr,
+                    ".digest_md5 section in runtime's ELF header is too small"
+                    "(found %lu bytes, minimum required: %lu bytes)\n",
+                    digest_md5_length, section_size
+                );
+                exit(1);
+            }
+
+            char digest[section_size];
+
+            if (!appimage_type2_digest_md5(destination, digest)) {
+                die("Failed to calculate MD5 digest");
+            }
+
+            FILE* destinationfp = fopen(destination, "r+");
+
+            if (destinationfp == NULL) {
+                die("Failed to open AppImage for updating");
+            }
+
+            if (fseek(destinationfp, digest_md5_offset, SEEK_SET) != 0) {
+                fclose(destinationfp);
+                die("Failed to embed MD5 digest: could not seek to section offset");
+            }
+
+            if (fwrite(digest, sizeof(char), section_size, destinationfp) != section_size) {
+                fclose(destinationfp);
+                die("Failed to embed MD5 digest: write failed");
+            }
+
+            fflush(destinationfp);
+            fclose(destinationfp);
+        }
+
         if (sign) {
             bool using_gpg = FALSE;
             bool using_shasum = FALSE;
