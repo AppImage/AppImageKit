@@ -82,6 +82,8 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
+    fclose(fp);
+
     char* hexlified_embedded_digest = appimage_hexlify(embedded_digest, digest_size);
     printf("  embedded: %s\n", embedded_digest);
     free(hexlified_embedded_digest);

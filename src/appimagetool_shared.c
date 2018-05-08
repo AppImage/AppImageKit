@@ -183,6 +183,8 @@ bool appimage_type2_digest_md5(const char* path, char* digest) {
     gsize digest_len = 16;
     g_checksum_get_digest(checksum, (guint8*) digest, &digest_len);
 
+    fclose(fp);
+
     return true;
 }
 
