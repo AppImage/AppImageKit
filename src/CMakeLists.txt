@@ -238,7 +238,6 @@ target_link_libraries(runtime-debug
     libzlib
     libcairo
     ${CMAKE_DL_LIBS}
-    bsd
 )
 
 set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -fdata-sections -Wl,--gc-sections")

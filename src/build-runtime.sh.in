@@ -26,7 +26,7 @@ small_LDFLAGS="-s -Wl,--gc-sections"
 
 if [ "@APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE@" == "ON" ]; then
     small_FLAGS="$SMALL_FLAGS -DENABLE_SETPROCTITLE"
-    small_LDFLAGS="$SMALL_LDFLAGS -lbsd"
+    small_LDFLAGS="$SMALL_LDFLAGS"
 fi
 
 cd $repo_root
