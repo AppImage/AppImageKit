@@ -144,6 +144,11 @@ bool appimage_type2_digest_md5(const char* fname, char* digest);
  */
 char* appimage_hexlify(const char* bytes, size_t numBytes);
 
+/*
+ * Return the offset, and the length of an ELF section with a given name in a given ELF file
+ */
+bool appimage_get_elf_section_offset_and_length(const char* fname, const char* section_name, unsigned long* offset, unsigned long* length);
+
 #ifdef __cplusplus
 }
 #endif

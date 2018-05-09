@@ -61,15 +61,15 @@ int appimage_get_type(const char* path, bool verbose)
 bool appimage_type2_digest_md5(const char* path, char* digest) {
     // skip digest, signature and key sections in digest calculation
     unsigned long digest_md5_offset = 0, digest_md5_length = 0;
-    if (get_elf_section_offset_and_length(path, ".digest_md5", &digest_md5_offset, &digest_md5_length) != 0)
+    if (!appimage_get_elf_section_offset_and_length(path, ".digest_md5", &digest_md5_offset, &digest_md5_length))
         return false;
 
     unsigned long signature_offset = 0, signature_length = 0;
-    if (get_elf_section_offset_and_length(path, ".sha256_sig", &signature_offset, &signature_length) != 0)
+    if (!appimage_get_elf_section_offset_and_length(path, ".sha256_sig", &signature_offset, &signature_length))
         return false;
 
     unsigned long sig_key_offset = 0, sig_key_length = 0;
-    if (get_elf_section_offset_and_length(path, ".sig_key", &sig_key_offset, &sig_key_length) != 0)
+    if (!appimage_get_elf_section_offset_and_length(path, ".sig_key", &sig_key_offset, &sig_key_length))
         return false;
 
     GChecksum *checksum = g_checksum_new(G_CHECKSUM_MD5);
