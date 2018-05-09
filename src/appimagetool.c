@@ -864,7 +864,7 @@ main (int argc, char *argv[])
             unsigned long digest_md5_offset = 0;
             unsigned long digest_md5_length = 0;
 
-            int rv = get_elf_section_offset_and_length(destination, ".sha256_sig", &digest_md5_offset, &digest_md5_length);
+            int rv = get_elf_section_offset_and_length(destination, ".digest_md5", &digest_md5_offset, &digest_md5_length);
 
             if (rv != 0 || digest_md5_offset == 0 || digest_md5_length == 0) {
                 die("Could not find section .digest_md5 in runtime");
@@ -904,7 +904,6 @@ main (int argc, char *argv[])
                 die("Failed to embed MD5 digest: write failed");
             }
 
-            fflush(destinationfp);
             fclose(destinationfp);
         }
 
