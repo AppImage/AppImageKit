@@ -226,6 +226,11 @@ target_link_libraries(validate
     libopenssl
 )
 
+target_include_directories(validate
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/
+)
+
 
 add_executable(digest digest.c getsection.c)
 

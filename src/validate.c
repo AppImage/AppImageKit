@@ -16,6 +16,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
+#include "appimage/appimage.h"
 #include "getsection.h"
 #include "light_elf.h"
 
