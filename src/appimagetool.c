@@ -882,9 +882,9 @@ main (int argc, char *argv[])
                 exit(1);
             }
 
-            char digest[section_size];
+            char digest_buffer[section_size];
 
-            if (!appimage_type2_digest_md5(destination, digest)) {
+            if (!appimage_type2_digest_md5(destination, digest_buffer)) {
                 die("Failed to calculate MD5 digest");
             }
 
@@ -899,7 +899,7 @@ main (int argc, char *argv[])
                 die("Failed to embed MD5 digest: could not seek to section offset");
             }
 
-            if (fwrite(digest, sizeof(char), section_size, destinationfp) != section_size) {
+            if (fwrite(digest_buffer, sizeof(char), section_size, destinationfp) != section_size) {
                 fclose(destinationfp);
                 die("Failed to embed MD5 digest: write failed");
             }
