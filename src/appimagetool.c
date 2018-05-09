@@ -857,19 +857,69 @@ main (int argc, char *argv[])
             }
         }
 
-        if(sign){
+        // calculate and embed MD5 digest
+        {
+            fprintf(stderr, "Embedding MD5 digest\n");
+
+            unsigned long digest_md5_offset = 0;
+            unsigned long digest_md5_length = 0;
+
+            int rv = get_elf_section_offset_and_length(destination, ".digest_md5", &digest_md5_offset, &digest_md5_length);
+
+            if (rv != 0 || digest_md5_offset == 0 || digest_md5_length == 0) {
+                die("Could not find section .digest_md5 in runtime");
+            }
+
+            static const unsigned long section_size = 16;
+
+            if (digest_md5_length < section_size) {
+                fprintf(
+                    stderr,
+                    ".digest_md5 section in runtime's ELF header is too small"
+                    "(found %lu bytes, minimum required: %lu bytes)\n",
+                    digest_md5_length, section_size
+                );
+                exit(1);
+            }
+
+            char digest_buffer[section_size];
+
+            if (!appimage_type2_digest_md5(destination, digest_buffer)) {
+                die("Failed to calculate MD5 digest");
+            }
+
+            FILE* destinationfp = fopen(destination, "r+");
+
+            if (destinationfp == NULL) {
+                die("Failed to open AppImage for updating");
+            }
+
+            if (fseek(destinationfp, digest_md5_offset, SEEK_SET) != 0) {
+                fclose(destinationfp);
+                die("Failed to embed MD5 digest: could not seek to section offset");
+            }
+
+            if (fwrite(digest_buffer, sizeof(char), section_size, destinationfp) != section_size) {
+                fclose(destinationfp);
+                die("Failed to embed MD5 digest: write failed");
+            }
+
+            fclose(destinationfp);
+        }
+
+        if (sign) {
             bool using_gpg = FALSE;
             bool using_shasum = FALSE;
 
             /* The user has indicated that he wants to sign */
-            gchar *gpg2_path = g_find_program_in_path("gpg2");
+            gchar* gpg2_path = g_find_program_in_path("gpg2");
 
             if (!gpg2_path) {
                 gpg2_path = g_find_program_in_path("gpg");
                 using_gpg = TRUE;
             }
 
-            gchar *sha256sum_path = g_find_program_in_path("sha256sum");
+            gchar* sha256sum_path = g_find_program_in_path("sha256sum");
 
             if (!sha256sum_path) {
                 sha256sum_path = g_find_program_in_path("shasum");
@@ -882,7 +932,7 @@ main (int argc, char *argv[])
                 fprintf(stderr, "sha256sum or shasum is not installed, cannot sign\n");
             } else {
                 fprintf(stderr, "%s and %s are installed and user requested to sign, "
-                        "hence signing\n", using_gpg ? "gpg" : "gpg2",
+                                "hence signing\n", using_gpg ? "gpg" : "gpg2",
                     using_shasum ? "shasum" : "sha256sum");
 
                 char* digestfile;
@@ -963,172 +1013,182 @@ main (int argc, char *argv[])
 
                 fp = NULL;
 
-                unsigned long sig_offset = 0;
-                unsigned long sig_length = 0;
-
-                int rv = get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
-
-                if (rv != 0 || sig_offset == 0 || sig_length == 0) {
-                    die("Could not find section .sig_key in runtime");
-                }
-
-                if (verbose) {
-                    printf("sig_offset: %lu\n", sig_offset);
-                    printf("sig_length: %lu\n", sig_length);
-                }
-
-                if (sig_offset == 0) {
-                    die("Could not determine offset for signature");
-                }
-
                 FILE* destinationfp = fopen(destination, "r+");
 
-                if (destinationfp == NULL)
-                    die("Not able to open the destination file for writing, aborting");
+                // calculate signature
+                {
+                    unsigned long sig_offset = 0;
+                    unsigned long sig_length = 0;
 
-                // if(strlen(updateinformation)>sig_length)
-                //     die("signature does not fit into segment, aborting");
+                    int rv = get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
 
-                fseek(destinationfp, sig_offset, SEEK_SET);
-
-                FILE* ascfilefp = fopen(ascfile, "rb");
-
-                if (ascfilefp == NULL) {
-                    die("Not able to open the asc file for reading, aborting");
-                }
-
-                static const int bufsize = 1024;
-                char buffer[bufsize];
-
-                size_t totalBytesRead = 0;
-
-                while (!feof(ascfilefp)) {
-                    size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
-                    totalBytesRead += bytesRead;
-
-                    if (totalBytesRead > sig_length) {
-                        die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
+                    if (rv != 0 || sig_offset == 0 || sig_length == 0) {
+                        die("Could not find section .sha256_sig in runtime");
                     }
 
-                    size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
-
-                    if (bytesRead != bytesWritten) {
-                        char message[128];
-                        sprintf(message, "Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead, (long unsigned) bytesWritten);
-                        die(message);
-                    }
-                }
-
-                fclose(ascfilefp);
-                if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
-                    unlink(digestfile);
-
-                if (sign_key == NULL || strlen(sign_key) > 0) {
-                    // read which key was used to sign from signature
-                    sprintf(command, "%s --batch --list-packets %s", gpg2_path, ascfile);
-
-                    fp = popen(command, "r");
-
-                    if (fp == NULL)
-                        die("Failed to call gpg[2] to detect signature's key ID");
-
-                    while (!feof(fp)) {
-                        size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
-
-                        char* keyid_pos = strstr(buffer, "keyid");
-
-                        if (keyid_pos == NULL)
-                            continue;
-
-                        char* keyIDBegin = keyid_pos + strlen("keyid ");
-                        char* endOfKeyID = strstr(keyIDBegin, "\n");
-
-                        sign_key = calloc(endOfKeyID - keyIDBegin, sizeof(char));
-                        memcpy(sign_key, keyIDBegin, endOfKeyID - keyIDBegin);
+                    if (verbose) {
+                        printf("sig_offset: %lu\n", sig_offset);
+                        printf("sig_length: %lu\n", sig_length);
                     }
 
-                    // read rest of process input to avoid broken pipe error
-                    while (!feof(fp)) {
-                        fread(buffer, sizeof(char), bufsize, fp);
+                    if (sig_offset == 0) {
+                        die("Could not determine offset for signature");
                     }
 
-                    int retval = pclose(fp);
-                    fp = NULL;
+                    if (destinationfp == NULL)
+                        die("Not able to open the destination file for writing, aborting");
 
-                    if (retval != 0)
-                        die("Failed to call gpg[2] to detect signature's key ID");
-                }
+                    // if(strlen(updateinformation)>sig_length)
+                    //     die("signature does not fit into segment, aborting");
 
-                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
-                    unlink(ascfile);
+                    fseek(destinationfp, sig_offset, SEEK_SET);
 
-                // export key and write into section
-                sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key);
+                    FILE* ascfilefp = fopen(ascfile, "rb");
 
-                unsigned long key_offset, key_length;
-                rv = get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
+                    if (ascfilefp == NULL) {
+                        die("Not able to open the asc file for reading, aborting");
+                    }
 
-                if (verbose) {
-                    printf("key_offset: %lu\n", key_offset);
-                    printf("key_length: %lu\n", key_length);
-                }
+                    static const int bufsize = 1024;
+                    char buffer[bufsize];
 
-                if (rv != 0 || key_offset == 0 || key_length == 0) {
-                    die("Could not find section .sig_key in runtime");
-                }
+                    size_t totalBytesRead = 0;
 
-                fseek(destinationfp, key_offset, SEEK_SET);
+                    while (!feof(ascfilefp)) {
+                        size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
+                        totalBytesRead += bytesRead;
 
-                fp = popen(command, "r");
+                        if (totalBytesRead > sig_length) {
+                            die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
+                        }
 
-                if (fp == NULL)
-                    die("Failed to call gpg[2] to export the signature key");
+                        size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
 
-                totalBytesRead = 0;
-                while (!feof(fp)) {
-                    size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
-                    totalBytesRead += bytesRead;
+                        if (bytesRead != bytesWritten) {
+                            char message[128];
+                            sprintf(message, "Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead,
+                                (long unsigned) bytesWritten);
+                            die(message);
+                        }
+                    }
 
-                    if (totalBytesRead > key_length) {
+                    fclose(ascfilefp);
+                    if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
+                        unlink(digestfile);
+
+                    if (sign_key == NULL || strlen(sign_key) > 0) {
+                        // read which key was used to sign from signature
+                        sprintf(command, "%s --batch --list-packets %s", gpg2_path, ascfile);
+
+                        fp = popen(command, "r");
+
+                        if (fp == NULL)
+                            die("Failed to call gpg[2] to detect signature's key ID");
+
+                        while (!feof(fp)) {
+                            size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
+
+                            char* keyid_pos = strstr(buffer, "keyid");
+
+                            if (keyid_pos == NULL)
+                                continue;
+
+                            char* keyIDBegin = keyid_pos + strlen("keyid ");
+                            char* endOfKeyID = strstr(keyIDBegin, "\n");
+
+                            sign_key = calloc(endOfKeyID - keyIDBegin, sizeof(char));
+                            memcpy(sign_key, keyIDBegin, endOfKeyID - keyIDBegin);
+                        }
+
                         // read rest of process input to avoid broken pipe error
                         while (!feof(fp)) {
                             fread(buffer, sizeof(char), bufsize, fp);
                         }
 
-                        pclose(fp);
-                        die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
+                        int retval = pclose(fp);
+                        fp = NULL;
+
+                        if (retval != 0)
+                            die("Failed to call gpg[2] to detect signature's key ID");
                     }
 
-                    size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
+                    if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
+                        unlink(ascfile);
+                }
 
-                    if (bytesRead != bytesWritten) {
+                // export key and write into section
+                {
+                    sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key);
+
+                    unsigned long key_offset, key_length;
+                    int rv = get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
+
+                    if (verbose) {
+                        printf("key_offset: %lu\n", key_offset);
+                        printf("key_length: %lu\n", key_length);
+                    }
+
+                    if (rv != 0 || key_offset == 0 || key_length == 0) {
+                        die("Could not find section .sig_key in runtime");
+                    }
+
+                    fseek(destinationfp, key_offset, SEEK_SET);
+
+                    fp = popen(command, "r");
+
+                    if (fp == NULL)
+                        die("Failed to call gpg[2] to export the signature key");
+
+                    static const int bufsize = 1024;
+                    char buffer[bufsize];
+
+                    size_t totalBytesRead = 0;
+                    while (!feof(fp)) {
+                        size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
+                        totalBytesRead += bytesRead;
+
+                        if (totalBytesRead > key_length) {
+                            // read rest of process input to avoid broken pipe error
+                            while (!feof(fp)) {
+                                fread(buffer, sizeof(char), bufsize, fp);
+                            }
+
+                            pclose(fp);
+                            die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
+                        }
+
+                        size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
+
+                        if (bytesRead != bytesWritten) {
+                            char message[128];
+                            sprintf(message, "Error: Bytes read and written differ: %lu != %lu",
+                                (long unsigned) bytesRead, (long unsigned) bytesWritten);
+                            die(message);
+                        }
+                    }
+
+                    int exportexitcode = pclose(fp);
+                    fp = NULL;
+
+                    if (exportexitcode != 0) {
                         char message[128];
-                        sprintf(message, "Error: Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead, (long unsigned) bytesWritten);
+                        sprintf(message, "GPG key export failed: exit code %d", exportexitcode);
                         die(message);
                     }
+
+                    fclose(destinationfp);
                 }
-
-                int exportexitcode = pclose(fp);
-                fp = NULL;
-
-                if (exportexitcode != 0) {
-                    char message[128];
-                    sprintf(message, "GPG key export failed: exit code %d", exportexitcode);
-                    die(message);
-                }
-
-                fclose(destinationfp);
             }
         }
-        
+
         /* If updateinformation was provided, then we also generate the zsync file (after having signed the AppImage) */
-        if(updateinformation != NULL){
-            gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
-            if(!zsyncmake_path){
-                fprintf (stderr, "zsyncmake is not installed/bundled, skipping\n");
+        if (updateinformation != NULL) {
+            gchar* zsyncmake_path = g_find_program_in_path("zsyncmake");
+            if (!zsyncmake_path) {
+                fprintf(stderr, "zsyncmake is not installed/bundled, skipping\n");
             } else {
-                fprintf (stderr, "zsyncmake is available and updateinformation is provided, "
-                "hence generating zsync file\n");
+                fprintf(stderr, "zsyncmake is available and updateinformation is provided, "
+                                "hence generating zsync file\n");
 
                 int pid = fork();
 
@@ -1163,13 +1223,13 @@ main (int argc, char *argv[])
                         die("zsyncmake command did not succeed");
                 }
             }
-         } 
-         
-        fprintf (stderr, "Success\n\n");
-        fprintf (stderr, "Please consider submitting your AppImage to AppImageHub, the crowd-sourced\n");
-        fprintf (stderr, "central directory of available AppImages, by opening a pull request\n");
-        fprintf (stderr, "at https://github.com/AppImage/appimage.github.io\n");
         }
+
+        fprintf(stderr, "Success\n\n");
+        fprintf(stderr, "Please consider submitting your AppImage to AppImageHub, the crowd-sourced\n");
+        fprintf(stderr, "central directory of available AppImages, by opening a pull request\n");
+        fprintf(stderr, "at https://github.com/AppImage/appimage.github.io\n");
+    }
     
     /* If the first argument is a regular file, then we assume that we should unpack it */
     if (g_file_test (remaining_args[0], G_FILE_TEST_IS_REGULAR)){

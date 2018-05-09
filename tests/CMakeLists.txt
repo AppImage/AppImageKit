@@ -28,6 +28,7 @@ if(BUILD_TESTING)
         ${PROJECT_SOURCE_DIR}/src/shared.c
         ${PROJECT_SOURCE_DIR}/src/elf.c
         ${PROJECT_SOURCE_DIR}/src/getsection.c
+        ${PROJECT_SOURCE_DIR}/src/appimagetool_shared.c
     )
 
     target_link_libraries(test_shared

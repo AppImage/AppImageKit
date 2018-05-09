@@ -188,6 +188,52 @@ TEST_F(SharedCTest, test_appimage_shall_not_integrate) {
     EXPECT_EQ(appimage_is_terminal_app("/invalid/path"), -1);
 }
 
+static bool test_strcmp(char* a, char* b) {
+    return strcmp(a, b) == 0;
+}
+
+TEST_F(SharedCTest, test_appimage_hexlify) {
+    {
+        char bytesIn[] = "\x00\x01\x02\x03\x04\x05\x06\x07";
+        char expectedHex[] = "0001020304050607";
+
+        char* hexlified = appimage_hexlify(bytesIn, 8);
+        EXPECT_PRED2(test_strcmp, hexlified, expectedHex);
+
+        // cleanup
+        free(hexlified);
+    }
+    {
+        char bytesIn[] = "\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
+        char expectedHex[] = "f8f9fafbfcfdfeff";
+
+        char* hexlified = appimage_hexlify(bytesIn, 8);
+        EXPECT_PRED2(test_strcmp, hexlified, expectedHex);
+
+        // cleanup
+        free(hexlified);
+    }
+}
+
+// compares whether the size first bytes of two given byte buffers are equal
+bool test_compare_bytes(const char* buf1, const char* buf2, int size) {
+    for (int i = 0; i < size; i++) {
+        if (buf1[i] != buf2[i]) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+TEST_F(SharedCTest, appimage_type2_digest_md5) {
+    char digest[16];
+    char expectedDigest[] = {-20, 92, -89, 99, -47, -62, 14, 36, -5, -127, 65, -126, 116, -41, -33, -121};
+
+    EXPECT_TRUE(appimage_type2_digest_md5(appImage_type_2_file_path.c_str(), digest));
+    EXPECT_PRED3(test_compare_bytes, digest, expectedDigest, 16);
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

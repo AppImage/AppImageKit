@@ -236,58 +236,6 @@ void move_icon_to_destination(gchar *icon_path, gboolean verbose)
 
 }
 
-/* Check if a file is an AppImage. Returns the image type if it is, or -1 if it isn't */
-int appimage_get_type(const char* path, bool verbose)
-{
-    FILE *f = fopen(path, "rt");
-    if (f != NULL)
-    {
-        char buffer[3] = {0};
-
-        /* Check magic bytes at offset 8 */
-        fseek(f, 8, SEEK_SET);
-        fread(buffer, 1, 3, f);
-        fclose(f);
-        if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x01)){
-#ifdef STANDALONE
-            fprintf(stderr, "_________________________\n");
-#endif
-            if(verbose){
-                fprintf(stderr, "AppImage type 1\n");
-            }
-            return 1;
-        } else if((buffer[0] == 0x41) && (buffer[1] == 0x49) && (buffer[2] == 0x02)){
-#ifdef STANDALONE
-            fprintf(stderr, "_________________________\n");
-#endif
-            if(verbose){
-                fprintf(stderr, "AppImage type 2\n");
-            }
-            return 2;
-        } else {
-            if((g_str_has_suffix(path,".AppImage")) || (g_str_has_suffix(path,".appimage"))) {
-#ifdef STANDALONE
-                fprintf(stderr, "_________________________\n");
-#endif
-                if (verbose) {
-                    fprintf(stderr, "Blindly assuming AppImage type 1\n");
-                    fprintf(stderr, "The author of this AppImage should embed the magic bytes, see https://github.com/AppImage/AppImageSpec\n");
-                }
-                return 1;
-            } else {
-#ifdef STANDALONE
-                fprintf(stderr, "_________________________\n");
-#endif
-                if(verbose){
-                    fprintf(stderr, "Unrecognized file '%s'\n", path);
-                }
-                return -1;
-            }
-        }
-    }
-    return -1;
-}
-
 /* Get filename extension */
 static gchar *get_file_extension(const gchar *filename)
 {
