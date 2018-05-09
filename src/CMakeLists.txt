@@ -252,6 +252,11 @@ target_link_libraries(runtime-debug
 
 set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -fdata-sections -Wl,--gc-sections")
 
+target_include_directories(runtime-debug
+    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+    INTERFACE $<INSTALL_INTERFACE:include/>
+)
+
 target_compile_options(runtime-debug
     PUBLIC -DGIT_COMMIT="${GIT_COMMIT}" -D_FILE_OFFSET_BITS=64
 )

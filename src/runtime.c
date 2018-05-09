@@ -53,12 +53,12 @@
 #define ENABLE_DLOPEN
 #endif
 #include "squashfuse_dlopen.h"
+#include "appimage/appimage.h"
 
 #include <fnmatch.h>
 
 //#include "notify.c"
 extern int notify(char *title, char *body, int timeout);
-
 struct stat st;
 
 static ssize_t fs_offset; // The offset at which a filesystem image is expected = end of this ELF
@@ -459,7 +459,7 @@ main (int argc, char *argv[])
     if(arg && (strcmp(arg,"appimage-updateinformation")==0 || strcmp(arg,"appimage-updateinfo")==0)) {
         unsigned long offset = 0;
         unsigned long length = 0;
-        get_elf_section_offset_and_length(appimage_path, ".upd_info", &offset, &length);
+        appimage_get_elf_section_offset_and_length(appimage_path, ".upd_info", &offset, &length);
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
@@ -470,7 +470,7 @@ main (int argc, char *argv[])
     if(arg && strcmp(arg,"appimage-signature")==0) {
         unsigned long offset = 0;
         unsigned long length = 0;
-        get_elf_section_offset_and_length(appimage_path, ".sha256_sig", &offset, &length);
+        appimage_get_elf_section_offset_and_length(appimage_path, ".sha256_sig", &offset, &length);
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
