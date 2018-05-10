@@ -122,7 +122,7 @@ int main(int argc,char **argv)
     }
 
     if(argc < 4){
-        get_elf_section_offset_and_length(filename, ".sha256_sig", &skip_offset, &skip_length);
+        appimage_get_elf_section_offset_and_length(filename, ".sha256_sig", &skip_offset, &skip_length);
         if(skip_length > 0)
             fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_name, skip_offset, skip_length);
     } else if(argc == 4) {
