@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 // local headers
+#include <appimage/appimage.h>
 #include "fixtures.h"
 
 extern "C" {
