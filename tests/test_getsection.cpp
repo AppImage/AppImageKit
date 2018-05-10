@@ -30,7 +30,7 @@ TEST_F(GetSectionCTest, test_appimage_get_elf_section_offset_and_length) {
 
     unsigned long offset, length;
 
-    ASSERT_EQ(appimage_get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length), 0);
+    ASSERT_TRUE(appimage_get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length));
 
     EXPECT_GT(offset, 0);
     EXPECT_GT(length, 0);
@@ -44,7 +44,7 @@ TEST_F(GetSectionCTest, test_print_binary) {
 
     unsigned long offset, length;
 
-    ASSERT_EQ(appimage_get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length), 0);
+    ASSERT_TRUE(appimage_get_elf_section_offset_and_length(appImagePath.c_str(), ".upd_info", &offset, &length));
 
     EXPECT_EQ(print_binary(appImagePath.c_str(), offset, length), 0);
 }
@@ -55,7 +55,7 @@ TEST_F(GetSectionCTest, test_print_hex) {
 
     unsigned long offset, length;
 
-    ASSERT_EQ(appimage_get_elf_section_offset_and_length(appImagePath.c_str(), ".sha256_sig", &offset, &length), 0);
+    ASSERT_TRUE(appimage_get_elf_section_offset_and_length(appImagePath.c_str(), ".sha256_sig", &offset, &length));
 
     EXPECT_EQ(print_hex(appImagePath.c_str(), offset, length), 0);
 }
