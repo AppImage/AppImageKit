@@ -835,7 +835,13 @@ main (int argc, char *argv[])
           
             unsigned long ui_offset = 0;
             unsigned long ui_length = 0;
-            get_elf_section_offset_and_length(destination, ".upd_info", &ui_offset, &ui_length);
+
+            bool rv = appimage_get_elf_section_offset_and_length(destination, ".upd_info", &ui_offset, &ui_length);
+
+            if (!rv || ui_offset == 0 || ui_length == 0) {
+                die("Could not find section .upd_info in runtime");
+            }
+
             if(verbose) {
                 printf("ui_offset: %lu\n", ui_offset);
                 printf("ui_length: %lu\n", ui_length);
@@ -864,9 +870,9 @@ main (int argc, char *argv[])
             unsigned long digest_md5_offset = 0;
             unsigned long digest_md5_length = 0;
 
-            int rv = get_elf_section_offset_and_length(destination, ".digest_md5", &digest_md5_offset, &digest_md5_length);
+            bool rv = appimage_get_elf_section_offset_and_length(destination, ".digest_md5", &digest_md5_offset, &digest_md5_length);
 
-            if (rv != 0 || digest_md5_offset == 0 || digest_md5_length == 0) {
+            if (!rv || digest_md5_offset == 0 || digest_md5_length == 0) {
                 die("Could not find section .digest_md5 in runtime");
             }
 
@@ -1020,9 +1026,9 @@ main (int argc, char *argv[])
                     unsigned long sig_offset = 0;
                     unsigned long sig_length = 0;
 
-                    int rv = get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
+                    bool rv = appimage_get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset, &sig_length);
 
-                    if (rv != 0 || sig_offset == 0 || sig_length == 0) {
+                    if (!rv || sig_offset == 0 || sig_length == 0) {
                         die("Could not find section .sha256_sig in runtime");
                     }
 
@@ -1120,8 +1126,13 @@ main (int argc, char *argv[])
                 {
                     sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key);
 
-                    unsigned long key_offset, key_length;
-                    int rv = get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
+                    unsigned long key_offset = 0, key_length = 0;
+
+                    bool rv = appimage_get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
+
+                    if (!rv || key_offset == 0 || key_length == 0) {
+                        die("Could not find section .sig_key in runtime");
+                    }
 
                     if (verbose) {
                         printf("key_offset: %lu\n", key_offset);

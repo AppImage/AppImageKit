@@ -2,13 +2,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/mman.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 #include "light_elf.h"
 
 /* Return the offset, and the length of an ELF section with a given name in a given ELF file */
-int get_elf_section_offset_and_length(const char* fname, const char* section_name, unsigned long* offset,
-                                      unsigned long* length) {
+bool appimage_get_elf_section_offset_and_length(const char* fname, const char* section_name, unsigned long* offset, unsigned long* length) {
     uint8_t* data;
     int i;
     int fd = open(fname, O_RDONLY);
@@ -51,11 +51,11 @@ int get_elf_section_offset_and_length(const char* fname, const char* section_nam
     } else {
         sprintf(stderr, "Platforms other than 32-bit/64-bit are currently not supported!");
         munmap(data, map_size);
-        return 2;
+        return false;
     }
 
     munmap(data, map_size);
-    return 0;
+    return true;
 }
 
 char* read_file_offset_length(const char* fname, unsigned long offset, unsigned long length) {

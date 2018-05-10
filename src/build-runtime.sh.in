@@ -41,7 +41,7 @@ trap cleanup EXIT
 cd "$build_dir"
 
 # Compile runtime but do not link
-$CC -DGIT_COMMIT=\"$git_version\" -I"@xz_INCLUDE_DIRS@" -I"@squashfuse_INCLUDE_DIRS@" \
+$CC -DGIT_COMMIT=\"$git_version\" -I"@xz_INCLUDE_DIRS@" -I"@squashfuse_INCLUDE_DIRS@" -I"@PROJECT_SOURCE_DIR@/include" \
     -D_FILE_OFFSET_BITS=64 -g $small_FLAGS -c "$repo_root"/runtime.c
 
 # Prepare 16 bytes of space for MD5 digest section

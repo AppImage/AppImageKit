@@ -536,7 +536,9 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     unsigned long upd_length = 0;
     if(g_find_program_in_path ("AppImageUpdate")){
         if(appimage_type == 2){
-            get_elf_section_offset_and_length(appimage_path, ".upd_info", &upd_offset, &upd_length);
+            if (!appimage_get_elf_section_offset_and_length(appimage_path, ".upd_info", &upd_offset, &upd_length) || upd_offset == 0 || upd_length == 0) {
+                fprintf(stderr, "Could not read .upd_info section in AppImage's header\n");
+            }
             if(upd_length != 1024) {
 #ifdef STANDALONE
                 fprintf(stderr,

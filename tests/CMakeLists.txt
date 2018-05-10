@@ -83,7 +83,15 @@ if(BUILD_TESTING)
         gtest
     )
 
-    target_include_directories(test_getsection PRIVATE ../src/)
+    target_include_directories(test_getsection
+        # used to include getsection.h
+        PRIVATE ${PROJECT_SOURCE_DIR}/src/
+        # need to include libappimage's header directory as well
+        # as we're building this test manually from the source files, we need to replicate the build settings of
+        # libappimage, appimagetool, ...
+        PRIVATE ${PROJECT_SOURCE_DIR}/include/
+    )
+
 
     add_dependencies(test_getsection squashfuse)
 

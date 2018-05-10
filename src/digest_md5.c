@@ -49,7 +49,7 @@ int main(int argc, char* argv[]) {
 
     static const char section_name[] = ".digest_md5";
 
-    if (get_elf_section_offset_and_length(fname, section_name, &offset, &length) != 0 || offset == 0 || length == 0) {
+    if (!appimage_get_elf_section_offset_and_length(fname, section_name, &offset, &length) || offset == 0 || length == 0) {
         fprintf(stderr, "Could not find %s section in file\n", section_name);
         return 1;
     }
