@@ -42,37 +42,3 @@ if [ -d /deps/ ]; then
         cp /usr/lib/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
     fi
 fi
-
-#######################################################################
-
-# build appimaged AppDir
-
-APPIMAGED_APPDIR=appdirs/appimaged.AppDir
-
-rm -rf "$APPIMAGED_APPDIR"/ || true
-mkdir -p "$APPIMAGED_APPDIR"/usr/bin
-mkdir -p "$APPIMAGED_APPDIR"/usr/lib
-cp -f install_prefix/usr/bin/appimaged "$APPIMAGED_APPDIR"/usr/bin
-cp -f install_prefix/usr/bin/validate "$APPIMAGED_APPDIR"/usr/bin
-mkdir -p "$APPIMAGED_APPDIR"/usr/share/metainfo
-cp ../resources/usr/share/metainfo/appimaged.appdata.xml "$APPIMAGED_APPDIR"/usr/share/metainfo/
-
-cp ../resources/AppRun "$APPIMAGED_APPDIR"/
-
-cp ../resources/appimaged.desktop "$APPIMAGED_APPDIR"/
-cp ../resources/appimagetool.svg "$APPIMAGED_APPDIR"/appimaged.svg
-( cd "$APPIMAGED_APPDIR"/ ; ln -s appimaged.svg .DirIcon )
-
-if [ -d /deps/ ]; then
-    # deploy glib
-    mkdir -p "$APPIMAGED_APPDIR"/usr/lib/
-    cp /deps/lib/lib*.so* "$APPIMAGED_APPDIR"/usr/lib/
-    # libffi is a runtime dynamic dependency
-    # see this thread for more information on the topic:
-    # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
-    if [ "$ARCH" == "x86_64" ]; then
-        cp /usr/lib64/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
-    else
-        cp /usr/lib/libffi.so.5 "$APPIMAGED_APPDIR"/usr/lib/
-    fi
-fi

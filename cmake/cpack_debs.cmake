@@ -40,13 +40,7 @@ set(CPACK_DEBIAN_LIBAPPIMAGE-DEV_PACKAGE_NAME "libappimage-dev")
 set(CPACK_DEBIAN_LIBAPPIMAGE-DEV_PACKAGE_DEPENDS "libappimage")
 set(CPACK_DEBIAN_LIBAPPIMAGE-DEV_PACKAGE_DESCRIPTION "Utilities collection to handle AppImage files.")
 
-set(CPACK_DEBIAN_APPIMAGED_PACKAGE_NAME "appimaged")
-set(CPACK_COMPONENT_APPIMAGED_DESCRIPTION
-    "Optional AppImage daemon for desktop integration.\n  Integrates AppImages into the desktop, e.g., installs icons and menu entries.")
-
-set(CPACK_DEBIAN_APPIMAGED_PACKAGE_DEPENDS "libarchive13, libc6 (>= 2.4), libglib2.0-0, zlib1g, fuse")
-
-set(CPACK_COMPONENTS_ALL appimaged libappimage libappimage-dev)
+set(CPACK_COMPONENTS_ALL libappimage libappimage-dev)
 set(CPACK_DEB_COMPONENT_INSTALL ON)
 
 include(CPack)
