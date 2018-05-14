@@ -97,7 +97,7 @@ for FILE in install_prefix/usr/bin/*; do
   ldd "$FILE" || true
 done
 
-bash -ex "$HERE/build-appdirs.sh"
+bash -ex "$HERE/build-appdir.sh"
 
 ls -lh
 
