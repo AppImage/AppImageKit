@@ -22,7 +22,7 @@ Providing an [AppImage](http://appimage.org/) for distributing application has, 
 - No root needed
 - No system libraries changed
 - Works out of the box, no installation of runtimes needed
-- Optional desktop integration with `appimaged`
+- Optional desktop integration with [appimaged](https://github.com/AppImage/appimaged)
 - Optional binary delta updates, e.g., for continuous builds (only download the binary diff) using AppImageUpdate
 - Can optionally GPG2-sign your AppImages (inside the file)
 - Works on Live ISOs
