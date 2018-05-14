@@ -2,10 +2,6 @@
 cmake_minimum_required(VERSION 3.2)
 
 
-# find required system dependencies via pkg-config
-find_package(PkgConfig REQUIRED)
-
-
 # imports a library from the standard set of variables CMake creates when using its pkg-config module or find_package
 # this is code shared by import_pkgconfig_target and import_external_project, hence it's been extracted into a separate
 # CMake function
@@ -21,7 +17,7 @@ function(import_library_from_prefix target_name variable_prefix)
         return()
     endif()
 
-    add_library(${target_name} INTERFACE IMPORTED)
+    add_library(${target_name} INTERFACE IMPORTED GLOBAL)
 
     # FIXME: the following line produces CMake errors "directory not found"
     # CMake does, however, not complain if the INCLUDE_DIRECTORIES property contains missing directories
@@ -57,6 +53,8 @@ endfunction()
 #  - target_name: name of the target that we shall create for you
 #  - pkg_config_target: librar(y name to pass to pkg-config (may include a version)
 function(import_pkgconfig_target target_name pkg_config_target)
+    find_package(PkgConfig REQUIRED)
+
     message(STATUS "Importing target ${target_name} via pkg-config (${pkg_config_target})")
 
     pkg_check_modules(${target_name}-IMPORTED REQUIRED ${pkg_config_target})
@@ -104,7 +102,7 @@ function(import_external_project)
         return()
     endif()
 
-    add_library(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} INTERFACE IMPORTED)
+    add_library(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME} INTERFACE IMPORTED GLOBAL)
 
     ExternalProject_Get_Property(${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME} SOURCE_DIR)
     ExternalProject_Get_Property(${IMPORT_EXTERNAL_PROJECT_EXT_PROJECT_NAME} INSTALL_DIR)

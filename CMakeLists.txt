@@ -96,16 +96,6 @@ check_program(desktop-file-validate)
 include(cmake/dependencies.cmake)
 
 
-# include directories globally
-include_directories(${GLIB_INCLUDE_DIRS})
-include_directories(${CAIRO_INCLUDE_DIRS})
-include_directories(${ZLIB_INCLUDE_DIRS})
-include_directories(${xz_INCLUDE_DIR})
-include_directories(${inotify-tools_INCLUDE_DIR})
-include_directories(${squashfuse_INCLUDE_DIR})
-include_directories(${libarchive_INCLUDE_DIR})
-
-
 ################
 # Source files #
 ################

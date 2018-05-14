@@ -35,9 +35,8 @@ docker run --rm \
 
 # inspect AppDirs
 find build/out/appimagetool.AppDir/
-find build/out/appimaged.AppDir/
 
-# build AppImages
+# build AppImage
 docker run --rm \
     --cap-add SYS_ADMIN \
     --device /dev/fuse:mrw \
@@ -47,13 +46,13 @@ docker run --rm \
     -v "${PWD}"/travis/:/travis \
     -v $HOME/.gnupg:/root/.gnupg \
     "$DOCKER_IMAGE" \
-    /bin/bash -x "/travis/build-packages-and-appimages.sh"
+    /bin/bash -x "/travis/build-appimage.sh"
 
 cd build/
 
 # test AppImages
 [ "$ARCH" == "i686" ] && sudo apt-get update && sudo apt-get install -y gcc-multilib lib32z1 libfuse2 libfuse2:i386 libglib2.0-0:i386 libcairo2:i386
-bash -x ../travis/test-appimages.sh
+bash -x ../travis/test-appimage.sh
 
 # install more tools
 # (vim-common contains xxd)
@@ -64,7 +63,7 @@ sudo chown -R travis.travis .
 
 # remove binaries from output directory
 ls -al out/
-rm -r out/{appimaged,appimagetool,validate,digest,mksquashfs,*.AppDir}
+rm -r out/{appimagetool,validate,digest,mksquashfs,*.AppDir}
 
 # inspect runtime
 xxd out/runtime | head -n 1

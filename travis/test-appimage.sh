@@ -21,13 +21,5 @@ out/appimagetool-"$ARCH".AppImage --version || error  # should not fail
 out/appimagetool-"$ARCH".AppImage --appimage-version || error  # should not fail
 out/appimagetool-"$ARCH".AppImage --appimage-updateinformation || error  # should not fail
 
-# now check appimaged
-timeout "$TIMEOUT" out/appimaged-"$ARCH".AppImage --no-install
-
-if [ $? -ne 124 ]; then
-    echo "Error: appimaged was not terminated by timeout as expected" >&2
-    exit 1
-fi
-
 echo "" >&2
 echo "Tests successful!" >&2

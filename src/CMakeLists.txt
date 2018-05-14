@@ -176,44 +176,6 @@ endif()
 add_sanitizers(appimagetool)
 
 
-add_executable(appimaged appimaged.c notify.c elf.c getsection.c appimagetool_shared.c)
-
-target_link_libraries(appimaged
-    PRIVATE
-    ${CMAKE_DL_LIBS}
-    pthread
-    libcairo
-    inotify-tools
-    squashfuse
-    xz
-    libzlib
-    libarchive
-    xdg-basedir
-    PUBLIC
-    libglib
-    libgio
-    libgobject
-)
-
-target_compile_definitions(appimaged
-    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
-    PRIVATE -DBUILD_NUMBER="${BUILD_NUMBER}"
-    PRIVATE -DBUILD_DATE="${DATE}"
-    PRIVATE -D_FILE_OFFSET_BITS=64
-    PRIVATE -DHAVE_LIBARCHIVE3=0
-    PRIVATE -DSTANDALONE=1
-    PRIVATE -DAPPIMAGED=1
-)
-# TODO: remove -DAPPIMAGED=1, move these code snippets to appimaged's source code files
-
-target_include_directories(appimaged
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
-    INTERFACE $<INSTALL_INTERFACE:include/>
-)
-
-add_sanitizers(appimaged)
-
-
 add_executable(AppRun AppRun.c)
 
 add_sanitizers(AppRun)
@@ -303,16 +265,6 @@ else()
     )
 endif()
 
-install(
-    TARGETS appimaged
-    RUNTIME DESTINATION bin COMPONENT appimaged
-)
-
-install(
-    FILES ${PROJECT_SOURCE_DIR}/resources/appimaged.service
-    DESTINATION lib/systemd/user/
-    COMPONENT appimaged
-)
 install(
     TARGETS AppRun appimagetool digest validate
     RUNTIME DESTINATION bin COMPONENT applications
