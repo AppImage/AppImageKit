@@ -113,7 +113,6 @@ msgid "picture:"
 msgstr "Afbeelding:"
 
 #: index.jinja2:214 index.jinja2:233
-#, fuzzy
 msgid "copyright_faces_of_open_source_/_peter_adams"
 msgstr "Copyright Faces of Open Source / Peter Adams."
 
