@@ -147,7 +147,6 @@ msgid "richard_brown_quote"
 msgstr "Ik hou van AppImage. Ik hou echt van AppImage."
 
 #: index.jinja2:272
-#, fuzzy
 msgid "copyright_theassassin"
 msgstr "Copyright TheAssassin."
 
