@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-05-18 16:34+0000\n"
+"PO-Revision-Date: 2018-05-18 17:37+0000\n"
 "Last-Translator: Hugo Locurcio <hugo.locurcio@hugo.pro>\n"
 "Language-Team: French <https://translate.assassinate-you.net/projects/"
 "appimage/website/fr/>\n"
@@ -51,9 +51,9 @@ msgstr "Des applications Linux qui tournent partout"
 #: index.jinja2:143
 msgid "user_story_1"
 msgstr ""
-"En tant qu'utilisateur, je veux télécharger une application chez son auteur "
-"et l'utiliser sur mon système Linux comme je le ferais avec une application "
-"Windows ou macOS."
+"En tant qu'utilisateur, je veux télécharger une application chez son "
+"développeur et l'utiliser sur mon système Linux comme je le ferais avec une "
+"application Windows ou macOS."
 
 #: index.jinja2:146
 msgid "user_story_2"
@@ -65,11 +65,13 @@ msgstr ""
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
-msgstr ""
+msgstr "Principales distributions Linux"
 
 #: index.jinja2:158
 msgid "download_make_executable_run"
 msgstr ""
+"Téléchargez une application, rendez-la exécutable et lancez-la ! Pas besoin "
+"d'installation. Aucune bibliothèque ou préférence système n'est affectée."
 
 #: index.jinja2:159
 #, python-format
@@ -78,22 +80,29 @@ msgid ""
 "                 can_run_in_sandboxes_like %(sandbox_name)s\n"
 "            "
 msgstr ""
+"\n"
+"                 Peut aussi tourner dans un bac à sable tel que "
+"%(sandbox_name)s\n"
+"            "
 
 #: index.jinja2:183
 msgid "distribute_linux_apps_as_appimage_and_win_users"
 msgstr ""
+"Distribuez votre application Linux au format AppImage et obtenez des "
+"utilisateurs sur toutes les distributions Linux courantes."
 
 #: index.jinja2:184
 msgid "package_once_and_run_everywhere"
-msgstr ""
+msgstr "Empaquetez une fois et lancez partout."
 
 #: index.jinja2:185
 msgid "reach_users_on_all_distros"
 msgstr ""
+"Atteignez des utilisateurs sur toutes les distributions de bureau majeures."
 
 #: index.jinja2:194
 msgid "what_people_think"
-msgstr ""
+msgstr "Ce que les gens en pensent"
 
 #: index.jinja2:209
 msgid "torvalds_quote"
@@ -102,7 +111,7 @@ msgstr ""
 #: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
 #: index.jinja2:429
 msgid "picture:"
-msgstr ""
+msgstr "Photo :"
 
 #: index.jinja2:214 index.jinja2:233
 msgid "copyright_faces_of_open_source_/_peter_adams"
