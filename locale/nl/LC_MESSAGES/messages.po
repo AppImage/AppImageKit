@@ -284,7 +284,6 @@ msgstr ""
 "uitgevoerd worden."
 
 #: index.jinja2:430
-#, fuzzy
 msgid "copyright_andis_rado"
 msgstr "Copyright Andis Rado."
 
