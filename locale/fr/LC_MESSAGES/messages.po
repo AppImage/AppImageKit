@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-05-18 17:38+0000\n"
+"PO-Revision-Date: 2018-05-18 17:43+0000\n"
 "Last-Translator: Hugo Locurcio <hugo.locurcio@hugo.pro>\n"
 "Language-Team: French <https://translate.assassinate-you.net/projects/"
 "appimage/website/fr/>\n"
@@ -139,7 +139,7 @@ msgstr "Copyright Aaron Hockley."
 
 #: index.jinja2:255
 msgid "licensed_under_CC-BY-SA_2.0"
-msgstr ""
+msgstr "Licence CC BY-SA 2.0."
 
 #: index.jinja2:267
 msgid "richard_brown_quote"
@@ -147,51 +147,52 @@ msgstr ""
 
 #: index.jinja2:272
 msgid "copyright_theassassin"
-msgstr ""
+msgstr "Copyright TheAssassin."
 
 #: index.jinja2:299
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
-msgstr ""
+msgstr "Dessin : lewing@isc.tamu.edu Larry Ewing et The GIMP."
 
 #: index.jinja2:305
 msgid "logo:"
-msgstr ""
+msgstr "Logo :"
 
 #: index.jinja2:306
 msgid "licensed_under_GPLv2"
-msgstr ""
+msgstr "Licence GPLv2."
 
 #: index.jinja2:308
 msgid "see_more"
-msgstr ""
+msgstr "Voir plus"
 
 #: index.jinja2:323
 msgid "see_it_in_action"
-msgstr ""
+msgstr "Voyez par vous-même"
 
 #: index.jinja2:325
 msgid "here_appimage_for_you_to_try"
 msgstr ""
+"Voici une application empaquetée en tant qu'AppImage que vous pouvez essayer."
 
 #: index.jinja2:326
 msgid "just_download_make_executable_run"
-msgstr ""
+msgstr "Téléchargez l'application, rendez-la exécutable et lancez-la !"
 
 #: index.jinja2:327
 msgid "no_need_to_install"
-msgstr ""
+msgstr "Pas besoin d'installation."
 
 #: index.jinja2:328
 msgid "runs_on_most_desktops"
-msgstr ""
+msgstr "S'exécute sur la majorité des distributions Linux 32 bits et 64 bits."
 
 #: index.jinja2:333
 msgid "try_subsurface_64-bit"
-msgstr ""
+msgstr "Essayez l'AppImage Subsurface (64 bits)"
 
 #: index.jinja2:337
 msgid "try_subsurface_32-bit"
-msgstr ""
+msgstr "Essayez l'AppImage Subsurface (32 bits)"
 
 #: index.jinja2:340
 #, python-format
@@ -202,6 +203,11 @@ msgid ""
 "\n"
 "                    "
 msgstr ""
+"\n"
+"                    De nombreux projets tels que %(krita)s, Subsurface, "
+"MuseScore, KDevelop et digiKam ont commencé à distribuer des AppImages sur "
+"leurs pages de téléchargement.\n"
+"                    "
 
 #: index.jinja2:343
 #, python-format
@@ -212,14 +218,19 @@ msgid ""
 "\n"
 "                    "
 msgstr ""
+"\n"
+"                    Davantage d'AppImages pour d'autres applications comme "
+"Atom, Arduino, Blender, Chromium, Firefox, LibreOffice et QCAD peuvent être "
+"téléchargées %(here)s (64 bits).\n"
+"                    "
 
 #: index.jinja2:357
 msgid "how_to_run_an_appimage?"
-msgstr ""
+msgstr "Comment lancer une AppImage ?"
 
 #: index.jinja2:365
 msgid "to_run_an_AppImage_simply:"
-msgstr ""
+msgstr "Pour lancer une AppImage :"
 
 #: index.jinja2:368
 msgid "make_it_executable"
