@@ -119,11 +119,11 @@ msgstr "Copyright Faces of Open Source / Peter Adams."
 
 #: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
 msgid "licensed_under_CC-BY-NC-SA_4.0"
-msgstr ""
+msgstr "Licence CC BY-NC-SA 4.0."
 
 #: index.jinja2:217 index.jinja2:236
 msgid "original_picture"
-msgstr ""
+msgstr "Photo originale"
 
 #: index.jinja2:229
 msgid "hohndel_quote"
@@ -135,7 +135,7 @@ msgstr ""
 
 #: index.jinja2:254
 msgid "copyright_aaron_hockley"
-msgstr ""
+msgstr "Copyright Aaron Hockley."
 
 #: index.jinja2:255
 msgid "licensed_under_CC-BY-SA_2.0"
