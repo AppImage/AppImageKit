@@ -8,50 +8,60 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: Automatically generated\n"
-"Language-Team: none\n"
+"PO-Revision-Date: 2018-05-18 16:34+0000\n"
+"Last-Translator: Hugo Locurcio <hugo.locurcio@hugo.pro>\n"
+"Language-Team: French <https://translate.assassinate-you.net/projects/"
+"appimage/website/fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2.20\n"
 "Generated-By: Babel 2.5.1\n"
 
 #: index.jinja2:7
 msgid "page_title"
-msgstr ""
+msgstr "AppImage | Des applications Linux qui tournent partout"
 
 #: index.jinja2:17
 msgid "meta_description"
-msgstr ""
+msgstr "AppImage | Des applications Linux qui tournent partout"
 
 #: index.jinja2:58
 msgid "docs_link_title"
-msgstr ""
+msgstr "Documentation"
 
 #: index.jinja2:63
 msgid "source_link_title"
-msgstr ""
+msgstr "Code source"
 
 #: index.jinja2:68
 msgid "wiki_link_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:73
 msgid "discourse_link_title"
-msgstr ""
+msgstr "Communauté"
 
 #: index.jinja2:139
 msgid "linux_apps_that_run_anywhere"
-msgstr ""
+msgstr "Des applications Linux qui tournent partout"
 
 #: index.jinja2:143
 msgid "user_story_1"
 msgstr ""
+"En tant qu'utilisateur, je veux télécharger une application chez son auteur "
+"et l'utiliser sur mon système Linux comme je le ferais avec une application "
+"Windows ou macOS."
 
 #: index.jinja2:146
 msgid "user_story_2"
 msgstr ""
+"En tant que développeur d'application, je veux fournir des paquets pour les "
+"distributions Linux de bureau, sans avoir le besoin de les faire « rentrer » "
+"dans une distribution et sans avoir à créer des paquets pour d'innombrables "
+"distributions."
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
