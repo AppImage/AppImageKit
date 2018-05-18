@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-05-18 17:53+0000\n"
+"PO-Revision-Date: 2018-05-18 17:55+0000\n"
 "Last-Translator: Hugo Locurcio <hugo.locurcio@hugo.pro>\n"
 "Language-Team: French <https://translate.assassinate-you.net/projects/"
 "appimage/website/fr/>\n"
@@ -106,7 +106,7 @@ msgstr "Ce que les gens en pensent"
 
 #: index.jinja2:209
 msgid "torvalds_quote"
-msgstr ""
+msgstr "Ceci est simplement très cool."
 
 #: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
 #: index.jinja2:429
@@ -127,11 +127,13 @@ msgstr "Photo originale"
 
 #: index.jinja2:229
 msgid "hohndel_quote"
-msgstr ""
+msgstr "L'approche AppImage est très très utile."
 
 #: index.jinja2:249
 msgid "shuttleworth_quote"
 msgstr ""
+"Les AppImages fournissent une expérience propre et j'admire le travail "
+"réalisé desssus."
 
 #: index.jinja2:254
 msgid "copyright_aaron_hockley"
@@ -143,7 +145,7 @@ msgstr "Licence CC BY-SA 2.0."
 
 #: index.jinja2:267
 msgid "richard_brown_quote"
-msgstr ""
+msgstr "J'adore AppImage maintenant. J'adore vraiment AppImage."
 
 #: index.jinja2:272
 msgid "copyright_theassassin"
@@ -370,8 +372,8 @@ msgstr "GitHub"
 
 #: index.jinja2:578
 msgid "e-mail_title"
-msgstr ""
+msgstr "e-mail"
 
 #: index.jinja2:586
 msgid "google+_title"
-msgstr ""
+msgstr "Google+"
