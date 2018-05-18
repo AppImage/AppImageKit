@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-02-13 19:13+0000\n"
-"Last-Translator: Weblate Admin <noreply@assassinate-you.net>\n"
-"Language-Team: Dutch <https://translate.assassinate-"
-"you.net/projects/appimage/website/nl/>\n"
+"PO-Revision-Date: 2018-05-18 15:47+0000\n"
+"Last-Translator: Weblate Admin <weblate@assassinate-you.net>\n"
+"Language-Team: Dutch <https://translate.assassinate-you.net/projects/"
+"appimage/website/nl/>\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.17.1\n"
+"X-Generator: Weblate 2.20\n"
 "Generated-By: Babel 2.5.1\n"
 
 #: index.jinja2:7
@@ -56,8 +56,12 @@ msgstr ""
 "of Mac applicatie."
 
 #: index.jinja2:146
+#, fuzzy
 msgid "user_story_2"
 msgstr ""
+"As an application author, I want to provide packages for Linux desktop "
+"systems, without the need to get it \\'into\\' a distribution and without "
+"having to build for gazillions of different distributions."
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
@@ -87,8 +91,9 @@ msgstr ""
 "gebruikers van alle gangbare Linux distributies."
 
 #: index.jinja2:184
+#, fuzzy
 msgid "package_once_and_run_everywhere"
-msgstr ""
+msgstr "Package once and run everywhere."
 
 #: index.jinja2:185
 msgid "reach_users_on_all_distros"
@@ -109,15 +114,16 @@ msgstr "Afbeelding:"
 
 #: index.jinja2:214 index.jinja2:233
 msgid "copyright_faces_of_open_source_/_peter_adams"
-msgstr ""
+msgstr "Copyright Faces of Open Source / Peter Adams."
 
 #: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
 msgid "licensed_under_CC-BY-NC-SA_4.0"
 msgstr "Gelicentieerd onder CC-BY-NC-SA 4.0."
 
 #: index.jinja2:217 index.jinja2:236
+#, fuzzy
 msgid "original_picture"
-msgstr ""
+msgstr "Original picture"
 
 #: index.jinja2:229
 msgid "hohndel_quote"
@@ -130,7 +136,7 @@ msgstr ""
 
 #: index.jinja2:254
 msgid "copyright_aaron_hockley"
-msgstr ""
+msgstr "Copyright Aaron Hockley."
 
 #: index.jinja2:255
 msgid "licensed_under_CC-BY-SA_2.0"
@@ -142,7 +148,7 @@ msgstr "Ik hou van AppImage. Ik hou echt van AppImage."
 
 #: index.jinja2:272
 msgid "copyright_theassassin"
-msgstr ""
+msgstr "Copyright TheAssassin."
 
 #: index.jinja2:299
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
@@ -223,8 +229,9 @@ msgid "how_to_run_an_appimage?"
 msgstr "Hoe draai je een AppImage?"
 
 #: index.jinja2:365
+#, fuzzy
 msgid "to_run_an_AppImage_simply:"
-msgstr ""
+msgstr "To run an AppImage, simply:"
 
 #: index.jinja2:368
 msgid "make_it_executable"
@@ -259,8 +266,12 @@ msgid "buzzwords_trusted_title"
 msgstr "Vertrouwd."
 
 #: index.jinja2:413
+#, fuzzy
 msgid "buzzwords_trusted_description"
 msgstr ""
+"AppImage format is ideal for <b>upstream packaging</b>, which means that you "
+"get the software directly from the original author(s) without any "
+"intermediaries, exactlyin the way the author(s) intended. And quickly."
 
 #: index.jinja2:419
 msgid "buzzwords_fast_title"
@@ -274,11 +285,12 @@ msgstr ""
 
 #: index.jinja2:430
 msgid "copyright_andis_rado"
-msgstr ""
+msgstr "Copyright Andis Rado."
 
 #: index.jinja2:450
+#, fuzzy
 msgid "buzzwords_open_source_title"
-msgstr ""
+msgstr "Open Source."
 
 #: index.jinja2:453
 msgid "buzzwords_open_source_description"
@@ -297,8 +309,9 @@ msgstr ""
 "ontwikkeling."
 
 #: index.jinja2:477
+#, fuzzy
 msgid "buzzwords_compatible_title"
-msgstr ""
+msgstr "Compatible."
 
 #: index.jinja2:480
 msgid "buzzwords_compatible_description"
@@ -320,24 +333,31 @@ msgid "wiki_title"
 msgstr "Wiki"
 
 #: index.jinja2:512
+#, fuzzy
 msgid "forum_title"
-msgstr ""
+msgstr "Discourse Forum"
 
 #: index.jinja2:515
+#, fuzzy
 msgid "forum_description"
 msgstr ""
+"Get your answers questioned on the Discourse forum and mailing list. Let us "
+"know what application you are working on. Discuss with other AppImage users."
 
 #: index.jinja2:521
+#, fuzzy
 msgid "forum_link_title"
-msgstr ""
+msgstr "Discourse Forum"
 
 #: index.jinja2:536
 msgid "live_chat_title"
 msgstr "Live-Chat"
 
 #: index.jinja2:539
+#, fuzzy
 msgid "live_chat_description"
 msgstr ""
+"Feel free to provide some feedback, give suggestions, or to just say hello!"
 
 #: index.jinja2:542
 msgid "live_chat_join_us"
@@ -348,17 +368,20 @@ msgid "#AppImage_on_freenode"
 msgstr "#AppImage op irc.freenode.net"
 
 #: index.jinja2:563
+#, fuzzy
 msgid "contact_probono"
-msgstr ""
+msgstr "Contact probono"
 
 #: index.jinja2:570
 msgid "github_title"
 msgstr "GitHub"
 
 #: index.jinja2:578
+#, fuzzy
 msgid "e-mail_title"
-msgstr ""
+msgstr "e-mail"
 
 #: index.jinja2:586
+#, fuzzy
 msgid "google+_title"
-msgstr ""
+msgstr "Google+"
