@@ -135,7 +135,6 @@ msgstr ""
 "AppImages zijn een erg schone ervaring en ik bewonder het werk erachter."
 
 #: index.jinja2:254
-#, fuzzy
 msgid "copyright_aaron_hockley"
 msgstr "Copyright Aaron Hockley."
 
