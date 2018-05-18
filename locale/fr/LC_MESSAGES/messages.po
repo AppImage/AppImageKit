@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-05-18 17:37+0000\n"
+"PO-Revision-Date: 2018-05-18 17:38+0000\n"
 "Last-Translator: Hugo Locurcio <hugo.locurcio@hugo.pro>\n"
 "Language-Team: French <https://translate.assassinate-you.net/projects/"
 "appimage/website/fr/>\n"
@@ -115,7 +115,7 @@ msgstr "Photo :"
 
 #: index.jinja2:214 index.jinja2:233
 msgid "copyright_faces_of_open_source_/_peter_adams"
-msgstr ""
+msgstr "Copyright Faces of Open Source / Peter Adams."
 
 #: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
 msgid "licensed_under_CC-BY-NC-SA_4.0"
