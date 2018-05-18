@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-05-18 17:43+0000\n"
+"PO-Revision-Date: 2018-05-18 17:53+0000\n"
 "Last-Translator: Hugo Locurcio <hugo.locurcio@hugo.pro>\n"
 "Language-Team: French <https://translate.assassinate-you.net/projects/"
 "appimage/website/fr/>\n"
@@ -234,119 +234,139 @@ msgstr "Pour lancer une AppImage :"
 
 #: index.jinja2:368
 msgid "make_it_executable"
-msgstr ""
+msgstr "Rendez-la exécutable"
 
 #: index.jinja2:374
 msgid "and_run!"
-msgstr ""
+msgstr "et lancez-la !"
 
 #: index.jinja2:380
 msgid "that_was_easy_wasn't_it?"
-msgstr ""
+msgstr "C'était facile, non ?"
 
 #: index.jinja2:384
 msgid "watch_how_it_works"
-msgstr ""
+msgstr "Regardez comment ça fonctionne"
 
 #: index.jinja2:401
 msgid "buzzwords_easy_title"
-msgstr ""
+msgstr "Facile."
 
 #: index.jinja2:404
 msgid "buzzwords_easy_description"
 msgstr ""
+"L'idée clé d'AppImage est <b>une application = un fichier</b>. Chaque "
+"AppImage contient une application et tous les fichiers dont l'application a "
+"besoin pour fonctionner. En d'autres mots, une AppImage n'a aucune "
+"dépendance sur ce qui n'est pas inclus de base dans un système Linux de "
+"bureau."
 
 #: index.jinja2:410
 msgid "buzzwords_trusted_title"
-msgstr ""
+msgstr "Digne de confiance."
 
 #: index.jinja2:413
 msgid "buzzwords_trusted_description"
 msgstr ""
+"Le format AppImage est idéal pour <b>l'empaquetage en amont</b>, ce qui "
+"signifie que vous pouvez obtenir des logiciels sans passer par des "
+"intermédiaires, directement de leurs auteurs, de la façon prévue par ces "
+"derniers. Et ceci, rapidement."
 
 #: index.jinja2:419
 msgid "buzzwords_fast_title"
-msgstr ""
+msgstr "Rapide."
 
 #: index.jinja2:422
 msgid "buzzwords_fast_description"
 msgstr ""
+"Les AppImages peuvent être téléchargées et lancées <b>sans installation</b> "
+"ou le besoin de privilèges administrateur (« root »)."
 
 #: index.jinja2:430
 msgid "copyright_andis_rado"
-msgstr ""
+msgstr "Copyright Andis Rado."
 
 #: index.jinja2:450
 msgid "buzzwords_open_source_title"
-msgstr ""
+msgstr "Open source."
 
 #: index.jinja2:453
 msgid "buzzwords_open_source_description"
 msgstr ""
+"Comme Linux, AppImageKit est open source. Utilisez-le pour empaqueter vos "
+"applications libres ou propriétaires."
 
 #: index.jinja2:464
 msgid "buzzwords_proven_title"
-msgstr ""
+msgstr "Prouvé."
 
 #: index.jinja2:467
 msgid "buzzwords_proven_description"
 msgstr ""
+"AppImageKit et son prédécesseur, klik, sont développés depuis plus de 10 ans."
 
 #: index.jinja2:477
 msgid "buzzwords_compatible_title"
-msgstr ""
+msgstr "Compatible."
 
 #: index.jinja2:480
 msgid "buzzwords_compatible_description"
-msgstr ""
+msgstr "Fonctionne avec la majorité des distributions Linux de bureau récentes."
 
 #: index.jinja2:494
 msgid "get_started_title"
-msgstr ""
+msgstr "Commencez à empaqueter votre application !"
 
 #: index.jinja2:497
 msgid "get_started_description"
 msgstr ""
+"Apprenez comment utiliser AppImageKit pour créer vos propres AppImages sur "
+"le wiki AppImageKit."
 
 #: index.jinja2:500
 msgid "wiki_title"
-msgstr ""
+msgstr "Wiki"
 
 #: index.jinja2:512
 msgid "forum_title"
-msgstr ""
+msgstr "Forum Discourse"
 
 #: index.jinja2:515
 msgid "forum_description"
 msgstr ""
+"Obtenez des réponses à vos questions sur le forum Discourse et la liste de "
+"discussion. Parlez d'une application que vous développez. Discutez avec "
+"d'autres utilisateurs d'AppImage."
 
 #: index.jinja2:521
 msgid "forum_link_title"
-msgstr ""
+msgstr "Forum Discourse"
 
 #: index.jinja2:536
 msgid "live_chat_title"
-msgstr ""
+msgstr "Chat en direct"
 
 #: index.jinja2:539
 msgid "live_chat_description"
 msgstr ""
+"Laissez-nous des retours, des suggestions, ou dites simplement bonjour !"
 
 #: index.jinja2:542
 msgid "live_chat_join_us"
-msgstr ""
+msgstr "Rejoignez-nous sur #AppImage sur irc.freenode.net"
 
 #: index.jinja2:548
 msgid "#AppImage_on_freenode"
-msgstr ""
+msgstr "#AppImage sur irc.freenode.net"
 
 #: index.jinja2:563
 msgid "contact_probono"
-msgstr ""
+msgstr "Contactez probono"
 
 #: index.jinja2:570
 msgid "github_title"
-msgstr ""
+msgstr "GitHub"
 
 #: index.jinja2:578
 msgid "e-mail_title"
