@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width"/>
     <link href="css/bootstrap.css" rel="stylesheet"/>
     <link href="css/landing-page.css" rel="stylesheet"/>
-    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/fontawesome-all.min.css" rel="stylesheet">
 
     <!-- SEO -->
     <meta name="description" content="{{ _('meta_description') }}"/>
@@ -27,7 +27,7 @@
 
 <body class="landing-page">
 
-<nav class="navbar navbar-transparent navbar-top" role="navigation">
+<nav class="navbar nav7bar-transparent navbar-top" role="navigation">
     <div class="container">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
@@ -81,44 +81,41 @@
                             height="30px"></iframe>
 
                     <!--<a href="https://github.com/probonopd/AppImageKit">
-                        <i class="fa fa-github-alt"></i> </a>-->
+                        <i class="fab fa-github"></i> </a>-->
                 </li>
             </ul>
         </div><!-- /.navbar-collapse -->
     </div>
 </nav>
 <!-- social buttons right -->
-<div class="container-fixed">
-    <div class="row">
-        <div class="col-md-1 navbar-fixed-top"
-             style="margin-left:92%; margin-top:9%;">
+<div id="sidebar-social">
+        <div style="position: fixed; top: 20%; right: 50px; width: 50px; display: block; z-index: 9999; color: #888;">
             <ul>
                 <a href="https://github.com/probonopd" class="btn btn-social btn-simple">
-                    <i class="fa fa-github-alt fa-fw"></i>
+                    <i class="fab fa-github fa-fw fa-2x"></i>
                     <span class="network-name"></span>
                 </a>
                 <a href="mailto:probono@puredarwin.org" class="btn btn-social btn-simple">
-                    <i class="fa fa-envelope fa-fw"></i>
+                    <i class="fas fa-envelope fa-fw fa-2x"></i>
                     <span class="network-name"></span>
                 </a>
                 <a href="https://plus.google.com/u/0/105493415534008524873" class="btn btn-social btn-simple">
-                    <i class="fa fa-google-plus fa-fw"></i>
+                    <i class="fab fa-google-plus-g fa-fw fa-2x"></i>
                     <span class="network-name"></span>
                 </a>
                 <a href="https://www.reddit.com/domain/appimage.org/" class="btn btn-social btn-simple">
-                    <i class="fa fa-reddit fa-fw"></i>
+                    <i class="fab fa-reddit fa-fw fa-2x"></i>
                     <span class="network-name"></span>
                 </a>
                 <a href="https://twitter.com/appimages" class="btn btn-social btn-simple">
-                    <i class="fa fa-twitter fa-fw"></i>
+                    <i class="fab fa-twitter fa-fw fa-2x"></i>
                     <span class="network-name"></span>
                 </a>
                 <a href="https://discourse.appimage.org" class="btn btn-social btn-simple">
-                    <i class="fa fa-comment-o fa-fw"></i>
+                    <i class="far fa-comment fa-fw fa-2x"></i>
                     <span class="network-name"></span>
                 </a>
             </ul>
-        </div>
     </div>
 </div>
 
@@ -439,7 +436,7 @@
             <div class="col-md-4 grayblock2">
                 <div class="card card-blue">
                     <div class="icon">
-                        <i class="fa fa-github"></i>
+                        <i class="fab fa-github"></i>
                     </div>
                     <div class="text">
                         <h4>
@@ -454,7 +451,7 @@
             <div class="col-md-4 grayblock">
                 <div class="card card-blue">
                     <div class="icon">
-                        <i class="fa  fa-check-circle"></i>
+                        <i class="far fa-check-circle"></i>
                     </div>
                     <h4>
                         {{ _('buzzwords_proven_title') }}
@@ -467,7 +464,7 @@
             <div class="col-md-4 grayblock2">
                 <div class="card card-blue">
                     <div class="icon">
-                        <i class="fa fa-linux"></i>
+                        <i class="fab fa-linux"></i>
                     </div>
                     <h4>
                         {{ _('buzzwords_compatible_title') }}
@@ -561,7 +558,7 @@
                 <ul class="list-inline banner-social-buttons">
                     <li>
                         <a href="https://github.com/probonopd" class="btn btn-default btn-lg">
-                            <i class="fa fa-github-alt fa-fw"></i>
+                            <i class="fab fa-github fa-fw"></i>
                             <span class="network-name">
                                 {{ _('github_title') }}
                             </span>
@@ -569,7 +566,7 @@
                     </li>
                     <li>
                         <a href="mailto:probono@puredarwin.org" class="btn btn-default btn-lg">
-                            <i class="fa fa-envelope fa-fw"></i>
+                            <i class="fas fa-envelope fa-fw"></i>
                             <span class="network-name">
                                 {{ _('e-mail_title') }}
                             </span>
@@ -577,7 +574,7 @@
                     </li>
                     <li>
                         <a href="https://plus.google.com/u/0/105493415534008524873" class="btn btn-default btn-lg">
-                            <i class="fa fa-google-plus fa-fw"></i>
+                            <i class="fab fa-google-plus fa-fw"></i>
                             <span class="network-name">
                                 {{ _('google+_title') }}
                             </span>
@@ -593,31 +590,32 @@
     <div class="container">
         <nav class="pull-left copyright">
             {# this line should not be translated, it should be the same on all pages #}
-            &copy; 2015-17 <a href="https://github.com/probonopd">Simon Peter</a> &mdash; I <i class="fa fa-heart"></i> simplicity
+            &copy; 2015-17 <a href="https://github.com/probonopd">Simon Peter</a> &mdash; I <i class="fas fa-heart"></i> simplicity
         </nav>
-        <div class="social-area pull-right">
+
+        <div class="social-area pull-right" style="color: #888; margin-top: 8px;">
             <a href="https://github.com/AppImage" class="btn btn-social btn-simple">
-                <i class="fa fa-github-alt fa-fw"></i>
+                <i class="fab fa-github fa-fw fa-2x"></i>
                 <span class="network-name"></span>
             </a>
             <a href="mailto:probono@puredarwin.org" class="btn btn-social btn-simple">
-                <i class="fa fa-envelope fa-fw"></i>
+                <i class="far fa-envelope fa-fw fa-2x"></i>
                 <span class="network-name"></span>
             </a>
             <a href="https://plus.google.com/u/0/105493415534008524873" class="btn btn-social btn-simple">
-                <i class="fa fa-google-plus fa-fw"></i>
+                <i class="fab fa-google-plus fa-fw fa-2x"></i>
                 <span class="network-name"></span>
             </a>
             <a href="https://www.reddit.com/domain/appimage.org/" class="btn btn-social btn-simple">
-                <i class="fa fa-reddit fa-fw"></i>
+                <i class="fab fa-reddit fa-fw fa-2x"></i>
                 <span class="network-name"></span>
             </a>
             <a href="https://twitter.com/probonopd" class="btn btn-social btn-simple">
-                <i class="fa fa-twitter fa-fw"></i>
+                <i class="fab fa-twitter fa-fw fa-2x"></i>
                 <span class="network-name"></span>
             </a>
             <a href="https://discourse.appimage.org" class="btn btn-social btn-simple">
-                <i class="fa fa-comment-o fa-fw"></i>
+                <i class="far fa-comment fa-fw fa-2x"></i>
                 <span class="network-name"></span>
             </a>
         </div>
