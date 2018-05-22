@@ -5,7 +5,10 @@ WORKDIR /build
 COPY requirements.txt /build/requirements.txt
 RUN pip install -r requirements.txt
 
-COPY . /build
+COPY locale/ /build/locale/
+COPY www/ /build/www/
+COPY *.py /build/
+COPY *.jinja2 /build/
 
 RUN python translator.py --compile --render
 
@@ -14,4 +17,8 @@ RUN python translator.py --compile --render
 FROM nginx:1.13-alpine
 
 COPY docker/nginx.conf /etc/nginx/
+
+# check nginx config
+RUN nginx -t
+
 COPY --from=builder /build/www /usr/share/nginx/html
