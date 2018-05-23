@@ -122,7 +122,7 @@ char *appimage_get_md5(const char* path)
         g_free(uri);
         return result;
     } else {
-        return "";
+        return NULL;
     }
 }
 
@@ -1002,7 +1002,7 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
                     break;
                 }
 
-                if ((fwrite(buff, size, 1, f) != size) || ferror(f) || feof(f)) {
+                if (fwrite(buff, 1, size, f) != size) {
 #ifdef STANDALONE
                     int error = errno;
                     fprintf(stderr, "Failed to copy icon: %s\n", strerror(error));
@@ -1019,7 +1019,7 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
                 fprintf(stderr, "Installed: %s\n", dest);
             }
 
-            if (g_str_has_prefix(dest, "/tmp")) {
+            if (!errored && g_str_has_prefix(dest, "/tmp")) {
                 move_icon_to_destination(dest, verbose);
             }
 
@@ -1631,6 +1631,13 @@ char* appimage_registered_desktop_file_path(const char *path, char *md5, bool ve
     // if not, we need to calculate it here
     if (md5 == NULL)
         md5 = appimage_get_md5(path);
+
+    // sanity check
+    if (md5 == NULL) {
+        if (verbose)
+            fprintf(stderr, "appimage_get_md5() failed\n");
+        return NULL;
+    }
 
     char *data_home = xdg_data_home();
 
