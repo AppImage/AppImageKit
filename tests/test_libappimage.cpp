@@ -115,7 +115,7 @@ namespace AppImageTests {
     TEST_F(LibAppImageTest, get_md5_invalid_file_path) {
         gchar *sum = appimage_get_md5("");
 
-        ASSERT_EQ(sum, NULL);
+        ASSERT_TRUE(sum == NULL) << "sum is not NULL";
     }
 
     TEST_F(LibAppImageTest, create_thumbnail_appimage_type_1) {
