@@ -89,7 +89,7 @@ if [ "@APPIMAGEKIT_EMBED_MAGIC_BYTES@" == "ON" ]; then
 fi
 
 # Convert runtime into a data object that can be embedded into appimagetool
-ld -r -b binary -o data.o runtime
+xxd -i runtime | $CC -c -x c - -o data.o
 
 # Show header for debugging purposes
 xxd runtime | head -n 1

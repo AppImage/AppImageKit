@@ -60,8 +60,8 @@
 
 #ifdef __linux__
 #define HAVE_BINARY_RUNTIME
-extern int _binary_runtime_start;
-extern int _binary_runtime_end;
+extern char runtime[];
+extern unsigned int runtime_len;
 #endif
 
 enum fARCH { 
@@ -743,8 +743,8 @@ main (int argc, char *argv[])
 #ifdef HAVE_BINARY_RUNTIME
             /* runtime is embedded into this executable
             * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
-            size = (int)((void *)&_binary_runtime_end - (void *)&_binary_runtime_start);
-            data = (char *)&_binary_runtime_start;
+            size = runtime_len;
+            data = runtime;
 #else
             die("No runtime file was provided");
 #endif
