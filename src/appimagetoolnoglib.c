@@ -19,8 +19,8 @@
 
 #include <stdio.h>
 
-extern int _binary_runtime_start;
-extern int _binary_runtime_size;
+extern char runtime[];
+extern unsigned int runtime_len;
 
 
 const char *argp_program_version =
@@ -254,8 +254,8 @@ int main (int argc, char **argv)
 
       /* runtime is embedded into this executable
        * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
-      int size = (int)&_binary_runtime_size;
-      char *data = (char *)&_binary_runtime_start;
+      int size = runtime_len;
+      char *data = runtime;
       if (arguments.verbose)
           printf("Size of the embedded runtime: %d bytes\n", size);
       /* Where to store updateinformation. Fixed offset preferred for easy manipulation 
