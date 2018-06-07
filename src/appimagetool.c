@@ -1130,16 +1130,12 @@ main (int argc, char *argv[])
 
                     bool rv = appimage_get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
 
-                    if (!rv || key_offset == 0 || key_length == 0) {
-                        die("Could not find section .sig_key in runtime");
-                    }
-
                     if (verbose) {
                         printf("key_offset: %lu\n", key_offset);
                         printf("key_length: %lu\n", key_length);
                     }
 
-                    if (rv != 0 || key_offset == 0 || key_length == 0) {
+                    if (!rv || key_offset == 0 || key_length == 0) {
                         die("Could not find section .sig_key in runtime");
                     }
 
