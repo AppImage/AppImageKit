@@ -832,7 +832,7 @@ main (int argc, char *argv[])
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
                 if(zsyncmake_path){
                     char buf[1024];
-                    sprintf(buf, "zsync|%s/-/jobs/artifacts/%s/raw/%s-%s.AppImage.zsync?job=%s", CI_PROJECT_URL, CI_COMMIT_REF_NAME, app_name_for_filename, arch, ${CI_JOB_NAME});
+                    sprintf(buf, "zsync|%s/-/jobs/artifacts/%s/raw/%s-%s.AppImage.zsync?job=%s", CI_PROJECT_URL, CI_COMMIT_REF_NAME, app_name_for_filename, arch, CI_JOB_NAME);
                     updateinformation = buf;
                     printf("Guessing update information based on $CI_COMMIT_REF_NAME=%s and $CI_JOB_NAME=%s\n", CI_COMMIT_REF_NAME, CI_JOB_NAME);
                     printf("%s\n", updateinformation);
