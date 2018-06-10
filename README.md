@@ -157,12 +157,18 @@ Help Options:
 Application Options:
   -l, --list                  List files in SOURCE AppImage
   -u, --updateinformation     Embed update information STRING; if zsyncmake is installed, generate zsync file
+  -g, --guess                 Guess update information based on Travis CI or GitLab environment variables
   --bintray-user              Bintray user name
   --bintray-repo              Bintray repository
   --version                   Show version number
   -v, --verbose               Produce verbose output
-  -s, --sign                  Sign with gpg2
+  -s, --sign                  Sign with gpg[2]
+  --comp                      Squashfs compression
   -n, --no-appstream          Do not check AppStream metadata
+  --exclude-file              Uses given file as exclude file for mksquashfs, in addition to .appimageignore.
+  --runtime-file              Runtime file to use
+  --sign-key                  Key ID to use for gpg[2] signatures
+  --sign-args                 Extra arguments to use when signing with gpg[2]
 ```
 
 If you want to generate an AppImage manually, you can:
