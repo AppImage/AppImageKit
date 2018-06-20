@@ -5,7 +5,6 @@ project(AppImageKit)
 include(ExternalProject)
 
 # enable testing globally
-option(BUILD_TESTING "Build the testing tree" ON)
 include(CTest)
 
 # support for ccache
