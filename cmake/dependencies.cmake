@@ -296,28 +296,30 @@ else()
 endif()
 
 
+if(BUILD_TESTING)
 set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system GTest instead of downloading and building GTest")
 
 if(NOT USE_SYSTEM_GTEST)
-    message(STATUS "Downloading and building GTest")
+        message(STATUS "Downloading and building GTest")
 
-    ExternalProject_Add(gtest-EXTERNAL
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.8.0
-        UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
-    )
+        ExternalProject_Add(gtest-EXTERNAL
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.8.0
+            UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
+            CONFIGURE_COMMAND ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
+        )
 
-    import_external_project(
-        TARGET_NAME gtest
-        EXT_PROJECT_NAME gtest-EXTERNAL
-        LIBRARIES "<INSTALL_DIR>/lib/libgtest.a;<INSTALL_DIR>/lib/libgtest_main.a"
-        INCLUDE_DIRS "<INSTALL_DIR>/include/"
-    )
-else()
-    message(STATUS "Using system GTest")
+        import_external_project(
+            TARGET_NAME gtest
+            EXT_PROJECT_NAME gtest-EXTERNAL
+            LIBRARIES "<INSTALL_DIR>/lib/libgtest.a;<INSTALL_DIR>/lib/libgtest_main.a"
+            INCLUDE_DIRS "<INSTALL_DIR>/include/"
+        )
+    else()
+        message(STATUS "Using system GTest")
 
-    import_find_pkg_target(gtest GTest GTEST)
+        import_find_pkg_target(gtest GTest GTEST)
+    endif()
 endif()
 
 
