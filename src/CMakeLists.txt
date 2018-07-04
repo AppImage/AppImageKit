@@ -26,7 +26,7 @@ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime
 )
 
 add_custom_command(OUTPUT data.o
-    COMMAND ld -r -b binary -o data.o runtime
+    COMMAND xxd -i runtime | ${CMAKE_C_COMPILER} -c -x c - -o data.o
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime
 )

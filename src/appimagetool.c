@@ -60,8 +60,8 @@
 
 #ifdef __linux__
 #define HAVE_BINARY_RUNTIME
-extern int _binary_runtime_start;
-extern int _binary_runtime_end;
+extern char runtime[];
+extern unsigned int runtime_len;
 #endif
 
 enum fARCH { 
@@ -434,7 +434,7 @@ static GOptionEntry entries[] =
 {
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
-    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI environment variables", NULL },
+    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI or GitLab environment variables", NULL },
     { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
@@ -475,6 +475,17 @@ main (int argc, char *argv[])
     /* https://github.com/probonopd/uploadtool */
     char* github_token;
     github_token = getenv("GITHUB_TOKEN");
+
+    /* Parse GitLab CI environment variables.
+     * https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
+     * echo "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/QtQuickApp-x86_64.AppImage?job=${CI_JOB_NAME}"
+     */    
+    char* CI_PROJECT_URL;
+    CI_PROJECT_URL = getenv("CI_PROJECT_URL");
+    char* CI_COMMIT_REF_NAME;
+    CI_COMMIT_REF_NAME = getenv("CI_COMMIT_REF_NAME"); // The branch or tag name for which project is built
+    char* CI_JOB_NAME;
+    CI_JOB_NAME = getenv("CI_JOB_NAME"); // The name of the job as defined in .gitlab-ci.yml
     
     /* Parse OWD environment variable.
      * If it is available then cd there. It is the original CWD prior to running AppRun */
@@ -743,8 +754,8 @@ main (int argc, char *argv[])
 #ifdef HAVE_BINARY_RUNTIME
             /* runtime is embedded into this executable
             * http://stupefydeveloper.blogspot.de/2008/08/cc-embed-binary-data-into-elf.html */
-            size = (int)((void *)&_binary_runtime_end - (void *)&_binary_runtime_start);
-            data = (char *)&_binary_runtime_start;
+            size = runtime_len;
+            data = runtime;
 #else
             die("No runtime file was provided");
 #endif
@@ -786,32 +797,44 @@ main (int argc, char *argv[])
         /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
         if(guessupdateinformation){
-            if(!travis_repo_slug){
-                printf("Cannot guess update information since $TRAVIS_REPO_SLUG is missing\n");
-            } else if(!github_token) {
-                printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
-                if(0 != strcmp(travis_pull_request, "false")){
-                    printf("please set it in the Travis CI Repository Settings for this project.\n");
-                    printf("You can get one from https://github.com/settings/tokens\n");
+            if(travis_repo_slug){
+                if(!github_token) {
+                    printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
+                    if(0 != strcmp(travis_pull_request, "false")){
+                        printf("please set it in the Travis CI Repository Settings for this project.\n");
+                        printf("You can get one from https://github.com/settings/tokens\n");
+                    } else {
+                        printf("which is expected since this is a pull request\n");
+                    }
                 } else {
-                    printf("which is expected since this is a pull request\n");
+                    gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+                    if(zsyncmake_path){
+                        char buf[1024];
+                        gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
+                        /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
+                         * gh-releases-zsync|probono|AppImages|latest|Subsurface*-x86_64.AppImage.zsync */
+                        gchar *channel = "continuous";
+                            if(travis_tag != NULL){
+                                if((strcmp(travis_tag, "") != 0) && (strcmp(travis_tag, "continuous") != 0)) {
+                                    channel = "latest";
+                                }
+                            }
+                        sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        updateinformation = buf;
+                        printf("Guessing update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
+                        printf("%s\n", updateinformation);
+                    } else {
+                        printf("Will not guess update information since zsyncmake is missing\n");
+                    }
                 }
-            } else {
+            } else if(CI_COMMIT_REF_NAME){
+                // ${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/QtQuickApp-x86_64.AppImage?job=${CI_JOB_NAME}
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
                 if(zsyncmake_path){
                     char buf[1024];
-                    gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
-                    /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
-                     * gh-releases-zsync|probono|AppImages|latest|Subsurface*-x86_64.AppImage.zsync */
-                    gchar *channel = "continuous";
-                        if(travis_tag != NULL){
-                            if((strcmp(travis_tag, "") != 0) && (strcmp(travis_tag, "continuous") != 0)) {
-                                channel = "latest";
-                            }
-                        }
-                    sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                    sprintf(buf, "zsync|%s/-/jobs/artifacts/%s/raw/%s-%s.AppImage.zsync?job=%s", CI_PROJECT_URL, CI_COMMIT_REF_NAME, app_name_for_filename, arch, CI_JOB_NAME);
                     updateinformation = buf;
-                    printf("Guessing update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
+                    printf("Guessing update information based on $CI_COMMIT_REF_NAME=%s and $CI_JOB_NAME=%s\n", CI_COMMIT_REF_NAME, CI_JOB_NAME);
                     printf("%s\n", updateinformation);
                 } else {
                     printf("Will not guess update information since zsyncmake is missing\n");
@@ -1130,16 +1153,12 @@ main (int argc, char *argv[])
 
                     bool rv = appimage_get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
 
-                    if (!rv || key_offset == 0 || key_length == 0) {
-                        die("Could not find section .sig_key in runtime");
-                    }
-
                     if (verbose) {
                         printf("key_offset: %lu\n", key_offset);
                         printf("key_length: %lu\n", key_length);
                     }
 
-                    if (rv != 0 || key_offset == 0 || key_length == 0) {
+                    if (!rv || key_offset == 0 || key_length == 0) {
                         die("Could not find section .sig_key in runtime");
                     }
 

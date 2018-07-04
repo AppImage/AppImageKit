@@ -183,7 +183,7 @@ if(NOT USE_SYSTEM_XZ)
     message(STATUS "Downloading and building xz")
 
     ExternalProject_Add(xz-EXTERNAL
-        URL https://tukaani.org/xz/xz-5.2.3.tar.gz
+        URL https://netcologne.dl.sourceforge.net/project/lzmautils/xz-5.2.3.tar.gz
         URL_HASH SHA512=a5eb4f707cf31579d166a6f95dbac45cf7ea181036d1632b4f123a4072f502f8d57cd6e7d0588f0bf831a07b8fc4065d26589a25c399b95ddcf5f73435163da6
         CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
         BUILD_COMMAND make
@@ -296,28 +296,30 @@ else()
 endif()
 
 
+if(BUILD_TESTING)
 set(USE_SYSTEM_GTEST OFF CACHE BOOL "Use system GTest instead of downloading and building GTest")
 
 if(NOT USE_SYSTEM_GTEST)
-    message(STATUS "Downloading and building GTest")
+        message(STATUS "Downloading and building GTest")
 
-    ExternalProject_Add(gtest-EXTERNAL
-        GIT_REPOSITORY https://github.com/google/googletest.git
-        GIT_TAG release-1.8.0
-        UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-        CONFIGURE_COMMAND ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
-    )
+        ExternalProject_Add(gtest-EXTERNAL
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.8.0
+            UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
+            CONFIGURE_COMMAND ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
+        )
 
-    import_external_project(
-        TARGET_NAME gtest
-        EXT_PROJECT_NAME gtest-EXTERNAL
-        LIBRARIES "<INSTALL_DIR>/lib/libgtest.a;<INSTALL_DIR>/lib/libgtest_main.a"
-        INCLUDE_DIRS "<INSTALL_DIR>/include/"
-    )
-else()
-    message(STATUS "Using system GTest")
+        import_external_project(
+            TARGET_NAME gtest
+            EXT_PROJECT_NAME gtest-EXTERNAL
+            LIBRARIES "<INSTALL_DIR>/lib/libgtest.a;<INSTALL_DIR>/lib/libgtest_main.a"
+            INCLUDE_DIRS "<INSTALL_DIR>/include/"
+        )
+    else()
+        message(STATUS "Using system GTest")
 
-    import_find_pkg_target(gtest GTest GTEST)
+        import_find_pkg_target(gtest GTest GTEST)
+    endif()
 endif()
 
 
