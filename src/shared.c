@@ -1715,7 +1715,7 @@ int appimage_register_in_system(const char *path, bool verbose)
         g_str_has_suffix(path, ".zs-old") ||
         g_str_has_suffix(path, ".~")
     ) {
-        return 0;
+        return 1;
     }
 
     int type = appimage_get_type(path, verbose);
