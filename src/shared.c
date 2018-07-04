@@ -951,7 +951,7 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
         // cleanup
         g_free(filename);
 
-        if (dest != NULL) {
+        if (dest != NULL && strlen(dest) <= 0) {
             if (verbose)
                 fprintf(stderr, "install: %s\n", dest);
 
@@ -1715,7 +1715,7 @@ int appimage_register_in_system(const char *path, bool verbose)
         g_str_has_suffix(path, ".zs-old") ||
         g_str_has_suffix(path, ".~")
     ) {
-        return 0;
+        return 1;
     }
 
     int type = appimage_get_type(path, verbose);
