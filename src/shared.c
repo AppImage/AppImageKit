@@ -951,7 +951,7 @@ bool archive_copy_icons_recursively_to_destination(struct archive** a, const gch
         // cleanup
         g_free(filename);
 
-        if (dest != NULL) {
+        if (dest != NULL && strlen(dest) <= 0) {
             if (verbose)
                 fprintf(stderr, "install: %s\n", dest);
 
