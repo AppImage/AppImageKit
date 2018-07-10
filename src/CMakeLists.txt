@@ -178,6 +178,12 @@ add_sanitizers(appimagetool)
 
 add_executable(AppRun AppRun.c)
 
+target_compile_definitions(AppRun
+    PRIVATE -D_FILE_OFFSET_BITS=64
+    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
+    PRIVATE -DENABLE_BINRELOC
+)
+
 add_sanitizers(AppRun)
 
 
