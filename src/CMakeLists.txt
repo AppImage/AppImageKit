@@ -1,5 +1,12 @@
 find_package(Sanitizers)
 
+if(NOT COMMAND add_sanitizers)
+    message(WARNING "Sanitizers CMake module not found, sanitizer support is not available")
+    # defining a no-op function to avoid CMake errors
+    function(add_sanitizers ...)
+    endfunction()
+endif()
+
 set(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE OFF CACHE BOOL "Useful for $TARGET_APPIMAGE; see issue #763")
 
 # set up build script
