@@ -7,39 +7,6 @@ if(NOT COMMAND add_sanitizers)
     endfunction()
 endif()
 
-set(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE OFF CACHE BOOL "Useful for $TARGET_APPIMAGE; see issue #763")
-
-# set up build script
-
-# if set to anything but ON, the magic bytes won't be embedded
-# CAUTION: the magic bytes are a hard requirement for type 2 AppImages! This option should NEVER be used unless you are
-# 100% sure what you are doing here!
-set(APPIMAGEKIT_EMBED_MAGIC_BYTES ON CACHE BOOL "")
-# mark as advanced so it won't show up in CMake GUIs etc., to prevent users from accidentally using this option
-mark_as_advanced(APPIMAGEKIT_EMBED_MAGIC_BYTES)
-
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/build-runtime.sh.in
-    ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
-    @ONLY
-)
-
-add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime
-    COMMAND bash ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/build-runtime.sh
-    DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c
-    DEPENDS squashfuse
-)
-
-add_custom_command(OUTPUT data.o
-    COMMAND xxd -i runtime | ${CMAKE_C_COMPILER} -c -x c - -o data.o
-    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime
-)
-
-add_custom_target(runtime DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/runtime)
-
 
 # include XDG basedir library
 add_subdirectory(xdg-basedir)
@@ -130,13 +97,16 @@ target_link_libraries(libappimage_static
 )
 
 
+include(build-runtime.cmake)
+
+
 add_executable(appimagetool
     ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     appimagetool.c
     getsection.c
     binreloc.c
     elf.c
-    data.o
+    runtime_embed.o
     appimagetool_shared.c
 )
 
@@ -214,38 +184,6 @@ target_link_libraries(digest
 )
 
 add_sanitizers(digest)
-
-
-add_executable(runtime-debug EXCLUDE_FROM_ALL elf.c notify.c getsection.c ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c)
-
-target_link_libraries(runtime-debug
-    squashfuse
-    libarchive
-    xz
-    xdg-basedir
-    pthread
-    libglib
-    libzlib
-    libcairo
-    ${CMAKE_DL_LIBS}
-)
-
-set_target_properties(runtime-debug PROPERTIES LINK_FLAGS "-ffunction-sections -fdata-sections -Wl,--gc-sections")
-
-target_include_directories(runtime-debug
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
-    INTERFACE $<INSTALL_INTERFACE:include/>
-)
-
-target_compile_options(runtime-debug
-    PUBLIC -DGIT_COMMIT="${GIT_COMMIT}" -D_FILE_OFFSET_BITS=64
-)
-
-if(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE)
-    target_compile_definitions(runtime-debug
-        PUBLIC -DENABLE_SETPROCTITLE
-    )
-endif()
 
 
 # digest_md5 demo application
