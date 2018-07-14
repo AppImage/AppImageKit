@@ -561,6 +561,8 @@ main (int argc, char *argv[])
         /* Pause until mounted */
         read (keepalive_pipe[0], &c, 1);
 
+        /* Fuse process has now daemonized, reap our child */
+        waitpid(pid, NULL, 0);
 
         dir_fd = open (mount_dir, O_RDONLY);
         if (dir_fd == -1) {
