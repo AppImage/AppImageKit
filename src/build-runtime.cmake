@@ -11,7 +11,7 @@ set(runtime_cflags -Os -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT
 set(runtime_ldflags -s -Wl,--gc-sections)
 
 if(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE)
-    set(runtime_cflags "${runtime_cflags} -DENABLE_SETPROCTITLE")
+    set(runtime_cflags ${runtime_cflags} -DENABLE_SETPROCTITLE)
 endif()
 
 # objcopy requires actual files for creating new sections to populate the new section
