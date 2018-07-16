@@ -93,9 +93,9 @@ int main(int argc, char *argv[]) {
     // If we found no .desktop files, there's nothing to run. Fatal error.
     if (ret == 0) {
         die("No .desktop files found\n");
-    }
+
     // If there was an error with scandir(...), we can't go on. Fatal error.
-    else if(ret == -1) {
+    } else if(ret == -1) {
         die("Could not scan directory %s\n", appdir);
     }
 
@@ -138,10 +138,11 @@ int main(int argc, char *argv[]) {
      */
     for (n = 0; n < LINE_SIZE; n++) {
         // If we've reached the end of the string/line, break out of loop.
-        if (!line[n])
+        if (!line[n]) {
             break;
+
         /* If we encounter a LINE FEED (10) or CARRIAGE RETURN (13)... */
-        else if (line[n] == 10 || line[n] == 13) {
+        } else if (line[n] == 10 || line[n] == 13) {
             /* Change the next three characters to NULL CHAR.
              * NOTE: Why?
              * FIXME: What if [n+1] and/or [n+2] are past the end of the string?
@@ -151,9 +152,9 @@ int main(int argc, char *argv[]) {
             line[n+2] = '\0';
             // Break out of loop.
             break;
-        }
+
         // If the current character is a quote, invert our `in_quotes` flag.
-        else if (line[n] == '"') {
+        } else if (line[n] == '"') {
             // FIXME: This logic doesn't account for escaped quotes (\")
             in_quotes = !in_quotes;
         }
