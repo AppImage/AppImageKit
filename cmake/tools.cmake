@@ -45,4 +45,5 @@ check_program(objcopy)
 check_program(objdump)
 check_program(readelf)
 check_program(strip)
+check_program(make)
 # TODO: add checks for remaining commands
