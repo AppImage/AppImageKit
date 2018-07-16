@@ -41,4 +41,8 @@ check_program(sed)
 check_program(wget)
 check_program(xxd)
 check_program(desktop-file-validate)
+check_program(objcopy)
+check_program(objdump)
+check_program(readelf)
+check_program(strip)
 # TODO: add checks for remaining commands
