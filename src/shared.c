@@ -579,10 +579,43 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         char* appimage_version = g_key_file_get_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "X-AppImage-Version", NULL);
 
         if (appimage_version != NULL) {
-            // TODO: support for multiple locales
-            // the following code snippet is prepared for multiple locales, we just need to add all possible locales
+            // parse desktop files and generate a list of locales representing all localized Name entries
             // NULL refers to the key without the locale tag
-            static const gchar* locales[] = {NULL};
+            gchar* locales[256] = {NULL};
+            gint localesCount = 1;
+
+            {
+                // create temporary in-memory copy of the keyfile
+                gsize bufsize;
+                char* orig_buffer = g_key_file_to_data(key_file_structure, &bufsize, NULL);
+
+                if (orig_buffer == NULL) {
+                    fprintf(stderr, "Failed to create in-memory copy of desktop file\n");
+                    return false;
+                }
+
+                // need to keep original reference to buffer to be able to free() it later
+                char* buffer = orig_buffer;
+
+                // parse line by line
+                char* line = NULL;
+                while ((line = strsep(&buffer, "\n")) != NULL) {
+                    if (strncmp(line, "Name[", 5) != 0)
+                        continue;
+
+                    // python: s = split(line, "[")[1]
+                    char* s = strsep(&line, "[");
+                    s = strsep(&line, "[");
+
+                    // python: locale = split(s, "]")[0]
+                    char* locale = strsep(&s, "]");
+
+                    locales[localesCount++] = locale;
+                }
+
+                free(orig_buffer);
+            }
+
 
             for (int i = 0; i < (sizeof(locales) / sizeof(gchar*)); i++) {
                 const gchar* locale = locales[i];
