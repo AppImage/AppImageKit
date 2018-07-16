@@ -76,7 +76,8 @@ add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o elf.c notify.c ge
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
 target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread)
 
-if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+if (BUILD_TYPE_UPPER STREQUAL DEBUG)
     message(WARNING "Debug build, not stripping runtime to allow debugging using gdb etc.")
 else()
     find_program(STRIP strip)
