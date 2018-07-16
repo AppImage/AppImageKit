@@ -33,42 +33,69 @@ THE SOFTWARE.
 #include <string.h>
 #include <errno.h>
 
+/** Macro to throw error and exit. */
 #define die(...)                                    \
     do {                                            \
         fprintf(stderr, "Error: " __VA_ARGS__);     \
         exit(1);                                    \
     } while(0);
+
+/** Macro to set environmental variables. */
 #define SET_NEW_ENV(str,len,fmt,...)                \
     format = fmt;                                   \
     length = strlen(format) + (len);                \
     char *str = calloc(length, sizeof(char));     \
     snprintf(str, length, format, __VA_ARGS__);   \
     putenv(str);
+
+/** Macro to return the largest of a pair of numbers */
 #define MAX(a,b)    (a > b ? a : b)
+
+/* Redefine the boolean type and its constants to use integers, with n<0 == true.
+ * FIXME: This is terrible, bad and wrong. Fix it in refactor.
+ */
 #define bool int
 #define false 0
 #define true -1
 
 #define LINE_SIZE 255
 
+/** Check for a *.desktop file at the given path.
+  * \param the file path to check
+  * \return True (1) if the path points to a .desktop file, else false (0).
+  */
 int filter(const struct dirent *dir) {
+    // Get pointer to file path.
     char *p = (char*) &dir->d_name;
+    // Read only the file extension (start reading from last dot in path)
     p = strrchr(p, '.');
+    // Return true if the file extension .desktop is found
     return p && !strcmp(p, ".desktop");
 }
 
 int main(int argc, char *argv[]) {
+    // Get path to the application directory.
     char *appdir = dirname(realpath("/proc/self/exe", NULL));
+    /* If there's a problem accessing the application directory,
+     * throw fatal error.
+     */
     if (!appdir)
         die("Could not access /proc/self/exe\n");
 
+    // Check for .desktop files
+    // The return code for whether we found a .desktop file
     int ret;
+    // A pointer to a pointer of a list of file paths. (NOTE: Why?)
     struct dirent **namelist;
+    // Scan for .desktop files.
     ret = scandir(appdir, &namelist, filter, NULL);
 
+    // If we found no .desktop files, there's nothing to run. Fatal error.
     if (ret == 0) {
         die("No .desktop files found\n");
-    } else if(ret == -1) {
+    }
+    // If there was an error with scandir(...), we can't go on. Fatal error.
+    else if(ret == -1) {
         die("Could not scan directory %s\n", appdir);
     }
 
@@ -76,29 +103,64 @@ int main(int argc, char *argv[]) {
     char *desktop_file = calloc(LINE_SIZE, sizeof(char));
     snprintf(desktop_file, LINE_SIZE, "%s/%s", appdir, namelist[0]->d_name);
     FILE *f     = fopen(desktop_file, "r");
+    // Store the line we're reading.
     char *line  = malloc(LINE_SIZE);
+    // Skip the `Exec=` prefix on `line`, only looking at the stored value.
     char *exe   = line+5;
     size_t n    = LINE_SIZE;
 
+    /* Search each line of our file for the 'Exec=' entry.
+     * To search, we store the line in `line`, and then check for the
+     * correct prefix. If it doesn't match, we keep looking.
+     */
     do {
+        // If we reach the end of the file without finding 'Exec=', fatal error.
         if (getline(&line, &n, f) == -1)
             die("Executable not found, make sure there is a line starting with 'Exec='\n");
     } while(strncmp(line, "Exec=", 5));
+    // We now have the line we need, close the file.
     fclose(f);
 
-    // parse arguments
+    /* FIXME: We aren't ensuring that 'exe' has a value!
+     * If the entire line is `Exec=`, attempting to access `exe` will result
+     * in undefined behavior (wild pointer).
+     */
+
+    /* Parse arguments */
+
+    // Flag if we're within quotation marks.
     bool in_quotes = 0;
+
+    // Loop through each character in a line.
+    /* FIXME: This should use a while or do-while, instead of a for with an
+     * arbitrary character range (LINE_SIZE = 255). This is both inefficient
+     * and prone to undesired edge-case behavior.
+     */
     for (n = 0; n < LINE_SIZE; n++) {
-        if (!line[n])         // end of string
+        // If we've reached the end of the string/line, break out of loop.
+        if (!line[n])
             break;
+        /* If we encounter a LINE FEED (10) or CARRIAGE RETURN (13)... */
         else if (line[n] == 10 || line[n] == 13) {
+            /* Change the next three characters to NULL CHAR.
+             * NOTE: Why?
+             * FIXME: What if [n+1] and/or [n+2] are past the end of the string?
+             */
             line[n] = '\0';
             line[n+1] = '\0';
             line[n+2] = '\0';
+            // Break out of loop.
             break;
-        } else if (line[n] == '"') {
+        }
+        // If the current character is a quote, invert our `in_quotes` flag.
+        else if (line[n] == '"') {
+            // FIXME: This logic doesn't account for escaped quotes (\")
             in_quotes = !in_quotes;
-        } else if (line[n] == ' ' && !in_quotes)
+        }
+        /* If the current character is a quote, change it to a NULL CHAR.
+         * NOTE: Why?
+         */
+        else if (line[n] == ' ' && !in_quotes)
             line[n] = '\0';
     }
 
@@ -195,7 +257,7 @@ int main(int argc, char *argv[]) {
 
     /* Run */
     ret = execvp(exe, outargptrs);
-    
+
     int error = errno;
 
     if (ret == -1)
