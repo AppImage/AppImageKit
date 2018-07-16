@@ -76,11 +76,17 @@ add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o elf.c notify.c ge
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
 target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread)
 
-add_custom_command(
-    TARGET runtime
-    POST_BUILD
-    COMMAND ${strip} ${CMAKE_CURRENT_BINARY_DIR}/runtime
-)
+if (CMAKE_BUILD_TYPE MATCHES DEBUG)
+    message(WARNING "Debug build, not stripping runtime to allow debugging using gdb etc.")
+else()
+    find_program(STRIP strip)
+
+    add_custom_command(
+        TARGET runtime
+        POST_BUILD
+        COMMAND ${STRIP} ${CMAKE_CURRENT_BINARY_DIR}/runtime
+    )
+endif()
 
 # embed the magic bytes after the runtime's build has finished
 if(APPIMAGEKIT_EMBED_MAGIC_BYTES)
