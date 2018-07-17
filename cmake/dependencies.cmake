@@ -209,14 +209,10 @@ set(USE_SYSTEM_XZ OFF CACHE BOOL "Use system xz/liblzma instead of building our 
 if(NOT USE_SYSTEM_XZ)
     message(STATUS "Downloading and building xz")
 
-    set(xz_CFLAGS CFLAGS="${CFLAGS} -fPIC")
-    set(xz_CPPFLAGS CPPFLAGS="${CPPFLAGS} -fPIC")
-
     ExternalProject_Add(xz-EXTERNAL
         URL https://netcologne.dl.sourceforge.net/project/lzmautils/xz-5.2.3.tar.gz
         URL_HASH SHA512=a5eb4f707cf31579d166a6f95dbac45cf7ea181036d1632b4f123a4072f502f8d57cd6e7d0588f0bf831a07b8fc4065d26589a25c399b95ddcf5f73435163da6
-        CONFIGURE_COMMAND export CC=${CC} CXX=${CXX} ${xz_CFLAGS} ${xz_CPPFLAGS} LDFLAGS=${LDFLAGS}
-                  COMMAND <SOURCE_DIR>/configure --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} CPPFLAGS=${CPPFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --with-pic --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
         BUILD_COMMAND ${MAKE}
         INSTALL_COMMAND ${MAKE} install
     )
@@ -306,14 +302,10 @@ set(USE_SYSTEM_LIBARCHIVE OFF CACHE BOOL "Use system libarchive instead of build
 if(NOT USE_SYSTEM_LIBARCHIVE)
     message(STATUS "Downloading and building libarchive")
 
-    set(libarchive_CFLAGS CFLAGS="${CFLAGS} -fPIC")
-    set(libarchive_CPPFLAGS CPPFLAGS="${CPPFLAGS} -fPIC")
-
     ExternalProject_Add(libarchive-EXTERNAL
         URL https://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
         URL_HASH SHA512=90702b393b6f0943f42438e277b257af45eee4fa82420431f6a4f5f48bb846f2a72c8ff084dc3ee9c87bdf8b57f4d8dddf7814870fe2604fe86c55d8d744c164
-        CONFIGURE_COMMAND export CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} ${libarchive_CFLAGS} ${libarchive_CPPFLAGS} LDFLAGS=${LDFLAGS}
-                  COMMAND <SOURCE_DIR>/configure --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} CPPFLAGS=${CPPFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --with-pic --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
         BUILD_COMMAND ${MAKE}
         INSTALL_COMMAND ${MAKE} install
     )
