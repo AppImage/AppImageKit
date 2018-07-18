@@ -171,6 +171,7 @@ function(import_external_project)
     # configuration)
     set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_INCLUDE_DIRS "${IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS}" CACHE INTERNAL "")
     set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_LIBRARIES "${IMPORT_EXTERNAL_PROJECT_LIBRARIES}" CACHE INTERNAL "")
+    set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_LIBRARY_DIRS "${IMPORT_EXTERNAL_PROJECT_LIBRARY_DIRS}" CACHE INTERNAL "")
     set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_PREFIX ${INSTALL_DIR} CACHE INTERNAL "")
 endfunction()
 
@@ -220,6 +221,7 @@ if(NOT USE_SYSTEM_XZ)
     import_external_project(
         TARGET_NAME xz
         EXT_PROJECT_NAME xz-EXTERNAL
+        LIBRARY_DIRS <INSTALL_DIR>/lib/
         LIBRARIES "<INSTALL_DIR>/lib/liblzma.a"
         INCLUDE_DIRS "<SOURCE_DIR>/src/liblzma/api/"
     )
@@ -352,8 +354,18 @@ endif()
 
 # TODO: allow using system wide mksquashfs
 set(mksquashfs_cflags "-DXZ_SUPPORT ${CFLAGS}")
+
+if(xz_LIBRARIES MATCHES "\\.a$")
+    set(mksquashfs_ldflags "${xz_LIBRARIES}")
+else()
+    set(mksquashfs_ldflags "-l${xz_LIBRARIES}")
+endif()
+
 if(xz_INCLUDE_DIRS)
     set(mksquashfs_cflags "${mksquashfs_cflags} -I${xz_INCLUDE_DIRS}")
+endif()
+if(xz_LIBRARY_DIRS)
+    set(mksquashfs_ldflags "${mksquashfs_ldflags} -L${xz_LIBRARY_DIRS}")
 endif()
 
 ExternalProject_Add(mksquashfs
@@ -362,7 +374,7 @@ ExternalProject_Add(mksquashfs
     UPDATE_COMMAND ""  # ${MAKE} sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
     PATCH_COMMAND patch -N -p1 < ${PROJECT_SOURCE_DIR}/src/mksquashfs-mkfs-fixed-timestamp.patch || true
     CONFIGURE_COMMAND ${SED} -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += ${mksquashfs_cflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
-    COMMAND ${SED} -i "s|LIBS += -llzma|LIBS += -Bstatic -l${xz_LIBRARIES}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+    COMMAND ${SED} -i "s|LIBS += -llzma|LIBS += -Bstatic ${mksquashfs_ldflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
     COMMAND ${SED} -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
     COMMAND ${SED} -i "/cp unsquashfs/d" squashfs-tools/Makefile
     BUILD_COMMAND env CC=${CC} CXX=${CXX} LDFLAGS=${LDFLAGS} ${MAKE} -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
