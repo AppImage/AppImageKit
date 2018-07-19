@@ -20,8 +20,9 @@ if [ "$CI" != "" ] && [ "$KEY" != "" ]; then
     wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
     set +x ; echo "$KEY" | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg || true
     tar xf data.tar.gz
-    chown -R "$USER" .gnu*
-    export GNUPGHOME=$(readlink -f .gnu*)
+    chown -R "$USER" .gnu*/
+    chmod 0700 .gnu*/
+    export GNUPGHOME=$(readlink -f .gnu*/)
 fi
 
 # prepare output directory
