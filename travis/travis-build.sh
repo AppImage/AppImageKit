@@ -14,11 +14,15 @@ case "$ARCH" in
         ;;
 esac
 
-# clean up and download data from GitHub
-rm -rf data.tar.g* .gnu* || true
-wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
-( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg ) || true
-( tar xf data.tar.gz ; sudo chown -R $USER .gnu* ; rm -rf $HOME/.gnu* ; mv .gnu* $HOME/ ) || true
+if [ "$CI" != "" ] && [ "$KEY" != "" ]; then
+    # clean up and download data from GitHub
+    # don't worry about removing those data -- they'll be removed by the exit hook
+    wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
+    set +x ; echo "$KEY" | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg || true
+    tar xf data.tar.gz
+    chown -R "$USER" .gnu*
+    export GNUPGHOME=$(readlink -f .gnu*)
+fi
 
 # prepare output directory
 mkdir -p ./out/
