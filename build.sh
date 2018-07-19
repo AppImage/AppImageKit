@@ -51,8 +51,6 @@ if cat /etc/*release | grep "CentOS" 2>&1 >/dev/null; then
     fi
 fi
 
-echo "$KEY" | md5sum
-
 set -e
 set -x
 

@@ -10,8 +10,6 @@ CC="cc -O2 -Wall -Wno-deprecated-declarations -Wno-unused-result"
 STRIP="strip"
 JOBS=${JOBS:-1}
 
-echo $KEY | md5sum
-
 set -e
 set -x
 
