@@ -34,7 +34,7 @@ msgid "source_link_title"
 msgstr ""
 
 #: index.jinja2:68
-msgid "docs_link_title"
+msgid "wiki_link_title"
 msgstr ""
 
 #: index.jinja2:73
