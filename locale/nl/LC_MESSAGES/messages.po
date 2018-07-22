@@ -37,7 +37,7 @@ msgid "source_link_title"
 msgstr "Broncode"
 
 #: index.jinja2:68
-msgid "wiki_link_title"
+msgid "docs_link_title"
 msgstr "Wiki"
 
 #: index.jinja2:73
