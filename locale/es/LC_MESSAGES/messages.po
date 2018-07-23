@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2017-12-11 02:22+0000\n"
-"Last-Translator: Alexis López Zubieta <azubieta90@gmail.com>\n"
-"Language-Team: Spanish <https://translate.assassinate-"
-"you.net/projects/appimage/website/es/>\n"
+"PO-Revision-Date: 2018-07-23 15:05+0000\n"
+"Last-Translator: Lvaskz <lvaskz@protonmail.com>\n"
+"Language-Team: Spanish <https://translate.assassinate-you.net/projects/"
+"appimage/website/es/>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.17.1\n"
+"X-Generator: Weblate 2.20\n"
 "Generated-By: Babel 2.5.1\n"
 
 #: index.jinja2:7
@@ -59,14 +59,20 @@ msgstr ""
 #: index.jinja2:146
 msgid "user_story_2"
 msgstr ""
+"Como autor de la aplicación, deseo proporcionar paquetes para sistemas de "
+"escritorio Linux, sin la necesidad de incluirlo en una distribución y sin "
+"tener que compilar para montones de diferentes distribuciones."
 
 #: index.jinja2:156
 msgid "leading_linux_distributions"
-msgstr ""
+msgstr "Distribuciones líderes de Linux"
 
 #: index.jinja2:158
 msgid "download_make_executable_run"
 msgstr ""
+"Descarga una aplicación, hazla ejecutable y ejecuta! No es necesario "
+"instalar No se modifican las bibliotecas del sistema ni las preferencias del "
+"sistema."
 
 #: index.jinja2:159
 #, python-format
@@ -75,67 +81,76 @@ msgid ""
 "                 can_run_in_sandboxes_like %(sandbox_name)s\n"
 "            "
 msgstr ""
+"\n"
+"                 También se puede ejecutar en un sandbox como% (sandbox_name)"
+" s 1\n"
+"            "
 
 #: index.jinja2:183
 msgid "distribute_linux_apps_as_appimage_and_win_users"
 msgstr ""
+"Distribuya su aplicación Linux de escritorio en el formato AppImage y gane "
+"usuarios que ejecuten todas las distribuciones comunes de Linux."
 
 #: index.jinja2:184
 msgid "package_once_and_run_everywhere"
-msgstr ""
+msgstr "Empaquete una vez y corra a todas partes."
 
 #: index.jinja2:185
 msgid "reach_users_on_all_distros"
 msgstr ""
+"Llegue a los usuarios en todas las principales distribuciones de escritorio."
 
 #: index.jinja2:194
 msgid "what_people_think"
-msgstr ""
+msgstr "Lo que la gente piensa"
 
 #: index.jinja2:209
 msgid "torvalds_quote"
-msgstr ""
+msgstr "Esto es simplemente genial."
 
 #: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
 #: index.jinja2:429
 msgid "picture:"
-msgstr ""
+msgstr "Imagen:"
 
 #: index.jinja2:214 index.jinja2:233
 msgid "copyright_faces_of_open_source_/_peter_adams"
-msgstr ""
+msgstr "Caras de derechos de autor de código abierto / Peter Adams."
 
 #: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
 msgid "licensed_under_CC-BY-NC-SA_4.0"
-msgstr ""
+msgstr "Licencia bajo CC-BY-NC-SA 4.0."
 
 #: index.jinja2:217 index.jinja2:236
 msgid "original_picture"
-msgstr ""
+msgstr "Imagen Original"
 
 #: index.jinja2:229
 msgid "hohndel_quote"
-msgstr ""
+msgstr "El enfoque de AppImage es realmente muy útil."
 
 #: index.jinja2:249
 msgid "shuttleworth_quote"
 msgstr ""
+"Las AppImages son una experiencia bastante limpia y admiro el trabajo detrás "
+"de ellas."
 
 #: index.jinja2:254
 msgid "copyright_aaron_hockley"
-msgstr ""
+msgstr "Derechos de autor Aaron Hockley."
 
 #: index.jinja2:255
 msgid "licensed_under_CC-BY-SA_2.0"
-msgstr ""
+msgstr "Licencia bajo CC-BY-SA 2.0."
 
 #: index.jinja2:267
 msgid "richard_brown_quote"
-msgstr ""
+msgstr "Ahora amo AppImage. Realmente amo AppImage."
 
 #: index.jinja2:272
 msgid "copyright_theassassin"
-msgstr ""
+msgstr "Derechos de autor El Asesino"
 
 #: index.jinja2:299
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
