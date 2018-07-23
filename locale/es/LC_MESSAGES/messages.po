@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-07-23 15:18+0000\n"
+"PO-Revision-Date: 2018-07-23 15:19+0000\n"
 "Last-Translator: Lvaskz <lvaskz@protonmail.com>\n"
 "Language-Team: Spanish <https://translate.assassinate-you.net/projects/"
 "appimage/website/es/>\n"
@@ -228,15 +228,15 @@ msgstr ""
 
 #: index.jinja2:357
 msgid "how_to_run_an_appimage?"
-msgstr ""
+msgstr "Cómo ejecutar una AppImage?"
 
 #: index.jinja2:365
 msgid "to_run_an_AppImage_simply:"
-msgstr ""
+msgstr "Para ejecutar una AppImage, simplemente:"
 
 #: index.jinja2:368
 msgid "make_it_executable"
-msgstr ""
+msgstr "Hazlo ejecutable"
 
 #: index.jinja2:374
 msgid "and_run!"
