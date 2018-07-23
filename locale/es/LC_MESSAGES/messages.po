@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-07-23 15:11+0000\n"
+"PO-Revision-Date: 2018-07-23 15:13+0000\n"
 "Last-Translator: Lvaskz <lvaskz@protonmail.com>\n"
 "Language-Team: Spanish <https://translate.assassinate-you.net/projects/"
 "appimage/website/es/>\n"
@@ -182,11 +182,11 @@ msgstr "¡Solo descarga la aplicación, hazla ejecutable y ejecuta!"
 
 #: index.jinja2:327
 msgid "no_need_to_install"
-msgstr "No necesita instalar"
+msgstr "No necesita instalar."
 
 #: index.jinja2:328
 msgid "runs_on_most_desktops"
-msgstr ""
+msgstr "Corre en la mayoría de escritorios Linux de 32-bit y 64-bit"
 
 #: index.jinja2:333
 msgid "try_subsurface_64-bit"
