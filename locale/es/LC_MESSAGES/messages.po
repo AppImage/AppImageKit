@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-07-23 15:05+0000\n"
+"PO-Revision-Date: 2018-07-23 15:11+0000\n"
 "Last-Translator: Lvaskz <lvaskz@protonmail.com>\n"
 "Language-Team: Spanish <https://translate.assassinate-you.net/projects/"
 "appimage/website/es/>\n"
@@ -150,39 +150,39 @@ msgstr "Ahora amo AppImage. Realmente amo AppImage."
 
 #: index.jinja2:272
 msgid "copyright_theassassin"
-msgstr "Derechos de autor El Asesino"
+msgstr "Derechos de autor TheAssassin."
 
 #: index.jinja2:299
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
-msgstr ""
+msgstr "Dibujo: lewing@isc.tamu.edu Larry Ewing y The GIMP."
 
 #: index.jinja2:305
 msgid "logo:"
-msgstr ""
+msgstr "Logo:"
 
 #: index.jinja2:306
 msgid "licensed_under_GPLv2"
-msgstr ""
+msgstr "Licencia bajo los términos de la GPLv2."
 
 #: index.jinja2:308
 msgid "see_more"
-msgstr ""
+msgstr "Ver además"
 
 #: index.jinja2:323
 msgid "see_it_in_action"
-msgstr ""
+msgstr "Verlo en accción"
 
 #: index.jinja2:325
 msgid "here_appimage_for_you_to_try"
-msgstr ""
+msgstr "Aquí hay una aplicación empaquetada como AppImage para que pruebes."
 
 #: index.jinja2:326
 msgid "just_download_make_executable_run"
-msgstr ""
+msgstr "¡Solo descarga la aplicación, hazla ejecutable y ejecuta!"
 
 #: index.jinja2:327
 msgid "no_need_to_install"
-msgstr ""
+msgstr "No necesita instalar"
 
 #: index.jinja2:328
 msgid "runs_on_most_desktops"
