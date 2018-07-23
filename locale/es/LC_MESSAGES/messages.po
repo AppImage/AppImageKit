@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-07-23 15:13+0000\n"
+"PO-Revision-Date: 2018-07-23 15:17+0000\n"
 "Last-Translator: Lvaskz <lvaskz@protonmail.com>\n"
 "Language-Team: Spanish <https://translate.assassinate-you.net/projects/"
 "appimage/website/es/>\n"
@@ -186,15 +186,15 @@ msgstr "No necesita instalar."
 
 #: index.jinja2:328
 msgid "runs_on_most_desktops"
-msgstr "Corre en la mayoría de escritorios Linux de 32-bit y 64-bit"
+msgstr "Se ejecuta en la mayoría de los escritorios Linux de 32 bits y 64 bits."
 
 #: index.jinja2:333
 msgid "try_subsurface_64-bit"
-msgstr ""
+msgstr "Pruebe la imagen de la aplicación subsuperficial (64 bits)"
 
 #: index.jinja2:337
 msgid "try_subsurface_32-bit"
-msgstr ""
+msgstr "Pruebe la AppImage de subsuperficial (32 bits)"
 
 #: index.jinja2:340
 #, python-format
@@ -205,6 +205,11 @@ msgid ""
 "\n"
 "                    "
 msgstr ""
+"\n"
+"                    Muchos proyectos anteriores como% (krita) s 1, "
+"Subsurface, MuseScore, KDevelop y digiKam han comenzado a proporcionar "
+"AppImages directamente en sus páginas de descarga.\n"
+"                    "
 
 #: index.jinja2:343
 #, python-format
