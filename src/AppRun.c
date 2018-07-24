@@ -26,9 +26,14 @@ THE SOFTWARE.
 **************************************************************************/
 
 #include <dirent.h>
+#include <errno.h>
+#include <libgen.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
 
 /** Macro to set environment variables. */
 #define SET_NEW_ENV(str, len, fmt, ...)         \
@@ -186,7 +191,7 @@ int main(int argc, char *argv[]) {
     while ((arg += (strlen(arg)+1)) && *arg) {
         // If the current argument is a desktop file field code.
         if (arg[0] == '%' || (arg[0] == '"' && arg[1] == '%')) {
-            // Get the actual code after the `%` or `"5`.
+            // Get the actual code after the `%` or `"%`.
             char code = arg[arg[0] == '%' ? 1 : 2];
             switch(code) {
                 // For single file or URL args, merge in one of the `argv` args.
@@ -244,7 +249,7 @@ int main(int argc, char *argv[]) {
     size_t appdir_s = strlen(appdir);
     // Define the path to the ./usr subfolder in the application directory.
     char *usr_in_appdir = malloc(appdir_s + 5);
-    snprintf(usr_in_appdir, appdir_s + 1, "%s/usr", appdir);
+    snprintf(usr_in_appdir, appdir_s + 5, "%s/usr", appdir);
     // Attempt to change to the `<appdir>/usr` directory.
     ret = chdir(usr_in_appdir);
     // If we encounter a problem changing to that directory, throw a fatal error.
