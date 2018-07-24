@@ -52,14 +52,37 @@ endfunction()
 # positional parameters:
 #  - target_name: name of the target that we shall create for you
 #  - pkg_config_target: librar(y name to pass to pkg-config (may include a version)
-function(import_pkgconfig_target target_name pkg_config_target)
+function(import_pkgconfig_target)
+    set(keywords STATIC)
+    set(oneValueArgs TARGET_NAME PKGCONFIG_TARGET)
+    cmake_parse_arguments(IMPORT_PKGCONFIG_TARGET "${keywords}" "${oneValueArgs}" "" "${ARGN}")
+
+    # check whether parameters have been set
+    if(NOT IMPORT_PKGCONFIG_TARGET_TARGET_NAME)
+        message(FATAL_ERROR "TARGET_NAME parameter missing, but is required")
+    endif()
+    if(NOT IMPORT_PKGCONFIG_TARGET_PKGCONFIG_TARGET)
+        message(FATAL_ERROR "PKGCONFIG_TARGET parameter missing, but is required")
+    endif()
+
     find_package(PkgConfig REQUIRED)
 
-    message(STATUS "Importing target ${target_name} via pkg-config (${pkg_config_target})")
+    set(type "shared")
+    if(IMPORT_PKGCONFIG_TARGET_STATIC)
+        set(type "static")
+    endif()
 
-    pkg_check_modules(${target_name}-IMPORTED REQUIRED ${pkg_config_target})
+    message(STATUS "Importing target ${IMPORT_PKGCONFIG_TARGET_TARGET_NAME} via pkg-config (${IMPORT_PKGCONFIG_TARGET_PKGCONFIG_TARGET}, ${type})")
 
-    import_library_from_prefix(${target_name} ${target_name}-IMPORTED)
+    pkg_check_modules(${IMPORT_PKGCONFIG_TARGET_TARGET_NAME}-IMPORTED REQUIRED ${IMPORT_PKGCONFIG_TARGET_PKGCONFIG_TARGET})
+
+     if(IMPORT_PKGCONFIG_TARGET_STATIC)
+        set(prefix ${IMPORT_PKGCONFIG_TARGET_TARGET_NAME}-IMPORTED_STATIC)
+    else()
+        set(prefix ${IMPORT_PKGCONFIG_TARGET_TARGET_NAME}-IMPORTED)
+    endif()
+
+    import_library_from_prefix(${IMPORT_PKGCONFIG_TARGET_TARGET_NAME} ${prefix})
 endfunction()
 
 function(import_find_pkg_target target_name pkg_name variable_prefix)
@@ -148,6 +171,7 @@ function(import_external_project)
     # configuration)
     set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_INCLUDE_DIRS "${IMPORT_EXTERNAL_PROJECT_INCLUDE_DIRS}" CACHE INTERNAL "")
     set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_LIBRARIES "${IMPORT_EXTERNAL_PROJECT_LIBRARIES}" CACHE INTERNAL "")
+    set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_LIBRARY_DIRS "${IMPORT_EXTERNAL_PROJECT_LIBRARY_DIRS}" CACHE INTERNAL "")
     set(${IMPORT_EXTERNAL_PROJECT_TARGET_NAME}_PREFIX ${INSTALL_DIR} CACHE INTERNAL "")
 endfunction()
 
@@ -155,13 +179,13 @@ endfunction()
 # the names of the targets need to differ from the library filenames
 # this is especially an issue with libcairo, where the library is called libcairo
 # therefore, all libs imported this way have been prefixed with lib
-import_pkgconfig_target(libglib glib-2.0>=2.40)
-import_pkgconfig_target(libgobject gobject-2.0>=2.40)
-import_pkgconfig_target(libgio gio-2.0>=2.40)
-import_pkgconfig_target(libzlib zlib)
-import_pkgconfig_target(libcairo cairo)
-import_pkgconfig_target(libopenssl openssl)
-import_pkgconfig_target(libfuse fuse)
+import_pkgconfig_target(TARGET_NAME libglib PKGCONFIG_TARGET glib-2.0>=2.40)
+import_pkgconfig_target(TARGET_NAME libgobject PKGCONFIG_TARGET gobject-2.0>=2.40)
+import_pkgconfig_target(TARGET_NAME libgio PKGCONFIG_TARGET gio-2.0>=2.40)
+import_pkgconfig_target(TARGET_NAME libzlib PKGCONFIG_TARGET zlib)
+import_pkgconfig_target(TARGET_NAME libcairo PKGCONFIG_TARGET cairo)
+import_pkgconfig_target(TARGET_NAME libopenssl PKGCONFIG_TARGET openssl)
+import_pkgconfig_target(TARGET_NAME libfuse PKGCONFIG_TARGET fuse)
 
 
 if(USE_CCACHE)
@@ -176,6 +200,10 @@ else()
     set(CXX "${CMAKE_CXX_COMPILER}")
 endif()
 
+set(CFLAGS ${DEPENDENCIES_CFLAGS})
+set(CPPFLAGS ${DEPENDENCIES_CPPFLAGS})
+set(LDFLAGS ${DEPENDENCIES_LDFLAGS})
+
 
 set(USE_SYSTEM_XZ OFF CACHE BOOL "Use system xz/liblzma instead of building our own")
 
@@ -185,21 +213,22 @@ if(NOT USE_SYSTEM_XZ)
     ExternalProject_Add(xz-EXTERNAL
         URL https://netcologne.dl.sourceforge.net/project/lzmautils/xz-5.2.3.tar.gz
         URL_HASH SHA512=a5eb4f707cf31579d166a6f95dbac45cf7ea181036d1632b4f123a4072f502f8d57cd6e7d0588f0bf831a07b8fc4065d26589a25c399b95ddcf5f73435163da6
-        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
-        BUILD_COMMAND make
-        INSTALL_COMMAND make install
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} CPPFLAGS=${CPPFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --with-pic --disable-shared --enable-static --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
+        BUILD_COMMAND ${MAKE}
+        INSTALL_COMMAND ${MAKE} install
     )
 
     import_external_project(
         TARGET_NAME xz
         EXT_PROJECT_NAME xz-EXTERNAL
+        LIBRARY_DIRS <INSTALL_DIR>/lib/
         LIBRARIES "<INSTALL_DIR>/lib/liblzma.a"
         INCLUDE_DIRS "<SOURCE_DIR>/src/liblzma/api/"
     )
 else()
     message(STATUS "Using system xz")
 
-    import_find_pkg_target(xz LibLZMA LIBLZMA)
+    import_pkgconfig_target(TARGET_NAME xz PKGCONFIG_TARGET liblzma STATIC)
 endif()
 
 
@@ -217,18 +246,18 @@ ExternalProject_Add(squashfuse-EXTERNAL
     GIT_TAG 1f98030
     UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
     PATCH_COMMAND bash -xe ${CMAKE_CURRENT_BINARY_DIR}/patch-squashfuse.sh
-    CONFIGURE_COMMAND libtoolize --force
+    CONFIGURE_COMMAND ${LIBTOOLIZE} --force
               COMMAND env ACLOCAL_FLAGS="-I /usr/share/aclocal" aclocal
-              COMMAND autoheader
-              COMMAND automake --force-missing --add-missing
-              COMMAND autoreconf -fi || true
-              COMMAND sed -i "/PKG_CHECK_MODULES.*/,/,:./d" configure  # https://github.com/vasi/squashfuse/issues/12
-              COMMAND sed -i "s/typedef off_t sqfs_off_t/typedef int64_t sqfs_off_t/g" common.h  # off_t's size might differ, see https://stackoverflow.com/a/9073762
-              COMMAND CC=${CC} CXX=${CXX} <SOURCE_DIR>/configure --disable-demo --disable-high-level --without-lzo --without-lz4 --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib --with-xz=${xz_PREFIX}
-              COMMAND sed -i "s|XZ_LIBS = -llzma |XZ_LIBS = -Bstatic ${xz_LIBRARIES}/|g" Makefile
-    BUILD_COMMAND make
+              COMMAND ${AUTOHEADER}
+              COMMAND ${AUTOMAKE} --force-missing --add-missing
+              COMMAND ${AUTORECONF} -fi || true
+              COMMAND ${SED} -i "/PKG_CHECK_MODULES.*/,/,:./d" configure  # https://github.com/vasi/squashfuse/issues/12
+              COMMAND ${SED} -i "s/typedef off_t sqfs_off_t/typedef int64_t sqfs_off_t/g" common.h  # off_t's size might differ, see https://stackoverflow.com/a/9073762
+              COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --disable-demo --disable-high-level --without-lzo --without-lz4 --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib --with-xz=${xz_PREFIX} ${EXTRA_CONFIGURE_FLAGS}
+              COMMAND ${SED} -i "s|XZ_LIBS = -llzma |XZ_LIBS = -Bstatic ${xz_LIBRARIES}/|g" Makefile
+    BUILD_COMMAND ${MAKE}
     BUILD_IN_SOURCE ON
-    INSTALL_COMMAND make install
+    INSTALL_COMMAND ${MAKE} install
 )
 
 import_external_project(
@@ -248,13 +277,13 @@ if(NOT USE_SYSTEM_INOTIFY_TOOLS)
     ExternalProject_Add(inotify-tools-EXTERNAL
         URL https://github.com/downloads/rvoicilas/inotify-tools/inotify-tools-3.14.tar.gz
         URL_HASH SHA512=6074d510e89bba5da0d7c4d86f2562c662868666ba0a7ea5d73e53c010a0050dd1fc01959b22cffdb9b8a35bd1b0b43c04d02d6f19927520f05889e8a9297dfb
-        PATCH_COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.guess$<SEMICOLON>hb=HEAD"
-              COMMAND wget -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.sub$<SEMICOLON>hb=HEAD"
-        UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
-        BUILD_COMMAND make
+        PATCH_COMMAND ${WGET} -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.guess$<SEMICOLON>hb=HEAD"
+              COMMAND ${WGET} -N --content-disposition "https://git.savannah.gnu.org/gitweb/?p=config.git$<SEMICOLON>a=blob_plain$<SEMICOLON>f=config.sub$<SEMICOLON>hb=HEAD"
+        UPDATE_COMMAND ""  # ${MAKE} sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --enable-shared --enable-static --enable-doxygen=no --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
+        BUILD_COMMAND ${MAKE}
         BUILD_IN_SOURCE ON
-        INSTALL_COMMAND make install
+        INSTALL_COMMAND ${MAKE} install
     )
 
     import_external_project(
@@ -278,9 +307,9 @@ if(NOT USE_SYSTEM_LIBARCHIVE)
     ExternalProject_Add(libarchive-EXTERNAL
         URL https://www.libarchive.org/downloads/libarchive-3.3.1.tar.gz
         URL_HASH SHA512=90702b393b6f0943f42438e277b257af45eee4fa82420431f6a4f5f48bb846f2a72c8ff084dc3ee9c87bdf8b57f4d8dddf7814870fe2604fe86c55d8d744c164
-        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=-fPIC CPPFLAGS=-fPIC <SOURCE_DIR>/configure --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib
-        BUILD_COMMAND make
-        INSTALL_COMMAND make install
+        CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} CPPFLAGS=${CPPFLAGS} LDFLAGS=${LDFLAGS} <SOURCE_DIR>/configure --with-pic --disable-shared --enable-static --disable-bsdtar --disable-bsdcat --disable-bsdcpio --with-zlib --without-bz2lib --without-iconv --without-lz4 --without-lzma --without-lzo2 --without-nettle --without-openssl --without-xml2 --without-expat --prefix=<INSTALL_DIR> --libdir=<INSTALL_DIR>/lib ${EXTRA_CONFIGURE_FLAGS}
+        BUILD_COMMAND ${MAKE}
+        INSTALL_COMMAND ${MAKE} install
     )
 
     import_external_project(
@@ -305,8 +334,8 @@ if(NOT USE_SYSTEM_GTEST)
         ExternalProject_Add(gtest-EXTERNAL
             GIT_REPOSITORY https://github.com/google/googletest.git
             GIT_TAG release-1.8.0
-            UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
-            CONFIGURE_COMMAND ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
+            UPDATE_COMMAND ""  # ${MAKE} sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
+            CONFIGURE_COMMAND CC=${CC} CXX=${CXX} CFLAGS=${CFLAGS} CPPFLAGS=${CPPFLAGS} LDFLAGS=${LDFLAGS} ${CMAKE_COMMAND} -G${CMAKE_GENERATOR} -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR> <SOURCE_DIR>/googletest
         )
 
         import_external_project(
@@ -324,21 +353,36 @@ endif()
 
 
 # TODO: allow using system wide mksquashfs
+set(mksquashfs_cflags "-DXZ_SUPPORT ${CFLAGS}")
+
+if(xz_LIBRARIES MATCHES "\\.a$")
+    set(mksquashfs_ldflags "${xz_LIBRARIES}")
+else()
+    set(mksquashfs_ldflags "-l${xz_LIBRARIES}")
+endif()
+
+if(xz_INCLUDE_DIRS)
+    set(mksquashfs_cflags "${mksquashfs_cflags} -I${xz_INCLUDE_DIRS}")
+endif()
+if(xz_LIBRARY_DIRS)
+    set(mksquashfs_ldflags "${mksquashfs_ldflags} -L${xz_LIBRARY_DIRS}")
+endif()
+
 ExternalProject_Add(mksquashfs
     GIT_REPOSITORY https://github.com/plougher/squashfs-tools/
     GIT_TAG 5be5d61
-    UPDATE_COMMAND ""  # make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
+    UPDATE_COMMAND ""  # ${MAKE} sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
     PATCH_COMMAND patch -N -p1 < ${PROJECT_SOURCE_DIR}/src/mksquashfs-mkfs-fixed-timestamp.patch || true
-    CONFIGURE_COMMAND sed -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += -DXZ_SUPPORT -I${xz_INCLUDE_DIRS}|g" <SOURCE_DIR>/squashfs-tools/Makefile
-    COMMAND sed -i "s|LIBS += -llzma|LIBS += -Bstatic ${xz_LIBRARIES}|g" <SOURCE_DIR>/squashfs-tools/Makefile
-    COMMAND sed -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
-    COMMAND sed -i "/cp unsquashfs/d" squashfs-tools/Makefile
-    BUILD_COMMAND CC=${CC} CXX=${CXX} make -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
-    # make install unfortunately expects unsquashfs to be built as well, hence can't install the binary
+    CONFIGURE_COMMAND ${SED} -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += ${mksquashfs_cflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+    COMMAND ${SED} -i "s|LIBS += -llzma|LIBS += -Bstatic ${mksquashfs_ldflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+    COMMAND ${SED} -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
+    COMMAND ${SED} -i "/cp unsquashfs/d" squashfs-tools/Makefile
+    BUILD_COMMAND env CC=${CC} CXX=${CXX} LDFLAGS=${LDFLAGS} ${MAKE} -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
+    # ${MAKE} install unfortunately expects unsquashfs to be built as well, hence can't install the binary
     # therefore using built file in SOURCE_DIR
     # TODO: implement building out of source
     BUILD_IN_SOURCE ON
-    INSTALL_COMMAND make -C squashfs-tools/ install INSTALL_DIR=<INSTALL_DIR>
+    INSTALL_COMMAND ${MAKE} -C squashfs-tools/ install INSTALL_DIR=<INSTALL_DIR>
 )
 
 ExternalProject_Get_Property(mksquashfs INSTALL_DIR)

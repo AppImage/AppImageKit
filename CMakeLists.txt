@@ -65,32 +65,8 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-# first of all, make sure required programs are available
-function(check_program name)
-    string(TOUPPER ${name} name_upper)
-    find_program(${name_upper} ${name})
-
-    message(STATUS "Checking for program ${name}")
-
-    if(NOT ${name_upper})
-        message(FATAL_ERROR "Could not find required program ${name}.")
-    endif()
-
-    mark_as_advanced(${name_upper})
-endfunction()
-
-check_program(aclocal)
-check_program(autoheader)
-check_program(automake)
-check_program(autoreconf)
-check_program(libtoolize)
-check_program(patch)
-check_program(sed)
-check_program(wget)
-check_program(xxd)
-check_program(desktop-file-validate)
-# TODO: add checks for remaining commands
-
+# find paths to tools, incorporating optional TOOLS_PREFIX
+include(cmake/tools.cmake)
 
 # configure dependencies
 include(cmake/dependencies.cmake)

@@ -7,8 +7,12 @@ set(APPIMAGEKIT_EMBED_MAGIC_BYTES ON CACHE BOOL "")
 # mark as advanced so it won't show up in CMake GUIs etc., to prevent users from accidentally using this option
 mark_as_advanced(APPIMAGEKIT_EMBED_MAGIC_BYTES)
 
-set(runtime_cflags -std=c99 -Os -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT_COMMIT}\\" -I${xz_INCLUDE_DIRS} -I${squashfuse_INCLUDE_DIRS} -I${PROJECT_SOURCE_DIR}/include)
-set(runtime_ldflags -s -Wl,--gc-sections)
+set(runtime_cflags -std=c99 -Os -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT_COMMIT}\\" -I${squashfuse_INCLUDE_DIRS} -I${PROJECT_SOURCE_DIR}/include ${DEPENDENCIES_CFLAGS})
+set(runtime_ldflags -s -Wl,--gc-sections ${DEPENDENCIES_LDFLAGS})
+
+if(NOT xz_INCLUDE_DIRS STREQUAL "")
+    list(APPEND runtime_cflags -I${xz_INCLUDE_DIRS})
+endif()
 
 if(APPIMAGEKIT_RUNTIME_ENABLE_SETPROCTITLE)
     set(runtime_cflags ${runtime_cflags} -DENABLE_SETPROCTITLE)
@@ -42,28 +46,28 @@ add_custom_command(
 # TODO: find out whether all the sections can be embedded in a single objcopy call
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.1.o
-    COMMAND objcopy --add-section .digest_md5=16_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.0.o runtime.1.o
+    COMMAND ${OBJCOPY} --add-section .digest_md5=16_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.0.o runtime.1.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.0.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/16_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.2.o
-    COMMAND objcopy --add-section .upd_info=1024_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.1.o runtime.2.o
+    COMMAND ${OBJCOPY} --add-section .upd_info=1024_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.1.o runtime.2.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.1.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/1024_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.3.o
-    COMMAND objcopy --add-section .sha256_sig=1024_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.2.o runtime.3.o
+    COMMAND ${OBJCOPY} --add-section .sha256_sig=1024_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.2.o runtime.3.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.2.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/1024_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o
-    COMMAND objcopy --add-section .sig_key=8192_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.3.o runtime.4.o
+    COMMAND ${OBJCOPY} --add-section .sig_key=8192_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.3.o runtime.4.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.3.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/8192_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
@@ -80,8 +84,6 @@ string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
 if (BUILD_TYPE_UPPER STREQUAL DEBUG)
     message(WARNING "Debug build, not stripping runtime to allow debugging using gdb etc.")
 else()
-    find_program(STRIP strip)
-
     add_custom_command(
         TARGET runtime
         POST_BUILD
@@ -101,7 +103,7 @@ endif()
 # required for embedding in appimagetool
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime_embed.o
-    COMMAND xxd -i runtime | ${CMAKE_C_COMPILER} -c -x c - -o runtime_embed.o
+    COMMAND ${XXD} -i runtime | ${CMAKE_C_COMPILER} -c -x c - -o runtime_embed.o
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
     MAIN_DEPENDENCY runtime
 )
