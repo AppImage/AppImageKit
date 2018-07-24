@@ -35,18 +35,24 @@ THE SOFTWARE.
 #include <string.h>
 #include <unistd.h>
 
-/** Macro to set environment variables. */
-#define SET_NEW_ENV(str, len, fmt, ...)         \
-    format = fmt;                               \
-    length = strlen(format);                    \
-    char* str = calloc(length, sizeof(char));   \
-    snprintf(str, length, format, __VA_ARGS__);  \
-    putenv(str);
+/** Macro to set environment variables.
+  * The do-while(0) is because of http://www.bruceblinn.com/linuxinfo/DoWhile.html
+  */
+// TODO: Convert this to a regular function later?
+#define SET_NEW_ENV(str, len, fmt, ...)             \
+    do {                                            \
+        format = fmt;                               \
+        length = strlen(format);                    \
+        char* str = calloc(length, sizeof(char));   \
+        snprintf(str, length, format, __VA_ARGS__); \
+        putenv(str);                                \
+        free(str);                                  \
+    } while(0);
 
 /** Macro to return the largest of a pair of numbers */
-#define MAX(a, b) (a > b? a : b)
+#define MAX(a, b) (a > b ? a : b)
 
-// TODO: Is this arbitrary? Check and refine.
+// This constant will be used for allocating strings of unknown size.
 #define LINE_SIZE 255
 
 /** Throw error and exit. */
@@ -91,7 +97,7 @@ int main(int argc, char *argv[]) {
 
     if (ret == 0) {
         // If we found no .desktop files, there's nothing to run. Fatal error.
-        die("No .desktop files found.\n");
+        die("No .desktop files found\n");
     } else if(ret == -1) {
         // If there was an error with scandir(), we can't go on. Fatal error.
         die("Could not scan directory %s\n", appdir);
@@ -103,7 +109,7 @@ int main(int argc, char *argv[]) {
     char* desktop_file = calloc(LINE_SIZE, sizeof(char));
     snprintf(desktop_file, LINE_SIZE, "%s/%s", appdir, namelist[0]->d_name);
     // Open the desktop file for reading.
-    FILE* f = fopen(desktop_file, "r";)
+    FILE* f = fopen(desktop_file, "r");
     // Store the line we're reading.
     char* line = malloc(LINE_SIZE);
     // Skip the `Exec=` prefix on `line`, only looking at the stored value.
@@ -119,44 +125,44 @@ int main(int argc, char *argv[]) {
         if (getline(&line, &n, f) == -1) {
             die("Executable not found. Make sure there is a line starting with 'Exec='\n");
         }
-    } while(strncmp(line, "Exec", 5));
+    } while(strncmp(line, "Exec=", 5));
     // We now have the line we need, close the file.
     fclose(f);
 
     /* If the line we found has nothing more than `Exec=`, it's missing a value.
      * This means the .desktop file is malformed. Fatal error.
      */
-    if( strlen(line) <= 5) {
-        die("Executable not found. Make sure 'Exec=' has a value.\n");
+    if(strlen(line) <= 5) {
+        die("Executable not found. Make sure 'Exec=' has a value\n");
     }
 
     // Flag if we're within quotation marks.
     bool in_quotes = false;
 
     // Loop through each character in a line.
-    int n = 0;
+    int ch = 0;
     do {
-        if ((exe[n] == 10 || exe[n] == 13) && exe[n+1] && exe[n+2]) {
+        if ((exe[ch] == 10 || exe[ch] == 13) && exe[ch+1] && exe[ch+2]) {
             /* If we encounter a LINE FEED (10) or CARRIAGE RETURN (13), change
             * the next three characters to NULL CHAR. This acts as a sentry
             * while parsing through all the substrings later.
             * (We also confirm that the next two characters aren't already null.)
             */
-            exe[n] = '\0';
-            exe[n+1] = '\0';
-            exe[n+2] = '\0';
-        } else if (exe[n] == '"' && exe[n-1] != '\\') {
+            exe[ch] = '\0';
+            exe[ch+1] = '\0';
+            exe[ch+2] = '\0';
+        } else if (exe[ch] == '"' && exe[ch-1] != '\\') {
             /* If the current character is a non-escaped quote, toggle whether
              * we are parsing inside a string.
              */
             in_quotes = !in_quotes;
-        } else if (line[n] == ' ' && !in_quotes) {
+        } else if (line[ch] == ' ' && !in_quotes) {
             /* If the current character is a space, change it to a NULL CHAR,
             * effectively splitting the string into multiple strings.
             * This will allow us to iterate through the space-delimited args
             * in the upcoming step.
             */
-            exe[n] = '\0';
+            exe[ch] = '\0';
         }
     } while (exe[++n] != '\0');
 
@@ -218,14 +224,14 @@ int main(int argc, char *argv[]) {
                 case 'i':
                 case 'c':
                 case 'k':
-                    fprintf(stderr, "WARNING: Desktop field field %%%c is not currently supported.\n", code);
+                    fprintf(stderr, "WARNING: Desktop file field %%%c is not currently supported\n", code);
                     break;
                 // Everything else is invalid. Throw a non-fatal error.
                 /* TODO: Properly support deprecated codes (accept but remove)
                  * according to spec (???)
                  */
                 default:
-                    fprintf(stderr, "WARNING: Invalid desktop file field code %%%c.\n", code);
+                    fprintf(stderr, "WARNING: Invalid desktop file field code %%%c\n", code);
                     break;
             }
         } else {
@@ -247,7 +253,7 @@ int main(int argc, char *argv[]) {
 
     // Calculate the length of the application directory path string.
     size_t appdir_s = strlen(appdir);
-    // Define the path to the ./usr subfolder in the application directory.
+    // Define the path to the ./usr subdirectory in the application directory.
     char *usr_in_appdir = malloc(appdir_s + 5);
     snprintf(usr_in_appdir, appdir_s + 5, "%s/usr", appdir);
     // Attempt to change to the `<appdir>/usr` directory.
@@ -292,7 +298,7 @@ int main(int argc, char *argv[]) {
     old_env = getenv("GSETTINGS_SCHEMA_DIR") ?: "";
     SET_NEW_ENV(new_gsettings_schema_dir, appdir_s + strlen(old_env), "GSETTINGS_SCHEMA_DIR=%s/usr/share/glib-2.0/schemas/:%s", appdir, old_env);
 
-    //Append the Qt Path
+    //Append the Qt Plugin Path
     old_env = getenv("QT_PLUGIN_PATH") ?: "";
     SET_NEW_ENV(new_qt_plugin_path, appdir_s*10 + strlen(old_env), "QT_PLUGIN_PATH=%s/usr/lib/qt4/plugins/:%s/usr/lib/i386-linux-gnu/qt4/plugins/:%s/usr/lib/x86_64-linux-gnu/qt4/plugins/:%s/usr/lib32/qt4/plugins/:%s/usr/lib64/qt4/plugins/:%s/usr/lib/qt5/plugins/:%s/usr/lib/i386-linux-gnu/qt5/plugins/:%s/usr/lib/x86_64-linux-gnu/qt5/plugins/:%s/usr/lib32/qt5/plugins/:%s/usr/lib64/qt5/plugins/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
 
@@ -320,14 +326,18 @@ int main(int argc, char *argv[]) {
     free(line);
     free(desktop_file);
     free(usr_in_appdir);
-    free(new_pythonhome);
-    free(new_path);
-    free(new_ld_library_path);
-    free(new_pythonpath);
-    free(new_xdg_data_dirs);
-    free(new_perllib);
-    free(new_gsettings_schema_dir);
-    free(new_qt_plugin_path);
+
+    /* NOTE: These are no longer needed, as we free `str` at the end of the
+     * SET_NEW_ENV() macro.
+     */
+    // free(new_pythonhome);
+    // free(new_path);
+    // free(new_ld_library_path);
+    // free(new_pythonpath);
+    // free(new_xdg_data_dirs);
+    // free(new_perllib);
+    // free(new_gsettings_schema_dir);
+    // free(new_qt_plugin_path);
 
     return 0;
 }
