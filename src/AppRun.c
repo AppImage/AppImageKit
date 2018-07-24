@@ -51,7 +51,7 @@ THE SOFTWARE.
 /** Macro to return the largest of a pair of numbers */
 #define MAX(a,b)    (a > b ? a : b)
 
-/* Redefine the boolean type and its constants to use integers, with n<0 == true.
+/* Define the boolean type and its constants to use integers, with n<0 == true.
  * FIXME: This is terrible, bad and wrong. Fix it in refactor.
  */
 #define bool int
@@ -85,8 +85,8 @@ int main(int argc, char *argv[]) {
     // Check for .desktop files
     // The return code for whether we found a .desktop file
     int ret;
-    // A pointer to a pointer of a list of file paths. (NOTE: Why?)
-    struct dirent **namelist;
+    // An array of pointers to lists of file paths.
+    struct dirent** namelist;
     // Scan for .desktop files.
     ret = scandir(appdir, &namelist, filter, NULL);
 
@@ -269,7 +269,9 @@ int main(int argc, char *argv[]) {
     size_t length;
     const char *format;
 
-    /* https://docs.python.org/2/using/cmdline.html#envvar-PYTHONHOME */
+    /* Append the Python home path.
+     * https://docs.python.org/2/using/cmdline.html#envvar-PYTHONHOME
+     */
     SET_NEW_ENV(new_pythonhome, appdir_s, "PYTHONHOME=%s/usr/", appdir);
 
     // Append the system path.
