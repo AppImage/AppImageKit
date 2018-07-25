@@ -327,17 +327,5 @@ int main(int argc, char *argv[]) {
     free(desktop_file);
     free(usr_in_appdir);
 
-    /* NOTE: These are no longer needed, as we free `str` at the end of the
-     * SET_NEW_ENV() macro.
-     */
-    // free(new_pythonhome);
-    // free(new_path);
-    // free(new_ld_library_path);
-    // free(new_pythonpath);
-    // free(new_xdg_data_dirs);
-    // free(new_perllib);
-    // free(new_gsettings_schema_dir);
-    // free(new_qt_plugin_path);
-
     return 0;
 }
