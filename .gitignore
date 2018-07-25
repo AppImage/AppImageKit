@@ -3,3 +3,4 @@ build/
 cmake-build-*/
 .idea/
 Testing/
+codealike.json
