@@ -361,6 +361,7 @@ main (int argc, char *argv[])
         char *pattern;
         char *prefix;
         char prefixed_path_to_extract[1024];
+        char **created_inode;
 
         prefix = "squashfs-root/";
 
@@ -378,6 +379,13 @@ main (int argc, char *argv[])
 
         if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
             exit(1);
+
+        created_inode = malloc(fs.sb.inodes * sizeof(char *));
+        if(created_inode != NULL) {
+            memset(created_inode, 0, fs.sb.inodes * sizeof(char *));
+        } else {
+            fprintf(stderr, "Can't track hardlinks.\n");
+        }
 
         if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
             die("sqfs_traverse_open error");
@@ -404,6 +412,16 @@ main (int argc, char *argv[])
                             }
                         }
                     } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
+                        if(created_inode[inode.base.inode_number - 1]) {
+                            unlink(prefixed_path_to_extract);
+                            if(link(created_inode[inode.base.inode_number - 1], prefixed_path_to_extract) == -1) {
+                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, created_inode[inode.base.inode_number - 1], strerror(errno));
+                                // fallthrow and follow the extract logic in the hope that it will work
+                            } else {
+                                continue;
+                            }
+                        }
+                        created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
                         // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
                         if(private_sqfs_stat(&fs, &inode, &st) != 0)
                             die("private_sqfs_stat error");
