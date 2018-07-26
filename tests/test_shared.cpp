@@ -45,14 +45,17 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
 
     ASSERT_EQ(error, NULL) << "Error while creating key file from data: " << error->message;
 
+    gchar desktop_filename[] = "desktop_filename";
+    gchar md5testvalue[] = "md5testvalue";
+
     if (success) {
-        write_edited_desktop_file(keyFile, "testpath", strdup("vendorprefix"), 1, strdup("md5testvalue"), false);
+        write_edited_desktop_file(keyFile, "testpath", desktop_filename, 1, md5testvalue, false);
     }
 
     g_key_file_free(keyFile);
 
     stringstream pathToInstalledDesktopFile;
-    pathToInstalledDesktopFile << tempHome << "/.local/share/applications/appimagekit_def-abc";
+    pathToInstalledDesktopFile << tempHome << g_strdup_printf("/.local/share/applications/appimagekit_%s-%s", md5testvalue, desktop_filename);
 
     // now, read original and installed desktop file, and compare both
     ifstream originalStrm(pathToOriginalDesktopFile.str().c_str());
