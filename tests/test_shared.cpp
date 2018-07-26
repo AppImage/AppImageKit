@@ -138,7 +138,7 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
                 ASSERT_EQ(execSplit[i], originalExecSplit[i]);
             }
         } else if (key == "Icon") {
-            ASSERT_EQ(value, "appimagekit_def_cura-icon");
+            ASSERT_EQ(value, g_strdup_printf("appimagekit_%s_cura-icon", md5testvalue));
         } else {
             ASSERT_EQ(value, (*entry).second);
         }
