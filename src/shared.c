@@ -633,7 +633,7 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
         }
 
         // iterate over locales, check whether name or icon entries exist, and edit accordingly
-        for (int i = 0; i < (sizeof(locales) / sizeof(gchar*)); i++) {
+        for (int i = 0; i < localesCount; i++) {
             const gchar* locale = locales[i];
 
             // check for icon entries and add MD5 hash
