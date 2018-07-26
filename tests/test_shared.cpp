@@ -53,11 +53,19 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     ASSERT_TRUE(originalStrm) << "Failed to open desktop file " << pathToOriginalDesktopFile.str();
     ASSERT_TRUE(installedStrm) << "Failed to open desktop file " << pathToInstalledDesktopFile.str();
 
+    originalStrm.seekg(0, ios::end);
+    unsigned long originalStrmSize = static_cast<unsigned long>(originalStrm.tellg());
+    originalStrm.seekg(0, ios::beg);
+
+    installedStrm.seekg(0, ios::end);
+    unsigned long installedStrmSize = static_cast<unsigned long>(installedStrm.tellg());
+    installedStrm.seekg(0, ios::beg);
+
     // split both files by lines, then convert to key-value list, and check whether all lines from original file
     // are also available in the installed file
     // some values modified by write_edited_desktop_file need some extra checks, which can be performed then.
-    vector<char> originalData(100 * 1024 * 1024);
-    vector<char> installedData(100 * 1024 * 1024);
+    vector<char> originalData(originalStrmSize);
+    vector<char> installedData(installedStrmSize);
 
     originalStrm.read(originalData.data(), originalData.size());
     installedStrm.read(installedData.data(), originalData.size());
