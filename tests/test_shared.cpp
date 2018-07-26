@@ -38,8 +38,12 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     // read in desktop file
     ifs.read(buffer.data(), buffer.size());
 
+    GError* error = NULL;
+
     GKeyFile *keyFile = g_key_file_new();
-    gboolean success = g_key_file_load_from_data(keyFile, buffer.data(), buffer.size(), G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+    gboolean success = g_key_file_load_from_data(keyFile, buffer.data(), buffer.size(), G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, &error);
+
+    ASSERT_EQ(error, NULL) << "Error while creating key file from data: " << error->message;
 
     if (success) {
         write_edited_desktop_file(keyFile, "testpath", strdup("vendorprefix"), 1, strdup("md5testvalue"), false);
