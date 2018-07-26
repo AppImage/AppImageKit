@@ -578,48 +578,111 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     {
         char* appimage_version = g_key_file_get_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "X-AppImage-Version", NULL);
 
-        if (appimage_version != NULL) {
-            // parse desktop files and generate a list of locales representing all localized Name entries
-            // NULL refers to the key without the locale tag
-            gchar* locales[256] = {NULL};
-            gint localesCount = 1;
+        // parse desktop files and generate a list of locales representing all localized Name entries
+        // NULL refers to the key without the locale tag
+        gchar* locales[256] = {NULL};
+        gint localesCount = 1;
 
-            {
-                // create temporary in-memory copy of the keyfile
-                gsize bufsize;
-                char* orig_buffer = g_key_file_to_data(key_file_structure, &bufsize, NULL);
+        {
+            // create temporary in-memory copy of the keyfile
+            gsize bufsize;
+            char* orig_buffer = g_key_file_to_data(key_file_structure, &bufsize, NULL);
 
-                if (orig_buffer == NULL) {
-                    fprintf(stderr, "Failed to create in-memory copy of desktop file\n");
-                    return false;
-                }
-
-                // need to keep original reference to buffer to be able to free() it later
-                char* buffer = orig_buffer;
-
-                // parse line by line
-                char* line = NULL;
-                while ((line = strsep(&buffer, "\n")) != NULL) {
-                    if (strncmp(line, "Name[", 5) != 0)
-                        continue;
-
-                    // python: s = split(line, "[")[1]
-                    char* s = strsep(&line, "[");
-                    s = strsep(&line, "[");
-
-                    // python: locale = split(s, "]")[0]
-                    char* locale = strsep(&s, "]");
-
-                    locales[localesCount++] = locale;
-                }
-
-                free(orig_buffer);
+            if (orig_buffer == NULL) {
+                fprintf(stderr, "Failed to create in-memory copy of desktop file\n");
+                return false;
             }
 
+            // need to keep original reference to buffer to be able to free() it later
+            char* buffer = orig_buffer;
 
-            for (int i = 0; i < (sizeof(locales) / sizeof(gchar*)); i++) {
-                const gchar* locale = locales[i];
+            // parse line by line
+            char* line = NULL;
+            while ((line = strsep(&buffer, "\n")) != NULL) {
+                // the only keys for which we're interested in localizations is Name and Icon
+                if (strncmp(line, "Name[", 5) != 0 && strncmp(line, "Icon[", 5) != 0)
+                    continue;
 
+                // python: s = split(line, "[")[1]
+                char* s = strsep(&line, "[");
+                s = strsep(&line, "[");
+
+                // python: locale = split(s, "]")[0]
+                char* locale = strsep(&s, "]");
+
+                // avoid duplicates in list of locales
+                bool is_duplicate = false;
+
+                // unfortunately, the list of locales is not sorted, therefore a linear search is required
+                // however, this won't have a significant impact on the performance
+                // start at index 1, first entry is NULL
+                for (int i = 1; i < localesCount; i++) {
+                    if (strcmp(locale, locales[i]) == 0) {
+                        is_duplicate = true;
+                        break;
+                    }
+                }
+
+                if (is_duplicate)
+                    continue;
+
+                locales[localesCount++] = locale;
+            }
+
+            free(orig_buffer);
+        }
+
+        // iterate over locales, check whether name or icon entries exist, and edit accordingly
+        for (int i = 0; i < (sizeof(locales) / sizeof(gchar*)); i++) {
+            const gchar* locale = locales[i];
+
+            // check for icon entries and add MD5 hash
+            {
+                // check whether the key is set at all
+                gchar* old_contents = NULL;
+
+                // it's a little annoying that the GLib functions don't simply work with NULL as the locale, that'd
+                // make the following if-else construct unnecessary
+                if (locale == NULL) {
+                    old_contents = g_key_file_get_string(
+                        key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, NULL
+                    );
+                } else {
+                    old_contents = g_key_file_get_locale_string(
+                        key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, locale, NULL
+                    );
+                }
+
+                // continue to next key if not set
+                if (old_contents == NULL) {
+                    g_free(old_contents);
+                    continue;
+                }
+
+                // copy key's original contents
+                static const gchar old_key[] = "X-AppImage-Old-Icon";
+
+                // append AppImage version
+                gchar *basename = g_path_get_basename(old_contents);
+                gchar* new_contents = g_strdup_printf("%s_%s_%s", vendorprefix, md5, basename);
+                g_free(basename);
+
+                // see comment for above if-else construct
+                if (locale == NULL) {
+                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, old_contents);
+                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, new_contents);
+                } else {
+                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, locale, old_contents);
+                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, locale, new_contents);
+                }
+
+                // cleanup
+                g_free(old_contents);
+                g_free(new_contents);
+            }
+
+            // check for name entries and append version suffix
+            if (appimage_version != NULL) {
                 // check whether the key is set at all
                 gchar* old_contents;
 
@@ -664,20 +727,6 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 
         // cleanup
         g_free(appimage_version);
-    }
-
-    gchar *icon_path = g_key_file_get_value(key_file_structure, "Desktop Entry", "Icon", NULL);
-    gchar *basename = g_path_get_basename(icon_path);
-
-    {
-        gchar *icon_with_md5 = g_strdup_printf("%s_%s_%s", vendorprefix, md5, basename);
-
-        g_free(basename);
-        g_free(icon_path);
-
-        g_key_file_set_value(key_file_structure, "Desktop Entry", "Icon", icon_with_md5);
-
-        g_free(icon_with_md5);
     }
 
 #ifdef APPIMAGED
