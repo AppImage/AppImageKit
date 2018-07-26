@@ -637,6 +637,7 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
 
                 // continue to next key if not set
                 if (old_contents == NULL) {
+                    g_free(old_contents);
                     continue;
                 }
 
