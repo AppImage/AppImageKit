@@ -102,6 +102,9 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
 
         map<string, string>::const_iterator entry = entries.find(key);
 
+        if (entry == entries.end())
+            FAIL() << "No such entry in desktop file: " << key;
+
         if (key == "Exec" || key == "TryExec") {
             vector<string> execSplit = splitString(value);
             EXPECT_GT(execSplit.size(), 0) << "key: " << key;
