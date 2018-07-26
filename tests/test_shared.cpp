@@ -28,8 +28,12 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
 
     ASSERT_TRUE(ifs) << "Failed to open file: " << pathToOriginalDesktopFile.str();
 
+    ifs.seekg(0, ios::end);
+    unsigned long bufferSize = static_cast<unsigned long>(ifs.tellg());
+    ifs.seekg(0, ios::beg);
+
     // should be large enough
-    vector<char> buffer(100 * 1024 * 1024);
+    vector<char> buffer(bufferSize);
 
     // read in desktop file
     ifs.read(buffer.data(), buffer.size());
