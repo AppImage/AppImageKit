@@ -29,7 +29,7 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     ASSERT_TRUE(ifs) << "Failed to open file: " << pathToOriginalDesktopFile.str();
 
     ifs.seekg(0, ios::end);
-    unsigned long bufferSize = static_cast<unsigned long>(ifs.tellg());
+    unsigned long bufferSize = static_cast<unsigned long>(ifs.tellg() + 1);
     ifs.seekg(0, ios::beg);
 
     // should be large enough
@@ -65,11 +65,11 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     ASSERT_TRUE(installedStrm) << "Failed to open desktop file " << pathToInstalledDesktopFile.str();
 
     originalStrm.seekg(0, ios::end);
-    unsigned long originalStrmSize = static_cast<unsigned long>(originalStrm.tellg());
+    unsigned long originalStrmSize = static_cast<unsigned long>(originalStrm.tellg() + 1);
     originalStrm.seekg(0, ios::beg);
 
     installedStrm.seekg(0, ios::end);
-    unsigned long installedStrmSize = static_cast<unsigned long>(installedStrm.tellg());
+    unsigned long installedStrmSize = static_cast<unsigned long>(installedStrm.tellg() + 1);
     installedStrm.seekg(0, ios::beg);
 
     // split both files by lines, then convert to key-value list, and check whether all lines from original file
