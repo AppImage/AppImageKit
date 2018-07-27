@@ -578,10 +578,14 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
     {
         char* appimage_version = g_key_file_get_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, "X-AppImage-Version", NULL);
 
-        // parse desktop files and generate a list of locales representing all localized Name entries
+        // parse desktop files and generate a list of locales representing all localized Name/Icon entries
         // NULL refers to the key without the locale tag
-        gchar* locales[256] = {NULL};
-        gint localesCount = 1;
+        // the locales for both entry types need to be tracked separately due to a limitation in the GLib API, see
+        // the comment below for more information
+        gchar* nameLocales[256] = {NULL};
+        gchar* iconLocales[256] = {NULL};
+        gint nameLocalesCount = 1;
+        gint iconLocalesCount = 1;
 
         {
             // create temporary in-memory copy of the keyfile
@@ -599,8 +603,11 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
             // parse line by line
             char* line = NULL;
             while ((line = strsep(&buffer, "\n")) != NULL) {
+                const bool is_name_entry = strncmp(line, "Name[", 5) == 0;
+                const bool is_icon_entry = strncmp(line, "Icon[", 5) == 0;
+
                 // the only keys for which we're interested in localizations is Name and Icon
-                if (strncmp(line, "Name[", 5) != 0 && strncmp(line, "Icon[", 5) != 0)
+                if (!(is_name_entry || is_icon_entry))
                     continue;
 
                 // python: s = split(line, "[")[1]
@@ -610,13 +617,25 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
                 // python: locale = split(s, "]")[0]
                 char* locale = strsep(&s, "]");
 
+                // create references to the right variables
+                gchar** locales = NULL;
+                gint* localesCount = NULL;
+
+                if (is_name_entry) {
+                    locales = nameLocales;
+                    localesCount = &nameLocalesCount;
+                } else if (is_icon_entry) {
+                    locales = iconLocales;
+                    localesCount = &iconLocalesCount;
+                }
+
                 // avoid duplicates in list of locales
                 bool is_duplicate = false;
 
                 // unfortunately, the list of locales is not sorted, therefore a linear search is required
                 // however, this won't have a significant impact on the performance
                 // start at index 1, first entry is NULL
-                for (int i = 1; i < localesCount; i++) {
+                for (int i = 1; i < *localesCount; i++) {
                     if (strcmp(locale, locales[i]) == 0) {
                         is_duplicate = true;
                         break;
@@ -626,63 +645,68 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
                 if (is_duplicate)
                     continue;
 
-                locales[localesCount++] = locale;
+                locales[(*localesCount)++] = locale;
             }
 
             free(orig_buffer);
         }
 
         // iterate over locales, check whether name or icon entries exist, and edit accordingly
-        for (int i = 0; i < localesCount; i++) {
-            const gchar* locale = locales[i];
+        for (int i = 0; i < iconLocalesCount; i++) {
+            const gchar* locale = iconLocales[i];
 
-            // check for icon entries and add MD5 hash
-            {
-                // check whether the key is set at all
-                gchar* old_contents = NULL;
+            // check whether the key is set at all
+            gchar* old_contents = NULL;
 
-                // it's a little annoying that the GLib functions don't simply work with NULL as the locale, that'd
-                // make the following if-else construct unnecessary
-                if (locale == NULL) {
-                    old_contents = g_key_file_get_string(
-                        key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, NULL
-                    );
-                } else {
-                    old_contents = g_key_file_get_locale_string(
-                        key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, locale, NULL
-                    );
-                }
-
-                // continue to next key if not set
-                if (old_contents == NULL) {
-                    g_free(old_contents);
-                    continue;
-                }
-
-                // copy key's original contents
-                static const gchar old_key[] = "X-AppImage-Old-Icon";
-
-                // append AppImage version
-                gchar *basename = g_path_get_basename(old_contents);
-                gchar* new_contents = g_strdup_printf("%s_%s_%s", vendorprefix, md5, basename);
-                g_free(basename);
-
-                // see comment for above if-else construct
-                if (locale == NULL) {
-                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, old_contents);
-                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, new_contents);
-                } else {
-                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, locale, old_contents);
-                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, locale, new_contents);
-                }
-
-                // cleanup
-                g_free(old_contents);
-                g_free(new_contents);
+            // it's a little annoying that the GLib functions don't simply work with NULL as the locale, that'd
+            // make the following if-else construct unnecessary
+            if (locale == NULL) {
+                old_contents = g_key_file_get_string(
+                    key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, NULL
+                );
+            } else {
+                // please note that the following call will return a value even if there is no localized version
+                // probably to save one call when you're just interested in getting _some_ value while reading
+                // a desktop file
+                old_contents = g_key_file_get_locale_string(
+                    key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, "XXXXX", NULL
+                );
             }
 
-            // check for name entries and append version suffix
-            if (appimage_version != NULL) {
+            // continue to next key if not set
+            if (old_contents == NULL) {
+                g_free(old_contents);
+                continue;
+            }
+
+            // copy key's original contents
+            static const gchar old_key[] = "X-AppImage-Old-Icon";
+
+            // append AppImage version
+            gchar* basename = g_path_get_basename(old_contents);
+            gchar* new_contents = g_strdup_printf("%s_%s_%s", vendorprefix, md5, basename);
+            g_free(basename);
+
+            // see comment for above if-else construct
+            if (locale == NULL) {
+                g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, old_contents);
+                g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON,
+                    new_contents);
+            } else {
+                g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, locale, old_contents);
+                g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, locale, new_contents);
+            }
+
+            // cleanup
+            g_free(old_contents);
+            g_free(new_contents);
+        }
+
+        // check for name entries and append version suffix
+        if (appimage_version != NULL) {
+            for (int i = 0; i < nameLocalesCount; i++) {
+                const gchar* locale = nameLocales[i];
+
                 // check whether the key is set at all
                 gchar* old_contents;
 
@@ -693,6 +717,9 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
                         key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, NULL
                     );
                 } else {
+                    // please note that the following call will return a value even if there is no localized version
+                    // probably to save one call when you're just interested in getting _some_ value while reading
+                    // a desktop file
                     old_contents = g_key_file_get_locale_string(
                         key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, locale, NULL
                     );
@@ -713,10 +740,12 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
                 // see comment for above if-else construct
                 if (locale == NULL) {
                     g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, old_contents);
-                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, new_contents);
+                    g_key_file_set_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME,
+                    new_contents);
                 } else {
                     g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, old_key, locale, old_contents);
-                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, locale, new_contents);
+                    g_key_file_set_locale_string(key_file_structure, G_KEY_FILE_DESKTOP_GROUP,
+                    G_KEY_FILE_DESKTOP_KEY_NAME, locale, new_contents);
                 }
 
                 // cleanup
