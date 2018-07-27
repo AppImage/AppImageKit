@@ -79,7 +79,7 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     vector<char> installedData(installedStrmSize, '\0');
 
     originalStrm.read(originalData.data(), originalData.size());
-    installedStrm.read(installedData.data(), originalData.size());
+    installedStrm.read(installedData.data(), installedData.size());
 
     vector<string> originalLines = splitString(originalData.data(), '\n');
     vector<string> installedLines = splitString(installedData.data(), '\n');
