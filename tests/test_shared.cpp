@@ -28,23 +28,34 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
 
     ASSERT_TRUE(ifs) << "Failed to open file: " << pathToOriginalDesktopFile.str();
 
+    ifs.seekg(0, ios::end);
+    unsigned long bufferSize = static_cast<unsigned long>(ifs.tellg() + 1);
+    ifs.seekg(0, ios::beg);
+
     // should be large enough
-    vector<char> buffer(100 * 1024 * 1024);
+    vector<char> buffer(bufferSize, '\0');
 
     // read in desktop file
     ifs.read(buffer.data(), buffer.size());
 
+    GError* error = NULL;
+
     GKeyFile *keyFile = g_key_file_new();
-    gboolean success = g_key_file_load_from_data(keyFile, buffer.data(), buffer.size(), G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+    gboolean success = g_key_file_load_from_data(keyFile, buffer.data(), buffer.size(), G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, &error);
+
+    ASSERT_EQ(error, NULL) << "Error while creating key file from data: " << error->message;
+
+    gchar desktop_filename[] = "desktop_filename";
+    gchar md5testvalue[] = "md5testvalue";
 
     if (success) {
-        write_edited_desktop_file(keyFile, "testpath", strdup("abc"), 1, strdup("def"), false);
+        write_edited_desktop_file(keyFile, "testpath", desktop_filename, 1, md5testvalue, false);
     }
 
     g_key_file_free(keyFile);
 
     stringstream pathToInstalledDesktopFile;
-    pathToInstalledDesktopFile << tempHome << "/.local/share/applications/appimagekit_def-abc";
+    pathToInstalledDesktopFile << tempHome << g_strdup_printf("/.local/share/applications/appimagekit_%s-%s", md5testvalue, desktop_filename);
 
     // now, read original and installed desktop file, and compare both
     ifstream originalStrm(pathToOriginalDesktopFile.str().c_str());
@@ -53,14 +64,22 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     ASSERT_TRUE(originalStrm) << "Failed to open desktop file " << pathToOriginalDesktopFile.str();
     ASSERT_TRUE(installedStrm) << "Failed to open desktop file " << pathToInstalledDesktopFile.str();
 
+    originalStrm.seekg(0, ios::end);
+    unsigned long originalStrmSize = static_cast<unsigned long>(originalStrm.tellg() + 1);
+    originalStrm.seekg(0, ios::beg);
+
+    installedStrm.seekg(0, ios::end);
+    unsigned long installedStrmSize = static_cast<unsigned long>(installedStrm.tellg() + 1);
+    installedStrm.seekg(0, ios::beg);
+
     // split both files by lines, then convert to key-value list, and check whether all lines from original file
     // are also available in the installed file
     // some values modified by write_edited_desktop_file need some extra checks, which can be performed then.
-    vector<char> originalData(100 * 1024 * 1024);
-    vector<char> installedData(100 * 1024 * 1024);
+    vector<char> originalData(originalStrmSize, '\0');
+    vector<char> installedData(installedStrmSize, '\0');
 
     originalStrm.read(originalData.data(), originalData.size());
-    installedStrm.read(installedData.data(), originalData.size());
+    installedStrm.read(installedData.data(), installedData.size());
 
     vector<string> originalLines = splitString(originalData.data(), '\n');
     vector<string> installedLines = splitString(installedData.data(), '\n');
@@ -82,7 +101,7 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     // sort original entries into map
     for (vector<string>::const_iterator line = originalLines.begin(); line != originalLines.end(); line++) {
         vector<string> lineSplit = splitString(*line, '=');
-        ASSERT_EQ(lineSplit.size(), 2);
+        ASSERT_EQ(lineSplit.size(), 2) << "line: " << *line;
         entries.insert(std::make_pair(lineSplit[0], lineSplit[1]));
     }
 
@@ -102,23 +121,26 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
 
         map<string, string>::const_iterator entry = entries.find(key);
 
+        if (entry == entries.end())
+            FAIL() << "No such entry in desktop file: " << key;
+
         if (key == "Exec" || key == "TryExec") {
             vector<string> execSplit = splitString(value);
-            EXPECT_GT(execSplit.size(), 0) << "key: " << key;
-            EXPECT_EQ(execSplit[0], "testpath") << "key: " << key;
+            ASSERT_GT(execSplit.size(), 0) << "key: " << key;
+            ASSERT_EQ(execSplit[0], "testpath") << "key: " << key;
 
             vector<string> originalExecSplit = splitString((*entry).second);
-            EXPECT_EQ(execSplit.size(), originalExecSplit.size())
+            ASSERT_EQ(execSplit.size(), originalExecSplit.size())
                 << key << ": " << value << " and " << (*entry).second << " contain different number of parameters";
 
             // the rest of the split parts should be equal
             for (int i = 1; i < execSplit.size(); i++) {
-                EXPECT_EQ(execSplit[i], originalExecSplit[i]);
+                ASSERT_EQ(execSplit[i], originalExecSplit[i]);
             }
         } else if (key == "Icon") {
-            EXPECT_EQ(value, "appimagekit_def_cura-icon");
+            ASSERT_EQ(value, g_strdup_printf("appimagekit_%s_cura-icon", md5testvalue));
         } else {
-            EXPECT_EQ(value, (*entry).second);
+            ASSERT_EQ(value, (*entry).second);
         }
 
         installedLines.erase(line);
@@ -127,9 +149,11 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     // finally, handle X-AppImage- entries
     for (vector<string>::iterator line = installedLines.begin(); line != installedLines.end();) {
         if (stringStartsWith(*line, "X-AppImage-Comment")) {
-            EXPECT_EQ(*line, "X-AppImage-Comment=Generated by appimaged AppImageKit unit tests");
+            ASSERT_EQ(*line, "X-AppImage-Comment=Generated by appimaged AppImageKit unit tests");
         } else if (stringStartsWith(*line, "X-AppImage-Identifier")) {
-            EXPECT_EQ(*line, "X-AppImage-Identifier=def");
+            ASSERT_EQ(*line, g_strdup_printf("X-AppImage-Identifier=%s", md5testvalue));
+        } else if (stringStartsWith(*line, "X-AppImage-Old-")) {
+            // skip "old" entries, created by localization support
         } else {
             line++;
             continue;
