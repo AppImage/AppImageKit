@@ -101,7 +101,7 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     // sort original entries into map
     for (vector<string>::const_iterator line = originalLines.begin(); line != originalLines.end(); line++) {
         vector<string> lineSplit = splitString(*line, '=');
-        ASSERT_EQ(lineSplit.size(), 2);
+        ASSERT_EQ(lineSplit.size(), 2) << "line: " << *line;
         entries.insert(std::make_pair(lineSplit[0], lineSplit[1]));
     }
 
