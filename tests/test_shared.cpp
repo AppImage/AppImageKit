@@ -33,7 +33,7 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     ifs.seekg(0, ios::beg);
 
     // should be large enough
-    vector<char> buffer(bufferSize);
+    vector<char> buffer(bufferSize, '\0');
 
     // read in desktop file
     ifs.read(buffer.data(), buffer.size());
@@ -75,8 +75,8 @@ TEST_F(SharedCTest, test_write_desktop_file_exec) {
     // split both files by lines, then convert to key-value list, and check whether all lines from original file
     // are also available in the installed file
     // some values modified by write_edited_desktop_file need some extra checks, which can be performed then.
-    vector<char> originalData(originalStrmSize);
-    vector<char> installedData(installedStrmSize);
+    vector<char> originalData(originalStrmSize, '\0');
+    vector<char> installedData(installedStrmSize, '\0');
 
     originalStrm.read(originalData.data(), originalData.size());
     installedStrm.read(installedData.data(), originalData.size());
