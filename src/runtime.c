@@ -464,6 +464,10 @@ main (int argc, char *argv[])
         }
         if (err)
             die("sqfs_traverse_next error");
+        for (int i = 0; i < fs.sb.inodes; i++) {
+            free(created_inode[i]);
+        }
+        free(created_inode);
         sqfs_traverse_close(&trv);
         sqfs_fd_close(fs.fd);
         exit(0);
