@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2018-07-23 15:19+0000\n"
+"PO-Revision-Date: 2018-08-04 21:00+0000\n"
 "Last-Translator: Lvaskz <lvaskz@protonmail.com>\n"
 "Language-Team: Spanish <https://translate.assassinate-you.net/projects/"
 "appimage/website/es/>\n"
@@ -240,19 +240,19 @@ msgstr "Hazlo ejecutable"
 
 #: index.jinja2:374
 msgid "and_run!"
-msgstr ""
+msgstr "y ejecute!"
 
 #: index.jinja2:380
 msgid "that_was_easy_wasn't_it?"
-msgstr ""
+msgstr "Eso fue fácil, ¿no?"
 
 #: index.jinja2:384
 msgid "watch_how_it_works"
-msgstr ""
+msgstr "Mira cómo funciona"
 
 #: index.jinja2:401
 msgid "buzzwords_easy_title"
-msgstr ""
+msgstr "Fácil."
 
 #: index.jinja2:404
 msgid "buzzwords_easy_description"
