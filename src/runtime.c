@@ -414,11 +414,11 @@ main (int argc, char *argv[])
                         }
                     } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
                         // if we've already created this inode, then this is a hardlink
-                        char* exiting_path_for_inode = created_inode[inode.base.inode_number - 1];
-                        if(exiting_path_for_inode) {
+                        char* existing_path_for_inode = created_inode[inode.base.inode_number - 1];
+                        if(existing_path_for_inode) {
                             unlink(prefixed_path_to_extract);
-                            if(link(exiting_path_for_inode, prefixed_path_to_extract) == -1) {
-                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, exiting_path_for_inode, strerror(errno));
+                            if(link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
+                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
                                 // fallthrow and follow the extract logic in the hope that it will work
                             } else {
                                 continue;
