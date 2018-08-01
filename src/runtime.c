@@ -380,6 +380,7 @@ main (int argc, char *argv[])
         if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
             exit(1);
 
+        // track duplicate inodes for hardlinks
         created_inode = malloc(fs.sb.inodes * sizeof(char *));
         if(created_inode != NULL) {
             memset(created_inode, 0, fs.sb.inodes * sizeof(char *));
@@ -412,15 +413,18 @@ main (int argc, char *argv[])
                             }
                         }
                     } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
-                        if(created_inode[inode.base.inode_number - 1]) {
+                        // if we've already created this inode, then this is a hardlink
+                        char* exiting_path_for_inode = created_inode[inode.base.inode_number - 1];
+                        if(exiting_path_for_inode) {
                             unlink(prefixed_path_to_extract);
-                            if(link(created_inode[inode.base.inode_number - 1], prefixed_path_to_extract) == -1) {
-                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, created_inode[inode.base.inode_number - 1], strerror(errno));
+                            if(link(exiting_path_for_inode, prefixed_path_to_extract) == -1) {
+                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, exiting_path_for_inode, strerror(errno));
                                 // fallthrow and follow the extract logic in the hope that it will work
                             } else {
                                 continue;
                             }
                         }
+                        // track the path we extract to for this inode, so that we can `link` if this inode is found again
                         created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
                         // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
                         if(private_sqfs_stat(&fs, &inode, &st) != 0)
