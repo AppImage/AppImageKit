@@ -415,7 +415,7 @@ main (int argc, char *argv[])
                     } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
                         // if we've already created this inode, then this is a hardlink
                         char* existing_path_for_inode = created_inode[inode.base.inode_number - 1];
-                        if(existing_path_for_inode) {
+                        if(existing_path_for_inode != NULL) {
                             unlink(prefixed_path_to_extract);
                             if(link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
                                 fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
