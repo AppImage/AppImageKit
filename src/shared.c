@@ -669,7 +669,7 @@ bool write_edited_desktop_file(GKeyFile *key_file_structure, const char* appimag
                 // probably to save one call when you're just interested in getting _some_ value while reading
                 // a desktop file
                 old_contents = g_key_file_get_locale_string(
-                    key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, "XXXXX", NULL
+                    key_file_structure, G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_ICON, locale, NULL
                 );
             }
 
