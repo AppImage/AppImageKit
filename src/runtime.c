@@ -385,7 +385,8 @@ main (int argc, char *argv[])
         if(created_inode != NULL) {
             memset(created_inode, 0, fs.sb.inodes * sizeof(char *));
         } else {
-            fprintf(stderr, "Can't track hardlinks.\n");
+            fprintf(stderr, "Failed allocating memory to track hardlinks.\n");
+            exit(1);
         }
 
         if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
