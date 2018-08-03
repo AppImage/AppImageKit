@@ -420,7 +420,7 @@ main (int argc, char *argv[])
                             unlink(prefixed_path_to_extract);
                             if(link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
                                 fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
-                                // fallthrow and follow the extract logic in the hope that it will work
+                                exit(EXIT_FAILURE);
                             } else {
                                 continue;
                             }
