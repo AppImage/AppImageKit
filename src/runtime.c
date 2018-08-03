@@ -361,6 +361,7 @@ main (int argc, char *argv[])
         char *pattern;
         char *prefix;
         char prefixed_path_to_extract[1024];
+        char **created_inode;
 
         prefix = "squashfs-root/";
 
@@ -378,6 +379,15 @@ main (int argc, char *argv[])
 
         if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
             exit(1);
+
+        // track duplicate inodes for hardlinks
+        created_inode = malloc(fs.sb.inodes * sizeof(char *));
+        if(created_inode != NULL) {
+            memset(created_inode, 0, fs.sb.inodes * sizeof(char *));
+        } else {
+            fprintf(stderr, "Failed allocating memory to track hardlinks.\n");
+            exit(1);
+        }
 
         if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
             die("sqfs_traverse_open error");
@@ -404,6 +414,19 @@ main (int argc, char *argv[])
                             }
                         }
                     } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
+                        // if we've already created this inode, then this is a hardlink
+                        char* existing_path_for_inode = created_inode[inode.base.inode_number - 1];
+                        if(existing_path_for_inode != NULL) {
+                            unlink(prefixed_path_to_extract);
+                            if(link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
+                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
+                                exit(EXIT_FAILURE);
+                            } else {
+                                continue;
+                            }
+                        }
+                        // track the path we extract to for this inode, so that we can `link` if this inode is found again
+                        created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
                         // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
                         if(private_sqfs_stat(&fs, &inode, &st) != 0)
                             die("private_sqfs_stat error");
@@ -446,6 +469,10 @@ main (int argc, char *argv[])
         }
         if (err)
             die("sqfs_traverse_next error");
+        for (int i = 0; i < fs.sb.inodes; i++) {
+            free(created_inode[i]);
+        }
+        free(created_inode);
         sqfs_traverse_close(&trv);
         sqfs_fd_close(fs.fd);
         exit(0);
