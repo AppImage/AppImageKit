@@ -7,8 +7,24 @@ set(APPIMAGEKIT_EMBED_MAGIC_BYTES ON CACHE BOOL "")
 # mark as advanced so it won't show up in CMake GUIs etc., to prevent users from accidentally using this option
 mark_as_advanced(APPIMAGEKIT_EMBED_MAGIC_BYTES)
 
-set(runtime_cflags -std=c99 -g -Os -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT_COMMIT}\\" -I${squashfuse_INCLUDE_DIRS} -I${PROJECT_SOURCE_DIR}/include ${DEPENDENCIES_CFLAGS})
+# check type of current build
+string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
+if (BUILD_TYPE_UPPER STREQUAL DEBUG)
+    set(BUILD_DEBUG TRUE)
+else()
+    set(BUILD_DEBUG FALSE)
+endif()
+
+set(runtime_cflags -std=c99 -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT_COMMIT}\\" -I${squashfuse_INCLUDE_DIRS} -I${PROJECT_SOURCE_DIR}/include ${DEPENDENCIES_CFLAGS})
 set(runtime_ldflags -s -Wl,--gc-sections ${DEPENDENCIES_LDFLAGS})
+
+if(BUILD_DEBUG)
+    message(WARNING "Debug build, adding debug information")
+    set(runtime_cflags -g ${runtime_cflags})
+else()
+    message(STATUS "Release build, optimizing runtime")
+    set(runtime_cflags -Os ${runtime_cflags})
+endif()
 
 if(NOT xz_INCLUDE_DIRS STREQUAL "")
     list(APPEND runtime_cflags -I${xz_INCLUDE_DIRS})
@@ -81,8 +97,7 @@ add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o elf.c notify.c ge
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
 target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread)
 
-string(TOUPPER "${CMAKE_BUILD_TYPE}" BUILD_TYPE_UPPER)
-if (BUILD_TYPE_UPPER STREQUAL DEBUG)
+if(BUILD_DEBUG)
     message(WARNING "Debug build, not stripping runtime to allow debugging using gdb etc.")
 else()
     add_custom_command(
