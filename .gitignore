@@ -1,5 +1,5 @@
 # Build directory
-build/
+*build*/
 cmake-build-*/
 .idea/
 Testing/
