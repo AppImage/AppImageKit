@@ -37,6 +37,7 @@ add_custom_command(
 # TODO: find out how this .o object can be generated using a normal add_executable call
 # that'd allow us to get rid of the -I parameters in runtime_cflags
 add_custom_command(
+    MAIN_DEPENDENCY runtime.c
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.0.o
     COMMAND ${CMAKE_C_COMPILER} ${runtime_cflags} -c ${CMAKE_CURRENT_SOURCE_DIR}/runtime.c -o runtime.0.o
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
