@@ -34,9 +34,11 @@
 #include <nonstd.h>
 
 #include <limits.h>
+#include <libgen.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/sendfile.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <signal.h>
@@ -360,7 +362,7 @@ main (int argc, char *argv[])
         sqfs fs;
         char *pattern;
         char *prefix;
-        char prefixed_path_to_extract[1024];
+        char prefixed_path_to_extract[PATH_MAX];
         char **created_inode;
 
         prefix = "squashfs-root/";
@@ -388,6 +390,12 @@ main (int argc, char *argv[])
             fprintf(stderr, "Failed allocating memory to track hardlinks.\n");
             exit(1);
         }
+
+        // map of symlinks to create and/or copy after
+        // we'll use realloc() to increase this array's size for _every_ symlink
+        // this is not necessarily fast, but very efficient memory wise
+        char*** symlink_map = NULL;
+        int symlink_map_size = 0;
 
         if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
             die("sqfs_traverse_open error");
@@ -455,11 +463,27 @@ main (int argc, char *argv[])
                         int ret = sqfs_readlink(&fs, &inode, buf, &size);
                         if (ret != 0)
                             die("symlink error");
-                        // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
-                        unlink(prefixed_path_to_extract);
-                        ret = symlink(buf, prefixed_path_to_extract);
-                        if (ret != 0)
-                            die("Error: could not create symlink");
+
+                        fprintf(stderr, "Found symlink: %s (target: %s)\n", prefixed_path_to_extract, buf);
+
+                        // add new entry to dynamic array
+                        char** entry = malloc(sizeof(char*) * 2);
+
+                        // "from"
+                        entry[0] = malloc(strlen(prefixed_path_to_extract) * sizeof(char));
+                        strcpy(entry[0], prefixed_path_to_extract);
+
+                        // "to"
+                        entry[1] = malloc(strlen(buf) * sizeof(char));
+                        strcpy(entry[1], buf);
+
+                        char*** new_ptr = realloc(symlink_map, sizeof(char**) * (symlink_map_size + 1));
+                        if (!new_ptr)
+                            die("Failed to allocate space for symlink entry");
+
+                        new_ptr[symlink_map_size] = entry;
+                        symlink_map_size++;
+                        symlink_map = new_ptr;
                     } else {
                         fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
                     }
@@ -475,6 +499,90 @@ main (int argc, char *argv[])
         free(created_inode);
         sqfs_traverse_close(&trv);
         sqfs_fd_close(fs.fd);
+
+        // create symlinks collected during sqfs traversal
+        if (symlink_map != NULL) {
+            for (int i = 0; i < symlink_map_size; i++) {
+                char** entry = symlink_map[i];
+                char* from = entry[0];
+                char* to = entry[1];
+
+                unlink(from);
+
+                // check whether symlink could be created
+                // if this is not possible, e.g., when the filesystem doesn't support symlinks (looking at you, FAT32!), fall back to creating a regular file instead
+                if (symlink(from, to) != 0) {
+                    fprintf(stderr, "WARNING: could not create symlink, trying to create copy instead\n");
+
+                    // calculate absolute paths
+                    // these are needed for two reasons:
+                    // a) check whether target is inside prefix to prevent copying files from the system
+                    //    (this might be abused, e.g., by creating an AppImage with thousands of symlinks to large
+                    //    files on the system, causing --appimage-extract to create copies of all of them)
+                    // b) calculate the relative path to the target
+
+                    char abs_from[PATH_MAX];
+                    {
+                        char cwd[PATH_MAX];
+                        getcwd(cwd, sizeof(cwd));
+
+                        strcpy(abs_from, cwd);
+                        strcat(abs_from, "/");
+                        strcat(abs_from, from);
+                    }
+
+                    char abs_to[PATH_MAX];
+                    {
+                        char* abs_from_dir = NULL;
+                        char* abs_from_dir_in = strdup(abs_from);
+                        abs_from_dir = dirname(abs_from_dir_in);
+                        strcpy(abs_to, abs_from_dir);
+                        strcat(abs_to, "/");
+                        strcat(abs_to, to);
+                        free(abs_from_dir_in);
+                    }
+
+                    {
+                        char* abs_to_dir_in = strdup(abs_to);
+                        char* abs_to_dir = dirname(abs_to_dir_in);
+
+                        fprintf(stderr, "creating symlink %s -> %s\n", abs_from, abs_to);
+
+                        // TODO: resolve indirect symlinks using entry list
+
+                        if (strlen(abs_to) < strlen(abs_from) || strncmp(abs_from, abs_to_dir, strlen(abs_to_dir)) != 0)
+                            die("ERROR: target not in AppDir, this is not allowed");
+
+                        free(abs_to_dir);
+                    }
+
+                    FILE* in = fopen(abs_to, "rb");
+                    if (in == NULL)
+                        die("Failed to open source file for reading");
+
+                    FILE* out = fopen(abs_from, "wb+");
+                    if (out == NULL)
+                        die("Failed to open target file for writing");
+
+                    struct stat fileinfo;
+                    fstat(fileno(in), &fileinfo);
+                    off_t offset = 0;
+
+                    if (sendfile(fileno(out), fileno(in), &offset, (size_t) fileinfo.st_size) != 0)
+                        die("Failed to create file copy");
+
+                    fclose(in);
+                    fclose(out);
+
+                    free(entry[0]);
+                    free(entry[1]);
+                    free(entry);
+                }
+            }
+
+            free(symlink_map);
+        }
+
         exit(0);
     }
 
