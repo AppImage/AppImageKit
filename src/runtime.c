@@ -459,7 +459,7 @@ main (int argc, char *argv[])
                         unlink(prefixed_path_to_extract);
                         ret = symlink(buf, prefixed_path_to_extract);
                         if (ret != 0)
-                            die("Error: could not create symlink");
+                            fprintf(stderr, "WARNING: could not create symlink\n");
                     } else {
                         fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
                     }
