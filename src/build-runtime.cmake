@@ -7,7 +7,7 @@ set(APPIMAGEKIT_EMBED_MAGIC_BYTES ON CACHE BOOL "")
 # mark as advanced so it won't show up in CMake GUIs etc., to prevent users from accidentally using this option
 mark_as_advanced(APPIMAGEKIT_EMBED_MAGIC_BYTES)
 
-set(runtime_cflags -std=c99 -Os -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT_COMMIT}\\" -I${squashfuse_INCLUDE_DIRS} -I${PROJECT_SOURCE_DIR}/include ${DEPENDENCIES_CFLAGS})
+set(runtime_cflags -std=c99 -g -Os -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT_COMMIT}\\" -I${squashfuse_INCLUDE_DIRS} -I${PROJECT_SOURCE_DIR}/include ${DEPENDENCIES_CFLAGS})
 set(runtime_ldflags -s -Wl,--gc-sections ${DEPENDENCIES_LDFLAGS})
 
 if(NOT xz_INCLUDE_DIRS STREQUAL "")
