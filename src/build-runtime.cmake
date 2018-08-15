@@ -96,6 +96,7 @@ add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o elf.c notify.c ge
 # CMake gets confused by the .o object, therefore we need to tell it that it shall link everything using the C compiler
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
 target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread)
+target_include_directories(runtime PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 if(BUILD_DEBUG)
     message(WARNING "Debug build, not stripping runtime to allow debugging using gdb etc.")
