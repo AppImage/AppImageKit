@@ -606,7 +606,7 @@ int main (int argc, char *argv[]) {
         }
 
         int pid;
-        if ((pid = fork()) == 1) {
+        if ((pid = fork()) == -1) {
             int error = errno;
             fprintf(stderr, "fork() failed: %s\n", strerror(error));
             exit(1);
