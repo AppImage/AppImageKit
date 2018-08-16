@@ -691,7 +691,7 @@ int main (int argc, char *argv[]) {
     int dir_fd, res;
 
     char mount_dir[64];
-    int namelen = strlen(basename(argv[0]));
+    size_t namelen = strlen(basename(argv[0]));
     if(namelen>6){
         namelen=6;
     }
