@@ -268,7 +268,7 @@ portable_option(const char *arg, const char *appimage_path, const char *name)
     }
 }
 
-bool extract_appimage(const char* const appimage_path, const char* const _prefix, const char* const _pattern) {
+bool extract_appimage(const char* const appimage_path, const char* const _prefix, const char* const _pattern, const bool overwrite) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
     sqfs fs;
@@ -349,38 +349,42 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                         } else {
                             continue;
                         }
-                    }
-                    // track the path we extract to for this inode, so that we can `link` if this inode is found again
-                    created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
-                    // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
-                    if (private_sqfs_stat(&fs, &inode, &st) != 0)
-                        die("private_sqfs_stat error");
-                    // Read the file in chunks
-                    off_t bytes_already_read = 0;
-                    sqfs_off_t bytes_at_a_time = 64 * 1024;
-                    FILE* f;
-                    f = fopen(prefixed_path_to_extract, "w+");
-                    if (f == NULL) {
-                        perror("fopen error");
-                        rv = false;
-                        break;
-                    }
-                    while (bytes_already_read < inode.xtra.reg.file_size) {
-                        char buf[bytes_at_a_time];
-                        if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf)) {
-                            perror("sqfs_read_range error");
-                            fclose(f);
+                    } else {
+                        if (!overwrite && access(prefixed_path_to_extract, F_OK) == 0)
+                            continue;
+
+                        // track the path we extract to for this inode, so that we can `link` if this inode is found again
+                        created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
+                        // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
+                        if (private_sqfs_stat(&fs, &inode, &st) != 0)
+                            die("private_sqfs_stat error");
+                        // Read the file in chunks
+                        off_t bytes_already_read = 0;
+                        sqfs_off_t bytes_at_a_time = 64 * 1024;
+                        FILE* f;
+                        f = fopen(prefixed_path_to_extract, "w+");
+                        if (f == NULL) {
+                            perror("fopen error");
                             rv = false;
                             break;
                         }
-                        // fwrite(buf, 1, bytes_at_a_time, stdout);
-                        fwrite(buf, 1, bytes_at_a_time, f);
-                        bytes_already_read = bytes_already_read + bytes_at_a_time;
+                        while (bytes_already_read < inode.xtra.reg.file_size) {
+                            char buf[bytes_at_a_time];
+                            if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf)) {
+                                perror("sqfs_read_range error");
+                                fclose(f);
+                                rv = false;
+                                break;
+                            }
+                            // fwrite(buf, 1, bytes_at_a_time, stdout);
+                            fwrite(buf, 1, bytes_at_a_time, f);
+                            bytes_already_read = bytes_already_read + bytes_at_a_time;
+                        }
+                        fclose(f);
+                        chmod(prefixed_path_to_extract, st.st_mode);
+                        if (!rv)
+                            break;
                     }
-                    fclose(f);
-                    chmod(prefixed_path_to_extract, st.st_mode);
-                    if (!rv)
-                        break;
                 } else if (inode.base.inode_type == SQUASHFS_SYMLINK_TYPE) {
                     size_t size;
                     sqfs_readlink(&fs, &inode, NULL, &size);
@@ -572,7 +576,7 @@ int main (int argc, char *argv[]) {
             exit(1);
         }
 
-        if (!extract_appimage(appimage_path, "squashfs-root/", pattern)) {
+        if (!extract_appimage(appimage_path, "squashfs-root/", pattern, true)) {
             exit(1);
         }
 
@@ -617,7 +621,7 @@ int main (int argc, char *argv[]) {
         strcat(prefix, hexlified_digest);
         free(hexlified_digest);
 
-        if (!extract_appimage(appimage_path, prefix, NULL)) {
+        if (!extract_appimage(appimage_path, prefix, NULL, false)) {
             fprintf(stderr, "Failed to extract AppImage\n");
             exit(1);
         }
