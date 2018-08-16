@@ -16,6 +16,10 @@ add_subdirectory(xdg-basedir)
 set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install directory for mksquashfs")
 
 
+add_library(md5 md5.c md5.h)
+target_include_directories(md5 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+
 add_library(libappimage SHARED
     ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     shared.c

@@ -49,6 +49,7 @@
 
 #include "elf.h"
 #include "getsection.h"
+#include "md5.h"
 
 #ifndef ENABLE_DLOPEN
 #define ENABLE_DLOPEN
@@ -164,7 +165,7 @@ char* getArg(int argc, char *argv[],char chr)
 /* mkdir -p implemented in C, needed for https://github.com/AppImage/AppImageKit/issues/333
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
 int
-mkdir_p(const char *path)
+mkdir_p(const char* const path)
 {
     /* Adapted from http://stackoverflow.com/a/2336245/119527 */
     const size_t len = strlen(path);
@@ -583,20 +584,36 @@ int main (int argc, char *argv[]) {
         if (TMPDIR != NULL)
             strcpy(temp_base, getenv("TMPDIR"));
 
-        const char target_dir[] = "appimage_extracted_XXXXXX";
+        char* hexlified_digest;
 
-        char* template = malloc(strlen(temp_base) + 1 + strlen(target_dir) + 2);
-        strcpy(template, temp_base);
-        strcat(template, "/");
-        strcat(template, target_dir);
+        // calculate MD5 hash of file, and use it to make extracted directory name "content-aware"
+        // see https://github.com/AppImage/AppImageKit/issues/841 for more information
+        {
+            FILE* f = fopen(appimage_path, "rb");
+            if (f == NULL) {
+                perror("Failed to open AppImage file");
+                exit(1);
+            }
 
-        char* prefix = mkdtemp(template);
+            Md5Context ctx;
+            Md5Initialise(&ctx);
 
-        if (template != prefix) {
-            int error = errno;
-            fprintf(stderr, "Failed to create temporary directory: %s\n", strerror(error));
-            exit(1);
+            char buf[4096];
+            for (size_t bytes_read; (bytes_read = fread(buf, sizeof(char), sizeof(buf), f)); bytes_read > 0) {
+                Md5Update(&ctx, buf, (uint32_t) bytes_read);
+            }
+
+            MD5_HASH digest;
+            Md5Finalise(&ctx, &digest);
+
+            hexlified_digest = appimage_hexlify(digest.bytes, sizeof(digest.bytes));
         }
+
+        char* prefix = malloc(strlen(temp_base) + 20 + strlen(hexlified_digest) + 2);
+        strcpy(prefix, temp_base);
+        strcat(prefix, "/appimage_extracted_");
+        strcat(prefix, hexlified_digest);
+        free(hexlified_digest);
 
         if (!extract_appimage(appimage_path, prefix)) {
             fprintf(stderr, "Failed to extract AppImage\n");
