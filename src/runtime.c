@@ -350,8 +350,11 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                             continue;
                         }
                     } else {
-                        if (!overwrite && access(prefixed_path_to_extract, F_OK) == 0)
+                        struct stat st;
+                        if (!overwrite && stat(prefixed_path_to_extract, &st) == 0 && st.st_size == inode.xtra.reg.file_size) {
+                            fprintf(stderr, "File exists and file size matches, skipping\n");
                             continue;
+                        }
 
                         // track the path we extract to for this inode, so that we can `link` if this inode is found again
                         created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
