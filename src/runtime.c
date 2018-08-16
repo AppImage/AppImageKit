@@ -303,6 +303,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
 
     if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs)))) {
         fprintf(stderr, "sqfs_traverse_open error\n");
+        free(created_inode);
         return false;
     }
 
