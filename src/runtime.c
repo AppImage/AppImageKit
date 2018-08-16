@@ -38,7 +38,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <fts.h>
+#include <ftw.h>
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
@@ -418,68 +418,54 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
     return rv;
 }
 
-// based on https://stackoverflow.com/questions/2256945/removing-a-non-empty-directory-programmatically-in-c-or-c
-bool rm_recursive(const char* const path) {
-    FTS* ftsp = NULL;
-    FTSENT* curr;
+int rm_recursive_callback(const char* path, const struct stat* stat, const int type, struct FTW* ftw) {
+    (void) stat;
+    (void) ftw;
 
-    // fts is supposed not to modify the arguments in this array
-    char* files[] = {(char*) path, NULL};
+    switch (type) {
+        case FTW_NS:
+        case FTW_DNR:
+            fprintf(stderr, "%s: ftw error: %s\n",
+                path, strerror(errno));
+            return 1;
 
-    // FTS_NOCHDIR  - Avoid changing cwd, which could cause unexpected behavior in multithreaded programs
-    // FTS_PHYSICAL - Don't follow symlinks. Prevents deletion of files outside of the specified directory
-    // FTS_XDEV     - Don't cross filesystem boundaries
-    FTS* ftsp = fts_open(files, FTS_NOCHDIR | FTS_PHYSICAL | FTS_XDEV, NULL);
-    if (ftsp == NULL) {
-        fprintf(stderr, "%s: fts_open failed: %s\n", path, strerror(errno));
-        return false;
-    }
-
-    bool ret = true;
-
-    for (FTSENT* curr; (curr = fts_read(ftsp)) != NULL;) {
-        if (!ret)
+        case FTW_D:
+            // ignore directories at first, will be handled by FTW_DP
             break;
 
-        switch (curr->fts_info) {
-            case FTS_NS:
-            case FTS_DNR:
-            case FTS_ERR:
-                fprintf(stderr, "%s: fts_read error: %s\n",
-                    curr->fts_accpath, strerror(curr->fts_errno));
-                break;
+        case FTW_F:
+        case FTW_SL:
+        case FTW_SLN:
+            if (remove(path) != 0) {
+                fprintf(stderr, "Failed to remove %s: %s\n", path, strerror(errno));
+                return false;
+            }
+            break;
 
-            case FTS_DC:
-            case FTS_DOT:
-            case FTS_NSOK:
-                // Not reached unless FTS_LOGICAL, FTS_SEEDOT, or FTS_NOSTAT were passed to fts_open()
-                break;
 
-            case FTS_D:
-                // Do nothing. Need depth-first search, so directories are deleted in FTS_DP
-                break;
+        case FTW_DP:
+            if (rmdir(path) != 0) {
+                fprintf(stderr, "Failed to remove directory %s: %s\n", path, strerror(errno));
+                return false;
+            }
+            break;
 
-            case FTS_DP:
-            case FTS_F:
-            case FTS_SL:
-            case FTS_SLNONE:
-            case FTS_DEFAULT:
-                if (remove(curr->fts_accpath) < 0) {
-                    fprintf(stderr, "%s: Failed to remove: %s\n",
-                        curr->fts_path, strerror(errno));
-                    ret = false;
-                }
-                break;
-
-            default:
-                fprintf(stderr, "Unexpected fts_info\n");
-                ret = false;
-                break;
-        }
+        default:
+            fprintf(stderr, "Unexpected fts_info\n");
+            return 1;
     }
 
-    fts_close(ftsp);
-    return ret;
+    return 0;
+};
+
+bool rm_recursive(const char* const path) {
+    // FTW_DEPTH: perform depth-first search to make sure files are deleted before the containing directories
+    // FTW_MOUNT: prevent deletion of files on other mounted filesystems
+    // FTW_PHYS: do not follow symlinks, but report symlinks as such; this way, the symlink targets, which might point
+    //           to locations outside path will not be deleted accidentally (attackers might abuse this)
+    int rv = nftw(path, &rm_recursive_callback, 0, FTW_DEPTH | FTW_MOUNT | FTW_PHYS);
+
+    return rv == 0;
 }
 
 int main (int argc, char *argv[]) {
