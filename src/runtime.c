@@ -55,8 +55,6 @@
 #include "squashfuse_dlopen.h"
 #include "appimage/appimage.h"
 
-#include <fnmatch.h>
-
 //#include "notify.c"
 extern int notify(char *title, char *body, int timeout);
 struct stat st;
@@ -266,9 +264,127 @@ portable_option(const char *arg, const char *appimage_path, const char *name)
     }
 }
 
-int
-main (int argc, char *argv[])
-{
+bool extract_appimage(const char* const appimage_path, const char* const _prefix) {
+    sqfs_err err = SQFS_OK;
+    sqfs_traverse trv;
+    sqfs fs;
+    char prefixed_path_to_extract[1024];
+
+    // local copy we can modify safely
+    // allocate 1 more byte than we would need so we can add a trailing slash if there is none yet
+    char* prefix = malloc(strlen(_prefix+2));
+    strcpy(prefix, _prefix);
+
+    // sanitize prefix
+    if (prefix[strlen(prefix)] != '/')
+        strcat(prefix, "/");
+
+    if (access(prefix, F_OK) == -1) {
+        if (mkdir_p(prefix) == -1) {
+            perror("mkdir_p error");
+            exit(EXIT_FAILURE);
+        }
+    }
+
+    if ((err = sqfs_open_image(&fs, appimage_path, (size_t) fs_offset)))
+        die("Failed to open squashfs image");
+
+    // track duplicate inodes for hardlinks
+    char** created_inode = malloc(fs.sb.inodes * sizeof(char*));
+    if (created_inode != NULL) {
+        memset(created_inode, 0, fs.sb.inodes * sizeof(char*));
+    } else {
+        die("Failed allocating memory to track hardlinks.");
+    }
+
+    if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
+        die("sqfs_traverse_open error");
+    while (sqfs_traverse_next(&trv, &err)) {
+        if (!trv.dir_end) {
+            // fprintf(stderr, "trv.path: %s\n", trv.path);
+            // fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
+            sqfs_inode inode;
+            if (sqfs_inode_get(&fs, &inode, trv.entry.inode))
+                die("sqfs_inode_get error");
+            // fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
+            // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
+            strcpy(prefixed_path_to_extract, "");
+            strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
+            fprintf(stderr, "%s\n", prefixed_path_to_extract);
+            if (inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE) {
+                // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
+                // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
+                if (access(prefixed_path_to_extract, F_OK) == -1) {
+                    if (mkdir_p(prefixed_path_to_extract) == -1) {
+                        perror("mkdir_p error");
+                        exit(EXIT_FAILURE);
+                    }
+                }
+            } else if (inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE) {
+                // if we've already created this inode, then this is a hardlink
+                char* existing_path_for_inode = created_inode[inode.base.inode_number - 1];
+                if (existing_path_for_inode != NULL) {
+                    unlink(prefixed_path_to_extract);
+                    if (link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
+                        fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n",
+                            prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
+                        exit(EXIT_FAILURE);
+                    } else {
+                        continue;
+                    }
+                }
+                // track the path we extract to for this inode, so that we can `link` if this inode is found again
+                created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
+                // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
+                if (private_sqfs_stat(&fs, &inode, &st) != 0)
+                    die("private_sqfs_stat error");
+                // Read the file in chunks
+                off_t bytes_already_read = 0;
+                sqfs_off_t bytes_at_a_time = 64 * 1024;
+                FILE* f;
+                f = fopen(prefixed_path_to_extract, "w+");
+                if (f == NULL)
+                    die("fopen error");
+                while (bytes_already_read < inode.xtra.reg.file_size) {
+                    char buf[bytes_at_a_time];
+                    if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
+                        die("sqfs_read_range error");
+                    // fwrite(buf, 1, bytes_at_a_time, stdout);
+                    fwrite(buf, 1, bytes_at_a_time, f);
+                    bytes_already_read = bytes_already_read + bytes_at_a_time;
+                }
+                fclose(f);
+                chmod(prefixed_path_to_extract, st.st_mode);
+            } else if (inode.base.inode_type == SQUASHFS_SYMLINK_TYPE) {
+                size_t size;
+                sqfs_readlink(&fs, &inode, NULL, &size);
+                char buf[size];
+                int ret = sqfs_readlink(&fs, &inode, buf, &size);
+                if (ret != 0)
+                    die("symlink error");
+                // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
+                unlink(prefixed_path_to_extract);
+                ret = symlink(buf, prefixed_path_to_extract);
+                if (ret != 0)
+                    fprintf(stderr, "WARNING: could not create symlink\n");
+            } else {
+                fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
+            }
+            // fprintf(stderr, "\n");
+        }
+    }
+    if (err)
+        die("sqfs_traverse_next error");
+    for (int i = 0; i < fs.sb.inodes; i++) {
+        free(created_inode[i]);
+    }
+    free(created_inode);
+    sqfs_traverse_close(&trv);
+    sqfs_fd_close(fs.fd);
+    exit(0);
+}
+
+int main (int argc, char *argv[]) {
     char appimage_path[PATH_MAX];
     char argv0_path[PATH_MAX];
     char * arg;
@@ -352,129 +468,29 @@ main (int argc, char *argv[])
         exit(0);
     }
 
-    /* Exract the AppImage */
     arg=getArg(argc,argv,'-');
+
+    /* extract the AppImage */
     if(arg && strcmp(arg,"appimage-extract")==0) {
-        sqfs_err err = SQFS_OK;
-        sqfs_traverse trv;
-        sqfs fs;
-        char *pattern;
-        char *prefix;
-        char prefixed_path_to_extract[1024];
-        char **created_inode;
+        char default_prefix[] = "squashfs-root/";
 
-        prefix = "squashfs-root/";
+        char* prefix = NULL;
 
-        if(access(prefix, F_OK ) == -1 ) {
-            if (mkdir_p(prefix) == -1) {
-                perror("mkdir_p error");
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        if(argc == 3){
-            pattern = argv[2];
-            if (pattern[0] == '/') pattern++; // Remove leading '/'
-        }
-
-        if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
-            exit(1);
-
-        // track duplicate inodes for hardlinks
-        created_inode = malloc(fs.sb.inodes * sizeof(char *));
-        if(created_inode != NULL) {
-            memset(created_inode, 0, fs.sb.inodes * sizeof(char *));
+        // default use case: use standard prefix
+        if (argc == 2) {
+            prefix = default_prefix;
+        } else if (argc == 3) {
+            prefix = argv[2];
         } else {
-            fprintf(stderr, "Failed allocating memory to track hardlinks.\n");
+            fprintf(stderr, "Unexpected argument count: %d\n", argc-1);
+            fprintf(stderr, "Usage: %s --appimage-extract [<prefix>]\n", argv0_path);
             exit(1);
         }
 
-        if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
-            die("sqfs_traverse_open error");
-        while (sqfs_traverse_next(&trv, &err)) {
-            if (!trv.dir_end) {
-                if((argc != 3) || (fnmatch (pattern, trv.path, FNM_FILE_NAME) == 0)){
-                    // fprintf(stderr, "trv.path: %s\n", trv.path);
-                    // fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
-                    sqfs_inode inode;
-                    if (sqfs_inode_get(&fs, &inode, trv.entry.inode))
-                        die("sqfs_inode_get error");
-                    // fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
-                    // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
-                    strcpy(prefixed_path_to_extract, "");
-                    strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
-                    fprintf(stderr, "%s\n", prefixed_path_to_extract);
-                    if(inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE){
-                        // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
-                        // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
-                        if(access(prefixed_path_to_extract, F_OK ) == -1 ) {
-                            if (mkdir_p(prefixed_path_to_extract) == -1) {
-                                perror("mkdir_p error");
-                                exit(EXIT_FAILURE);
-                            }
-                        }
-                    } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
-                        // if we've already created this inode, then this is a hardlink
-                        char* existing_path_for_inode = created_inode[inode.base.inode_number - 1];
-                        if(existing_path_for_inode != NULL) {
-                            unlink(prefixed_path_to_extract);
-                            if(link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
-                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
-                                exit(EXIT_FAILURE);
-                            } else {
-                                continue;
-                            }
-                        }
-                        // track the path we extract to for this inode, so that we can `link` if this inode is found again
-                        created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
-                        // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
-                        if(private_sqfs_stat(&fs, &inode, &st) != 0)
-                            die("private_sqfs_stat error");
-                        // Read the file in chunks
-                        off_t bytes_already_read = 0;
-                        sqfs_off_t bytes_at_a_time = 64*1024;
-                        FILE * f;
-                        f = fopen (prefixed_path_to_extract, "w+");
-                        if (f == NULL)
-                            die("fopen error");
-                        while (bytes_already_read < inode.xtra.reg.file_size)
-                        {
-                            char buf[bytes_at_a_time];
-                            if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
-                                die("sqfs_read_range error");
-                            // fwrite(buf, 1, bytes_at_a_time, stdout);
-                            fwrite(buf, 1, bytes_at_a_time, f);
-                            bytes_already_read = bytes_already_read + bytes_at_a_time;
-                        }
-                        fclose(f);
-                        chmod (prefixed_path_to_extract, st.st_mode);
-                    } else if(inode.base.inode_type == SQUASHFS_SYMLINK_TYPE){
-                        size_t size;
-                        sqfs_readlink(&fs, &inode, NULL, &size);
-                        char buf[size];
-                        int ret = sqfs_readlink(&fs, &inode, buf, &size);
-                        if (ret != 0)
-                            die("symlink error");
-                        // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
-                        unlink(prefixed_path_to_extract);
-                        ret = symlink(buf, prefixed_path_to_extract);
-                        if (ret != 0)
-                            fprintf(stderr, "WARNING: could not create symlink\n");
-                    } else {
-                        fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
-                    }
-                    // fprintf(stderr, "\n");
-                }
-            }
+        if (!extract_appimage(appimage_path, prefix)) {
+            exit(1);
         }
-        if (err)
-            die("sqfs_traverse_next error");
-        for (int i = 0; i < fs.sb.inodes; i++) {
-            free(created_inode[i]);
-        }
-        free(created_inode);
-        sqfs_traverse_close(&trv);
-        sqfs_fd_close(fs.fd);
+
         exit(0);
     }
 
