@@ -307,6 +307,8 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
         return false;
     }
 
+    bool rv = true;
+
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
             // fprintf(stderr, "trv.path: %s\n", trv.path);
@@ -314,7 +316,8 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
             sqfs_inode inode;
             if (sqfs_inode_get(&fs, &inode, trv.entry.inode)) {
                 fprintf(stderr, "sqfs_inode_get error\n");
-                return false;
+                rv = false;
+                break;
             }
             // fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
             // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
@@ -327,7 +330,8 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 if (access(prefixed_path_to_extract, F_OK) == -1) {
                     if (mkdir_p(prefixed_path_to_extract) == -1) {
                         perror("mkdir_p error");
-                        return false;
+                        rv = false;
+                        break;
                     }
                 }
             } else if (inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE) {
@@ -338,7 +342,8 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                     if (link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
                         fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n",
                             prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
-                        return false;
+                        rv = false;
+                        break;
                     } else {
                         continue;
                     }
@@ -355,14 +360,16 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 f = fopen(prefixed_path_to_extract, "w+");
                 if (f == NULL) {
                     perror("fopen error");
-                    return false;
+                    rv = false;
+                    break;
                 }
                 while (bytes_already_read < inode.xtra.reg.file_size) {
                     char buf[bytes_at_a_time];
                     if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf)) {
                         perror("sqfs_read_range error");
                         fclose(f);
-                        return false;
+                        rv = false;
+                        break;
                     }
                     // fwrite(buf, 1, bytes_at_a_time, stdout);
                     fwrite(buf, 1, bytes_at_a_time, f);
@@ -370,6 +377,8 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 }
                 fclose(f);
                 chmod(prefixed_path_to_extract, st.st_mode);
+                if (!rv)
+                    break;
             } else if (inode.base.inode_type == SQUASHFS_SYMLINK_TYPE) {
                 size_t size;
                 sqfs_readlink(&fs, &inode, NULL, &size);
@@ -377,7 +386,8 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 int ret = sqfs_readlink(&fs, &inode, buf, &size);
                 if (ret != 0) {
                     perror("symlink error");
-                    return false;
+                    rv = false;
+                    break;
                 }
                 // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
                 unlink(prefixed_path_to_extract);
@@ -388,20 +398,24 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
             }
             // fprintf(stderr, "\n");
+
+            if (!rv)
+                break;
         }
-    }
-    if (err) {
-        fprintf(stderr, "sqfs_traverse_next error\n");
-        return false;
     }
     for (int i = 0; i < fs.sb.inodes; i++) {
         free(created_inode[i]);
     }
     free(created_inode);
+
+    if (err != SQFS_OK) {
+        fprintf(stderr, "sqfs_traverse_next error\n");
+        rv = false;
+    }
     sqfs_traverse_close(&trv);
     sqfs_fd_close(fs.fd);
 
-    return true;
+    return rv;
 }
 
 // based on https://stackoverflow.com/questions/2256945/removing-a-non-empty-directory-programmatically-in-c-or-c
