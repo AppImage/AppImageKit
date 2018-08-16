@@ -273,7 +273,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
 
     // local copy we can modify safely
     // allocate 1 more byte than we would need so we can add a trailing slash if there is none yet
-    char* prefix = malloc(strlen(_prefix + 2));
+    char* prefix = malloc(strlen(_prefix + 3));
     strcpy(prefix, _prefix);
 
     // sanitize prefix
@@ -293,10 +293,8 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
     };
 
     // track duplicate inodes for hardlinks
-    char** created_inode = malloc(fs.sb.inodes * sizeof(char*));
-    if (created_inode != NULL) {
-        memset(created_inode, 0, fs.sb.inodes * sizeof(char*));
-    } else {
+    char** created_inode = calloc(fs.sb.inodes, sizeof(char*));
+    if (created_inode == NULL) {
         fprintf(stderr, "Failed allocating memory to track hardlinks\n");
         return false;
     }
