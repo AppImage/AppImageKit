@@ -38,6 +38,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <ftw.h>
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
@@ -45,17 +46,17 @@
 #include <pthread.h>
 #include <errno.h>
 #include <wait.h>
+#include <fnmatch.h>
 
 #include "elf.h"
 #include "getsection.h"
+#include "md5.h"
 
 #ifndef ENABLE_DLOPEN
 #define ENABLE_DLOPEN
 #endif
 #include "squashfuse_dlopen.h"
 #include "appimage/appimage.h"
-
-#include <fnmatch.h>
 
 //#include "notify.c"
 extern int notify(char *title, char *body, int timeout);
@@ -165,7 +166,7 @@ char* getArg(int argc, char *argv[],char chr)
 /* mkdir -p implemented in C, needed for https://github.com/AppImage/AppImageKit/issues/333
  * https://gist.github.com/JonathonReinhart/8c0d90191c38af2dcadb102c4e202950 */
 int
-mkdir_p(const char *path)
+mkdir_p(const char* const path)
 {
     /* Adapted from http://stackoverflow.com/a/2336245/119527 */
     const size_t len = strlen(path);
@@ -210,7 +211,8 @@ print_help(const char *appimage_path)
     // TODO: "--appimage-list                 List content from embedded filesystem image\n"
     printf(
         "AppImage options:\n\n"
-        "  --appimage-extract              Extract content from embedded filesystem image\n"
+        "  --appimage-extract [<pattern>]  Extract content from embedded filesystem image\n"
+        "                                  If pattern is passed, only extract matching files\n"
         "  --appimage-help                 Print this help\n"
         "  --appimage-mount                Mount embedded filesystem image and print\n"
         "                                  mount point and wait for kill with Ctrl-C\n"
@@ -266,9 +268,217 @@ portable_option(const char *arg, const char *appimage_path, const char *name)
     }
 }
 
-int
-main (int argc, char *argv[])
-{
+bool extract_appimage(const char* const appimage_path, const char* const _prefix, const char* const _pattern, const bool overwrite) {
+    sqfs_err err = SQFS_OK;
+    sqfs_traverse trv;
+    sqfs fs;
+    char prefixed_path_to_extract[1024];
+
+    // local copy we can modify safely
+    // allocate 1 more byte than we would need so we can add a trailing slash if there is none yet
+    char* prefix = malloc(strlen(_prefix) + 2);
+    strcpy(prefix, _prefix);
+
+    // sanitize prefix
+    if (prefix[strlen(prefix) - 1] != '/')
+        strcat(prefix, "/");
+
+    if (access(prefix, F_OK) == -1) {
+        if (mkdir_p(prefix) == -1) {
+            perror("mkdir_p error");
+            return false;
+        }
+    }
+
+    if ((err = sqfs_open_image(&fs, appimage_path, (size_t) fs_offset))) {
+        fprintf(stderr, "Failed to open squashfs image\n");
+        return false;
+    };
+
+    // track duplicate inodes for hardlinks
+    char** created_inode = calloc(fs.sb.inodes, sizeof(char*));
+    if (created_inode == NULL) {
+        fprintf(stderr, "Failed allocating memory to track hardlinks\n");
+        return false;
+    }
+
+    if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs)))) {
+        fprintf(stderr, "sqfs_traverse_open error\n");
+        free(created_inode);
+        return false;
+    }
+
+    bool rv = true;
+
+    while (sqfs_traverse_next(&trv, &err)) {
+        if (!trv.dir_end) {
+            if (_pattern == NULL || fnmatch(_pattern, trv.path, FNM_FILE_NAME) == 0) {
+                // fprintf(stderr, "trv.path: %s\n", trv.path);
+                // fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
+                sqfs_inode inode;
+                if (sqfs_inode_get(&fs, &inode, trv.entry.inode)) {
+                    fprintf(stderr, "sqfs_inode_get error\n");
+                    rv = false;
+                    break;
+                }
+                // fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
+                // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
+                strcpy(prefixed_path_to_extract, "");
+                strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
+                fprintf(stderr, "%s\n", prefixed_path_to_extract);
+                if (inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE) {
+                    // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
+                    // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
+                    if (access(prefixed_path_to_extract, F_OK) == -1) {
+                        if (mkdir_p(prefixed_path_to_extract) == -1) {
+                            perror("mkdir_p error");
+                            rv = false;
+                            break;
+                        }
+                    }
+                } else if (inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE) {
+                    // if we've already created this inode, then this is a hardlink
+                    char* existing_path_for_inode = created_inode[inode.base.inode_number - 1];
+                    if (existing_path_for_inode != NULL) {
+                        unlink(prefixed_path_to_extract);
+                        if (link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
+                            fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n",
+                                prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
+                            rv = false;
+                            break;
+                        } else {
+                            continue;
+                        }
+                    } else {
+                        struct stat st;
+                        if (!overwrite && stat(prefixed_path_to_extract, &st) == 0 && st.st_size == inode.xtra.reg.file_size) {
+                            fprintf(stderr, "File exists and file size matches, skipping\n");
+                            continue;
+                        }
+
+                        // track the path we extract to for this inode, so that we can `link` if this inode is found again
+                        created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
+                        // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
+                        if (private_sqfs_stat(&fs, &inode, &st) != 0)
+                            die("private_sqfs_stat error");
+                        // Read the file in chunks
+                        off_t bytes_already_read = 0;
+                        sqfs_off_t bytes_at_a_time = 64 * 1024;
+                        FILE* f;
+                        f = fopen(prefixed_path_to_extract, "w+");
+                        if (f == NULL) {
+                            perror("fopen error");
+                            rv = false;
+                            break;
+                        }
+                        while (bytes_already_read < inode.xtra.reg.file_size) {
+                            char buf[bytes_at_a_time];
+                            if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf)) {
+                                perror("sqfs_read_range error");
+                                fclose(f);
+                                rv = false;
+                                break;
+                            }
+                            // fwrite(buf, 1, bytes_at_a_time, stdout);
+                            fwrite(buf, 1, bytes_at_a_time, f);
+                            bytes_already_read = bytes_already_read + bytes_at_a_time;
+                        }
+                        fclose(f);
+                        chmod(prefixed_path_to_extract, st.st_mode);
+                        if (!rv)
+                            break;
+                    }
+                } else if (inode.base.inode_type == SQUASHFS_SYMLINK_TYPE) {
+                    size_t size;
+                    sqfs_readlink(&fs, &inode, NULL, &size);
+                    char buf[size];
+                    int ret = sqfs_readlink(&fs, &inode, buf, &size);
+                    if (ret != 0) {
+                        perror("symlink error");
+                        rv = false;
+                        break;
+                    }
+                    // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
+                    unlink(prefixed_path_to_extract);
+                    ret = symlink(buf, prefixed_path_to_extract);
+                    if (ret != 0)
+                        fprintf(stderr, "WARNING: could not create symlink\n");
+                } else {
+                    fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
+                }
+                // fprintf(stderr, "\n");
+
+                if (!rv)
+                    break;
+            }
+        }
+    }
+    for (int i = 0; i < fs.sb.inodes; i++) {
+        free(created_inode[i]);
+    }
+    free(created_inode);
+
+    if (err != SQFS_OK) {
+        fprintf(stderr, "sqfs_traverse_next error\n");
+        rv = false;
+    }
+    sqfs_traverse_close(&trv);
+    sqfs_fd_close(fs.fd);
+
+    return rv;
+}
+
+int rm_recursive_callback(const char* path, const struct stat* stat, const int type, struct FTW* ftw) {
+    (void) stat;
+    (void) ftw;
+
+    switch (type) {
+        case FTW_NS:
+        case FTW_DNR:
+            fprintf(stderr, "%s: ftw error: %s\n",
+                path, strerror(errno));
+            return 1;
+
+        case FTW_D:
+            // ignore directories at first, will be handled by FTW_DP
+            break;
+
+        case FTW_F:
+        case FTW_SL:
+        case FTW_SLN:
+            if (remove(path) != 0) {
+                fprintf(stderr, "Failed to remove %s: %s\n", path, strerror(errno));
+                return false;
+            }
+            break;
+
+
+        case FTW_DP:
+            if (rmdir(path) != 0) {
+                fprintf(stderr, "Failed to remove directory %s: %s\n", path, strerror(errno));
+                return false;
+            }
+            break;
+
+        default:
+            fprintf(stderr, "Unexpected fts_info\n");
+            return 1;
+    }
+
+    return 0;
+};
+
+bool rm_recursive(const char* const path) {
+    // FTW_DEPTH: perform depth-first search to make sure files are deleted before the containing directories
+    // FTW_MOUNT: prevent deletion of files on other mounted filesystems
+    // FTW_PHYS: do not follow symlinks, but report symlinks as such; this way, the symlink targets, which might point
+    //           to locations outside path will not be deleted accidentally (attackers might abuse this)
+    int rv = nftw(path, &rm_recursive_callback, 0, FTW_DEPTH | FTW_MOUNT | FTW_PHYS);
+
+    return rv == 0;
+}
+
+int main(int argc, char *argv[]) {
     char appimage_path[PATH_MAX];
     char argv0_path[PATH_MAX];
     char * arg;
@@ -352,130 +562,117 @@ main (int argc, char *argv[])
         exit(0);
     }
 
-    /* Exract the AppImage */
     arg=getArg(argc,argv,'-');
+
+    /* extract the AppImage */
     if(arg && strcmp(arg,"appimage-extract")==0) {
-        sqfs_err err = SQFS_OK;
-        sqfs_traverse trv;
-        sqfs fs;
-        char *pattern;
-        char *prefix;
-        char prefixed_path_to_extract[1024];
-        char **created_inode;
+        char* pattern;
 
-        prefix = "squashfs-root/";
-
-        if(access(prefix, F_OK ) == -1 ) {
-            if (mkdir_p(prefix) == -1) {
-                perror("mkdir_p error");
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        if(argc == 3){
+        // default use case: use standard prefix
+        if (argc == 2) {
+            pattern = NULL;
+        } else if (argc == 3) {
             pattern = argv[2];
-            if (pattern[0] == '/') pattern++; // Remove leading '/'
-        }
-
-        if ((err = sqfs_open_image(&fs, appimage_path, fs_offset)))
-            exit(1);
-
-        // track duplicate inodes for hardlinks
-        created_inode = malloc(fs.sb.inodes * sizeof(char *));
-        if(created_inode != NULL) {
-            memset(created_inode, 0, fs.sb.inodes * sizeof(char *));
         } else {
-            fprintf(stderr, "Failed allocating memory to track hardlinks.\n");
+            fprintf(stderr, "Unexpected argument count: %d\n", argc - 1);
+            fprintf(stderr, "Usage: %s --appimage-extract [<prefix>]\n", argv0_path);
             exit(1);
         }
 
-        if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
-            die("sqfs_traverse_open error");
-        while (sqfs_traverse_next(&trv, &err)) {
-            if (!trv.dir_end) {
-                if((argc != 3) || (fnmatch (pattern, trv.path, FNM_FILE_NAME) == 0)){
-                    // fprintf(stderr, "trv.path: %s\n", trv.path);
-                    // fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
-                    sqfs_inode inode;
-                    if (sqfs_inode_get(&fs, &inode, trv.entry.inode))
-                        die("sqfs_inode_get error");
-                    // fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
-                    // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
-                    strcpy(prefixed_path_to_extract, "");
-                    strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
-                    fprintf(stderr, "%s\n", prefixed_path_to_extract);
-                    if(inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE){
-                        // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
-                        // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
-                        if(access(prefixed_path_to_extract, F_OK ) == -1 ) {
-                            if (mkdir_p(prefixed_path_to_extract) == -1) {
-                                perror("mkdir_p error");
-                                exit(EXIT_FAILURE);
-                            }
-                        }
-                    } else if(inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE){
-                        // if we've already created this inode, then this is a hardlink
-                        char* existing_path_for_inode = created_inode[inode.base.inode_number - 1];
-                        if(existing_path_for_inode != NULL) {
-                            unlink(prefixed_path_to_extract);
-                            if(link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
-                                fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n", prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
-                                exit(EXIT_FAILURE);
-                            } else {
-                                continue;
-                            }
-                        }
-                        // track the path we extract to for this inode, so that we can `link` if this inode is found again
-                        created_inode[inode.base.inode_number - 1] = strdup(prefixed_path_to_extract);
-                        // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
-                        if(private_sqfs_stat(&fs, &inode, &st) != 0)
-                            die("private_sqfs_stat error");
-                        // Read the file in chunks
-                        off_t bytes_already_read = 0;
-                        sqfs_off_t bytes_at_a_time = 64*1024;
-                        FILE * f;
-                        f = fopen (prefixed_path_to_extract, "w+");
-                        if (f == NULL)
-                            die("fopen error");
-                        while (bytes_already_read < inode.xtra.reg.file_size)
-                        {
-                            char buf[bytes_at_a_time];
-                            if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
-                                die("sqfs_read_range error");
-                            // fwrite(buf, 1, bytes_at_a_time, stdout);
-                            fwrite(buf, 1, bytes_at_a_time, f);
-                            bytes_already_read = bytes_already_read + bytes_at_a_time;
-                        }
-                        fclose(f);
-                        chmod (prefixed_path_to_extract, st.st_mode);
-                    } else if(inode.base.inode_type == SQUASHFS_SYMLINK_TYPE){
-                        size_t size;
-                        sqfs_readlink(&fs, &inode, NULL, &size);
-                        char buf[size];
-                        int ret = sqfs_readlink(&fs, &inode, buf, &size);
-                        if (ret != 0)
-                            die("symlink error");
-                        // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
-                        unlink(prefixed_path_to_extract);
-                        ret = symlink(buf, prefixed_path_to_extract);
-                        if (ret != 0)
-                            fprintf(stderr, "WARNING: could not create symlink\n");
-                    } else {
-                        fprintf(stderr, "TODO: Implement inode.base.inode_type %i\n", inode.base.inode_type);
-                    }
-                    // fprintf(stderr, "\n");
+        if (!extract_appimage(appimage_path, "squashfs-root/", pattern, true)) {
+            exit(1);
+        }
+
+        exit(0);
+    }
+
+    if (arg && strcmp(arg, "appimage-extract-and-run") == 0) {
+        char temp_base[PATH_MAX] = "/tmp";
+
+        const char* const TMPDIR = getenv("TMPDIR");
+        if (TMPDIR != NULL)
+            strcpy(temp_base, getenv("TMPDIR"));
+
+        char* hexlified_digest;
+
+        // calculate MD5 hash of file, and use it to make extracted directory name "content-aware"
+        // see https://github.com/AppImage/AppImageKit/issues/841 for more information
+        {
+            FILE* f = fopen(appimage_path, "rb");
+            if (f == NULL) {
+                perror("Failed to open AppImage file");
+                exit(1);
+            }
+
+            Md5Context ctx;
+            Md5Initialise(&ctx);
+
+            char buf[4096];
+            for (size_t bytes_read; (bytes_read = fread(buf, sizeof(char), sizeof(buf), f)); bytes_read > 0) {
+                Md5Update(&ctx, buf, (uint32_t) bytes_read);
+            }
+
+            MD5_HASH digest;
+            Md5Finalise(&ctx, &digest);
+
+            hexlified_digest = appimage_hexlify(digest.bytes, sizeof(digest.bytes));
+        }
+
+        char* prefix = malloc(strlen(temp_base) + 20 + strlen(hexlified_digest) + 2);
+        strcpy(prefix, temp_base);
+        strcat(prefix, "/appimage_extracted_");
+        strcat(prefix, hexlified_digest);
+        free(hexlified_digest);
+
+        if (!extract_appimage(appimage_path, prefix, NULL, false)) {
+            fprintf(stderr, "Failed to extract AppImage\n");
+            exit(1);
+        }
+
+        int pid;
+        if ((pid = fork()) == -1) {
+            int error = errno;
+            fprintf(stderr, "fork() failed: %s\n", strerror(error));
+            exit(1);
+        } else if (pid == 0) {
+            const char apprun_fname[] = "AppRun";
+            char* apprun_path = malloc(strlen(prefix) + 1 + strlen(apprun_fname) + 1);
+            strcpy(apprun_path, prefix);
+            strcat(apprun_path, "/");
+            strcat(apprun_path, apprun_fname);
+
+            // create copy of argument list without the --appimage-extract-and-run parameter
+            char* new_argv[argc];
+            int new_argc = 0;
+            new_argv[new_argc++] = strdup(apprun_path);
+            for (int i = 1; i < argc; ++i) {
+                if (strcmp(argv[i], "--appimage-extract-and-run") != 0) {
+                    new_argv[new_argc++] = strdup(argv[i]);
                 }
             }
+            new_argv[new_argc] = NULL;
+
+            execv(apprun_path, new_argv);
+
+            int error = errno;
+            fprintf(stderr, "Failed to run %s: %s\n", apprun_path, strerror(error));
+
+            free(apprun_path);
         }
-        if (err)
-            die("sqfs_traverse_next error");
-        for (int i = 0; i < fs.sb.inodes; i++) {
-            free(created_inode[i]);
+
+        int rv = waitpid(pid, NULL, 0);
+
+        if (getenv("NO_CLEANUP") == NULL) {
+            if (!rm_recursive(prefix)) {
+                fprintf(stderr, "Failed to clean up cache directory\n");
+                rv = false;
+            }
         }
-        free(created_inode);
-        sqfs_traverse_close(&trv);
-        sqfs_fd_close(fs.fd);
-        exit(0);
+
+        // template == prefix, must be freed only once
+        free(prefix);
+
+        exit(rv ? 0 : 1);
     }
 
     if(arg && strcmp(arg,"appimage-version")==0) {
@@ -520,7 +717,7 @@ main (int argc, char *argv[])
     int dir_fd, res;
 
     char mount_dir[64];
-    int namelen = strlen(basename(argv[0]));
+    size_t namelen = strlen(basename(argv[0]));
     if(namelen>6){
         namelen=6;
     }
