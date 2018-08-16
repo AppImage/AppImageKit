@@ -276,7 +276,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
     strcpy(prefix, _prefix);
 
     // sanitize prefix
-    if (prefix[strlen(prefix)] != '/')
+    if (prefix[strlen(prefix) - 1] != '/')
         strcat(prefix, "/");
 
     if (access(prefix, F_OK) == -1) {
