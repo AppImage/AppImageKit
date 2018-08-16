@@ -273,7 +273,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
 
     // local copy we can modify safely
     // allocate 1 more byte than we would need so we can add a trailing slash if there is none yet
-    char* prefix = malloc(strlen(_prefix + 3));
+    char* prefix = malloc(strlen(_prefix) + 2);
     strcpy(prefix, _prefix);
 
     // sanitize prefix
