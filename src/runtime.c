@@ -38,6 +38,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <fts.h>
 #include <stdio.h>
 #include <signal.h>
 #include <string.h>
@@ -401,6 +402,70 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
     return true;
 }
 
+// based on https://stackoverflow.com/questions/2256945/removing-a-non-empty-directory-programmatically-in-c-or-c
+bool rm_recursive(const char* const path) {
+    FTS* ftsp = NULL;
+    FTSENT* curr;
+
+    // fts is supposed not to modify the arguments in this array
+    char* files[] = {(char*) path, NULL};
+
+    // FTS_NOCHDIR  - Avoid changing cwd, which could cause unexpected behavior in multithreaded programs
+    // FTS_PHYSICAL - Don't follow symlinks. Prevents deletion of files outside of the specified directory
+    // FTS_XDEV     - Don't cross filesystem boundaries
+    ftsp = fts_open(files, FTS_NOCHDIR | FTS_PHYSICAL | FTS_XDEV, NULL);
+    if (ftsp == NULL) {
+        fprintf(stderr, "%s: fts_open failed: %s\n", path, strerror(errno));
+        return false;
+    }
+
+    bool ret = true;
+
+    while ((curr = fts_read(ftsp))) {
+        if (!ret)
+            break;
+
+        switch (curr->fts_info) {
+            case FTS_NS:
+            case FTS_DNR:
+            case FTS_ERR:
+                fprintf(stderr, "%s: fts_read error: %s\n",
+                    curr->fts_accpath, strerror(curr->fts_errno));
+                break;
+
+            case FTS_DC:
+            case FTS_DOT:
+            case FTS_NSOK:
+                // Not reached unless FTS_LOGICAL, FTS_SEEDOT, or FTS_NOSTAT were passed to fts_open()
+                break;
+
+            case FTS_D:
+                // Do nothing. Need depth-first search, so directories are deleted in FTS_DP
+                break;
+
+            case FTS_DP:
+            case FTS_F:
+            case FTS_SL:
+            case FTS_SLNONE:
+            case FTS_DEFAULT:
+                if (remove(curr->fts_accpath) < 0) {
+                    fprintf(stderr, "%s: Failed to remove: %s\n",
+                        curr->fts_path, strerror(errno));
+                    ret = false;
+                }
+                break;
+
+            default:
+                fprintf(stderr, "Unexpected fts_info\n");
+                ret = false;
+                break;
+        }
+    }
+
+    fts_close(ftsp);
+    return ret;
+}
+
 int main (int argc, char *argv[]) {
     char appimage_path[PATH_MAX];
     char argv0_path[PATH_MAX];
@@ -509,6 +574,77 @@ int main (int argc, char *argv[]) {
         }
 
         exit(0);
+    }
+
+    if (arg && strcmp(arg, "appimage-extract-and-run") == 0) {
+        char temp_base[PATH_MAX] = "/tmp";
+
+        const char* const TMPDIR = getenv("TMPDIR");
+        if (TMPDIR != NULL)
+            strcpy(temp_base, getenv("TMPDIR"));
+
+        const char target_dir[] = "appimage_extracted_XXXXXX";
+
+        char* template = malloc(strlen(temp_base) + 1 + strlen(target_dir) + 2);
+        strcpy(template, temp_base);
+        strcat(template, "/");
+        strcat(template, target_dir);
+
+        char* prefix = mkdtemp(template);
+
+        if (template != prefix) {
+            int error = errno;
+            fprintf(stderr, "Failed to create temporary directory: %s\n", strerror(error));
+            exit(1);
+        }
+
+        if (!extract_appimage(appimage_path, prefix)) {
+            fprintf(stderr, "Failed to extract AppImage\n");
+            exit(1);
+        }
+
+        int pid;
+        if ((pid = fork()) == 1) {
+            int error = errno;
+            fprintf(stderr, "fork() failed: %s\n", strerror(error));
+            exit(1);
+        } else if (pid == 0) {
+            const char apprun_fname[] = "AppRun";
+            char* apprun_path = malloc(strlen(prefix) + 1 + strlen(apprun_fname) + 1);
+            strcpy(apprun_path, prefix);
+            strcat(apprun_path, "/");
+            strcat(apprun_path, apprun_fname);
+
+            // create copy of argument list without the --appimage-extract-and-run parameter
+            char* new_argv[argc];
+            int new_argc = 0;
+            new_argv[new_argc++] = strdup(apprun_path);
+            for (int i = 1; i < argc; ++i) {
+                if (strcmp(argv[i], "--appimage-extract-and-run") != 0) {
+                    new_argv[new_argc++] = strdup(argv[i]);
+                }
+            }
+            new_argv[new_argc] = NULL;
+
+            execv(apprun_path, new_argv);
+
+            int error = errno;
+            fprintf(stderr, "Failed to run %s: %s\n", apprun_path, strerror(error));
+
+            free(apprun_path);
+        }
+
+        int child_rv = waitpid(pid, NULL, 0);
+
+        // TODO: implement NO_CLEANUP environment variable
+        // it doesn't make sense to implement it until we have "predictable target directories" which can be used to
+        // speed up subsequent calls by not extracting the files again
+        rm_recursive(prefix);
+
+        // template == prefix, must be freed only once
+        free(prefix);
+
+        exit(child_rv ? 0 : 1);
     }
 
     if(arg && strcmp(arg,"appimage-version")==0) {
