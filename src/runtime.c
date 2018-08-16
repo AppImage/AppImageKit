@@ -272,7 +272,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
 
     // local copy we can modify safely
     // allocate 1 more byte than we would need so we can add a trailing slash if there is none yet
-    char* prefix = malloc(strlen(_prefix+2));
+    char* prefix = malloc(strlen(_prefix + 2));
     strcpy(prefix, _prefix);
 
     // sanitize prefix
@@ -282,30 +282,38 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
     if (access(prefix, F_OK) == -1) {
         if (mkdir_p(prefix) == -1) {
             perror("mkdir_p error");
-            exit(EXIT_FAILURE);
+            return false;
         }
     }
 
-    if ((err = sqfs_open_image(&fs, appimage_path, (size_t) fs_offset)))
-        die("Failed to open squashfs image");
+    if ((err = sqfs_open_image(&fs, appimage_path, (size_t) fs_offset))) {
+        fprintf(stderr, "Failed to open squashfs image\n");
+        return false;
+    };
 
     // track duplicate inodes for hardlinks
     char** created_inode = malloc(fs.sb.inodes * sizeof(char*));
     if (created_inode != NULL) {
         memset(created_inode, 0, fs.sb.inodes * sizeof(char*));
     } else {
-        die("Failed allocating memory to track hardlinks.");
+        fprintf(stderr, "Failed allocating memory to track hardlinks\n");
+        return false;
     }
 
-    if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
-        die("sqfs_traverse_open error");
+    if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs)))) {
+        fprintf(stderr, "sqfs_traverse_open error\n");
+        return false;
+    }
+
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
             // fprintf(stderr, "trv.path: %s\n", trv.path);
             // fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
             sqfs_inode inode;
-            if (sqfs_inode_get(&fs, &inode, trv.entry.inode))
-                die("sqfs_inode_get error");
+            if (sqfs_inode_get(&fs, &inode, trv.entry.inode)) {
+                fprintf(stderr, "sqfs_inode_get error\n");
+                return false;
+            }
             // fprintf(stderr, "inode.base.inode_type: %i\n", inode.base.inode_type);
             // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
             strcpy(prefixed_path_to_extract, "");
@@ -317,7 +325,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 if (access(prefixed_path_to_extract, F_OK) == -1) {
                     if (mkdir_p(prefixed_path_to_extract) == -1) {
                         perror("mkdir_p error");
-                        exit(EXIT_FAILURE);
+                        return false;
                     }
                 }
             } else if (inode.base.inode_type == SQUASHFS_REG_TYPE || inode.base.inode_type == SQUASHFS_LREG_TYPE) {
@@ -328,7 +336,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                     if (link(existing_path_for_inode, prefixed_path_to_extract) == -1) {
                         fprintf(stderr, "Couldn't create hardlink from \"%s\" to \"%s\": %s\n",
                             prefixed_path_to_extract, existing_path_for_inode, strerror(errno));
-                        exit(EXIT_FAILURE);
+                        return false;
                     } else {
                         continue;
                     }
@@ -343,12 +351,16 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 sqfs_off_t bytes_at_a_time = 64 * 1024;
                 FILE* f;
                 f = fopen(prefixed_path_to_extract, "w+");
-                if (f == NULL)
-                    die("fopen error");
+                if (f == NULL) {
+                    perror("fopen error");
+                    return false;
+                }
                 while (bytes_already_read < inode.xtra.reg.file_size) {
                     char buf[bytes_at_a_time];
-                    if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf))
-                        die("sqfs_read_range error");
+                    if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf)) {
+                        perror("sqfs_read_range error");
+                        return false;
+                    }
                     // fwrite(buf, 1, bytes_at_a_time, stdout);
                     fwrite(buf, 1, bytes_at_a_time, f);
                     bytes_already_read = bytes_already_read + bytes_at_a_time;
@@ -360,8 +372,10 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 sqfs_readlink(&fs, &inode, NULL, &size);
                 char buf[size];
                 int ret = sqfs_readlink(&fs, &inode, buf, &size);
-                if (ret != 0)
-                    die("symlink error");
+                if (ret != 0) {
+                    perror("symlink error");
+                    return false;
+                }
                 // fprintf(stderr, "Symlink: %s to %s \n", prefixed_path_to_extract, buf);
                 unlink(prefixed_path_to_extract);
                 ret = symlink(buf, prefixed_path_to_extract);
@@ -373,15 +387,18 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
             // fprintf(stderr, "\n");
         }
     }
-    if (err)
-        die("sqfs_traverse_next error");
+    if (err) {
+        fprintf(stderr, "sqfs_traverse_next error\n");
+        return false;
+    }
     for (int i = 0; i < fs.sb.inodes; i++) {
         free(created_inode[i]);
     }
     free(created_inode);
     sqfs_traverse_close(&trv);
     sqfs_fd_close(fs.fd);
-    exit(0);
+
+    return true;
 }
 
 int main (int argc, char *argv[]) {
