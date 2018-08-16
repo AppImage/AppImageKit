@@ -92,7 +92,7 @@ add_custom_command(
 
 # add the runtime as a normal executable
 # CLion will recognize it as a normal executable, one can simply step into the code
-add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o elf.c notify.c getsection.c)
+add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o elf.c notify.c getsection.c hexlify.c)
 # CMake gets confused by the .o object, therefore we need to tell it that it shall link everything using the C compiler
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
 target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread)

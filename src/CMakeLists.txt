@@ -23,6 +23,7 @@ add_library(libappimage SHARED
     notify.c
     elf.c
     appimagetool_shared.c
+    hexlify.c
 )
 
 set_target_properties(libappimage PROPERTIES PREFIX "")
@@ -63,6 +64,7 @@ add_library(libappimage_static STATIC
     notify.c
     elf.c
     appimagetool_shared.c
+    hexlify.c
 )
 
 set_target_properties(libappimage_static PROPERTIES PREFIX "")
