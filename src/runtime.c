@@ -211,7 +211,8 @@ print_help(const char *appimage_path)
     // TODO: "--appimage-list                 List content from embedded filesystem image\n"
     printf(
         "AppImage options:\n\n"
-        "  --appimage-extract              Extract content from embedded filesystem image\n"
+        "  --appimage-extract [<pattern>]  Extract content from embedded filesystem image\n"
+        "                                  If pattern is passed, only extract matching files\n"
         "  --appimage-help                 Print this help\n"
         "  --appimage-mount                Mount embedded filesystem image and print\n"
         "                                  mount point and wait for kill with Ctrl-C\n"
