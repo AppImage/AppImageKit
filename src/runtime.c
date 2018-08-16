@@ -429,7 +429,7 @@ bool rm_recursive(const char* const path) {
     // FTS_NOCHDIR  - Avoid changing cwd, which could cause unexpected behavior in multithreaded programs
     // FTS_PHYSICAL - Don't follow symlinks. Prevents deletion of files outside of the specified directory
     // FTS_XDEV     - Don't cross filesystem boundaries
-    ftsp = fts_open(files, FTS_NOCHDIR | FTS_PHYSICAL | FTS_XDEV, NULL);
+    FTS* ftsp = fts_open(files, FTS_NOCHDIR | FTS_PHYSICAL | FTS_XDEV, NULL);
     if (ftsp == NULL) {
         fprintf(stderr, "%s: fts_open failed: %s\n", path, strerror(errno));
         return false;
@@ -437,7 +437,7 @@ bool rm_recursive(const char* const path) {
 
     bool ret = true;
 
-    while ((curr = fts_read(ftsp))) {
+    for (FTSENT* curr; (curr = fts_read(ftsp)) != NULL;) {
         if (!ret)
             break;
 
