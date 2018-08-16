@@ -475,7 +475,7 @@ bool rm_recursive(const char* const path) {
     return rv == 0;
 }
 
-int main (int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
     char appimage_path[PATH_MAX];
     char argv0_path[PATH_MAX];
     char * arg;
@@ -657,17 +657,19 @@ int main (int argc, char *argv[]) {
             free(apprun_path);
         }
 
-        int child_rv = waitpid(pid, NULL, 0);
+        int rv = waitpid(pid, NULL, 0);
 
-        // TODO: implement NO_CLEANUP environment variable
-        // it doesn't make sense to implement it until we have "predictable target directories" which can be used to
-        // speed up subsequent calls by not extracting the files again
-        rm_recursive(prefix);
+        if (getenv("NO_CLEANUP") == NULL) {
+            if (!rm_recursive(prefix)) {
+                fprintf(stderr, "Failed to clean up cache directory\n");
+                rv = false;
+            }
+        }
 
         // template == prefix, must be freed only once
         free(prefix);
 
-        exit(child_rv ? 0 : 1);
+        exit(rv ? 0 : 1);
     }
 
     if(arg && strcmp(arg,"appimage-version")==0) {
