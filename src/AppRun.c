@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
     snprintf(desktop_file, LINE_SIZE, "%s/%s", appdir, namelist[0]->d_name);
     FILE *f     = fopen(desktop_file, "r");
     char *line  = malloc(LINE_SIZE);
-    char *exe   = line+5;
     size_t n    = LINE_SIZE;
 
     do {
@@ -85,6 +84,7 @@ int main(int argc, char *argv[]) {
             die("Executable not found, make sure there is a line starting with 'Exec='\n");
     } while(strncmp(line, "Exec=", 5));
     fclose(f);
+    char *exe   = line+5;
 
     // parse arguments
     bool in_quotes = 0;
@@ -195,7 +195,7 @@ int main(int argc, char *argv[]) {
 
     /* Run */
     ret = execvp(exe, outargptrs);
-    
+
     int error = errno;
 
     if (ret == -1)
