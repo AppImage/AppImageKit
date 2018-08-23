@@ -10,7 +10,7 @@
 #include <sys/stat.h>
 #include <linux/limits.h>
 
-#include "getsection.h"
+#include "appimage/appimage_shared.h"
 
 typedef unsigned char byte;      
 

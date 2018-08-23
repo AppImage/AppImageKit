@@ -65,10 +65,10 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
 
-# find paths to tools, incorporating optional TOOLS_PREFIX
-include(cmake/tools.cmake)
-
 # configure dependencies
+add_subdirectory(lib)
+
+include(lib/libappimage/cmake/tools.cmake)
 include(cmake/dependencies.cmake)
 
 
@@ -89,9 +89,3 @@ set(APPIMAGEKIT_PACKAGE_DEBS FALSE CACHE BOOL "")
 if(APPIMAGEKIT_PACKAGE_DEBS)
     include(cmake/cpack_debs.cmake)
 endif()
-
-################################
-# unit and functionality tests #
-################################
-
-add_subdirectory(tests)
