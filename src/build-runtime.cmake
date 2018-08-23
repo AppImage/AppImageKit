@@ -15,7 +15,15 @@ else()
     set(BUILD_DEBUG FALSE)
 endif()
 
-set(runtime_cflags -std=c99 -ffunction-sections -fdata-sections -DGIT_COMMIT=\\"${GIT_COMMIT}\\" -I${squashfuse_INCLUDE_DIRS} -I${PROJECT_SOURCE_DIR}/include ${DEPENDENCIES_CFLAGS})
+set(runtime_cflags
+    -std=c99 -ffunction-sections -fdata-sections
+    -DGIT_COMMIT=\\"${GIT_COMMIT}\\"
+    -I${squashfuse_INCLUDE_DIRS}
+    -I${PROJECT_SOURCE_DIR}/include
+    -I${PROJECT_SOURCE_DIR}/lib/libappimage/include
+    -I${PROJECT_SOURCE_DIR}/lib/libappimage/src/libappimage_hashlib/include
+    ${DEPENDENCIES_CFLAGS}
+)
 set(runtime_ldflags -s -Wl,--gc-sections ${DEPENDENCIES_LDFLAGS})
 
 if(BUILD_DEBUG)
@@ -92,10 +100,10 @@ add_custom_command(
 
 # add the runtime as a normal executable
 # CLion will recognize it as a normal executable, one can simply step into the code
-add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o elf.c notify.c getsection.c hexlify.c)
+add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o notify.c)
 # CMake gets confused by the .o object, therefore we need to tell it that it shall link everything using the C compiler
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
-target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread md5)
+target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread libappimage_shared libappimage_hashlib)
 target_include_directories(runtime PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 if(BUILD_DEBUG)

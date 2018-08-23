@@ -48,15 +48,13 @@
 #include <wait.h>
 #include <fnmatch.h>
 
-#include "elf.h"
-#include "getsection.h"
-#include "md5.h"
+#include <appimage/appimage_shared.h>
+#include <hashlib.h>
 
 #ifndef ENABLE_DLOPEN
 #define ENABLE_DLOPEN
 #endif
 #include "squashfuse_dlopen.h"
-#include "appimage/appimage.h"
 
 //#include "notify.c"
 extern int notify(char *title, char *body, int timeout);
@@ -687,7 +685,7 @@ int main(int argc, char *argv[]) {
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
-        print_binary(appimage_path, offset, length);
+        appimage_print_binary(appimage_path, offset, length);
         exit(0);
     }
 
@@ -698,7 +696,7 @@ int main(int argc, char *argv[]) {
         // printf("offset: %lu\n", offset);
         // printf("length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
-        print_binary(appimage_path, offset, length);
+        appimage_print_binary(appimage_path, offset, length);
         exit(0);
     }
 

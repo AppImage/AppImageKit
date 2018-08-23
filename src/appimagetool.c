@@ -54,8 +54,6 @@
 #include <limits.h>
 #include <stdbool.h>
 
-#include "elf.h"
-#include "getsection.h"
 #include "appimage/appimage.h"
 
 #ifdef __linux__

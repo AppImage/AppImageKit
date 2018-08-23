@@ -8,112 +8,18 @@ if(NOT COMMAND add_sanitizers)
 endif()
 
 
-# include XDG basedir library
-add_subdirectory(xdg-basedir)
-
-
 # allow setting different path for mksquashfs after installation
 set(AUXILIARY_FILES_DESTINATION "lib/appimagekit" CACHE STRING "Target install directory for mksquashfs")
 
 
-add_library(md5 md5.c md5.h)
-target_include_directories(md5 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
-
-add_library(libappimage SHARED
-    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
-    shared.c
-    getsection.c
-    notify.c
-    elf.c
-    appimagetool_shared.c
-    hexlify.c
-)
-
-set_target_properties(libappimage PROPERTIES PREFIX "")
-set_target_properties(libappimage PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/appimage/appimage.h")
-
-target_compile_definitions(libappimage
-    PRIVATE -D_FILE_OFFSET_BITS=64
-    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
-    PRIVATE -DENABLE_BINRELOC
-)
-
-target_include_directories(libappimage
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
-    INTERFACE $<INSTALL_INTERFACE:include/>
-)
-
-target_link_libraries(libappimage
-    PRIVATE
-    squashfuse
-    libarchive
-    inotify-tools
-    xz
-    xdg-basedir
-    PUBLIC
-    pthread
-    libglib
-    libgobject
-    libgio
-    libzlib
-    libcairo
-)
-
-
-add_library(libappimage_static STATIC
-    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
-    shared.c
-    getsection.c
-    notify.c
-    elf.c
-    appimagetool_shared.c
-    hexlify.c
-)
-
-set_target_properties(libappimage_static PROPERTIES PREFIX "")
-set_target_properties(libappimage_static PROPERTIES LIBRARY_OUTPUT_NAME libappimage)
-set_target_properties(libappimage_static PROPERTIES PUBLIC_HEADER "${PROJECT_SOURCE_DIR}/include/appimage/appimage.h")
-
-target_compile_definitions(libappimage_static
-    PRIVATE -D_FILE_OFFSET_BITS=64
-    PRIVATE -DGIT_COMMIT="${GIT_COMMIT}"
-    PRIVATE -DENABLE_BINRELOC
-)
-
-target_include_directories(libappimage_static
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
-    INTERFACE $<INSTALL_INTERFACE:include/>
-)
-
-target_link_libraries(libappimage_static
-    PRIVATE
-    squashfuse
-    libarchive
-    inotify-tools
-    xz
-    xdg-basedir
-    PUBLIC
-    pthread
-    libglib
-    libgobject
-    libgio
-    libzlib
-    libcairo
-)
-
-
+# the runtime build configuration is quite long, therefore it's managed in a separate CMake script
 include(build-runtime.cmake)
 
 
 add_executable(appimagetool
-    ${PROJECT_SOURCE_DIR}/include/appimage/appimage.h
     appimagetool.c
-    getsection.c
     binreloc.c
-    elf.c
     runtime_embed.o
-    appimagetool_shared.c
 )
 
 target_include_directories(appimagetool
@@ -124,16 +30,10 @@ target_include_directories(appimagetool
 # trick: list libraries on which imported static ones depend on in the PUBLIC section
 # CMake then adds them after the PRIVATE ones in the linker command
 target_link_libraries(appimagetool
-    PRIVATE
     ${CMAKE_DL_LIBS}
     squashfuse
-    xz
     xdg-basedir
-    PUBLIC
-    pthread
-    libglib
-    libgobject
-    libzlib
+    libappimage_static
 )
 
 target_compile_definitions(appimagetool
@@ -170,11 +70,12 @@ target_compile_definitions(AppRun
 add_sanitizers(AppRun)
 
 
-add_executable(validate validate.c getsection.c)
+add_executable(validate validate.c)
 
 target_link_libraries(validate
+    libappimage_static
     libglib
-    libopenssl
+    libssl
 )
 
 target_include_directories(validate
@@ -183,10 +84,11 @@ target_include_directories(validate
 )
 
 
-add_executable(digest digest.c getsection.c)
+add_executable(digest digest.c)
 
 target_link_libraries(digest
-    libopenssl
+    libappimage_static
+    libssl
 )
 
 add_sanitizers(digest)
@@ -194,7 +96,7 @@ add_sanitizers(digest)
 
 # digest_md5 demo application
 # can be used to verify AppImages' MD5 digest
-add_executable(digest_md5 EXCLUDE_FROM_ALL digest_md5.c getsection.c appimagetool_shared.c)
+add_executable(digest_md5 EXCLUDE_FROM_ALL digest_md5.c)
 
 target_include_directories(digest_md5
     PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
@@ -202,8 +104,8 @@ target_include_directories(digest_md5
 )
 
 target_link_libraries(digest_md5
-    PRIVATE
-    libglib
+    PRIVATE libglib
+    PRIVATE libappimage_static
 )
 
 
@@ -228,50 +130,4 @@ install(
     LIBRARY DESTINATION lib COMPONENT applications
     ARCHIVE DESTINATION lib/static COMPONENT applications
     INCLUDES DESTINATION include COMPONENT applications
-)
-
-
-# install libappimage
-install(TARGETS libappimage
-    EXPORT AppImageKitTargets
-    LIBRARY DESTINATION lib COMPONENT libappimage
-    ARCHIVE DESTINATION lib/static COMPONENT libappimage
-    PUBLIC_HEADER DESTINATION include/appimage COMPONENT libappimage-dev
-)
-
-# Add all targets to the build-tree export set
-export(
-    TARGETS libappimage
-    FILE "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitTargets.cmake"
-)
-
-# Export the package for use from the build-tree
-# (this registers the build-tree with a global CMake-registry)
-export(PACKAGE AppImageKit)
-
-# Create the AppImageConfig.cmake and AppImageConfigVersion files
-configure_file(
-    "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfig.cmake.in"
-    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
-    @ONLY
-)
-# ... for both
-configure_file(
-    "${PROJECT_SOURCE_DIR}/cmake/AppImageKitConfigVersion.cmake.in"
-    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
-    @ONLY
-)
-
-# Install the AppImageConfig.cmake and AppImageConfigVersion.cmake
-install(FILES
-    "${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/AppImageKitConfig.cmake"
-    "${PROJECT_BINARY_DIR}/${CMAKE_FILES_DIRECTORY}/AppImageKitConfigVersion.cmake"
-    DESTINATION "lib/cmake/AppImageKit"
-    COMPONENT libappimage-dev
-)
-
-# Install the export set for use with the install-tree
-install(EXPORT AppImageKitTargets
-    DESTINATION "lib/cmake/AppImageKit"
-    COMPONENT libappimage-dev
 )

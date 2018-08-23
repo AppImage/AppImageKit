@@ -1,7 +1,3 @@
-/*
-	cc -o validate ../getsection.c ../validate.c -lssl -lcrypto $(pkg-config --cflags glib-2.0) -I/usr/lib/x86_64-linux-gnu/glib-2.0/include
-*/
-
 #include <glib.h>
 #include <glib/gprintf.h>
 #include <stdio.h>
@@ -17,7 +13,7 @@
 #include <sys/mman.h>
 
 #include "appimage/appimage.h"
-#include "getsection.h"
+#include "appimage/appimage_shared.h"
 #include "light_elf.h"
 
 typedef unsigned char byte;      
