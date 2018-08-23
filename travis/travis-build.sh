@@ -3,6 +3,11 @@
 set -e
 set -x
 
+if [ "$CI" == "" ]; then
+    echo "Not running on CI system, aborting to prevent damage from system"
+    exit 2
+fi
+
 case "$ARCH" in
     "x86_64")
         export ARCH="x86_64"
