@@ -714,15 +714,20 @@ int main(int argc, char *argv[]) {
 
     int dir_fd, res;
 
+    char temp_base[PATH_MAX] = "/tmp";
+    if (getenv("TMPDIR") != NULL)
+      strcpy(temp_base, getenv("TMPDIR"));
+    size_t templen = strlen(temp_base);
     char mount_dir[64];
     size_t namelen = strlen(basename(argv[0]));
     if(namelen>6){
         namelen=6;
     }
-    strncpy(mount_dir, "/tmp/.mount_", 12);
-    strncpy(mount_dir+12, basename(argv[0]), namelen);
-    strncpy(mount_dir+12+namelen, "XXXXXX", 6);
-    mount_dir[12+namelen+6] = 0; // null terminate destination
+    strcpy(mount_dir, temp_base);
+    strncpy(mount_dir+templen, "/.mount_", 8);
+    strncpy(mount_dir+templen+8, basename(argv[0]), namelen);
+    strncpy(mount_dir+templen+8+namelen, "XXXXXX", 6);
+    mount_dir[templen+8+namelen+6] = 0; // null terminate destination
 
     char filename[100]; /* enough for mount_dir + "/AppRun" */
     pid_t pid;
