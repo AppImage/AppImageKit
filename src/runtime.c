@@ -585,7 +585,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (arg && strcmp(arg, "appimage-extract-and-run") == 0) {
-        char temp_base[PATH_MAX] = "/tmp";
+        char temp_base[PATH_MAX] = P_tmpdir;
 
         const char* const TMPDIR = getenv("TMPDIR");
         if (TMPDIR != NULL)
@@ -714,11 +714,11 @@ int main(int argc, char *argv[]) {
 
     int dir_fd, res;
 
-    char temp_base[PATH_MAX] = "/tmp";
+    char temp_base[PATH_MAX] = P_tmpdir;
     if (getenv("TMPDIR") != NULL)
       strcpy(temp_base, getenv("TMPDIR"));
     size_t templen = strlen(temp_base);
-    char mount_dir[64];
+    char mount_dir[templen + 60];
     size_t namelen = strlen(basename(argv[0]));
     if(namelen>6){
         namelen=6;
@@ -729,12 +729,14 @@ int main(int argc, char *argv[]) {
     strncpy(mount_dir+templen+8+namelen, "XXXXXX", 6);
     mount_dir[templen+8+namelen+6] = 0; // null terminate destination
 
-    char filename[100]; /* enough for mount_dir + "/AppRun" */
+    size_t mount_dir_size = strlen(mount_dir);
+    char filename[mount_dir_size + 8]; /* enough for mount_dir + "/AppRun" */
     pid_t pid;
     char **real_argv;
     int i;
 
     if (mkdtemp(mount_dir) == NULL) {
+        perror ("create mount dir error");
         exit (1);
     }
 
@@ -814,7 +816,11 @@ int main(int argc, char *argv[]) {
         real_argv[i] = NULL;
 
         if(arg && strcmp(arg,"appimage-mount")==0) {
-            printf("%s\n", mount_dir);
+            char real_mount_dir[PATH_MAX];
+            if (realpath(mount_dir, real_mount_dir) == real_mount_dir)
+                printf("%s\n", real_mount_dir);
+            else
+                printf("%s\n", mount_dir);
             for (;;) pause();
         }
 
