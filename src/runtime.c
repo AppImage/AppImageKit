@@ -730,7 +730,6 @@ int main(int argc, char *argv[]) {
     mount_dir[templen+8+namelen+6] = 0; // null terminate destination
 
     size_t mount_dir_size = strlen(mount_dir);
-    char filename[mount_dir_size + 8]; /* enough for mount_dir + "/AppRun" */
     pid_t pid;
     char **real_argv;
     int i;
@@ -806,9 +805,6 @@ int main(int argc, char *argv[]) {
         }
         close (dir_fd);
 
-        strcpy (filename, mount_dir);
-        strcat (filename, "/AppRun");
-
         real_argv = malloc (sizeof (char *) * (argc + 1));
         for (i = 0; i < argc; i++) {
             real_argv[i] = argv[i];
@@ -865,6 +861,10 @@ int main(int argc, char *argv[]) {
         if (getcwd(cwd, sizeof(cwd)) != NULL) {
             setenv( "OWD", cwd, 1 );
         }
+
+        char filename[mount_dir_size + 8]; /* enough for mount_dir + "/AppRun" */
+        strcpy (3, mount_dir);
+        strcat (filename, "/AppRun");
 
         /* TODO: Find a way to get the exit status and/or output of this */
         execv (filename, real_argv);
