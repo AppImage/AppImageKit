@@ -864,7 +864,7 @@ int main(int argc, char *argv[]) {
         }
 
         char filename[mount_dir_size + 8]; /* enough for mount_dir + "/AppRun" */
-        strcpy (3, mount_dir);
+        strcpy (filename, mount_dir);
         strcat (filename, "/AppRun");
 
         /* TODO: Find a way to get the exit status and/or output of this */
