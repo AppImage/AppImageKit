@@ -719,11 +719,16 @@ int main(int argc, char *argv[]) {
     int dir_fd, res;
 
     size_t templen = strlen(temp_base);
+
+    // allocate enough memory (size of name won't exceed 60 bytes)
     char mount_dir[templen + 60];
+
     size_t namelen = strlen(basename(argv[0]));
-    if(namelen>6){
-        namelen=6;
+    // limit length of tempdir name
+    if(namelen > 6){
+        namelen = 6;
     }
+
     strcpy(mount_dir, temp_base);
     strncpy(mount_dir+templen, "/.mount_", 8);
     strncpy(mount_dir+templen+8, basename(argv[0]), namelen);
