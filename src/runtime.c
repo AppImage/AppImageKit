@@ -529,6 +529,16 @@ int main(int argc, char *argv[]) {
 #endif
     }
 
+    // temporary directories are required in a few places
+    // therefore we implement the detection of the temp base dir at the top of the code to avoid redundancy
+    char temp_base[PATH_MAX] = P_tmpdir;
+
+    {
+        const char* const TMPDIR = getenv("TMPDIR");
+        if (TMPDIR != NULL)
+            strcpy(temp_base, getenv("TMPDIR"));
+    }
+
     fs_offset = appimage_get_elf_size(appimage_path);
 
     // error check
@@ -585,13 +595,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (arg && strcmp(arg, "appimage-extract-and-run") == 0) {
-        char temp_base[PATH_MAX] = "/tmp";
-
-        const char* const TMPDIR = getenv("TMPDIR");
-        if (TMPDIR != NULL)
-            strcpy(temp_base, getenv("TMPDIR"));
-
-        char* hexlified_digest;
+        char* hexlified_digest = NULL;
 
         // calculate MD5 hash of file, and use it to make extracted directory name "content-aware"
         // see https://github.com/AppImage/AppImageKit/issues/841 for more information
@@ -714,22 +718,30 @@ int main(int argc, char *argv[]) {
 
     int dir_fd, res;
 
-    char mount_dir[64];
-    size_t namelen = strlen(basename(argv[0]));
-    if(namelen>6){
-        namelen=6;
-    }
-    strncpy(mount_dir, "/tmp/.mount_", 12);
-    strncpy(mount_dir+12, basename(argv[0]), namelen);
-    strncpy(mount_dir+12+namelen, "XXXXXX", 6);
-    mount_dir[12+namelen+6] = 0; // null terminate destination
+    size_t templen = strlen(temp_base);
 
-    char filename[100]; /* enough for mount_dir + "/AppRun" */
+    // allocate enough memory (size of name won't exceed 60 bytes)
+    char mount_dir[templen + 60];
+
+    size_t namelen = strlen(basename(argv[0]));
+    // limit length of tempdir name
+    if(namelen > 6){
+        namelen = 6;
+    }
+
+    strcpy(mount_dir, temp_base);
+    strncpy(mount_dir+templen, "/.mount_", 8);
+    strncpy(mount_dir+templen+8, basename(argv[0]), namelen);
+    strncpy(mount_dir+templen+8+namelen, "XXXXXX", 6);
+    mount_dir[templen+8+namelen+6] = 0; // null terminate destination
+
+    size_t mount_dir_size = strlen(mount_dir);
     pid_t pid;
     char **real_argv;
     int i;
 
     if (mkdtemp(mount_dir) == NULL) {
+        perror ("create mount dir error");
         exit (1);
     }
 
@@ -799,9 +811,6 @@ int main(int argc, char *argv[]) {
         }
         close (dir_fd);
 
-        strcpy (filename, mount_dir);
-        strcat (filename, "/AppRun");
-
         real_argv = malloc (sizeof (char *) * (argc + 1));
         for (i = 0; i < argc; i++) {
             real_argv[i] = argv[i];
@@ -809,7 +818,11 @@ int main(int argc, char *argv[]) {
         real_argv[i] = NULL;
 
         if(arg && strcmp(arg,"appimage-mount")==0) {
-            printf("%s\n", mount_dir);
+            char real_mount_dir[PATH_MAX];
+            if (realpath(mount_dir, real_mount_dir) == real_mount_dir)
+                printf("%s\n", real_mount_dir);
+            else
+                printf("%s\n", mount_dir);
             for (;;) pause();
         }
 
@@ -854,6 +867,10 @@ int main(int argc, char *argv[]) {
         if (getcwd(cwd, sizeof(cwd)) != NULL) {
             setenv( "OWD", cwd, 1 );
         }
+
+        char filename[mount_dir_size + 8]; /* enough for mount_dir + "/AppRun" */
+        strcpy (filename, mount_dir);
+        strcat (filename, "/AppRun");
 
         /* TODO: Find a way to get the exit status and/or output of this */
         execv (filename, real_argv);
