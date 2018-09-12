@@ -529,6 +529,16 @@ int main(int argc, char *argv[]) {
 #endif
     }
 
+    // temporary directories are required in a few places
+    // therefore we implement the detection of the temp base dir at the top of the code to avoid redundancy
+    char temp_base[PATH_MAX] = P_tmpdir;
+
+    {
+        const char* const TMPDIR = getenv("TMPDIR");
+        if (TMPDIR != NULL)
+            strcpy(temp_base, getenv("TMPDIR"));
+    }
+
     fs_offset = appimage_get_elf_size(appimage_path);
 
     // error check
@@ -585,13 +595,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (arg && strcmp(arg, "appimage-extract-and-run") == 0) {
-        char temp_base[PATH_MAX] = P_tmpdir;
-
-        const char* const TMPDIR = getenv("TMPDIR");
-        if (TMPDIR != NULL)
-            strcpy(temp_base, getenv("TMPDIR"));
-
-        char* hexlified_digest;
+        char* hexlified_digest = NULL;
 
         // calculate MD5 hash of file, and use it to make extracted directory name "content-aware"
         // see https://github.com/AppImage/AppImageKit/issues/841 for more information
@@ -714,9 +718,6 @@ int main(int argc, char *argv[]) {
 
     int dir_fd, res;
 
-    char temp_base[PATH_MAX] = P_tmpdir;
-    if (getenv("TMPDIR") != NULL)
-      strcpy(temp_base, getenv("TMPDIR"));
     size_t templen = strlen(temp_base);
     char mount_dir[templen + 60];
     size_t namelen = strlen(basename(argv[0]));
