@@ -667,14 +667,14 @@ int main(int argc, char *argv[]) {
         if (getenv("NO_CLEANUP") == NULL) {
             if (!rm_recursive(prefix)) {
                 fprintf(stderr, "Failed to clean up cache directory\n");
-                rv = false;
+                rv = -1;
             }
         }
 
         // template == prefix, must be freed only once
         free(prefix);
 
-        exit(rv ? 0 : 1);
+        exit(rv >= 0 ? 0 : 1);
     }
 
     if(arg && strcmp(arg,"appimage-version")==0) {
