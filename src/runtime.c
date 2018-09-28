@@ -668,6 +668,7 @@ int main(int argc, char *argv[]) {
             fprintf(stderr, "Failed to run %s: %s\n", apprun_path, strerror(error));
 
             free(apprun_path);
+            exit(EXIT_EXECERROR);
         }
 
         int rv = waitpid(pid, NULL, 0);
