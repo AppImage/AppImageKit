@@ -671,19 +671,22 @@ int main(int argc, char *argv[]) {
             exit(EXIT_EXECERROR);
         }
 
-        int rv = waitpid(pid, NULL, 0);
+        int status = 0;
+        int rv = waitpid(pid, &status, 0);
+        status = rv > 0 && WIFEXITED (status) ? WEXITSTATUS (status) : EXIT_EXECERROR;
 
         if (getenv("NO_CLEANUP") == NULL) {
             if (!rm_recursive(prefix)) {
                 fprintf(stderr, "Failed to clean up cache directory\n");
-                rv = -1;
+                if (status == 0)        /* avoid messing existing failure exit status */
+                  status = EXIT_EXECERROR;
             }
         }
 
         // template == prefix, must be freed only once
         free(prefix);
 
-        exit(rv >= 0 ? 0 : EXIT_EXECERROR);
+        exit(status);
     }
 
     if(arg && strcmp(arg,"appimage-version")==0) {
