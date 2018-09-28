@@ -56,6 +56,14 @@
 #endif
 #include "squashfuse_dlopen.h"
 
+/* Exit status to use when launching an AppImage fails.
+ * For applications that assign meanings to exit status codes (e.g. rsync),
+ * we avoid "cluttering" pre-defined exit status codes by using 127 which
+ * is known to alias an application exit status and also known as launcher
+ * error, see SYSTEM(3POSIX).
+ */
+#define EXIT_EXECERROR  127     /* Execution error exit status.  */
+
 //#include "notify.c"
 extern int notify(char *title, char *body, int timeout);
 struct stat st;
@@ -64,7 +72,7 @@ static ssize_t fs_offset; // The offset at which a filesystem image is expected 
 
 static void die(const char *msg) {
     fprintf(stderr, "%s\n", msg);
-    exit(1);
+    exit(EXIT_EXECERROR);
 }
 
 /* Check whether directory is writable */
@@ -544,7 +552,7 @@ int main(int argc, char *argv[]) {
     // error check
     if (fs_offset < 0) {
         printf("Failed to get fs offset for %s\n", appimage_path);
-        exit(EXIT_FAILURE);
+        exit(EXIT_EXECERROR);
     }
 
     arg=getArg(argc,argv,'-');
@@ -556,7 +564,7 @@ int main(int argc, char *argv[]) {
         ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
         if (length < 0) {
             printf("Error getting realpath for %s\n", appimage_path);
-            exit(EXIT_FAILURE);
+            exit(EXIT_EXECERROR);
         }
         fullpath[length] = '\0';
 
@@ -603,7 +611,7 @@ int main(int argc, char *argv[]) {
             FILE* f = fopen(appimage_path, "rb");
             if (f == NULL) {
                 perror("Failed to open AppImage file");
-                exit(1);
+                exit(EXIT_EXECERROR);
             }
 
             Md5Context ctx;
@@ -628,14 +636,14 @@ int main(int argc, char *argv[]) {
 
         if (!extract_appimage(appimage_path, prefix, NULL, false)) {
             fprintf(stderr, "Failed to extract AppImage\n");
-            exit(1);
+            exit(EXIT_EXECERROR);
         }
 
         int pid;
         if ((pid = fork()) == -1) {
             int error = errno;
             fprintf(stderr, "fork() failed: %s\n", strerror(error));
-            exit(1);
+            exit(EXIT_EXECERROR);
         } else if (pid == 0) {
             const char apprun_fname[] = "AppRun";
             char* apprun_path = malloc(strlen(prefix) + 1 + strlen(apprun_fname) + 1);
@@ -674,7 +682,7 @@ int main(int argc, char *argv[]) {
         // template == prefix, must be freed only once
         free(prefix);
 
-        exit(rv >= 0 ? 0 : 1);
+        exit(rv >= 0 ? 0 : EXIT_EXECERROR);
     }
 
     if(arg && strcmp(arg,"appimage-version")==0) {
@@ -742,18 +750,18 @@ int main(int argc, char *argv[]) {
 
     if (mkdtemp(mount_dir) == NULL) {
         perror ("create mount dir error");
-        exit (1);
+        exit (EXIT_EXECERROR);
     }
 
     if (pipe (keepalive_pipe) == -1) {
         perror ("pipe error");
-        exit (1);
+        exit (EXIT_EXECERROR);
     }
 
     pid = fork ();
     if (pid == -1) {
         perror ("fork error");
-        exit (1);
+        exit (EXIT_EXECERROR);
     }
 
     if (pid == 0) {
@@ -801,13 +809,13 @@ int main(int argc, char *argv[]) {
         dir_fd = open (mount_dir, O_RDONLY);
         if (dir_fd == -1) {
             perror ("open dir error");
-            exit (1);
+            exit (EXIT_EXECERROR);
         }
 
         res = dup2 (dir_fd, 1023);
         if (res == -1) {
             perror ("dup2 error");
-            exit (1);
+            exit (EXIT_EXECERROR);
         }
         close (dir_fd);
 
@@ -876,7 +884,7 @@ int main(int argc, char *argv[]) {
         execv (filename, real_argv);
         /* Error if we continue here */
         perror("execv error");
-        exit(1);
+        exit(EXIT_EXECERROR);
     }
 
     return 0;
