@@ -606,13 +606,22 @@ int main(int argc, char *argv[]) {
     int length;
     char fullpath[PATH_MAX];
 
-    if(getenv("TARGET_APPIMAGE") == NULL){
+    if(getenv("TARGET_APPIMAGE") == NULL) {
         // If we are operating on this file itself
-        length = readlink(appimage_path, fullpath, sizeof(fullpath));
-        fullpath[length] = '\0';
+        ssize_t len = readlink(appimage_path, fullpath, sizeof(fullpath));
+        if (len < 0) {
+            perror("Failed to obtain absolute path");
+            exit(EXIT_EXECERROR);
+        }
+        fullpath[len] = '\0';
     } else {
-        // If we are operating on a different AppImage than this file
-        sprintf(fullpath, "%s", appimage_path); // TODO: Make absolute
+        char* abspath = realpath(appimage_path, NULL);
+        if (abspath == NULL) {
+            perror("Failed to obtain absolute path");
+            exit(EXIT_EXECERROR);
+        }
+        strcpy(fullpath, abspath);
+        free(abspath);
     }
 
     if (arg && strcmp(arg, "appimage-extract-and-run") == 0) {
