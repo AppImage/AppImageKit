@@ -699,8 +699,25 @@ int main(int argc, char *argv[]) {
         }
 
         int status = 0;
-        int rv = waitpid(pid, &status, 0);
-        status = rv > 0 && WIFEXITED (status) ? WEXITSTATUS (status) : EXIT_EXECERROR;
+        {
+            int w = waitpid(pid, &status, 0);
+
+            if (w < 0) {
+                perror("waitpid");
+                exit(EXIT_EXECERROR);
+            }
+        }
+
+        if (WIFEXITED(status)) {
+            status = WEXITSTATUS(status);
+            printf("exited, status=%d\n", status);
+        } else if (WIFSIGNALED(status)) {
+            status = WTERMSIG(status);
+            printf("killed by signal %d\n", status);
+        } else if (WIFSTOPPED(status)) {
+            status = WSTOPSIG(status);
+            printf("stopped by signal %d\n", status);
+        }
 
         if (getenv("NO_CLEANUP") == NULL) {
             if (!rm_recursive(prefix)) {
