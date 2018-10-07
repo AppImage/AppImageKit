@@ -33,7 +33,10 @@ target_link_libraries(appimagetool
     ${CMAKE_DL_LIBS}
     squashfuse
     xdg-basedir
-    libappimage_static
+    libappimage_shared
+    libglib
+    libzlib
+    xz
 )
 
 target_compile_definitions(appimagetool
@@ -73,7 +76,7 @@ add_sanitizers(AppRun)
 add_executable(validate validate.c)
 
 target_link_libraries(validate
-    libappimage_static
+    libappimage_shared
     libglib
     libssl
 )
@@ -87,7 +90,7 @@ target_include_directories(validate
 add_executable(digest digest.c)
 
 target_link_libraries(digest
-    libappimage_static
+    libappimage_shared
     libssl
 )
 
@@ -105,7 +108,7 @@ target_include_directories(digest_md5
 
 target_link_libraries(digest_md5
     PRIVATE libglib
-    PRIVATE libappimage_static
+    PRIVATE libappimage_shared
 )
 
 

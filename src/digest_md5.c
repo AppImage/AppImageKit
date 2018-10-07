@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "appimage/appimage.h"
+#include "appimage/appimage_shared.h"
 #include "getsection.h"
 
 
