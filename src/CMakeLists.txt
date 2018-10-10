@@ -1,5 +1,8 @@
 find_package(Sanitizers)
 
+find_package(PkgConfig)
+pkg_check_modules (libelf REQUIRED IMPORTED_TARGET libelf)
+
 if(NOT COMMAND add_sanitizers)
     message(WARNING "Sanitizers CMake module not found, sanitizer support is not available")
     # defining a no-op function to avoid CMake errors
@@ -37,6 +40,7 @@ target_link_libraries(appimagetool
     libglib
     libzlib
     xz
+    PkgConfig::libelf
 )
 
 target_compile_definitions(appimagetool
