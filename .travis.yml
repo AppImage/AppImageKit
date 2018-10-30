@@ -37,6 +37,8 @@ notifications:
     on_start: always     # options: [always|never|change] default: always
 
 branches:
-  only:
-    - appimagetool/master
-    - feature/usage
+  except:
+  - # Do not build tags that we create when we upload to GitHub Releases
+  - /^(?i:continuous)$/
+  - # our master is called "appimagetool/master"
+  - master
