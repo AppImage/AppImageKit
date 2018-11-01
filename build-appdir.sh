@@ -3,8 +3,6 @@
 set -e
 set -x
 
-# preparations
-mkdir -p appdirs/
 
 #######################################################################
 
@@ -12,11 +10,15 @@ mkdir -p appdirs/
 APPIMAGETOOL_APPDIR=appdirs/appimagetool.AppDir
 
 rm -rf "$APPIMAGETOOL_APPDIR" || true
-mkdir -p "$APPIMAGETOOL_APPDIR"/usr/{bin,lib/appimagekit}
-cp -f install_prefix/usr/bin/appimagetool "$APPIMAGETOOL_APPDIR"/usr/bin
 
+# Run make install only for the 'appimagetool.AppImage' component to deploy appimagetools files to
+# the $APPIMAGETOOL_APPDIR
+DESTDIR="$APPIMAGETOOL_APPDIR" cmake -DCOMPONENT=appimagetool -P cmake_install.cmake
+
+mkdir -p "$APPIMAGETOOL_APPDIR"/usr/lib/appimagekit/
+
+# Copy AppDir specific files
 cp ../resources/AppRun "$APPIMAGETOOL_APPDIR"
-cp install_prefix/usr/bin/appimagetool "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp install_prefix/usr/lib/appimagekit/mksquashfs "$APPIMAGETOOL_APPDIR"/usr/lib/appimagekit/
 cp $(which desktop-file-validate) "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
@@ -24,8 +26,6 @@ cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp ../resources/appimagetool.desktop "$APPIMAGETOOL_APPDIR"
 cp ../resources/appimagetool.svg "$APPIMAGETOOL_APPDIR"/appimagetool.svg
 ln -s "$APPIMAGETOOL_APPDIR"/appimagetool.svg "$APPIMAGETOOL_APPDIR"/.DirIcon
-mkdir -p "$APPIMAGETOOL_APPDIR"/usr/share/metainfo
-cp ../resources/usr/share/metainfo/appimagetool.appdata.xml "$APPIMAGETOOL_APPDIR"/usr/share/metainfo/
 
 if [ -d /deps/ ]; then
     # deploy glib
