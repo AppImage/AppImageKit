@@ -308,6 +308,28 @@ gchar* getArchName(bool* archs) {
         return "all";
 }
 
+void extract_arch_from_e_machine_field(int16_t e_machine, const gchar* sourcename, bool* archs) {
+    if (e_machine == 3) {
+        archs[fARCH_i386] = 1;
+        fprintf(stderr, "%s used for determining architecture i386\n", sourcename);
+    }
+
+    if (e_machine == 62) {
+        archs[fARCH_x86_64] = 1;
+        fprintf(stderr, "%s used for determining architecture x86_64\n", sourcename);
+    }
+
+    if (e_machine == 40) {
+        archs[fARCH_arm] = 1;
+        fprintf(stderr, "%s used for determining architecture ARM\n", sourcename);
+    }
+
+    if (e_machine == 183) {
+        archs[fARCH_aarch64] = 1;
+        fprintf(stderr, "%s used for determining architecture ARM aarch64\n", sourcename);
+    }
+}
+
 void extract_arch_from_text(gchar *archname, const gchar* sourcename, bool* archs) {
     if (archname) {
         archname = g_strstrip(archname);
@@ -343,16 +365,22 @@ void extract_arch_from_text(gchar *archname, const gchar* sourcename, bool* arch
     }
 }
 
+int16_t read_elf_e_machine_field(const gchar* file_path) {
+    int16_t e_machine = 0x00;
+    FILE* file = 0;
+    file = fopen(file_path, "rb");
+    if (file) {
+        fseek(file, 0x12, SEEK_SET);
+        fgets((char*) (&e_machine), 0x02, file);
+        fclose(file);
+    }
+
+    return e_machine;
+}
+
 void guess_arch_of_file(const gchar *archfile, bool* archs) {
-    char line[PATH_MAX];
-    char command[PATH_MAX];
-    sprintf(command, "/usr/bin/file -L -N -b %s", archfile);
-    FILE* fp = popen(command, "r");
-    if (fp == NULL)
-        die("Failed to run file command");
-    fgets(line, sizeof (line) - 1, fp);
-    pclose(fp);
-    extract_arch_from_text(g_strsplit_set(line, ",", -1)[1], archfile, archs);
+    int16_t e_machine_field = read_elf_e_machine_field(archfile);
+    extract_arch_from_e_machine_field(e_machine_field, archfile, archs);
 }
 
 void find_arch(const gchar *real_path, const gchar *pattern, bool* archs) {
