@@ -331,7 +331,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
                 strcpy(prefixed_path_to_extract, "");
                 strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
-                fprintf(stderr, "%s\n", prefixed_path_to_extract);
+                fprintf(stdout, "%s\n", prefixed_path_to_extract);
                 if (inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE) {
                     // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
                     // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
