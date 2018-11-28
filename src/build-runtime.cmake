@@ -15,6 +15,12 @@ else()
     set(BUILD_DEBUG FALSE)
 endif()
 
+if (NOT TARGET libsquashfuse)
+    message(FATAL_ERROR "TARGET NOT found libsquashfuse")
+else()
+    get_target_property(squashfuse_INCLUDE_DIRS libsquashfuse INTERFACE_INCLUDE_DIRECTORIES)
+endif()
+
 set(runtime_cflags
     -std=c99 -ffunction-sections -fdata-sections
     -DGIT_COMMIT=\\"${GIT_COMMIT}\\"
@@ -103,7 +109,7 @@ add_custom_command(
 add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o notify.c)
 # CMake gets confused by the .o object, therefore we need to tell it that it shall link everything using the C compiler
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
-target_link_libraries(runtime PRIVATE squashfuse dl xz libzlib pthread libappimage_shared libappimage_hashlib)
+target_link_libraries(runtime PRIVATE libsquashfuse dl xz libzlib pthread libappimage_shared libappimage_hashlib)
 target_include_directories(runtime PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 if(BUILD_DEBUG)

@@ -31,7 +31,7 @@ target_include_directories(appimagetool
 # CMake then adds them after the PRIVATE ones in the linker command
 target_link_libraries(appimagetool
     ${CMAKE_DL_LIBS}
-    squashfuse
+    libsquashfuse
     xdg-basedir
     libappimage_shared
     libglib
