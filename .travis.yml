@@ -1,5 +1,5 @@
 language: c
-compiler: gcc
+sudo: required
 
 services:
   - docker
@@ -11,7 +11,6 @@ matrix:
     - env: ARCH=armhf DOCKER_IMAGE=quay.io/appimage/appimagebuild-armhf-cross
       addons:
         apt:
-          # install binfmt support system-wide (for use in Docker containers)
           - binfmt-support
           # sets up the required binfmt interpreters so that qemu will actually be used (for use in Docker containers)
           - qemu-user-static
