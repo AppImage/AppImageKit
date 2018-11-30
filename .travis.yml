@@ -4,9 +4,17 @@ compiler: gcc
 services:
   - docker
 
-env:
-  - ARCH=x86_64 DOCKER_IMAGE=quay.io/appimage/appimagebuild
-  - ARCH=i686 DOCKER_IMAGE=quay.io/appimage/appimagebuild-i386
+matrix:
+  include:
+    - env: ARCH=x86_64 DOCKER_IMAGE=quay.io/appimage/appimagebuild
+    - env: ARCH=i686 DOCKER_IMAGE=quay.io/appimage/appimagebuild-i386
+    - env: ARCH=armhf DOCKER_IMAGE=quay.io/appimage/appimagebuild-armhf-cross
+      addons:
+        apt:
+          # install binfmt support system-wide (for use in Docker containers)
+          - binfmt-support
+          # sets up the required binfmt interpreters so that qemu will actually be used (for use in Docker containers)
+          - qemu-user-static
 
 script:
   - bash travis/travis-build.sh
@@ -24,7 +32,7 @@ notifications:
       - "chat.freenode.net#AppImage"
     on_success: always  # options: [always|never|change] default: always
     on_failure: always  # options: [always|never|change] default: always
-    on_start: always     # options: [always|never|change] default: always
+    on_start: always    # options: [always|never|change] default: always
     template:
       - "%{repository} build %{build_number}: %{result} %{build_url}"
     use_notice: true
