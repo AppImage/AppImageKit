@@ -73,7 +73,7 @@ target_compile_definitions(AppRun
 add_sanitizers(AppRun)
 
 
-if (NOT libssl)
+if (NOT TARGET libssl)
     message(WARNING "Could not find suitable libssl, skipping build of validate and digest")
 else()
     add_executable(validate validate.c)
