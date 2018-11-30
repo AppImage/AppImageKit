@@ -72,7 +72,12 @@ cd build
 # make sure that deps in separate install tree are found
 export PKG_CONFIG_PATH=/deps/lib/pkgconfig/
 
-cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DAPPIMAGEKIT_PACKAGE_DEBS=ON
+# make CMake use the right tools for ARM cross-compiling using toolchain file
+if [ "$ARCH" == "armhf" ]; then
+    export EXTRA_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=$HERE/cmake/toolchains/arm-linux-gnueabihf.cmake"
+fi
+
+cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DAPPIMAGEKIT_PACKAGE_DEBS=ON "${EXTRA_CMAKE_FLAGS[@]}"
 make -j$JOBS
 make install DESTDIR=install_prefix/
 
