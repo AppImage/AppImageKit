@@ -74,6 +74,7 @@ export PKG_CONFIG_PATH=/deps/lib/pkgconfig/
 
 # make CMake use the right tools for ARM cross-compiling using toolchain file
 if [ "$ARCH" == "armhf" ]; then
+    export PATH=/deps/bin:"$PATH"
     export EXTRA_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=$HERE/cmake/toolchains/arm-linux-gnueabihf.cmake"
 fi
 
