@@ -36,7 +36,11 @@ if [ -d /deps/ ]; then
     # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
     if [ "$ARCH" == "x86_64" ]; then
         cp /usr/lib64/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
-    else
+    elif [ "$ARCH" == "i686" ]; then
         cp /usr/lib/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    elif [ "$ARCH" == "armhf" ]; then
+        cp /deps/lib/libffi.so.6 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    else
+        echo "WARNING: unknown architecture, not bundling libffi"
     fi
 fi
