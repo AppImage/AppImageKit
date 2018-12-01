@@ -26,6 +26,8 @@ after_success:
   - ls -lh out/*   # <= wrong line: see https://travis-ci.org/AppImage/AppImageKit/jobs/347965050#L4211
   - ls -lh build/out/*
   - wget -c https://github.com/probonopd/uploadtool/raw/master/upload.sh
+  # make sure only pushes to rewrite create a new release, otherwise pretend PR and upload to transfer.sh
+  - if [ "$TRAVIS_BRANCH" != "$TRAVIS_TAG" ] && [ "$TRAVIS_BRANCH" != "appimagetool/master" ]; then export TRAVIS_EVENT_TYPE=pull_request; fi
   - bash ./upload.sh build/out/*
 
 notifications:
