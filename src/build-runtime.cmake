@@ -77,7 +77,7 @@ add_custom_command(
 # TODO: find out whether all the sections can be embedded in a single objcopy call
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.1.o
-    COMMAND ${OBJCOPY} --add-section .digest_md5=8192_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.0.o runtime.1.o
+    COMMAND ${OBJCOPY} --add-section .digest_md5=16_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.0.o runtime.1.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.0.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/16_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
