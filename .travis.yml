@@ -17,6 +17,15 @@ matrix:
             - binfmt-support
             # sets up the required binfmt interpreters so that qemu will actually be used (for use in Docker containers)
             - qemu-user-static
+    - env: ARCH=aarch64 DOCKER_IMAGE=quay.io/appimage/appimagebuild-aarch64-cross
+      addons:
+        apt:
+          update: true
+          packages:
+            # install binfmt support system-wide (for use in Docker containers)
+            - binfmt-support
+            # sets up the required binfmt interpreters so that qemu will actually be used (for use in Docker containers)
+            - qemu-user-static
 
 script:
   - bash travis/travis-build.sh
