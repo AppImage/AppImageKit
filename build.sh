@@ -76,6 +76,9 @@ export PKG_CONFIG_PATH=/deps/lib/pkgconfig/
 if [ "$ARCH" == "armhf" ]; then
     export PATH=/deps/bin:"$PATH"
     export EXTRA_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=$HERE/cmake/toolchains/arm-linux-gnueabihf.cmake"
+elif [ "$ARCH" == "aarch64" ]; then
+    export PATH=/deps/bin:"$PATH"
+    export EXTRA_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=$HERE/cmake/toolchains/aarch64-linux-gnu.cmake"
 fi
 
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DAPPIMAGEKIT_PACKAGE_DEBS=ON "${EXTRA_CMAKE_FLAGS[@]}"

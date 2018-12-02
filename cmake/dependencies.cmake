@@ -58,7 +58,7 @@ ExternalProject_Add(mksquashfs
     COMMAND ${SED} -i "s|LIBS += -llzma|LIBS += -Bstatic ${mksquashfs_ldflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
     COMMAND ${SED} -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
     COMMAND ${SED} -i "/cp unsquashfs/d" squashfs-tools/Makefile
-    BUILD_COMMAND env CC=${CC} CXX=${CXX} LDFLAGS=${LDFLAGS} ${MAKE} -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
+    BUILD_COMMAND env CC=${CC} CXX=${CXX} LDFLAGS=${LDFLAGS} CFLAGS=-ggdb ${MAKE} -C squashfs-tools/ XZ_SUPPORT=1 mksquashfs
     # ${MAKE} install unfortunately expects unsquashfs to be built as well, hence can't install the binary
     # therefore using built file in SOURCE_DIR
     # TODO: implement building out of source
