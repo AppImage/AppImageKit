@@ -38,7 +38,7 @@ if [ -d /deps/ ]; then
         cp /usr/lib64/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
     elif [ "$ARCH" == "i686" ]; then
         cp /usr/lib/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
-    elif [ "$ARCH" == "armhf" ]; then
+    elif [ "$ARCH" == "armhf" ] || [ "$ARCH" == "aarch64" ]; then
         cp /deps/lib/libffi.so.6 "$APPIMAGETOOL_APPDIR"/usr/lib/
     else
         echo "WARNING: unknown architecture, not bundling libffi"
