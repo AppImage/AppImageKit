@@ -20,6 +20,8 @@ mkdir -p "$APPIMAGETOOL_APPDIR"/usr/lib/appimagekit/
 # Copy AppDir specific files
 cp ../resources/AppRun "$APPIMAGETOOL_APPDIR"
 cp install_prefix/usr/lib/appimagekit/mksquashfs "$APPIMAGETOOL_APPDIR"/usr/lib/appimagekit/
+# prefer binaries from /deps, if available
+export PATH=/deps/bin:"$PATH"
 cp $(which desktop-file-validate) "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
 
