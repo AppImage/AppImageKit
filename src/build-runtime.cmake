@@ -127,7 +127,7 @@ if(APPIMAGEKIT_EMBED_MAGIC_BYTES)
     add_custom_command(
         TARGET runtime
         POST_BUILD
-        COMMAND echo -en '\\x41\\x49\\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
+        COMMAND echo -en 'AI\\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
     )
 endif()
 
