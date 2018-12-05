@@ -127,7 +127,7 @@ if(APPIMAGEKIT_EMBED_MAGIC_BYTES)
     add_custom_command(
         TARGET runtime
         POST_BUILD
-        COMMAND echo -en 'AI\\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/embed-magic-bytes-in-file.sh ${CMAKE_CURRENT_BINARY_DIR}/runtime
     )
 endif()
 
