@@ -8,8 +8,10 @@ include(${PROJECT_SOURCE_DIR}/lib/libappimage/cmake/scripts.cmake)
 # the names of the targets need to differ from the library filenames
 # this is especially an issue with libcairo, where the library is called libcairo
 # therefore, all libs imported this way have been prefixed with lib
-import_pkgconfig_target(TARGET_NAME libssl PKGCONFIG_TARGET openssl)
 import_pkgconfig_target(TARGET_NAME libfuse PKGCONFIG_TARGET fuse)
+# openssl is required for optional tools only, and doesn't need to be enforced
+# FIXME: remove dependency to openssl by implementing own SHA hashes in libappimage_hashlib
+import_pkgconfig_target(TARGET_NAME libssl PKGCONFIG_TARGET openssl OPTIONAL)
 
 
 if(USE_CCACHE)

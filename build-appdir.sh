@@ -20,6 +20,8 @@ mkdir -p "$APPIMAGETOOL_APPDIR"/usr/lib/appimagekit/
 # Copy AppDir specific files
 cp ../resources/AppRun "$APPIMAGETOOL_APPDIR"
 cp install_prefix/usr/lib/appimagekit/mksquashfs "$APPIMAGETOOL_APPDIR"/usr/lib/appimagekit/
+# prefer binaries from /deps, if available
+export PATH=/deps/bin:"$PATH"
 cp $(which desktop-file-validate) "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
 
@@ -36,7 +38,11 @@ if [ -d /deps/ ]; then
     # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
     if [ "$ARCH" == "x86_64" ]; then
         cp /usr/lib64/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
-    else
+    elif [ "$ARCH" == "i686" ]; then
         cp /usr/lib/libffi.so.5 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    elif [ "$ARCH" == "armhf" ] || [ "$ARCH" == "aarch64" ]; then
+        cp /deps/lib/libffi.so.6 "$APPIMAGETOOL_APPDIR"/usr/lib/
+    else
+        echo "WARNING: unknown architecture, not bundling libffi"
     fi
 fi

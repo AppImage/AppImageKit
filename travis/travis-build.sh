@@ -57,7 +57,7 @@ cd build/
 
 # test AppImages
 [ "$ARCH" == "i686" ] && sudo apt-get update && sudo apt-get install -y gcc-multilib lib32z1 libfuse2 libfuse2:i386 libglib2.0-0:i386 libcairo2:i386
-bash -x ../travis/test-appimage.sh
+[ "$ARCH" != "armhf" ] && [ "$ARCH" != "aarch64" ] && bash -x ../travis/test-appimage.sh
 
 # install more tools
 # (vim-common contains xxd)
@@ -68,10 +68,11 @@ sudo chown -R travis.travis .
 
 # remove binaries from output directory
 ls -al out/
-rm -r out/{appimagetool,validate,digest,mksquashfs,*.AppDir}
+rm -r out/{appimagetool,mksquashfs,*.AppDir}
+rm -r out/{validate,digest} || true
 
 # inspect runtime
-xxd out/runtime | head -n 1
+xxd out/runtime | head -n 1 | grep "4149 0200"
 # fix filename for upload
 mv out/runtime out/runtime-"$ARCH"
 

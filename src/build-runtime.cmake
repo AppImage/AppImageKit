@@ -52,15 +52,15 @@ endif()
 # therefore, we generate 3 suitable files containing blank bytes in the right sizes
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/16_blank_bytes
-    COMMAND printf '\\0%.0s' {0..15} > ${CMAKE_CURRENT_BINARY_DIR}/16_blank_bytes
+    COMMAND dd if=/dev/zero bs=1 count=16 of=${CMAKE_CURRENT_BINARY_DIR}/16_blank_bytes
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/1024_blank_bytes
-    COMMAND printf '\\0%.0s' {0..1023} > ${CMAKE_CURRENT_BINARY_DIR}/1024_blank_bytes
+    COMMAND dd if=/dev/zero bs=1 count=1024 of=${CMAKE_CURRENT_BINARY_DIR}/1024_blank_bytes
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/8192_blank_bytes
-    COMMAND printf '\\0%.0s' {0..8191} > ${CMAKE_CURRENT_BINARY_DIR}/8192_blank_bytes
+    COMMAND dd if=/dev/zero bs=1 count=8192 of=${CMAKE_CURRENT_BINARY_DIR}/8192_blank_bytes
 )
 
 # compile first raw object (not linked yet) into which the sections will be embedded
@@ -127,7 +127,7 @@ if(APPIMAGEKIT_EMBED_MAGIC_BYTES)
     add_custom_command(
         TARGET runtime
         POST_BUILD
-        COMMAND printf '\\x41\\x49\\x02' | dd of=runtime bs=1 seek=8 count=3 conv=notrunc
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/embed-magic-bytes-in-file.sh ${CMAKE_CURRENT_BINARY_DIR}/runtime
     )
 endif()
 
