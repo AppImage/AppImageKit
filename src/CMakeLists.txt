@@ -73,28 +73,32 @@ target_compile_definitions(AppRun
 add_sanitizers(AppRun)
 
 
-add_executable(validate validate.c)
+if (NOT TARGET libssl)
+    message(WARNING "Could not find suitable libssl, skipping build of validate and digest")
+else()
+    add_executable(validate validate.c)
 
-target_link_libraries(validate
-    libappimage_shared
-    libglib
-    libssl
-)
+    target_link_libraries(validate
+        libappimage_shared
+        libglib
+        libssl
+    )
 
-target_include_directories(validate
-    PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
-    INTERFACE $<INSTALL_INTERFACE:include/
-)
+    target_include_directories(validate
+        PUBLIC $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/>
+        INTERFACE $<INSTALL_INTERFACE:include/
+    )
 
 
-add_executable(digest digest.c)
+    add_executable(digest digest.c)
 
-target_link_libraries(digest
-    libappimage_shared
-    libssl
-)
+    target_link_libraries(digest
+        libappimage_shared
+        libssl
+    )
 
-add_sanitizers(digest)
+    add_sanitizers(digest)
+endif()
 
 
 # digest_md5 demo application
@@ -127,8 +131,15 @@ else()
     )
 endif()
 
+set(optional_targets "")
+foreach(target validate digest)
+    if(TARGET ${target})
+        list(APPEND optional_targets ${target})
+    endif()
+endforeach()
+
 install(
-    TARGETS AppRun appimagetool digest validate
+    TARGETS AppRun appimagetool ${optional_targets}
     RUNTIME DESTINATION bin COMPONENT applications
     LIBRARY DESTINATION lib COMPONENT applications
     ARCHIVE DESTINATION lib/static COMPONENT applications
