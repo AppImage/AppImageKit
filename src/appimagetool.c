@@ -301,9 +301,9 @@ gchar* getArchName(bool* archs) {
     else if (archs[fARCH_x86_64])
         return "x86_64";
     else if (archs[fARCH_arm])
-        return "ARM";
+        return "armhf";
     else if (archs[fARCH_aarch64])
-        return "ARM_aarch64";
+        return "aarch64";
     else
         return "all";
 }
@@ -321,12 +321,12 @@ void extract_arch_from_e_machine_field(int16_t e_machine, const gchar* sourcenam
 
     if (e_machine == 40) {
         archs[fARCH_arm] = 1;
-        fprintf(stderr, "%s used for determining architecture ARM\n", sourcename);
+        fprintf(stderr, "%s used for determining architecture armhf\n", sourcename);
     }
 
     if (e_machine == 183) {
         archs[fARCH_aarch64] = 1;
-        fprintf(stderr, "%s used for determining architecture ARM aarch64\n", sourcename);
+        fprintf(stderr, "%s used for determining architecture aarch64\n", sourcename);
     }
 }
 
