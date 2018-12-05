@@ -72,7 +72,7 @@ rm -r out/{appimagetool,mksquashfs,*.AppDir}
 rm -r out/{validate,digest} || true
 
 # inspect runtime
-xxd out/runtime | head -n 1
+xxd out/runtime | head -n 1 | grep "4149 0200"
 # fix filename for upload
 mv out/runtime out/runtime-"$ARCH"
 
