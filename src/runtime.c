@@ -394,7 +394,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                         if (!rv)
                             break;
                     }
-                } else if (inode.base.inode_type == SQUASHFS_SYMLINK_TYPE) {
+                } else if (inode.base.inode_type == SQUASHFS_SYMLINK_TYPE || inode.base.inode_type == SQUASHFS_LSYMLINK_TYPE) {
                     size_t size;
                     sqfs_readlink(&fs, &inode, NULL, &size);
                     char buf[size];
