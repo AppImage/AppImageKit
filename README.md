@@ -188,7 +188,7 @@ __NOTE:__ The AppImage project supplies [binaries](https://github.com/AppImage/A
 On the oldest still-supported Ubuntu LTS release (at this point, 14.04):
 
 ```
-git clone -b appimagetool/master --single-branch --recursive https://github.com/AppImage/AppImageKit
+git clone --single-branch --recursive https://github.com/AppImage/AppImageKit
 cd AppImageKit/
 sudo bash -ex install-build-deps.sh
 bash -ex build.sh
