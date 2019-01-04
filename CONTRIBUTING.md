@@ -23,25 +23,3 @@ Your contribution is especially welcome in these ares:
 * [Open bugs](https://github.com/search?utf8=%E2%9C%93&q=org%3AAppImage+label%3Abug+state%3Aopen&type=Issues)
 
 If you would like to report issues with AppImageKit itself, or would like to contribute to its development, please see get in touch with us in `#AppImage` on `irc.freenode.net`. We welcome pull requests addressing any of the open issues and/or other bugfixes and/or feature additions. In the case of complex feature additions, it is best to contact us first, before you spend much time.
-
-Fork, then clone the __appimagetool/master__ branch of the repo:
-
-    git clone -b appimagetool/master --single-branch --recursive git@github.com:your-username/AppImageKit.git
-
-Compile:
-
-```
-cd AppImageKit/
-sudo bash -ex install-build-deps.sh
-bash -ex build.sh
-```
-
-Make your change. Build again to be sure you didn't break anything. Run the resulting binaries to test them.
-
-Push to your fork and [submit a pull request][pr].
-
-[pr]: https://github.com/AppImage/AppImageKit/compare/appimagetool/master
-
-At this point you're waiting on us. We like to at least comment on pull requests
-within three business days (and, typically, one business day). We may suggest
-some changes or improvements or alternatives.
