@@ -311,22 +311,26 @@ gchar* getArchName(bool* archs) {
 void extract_arch_from_e_machine_field(int16_t e_machine, const gchar* sourcename, bool* archs) {
     if (e_machine == 3) {
         archs[fARCH_i386] = 1;
-        fprintf(stderr, "%s used for determining architecture i386\n", sourcename);
+        if(verbose)
+            fprintf(stderr, "%s used for determining architecture i386\n", sourcename);
     }
 
     if (e_machine == 62) {
         archs[fARCH_x86_64] = 1;
-        fprintf(stderr, "%s used for determining architecture x86_64\n", sourcename);
+        if(verbose)
+            fprintf(stderr, "%s used for determining architecture x86_64\n", sourcename);
     }
 
     if (e_machine == 40) {
         archs[fARCH_arm] = 1;
-        fprintf(stderr, "%s used for determining architecture armhf\n", sourcename);
+        if(verbose)
+            fprintf(stderr, "%s used for determining architecture armhf\n", sourcename);
     }
 
     if (e_machine == 183) {
         archs[fARCH_aarch64] = 1;
-        fprintf(stderr, "%s used for determining architecture aarch64\n", sourcename);
+        if(verbose)
+            fprintf(stderr, "%s used for determining architecture aarch64\n", sourcename);
     }
 }
 
