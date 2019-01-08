@@ -145,7 +145,7 @@ write_pipe_thread (void *arg)
         /* Write until we block, on broken pipe, exit */
         res = write (keepalive_pipe[1], c, sizeof (c));
         if (res == -1) {
-            kill (fuse_pid, SIGHUP);
+            kill (fuse_pid, SIGTERM);
             break;
         }
     }
