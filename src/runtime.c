@@ -367,6 +367,18 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                         // fprintf(stderr, "Extract to: %s\n", prefixed_path_to_extract);
                         if (private_sqfs_stat(&fs, &inode, &st) != 0)
                             die("private_sqfs_stat error");
+
+                        // create parent dir
+                        char* p = strrchr(prefixed_path_to_extract, '/');
+                        if (p) {
+                            // set an \0 to end the split the string
+                            *p = '\0';
+                            mkdir_p(prefixed_path_to_extract);
+
+                            // restore dir seprator
+                            *p = '/';
+                        }
+
                         // Read the file in chunks
                         off_t bytes_already_read = 0;
                         sqfs_off_t bytes_at_a_time = 64 * 1024;
