@@ -318,7 +318,7 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
 
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
-            if (_pattern == NULL || fnmatch(_pattern, trv.path, FNM_FILE_NAME) == 0) {
+            if (_pattern == NULL || fnmatch(_pattern, trv.path, FNM_FILE_NAME | FNM_LEADING_DIR) == 0) {
                 // fprintf(stderr, "trv.path: %s\n", trv.path);
                 // fprintf(stderr, "sqfs_inode_id: %lu\n", trv.entry.inode);
                 sqfs_inode inode;
