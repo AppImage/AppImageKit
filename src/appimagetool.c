@@ -1,6 +1,6 @@
 /**************************************************************************
  * 
- * Copyright (c) 2004-18 Simon Peter
+ * Copyright (c) 2004-19 Simon Peter
  * 
  * All Rights Reserved.
  * 
@@ -483,10 +483,6 @@ static GOptionEntry entries[] =
 int
 main (int argc, char *argv[])
 {
-    /* Parse VERSION environment variable.
-     * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6 */
-    char* version_env;
-    version_env = getenv("VERSION");
 
     /* Parse Travis CI environment variables. 
      * https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
@@ -556,6 +552,39 @@ main (int argc, char *argv[])
     if (showVersionOnly)
         exit(0);
 
+    /* Parse VERSION environment variable.
+     * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6
+     * Also, if VERSION is not set and -g is called and if git is on the path, use 
+     * git rev-parse --short HEAD
+     * TODO: Might also want to somehow make use of
+     * git rev-parse --abbrev-ref HEAD
+     * git log -1 --format=%ci */
+    gchar *version_env; // In which cases do we need to malloc() here?
+    version_env = getenv("VERSION");
+    if(guessupdateinformation){
+        if(g_find_program_in_path ("git")) {
+            if (version_env == NULL) {
+                GError *error = NULL;
+                gchar *out  = NULL;
+                GString *command_line = g_string_new("git");
+                g_string_append_printf(command_line, " rev-parse --short HEAD");
+                int ret = g_spawn_command_line_sync(command_line->str, &out, NULL, NULL, &error);
+                g_assert_no_error(error);
+                if (ret) {
+                    version_env = g_strstrip(out);
+                } else {
+                    g_print("Failed to run 'git rev-parse --short HEAD'");
+                }
+                g_string_free(command_line, true);
+                if (version_env != NULL) {
+                    g_print("NOTE: Using the output of 'git rev-parse --short HEAD' as the version:\n");
+                    g_print("      %s\n", version_env);
+                    g_print("      Please set the $VERSION environment variable if this is not intended\n");
+                }
+            }
+        }
+    }
+    
     if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
         die("Only gzip (faster execution, larger files) and xz (slower execution, smaller files) compression is supported at the moment. Let us know if there are reasons for more, should be easy to add. You could help the project by doing some systematic size/performance measurements. Watch for size, execution speed, and zsync delta size.");
     /* Check for dependencies here. Better fail early if they are not present. */
