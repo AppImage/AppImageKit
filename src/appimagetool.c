@@ -669,22 +669,26 @@ main (int argc, char *argv[])
             /* No destination has been specified, to let's construct one
             * TODO: Find out the architecture and use a $VERSION that might be around in the env */
             char dest_path[PATH_MAX];
-            sprintf(dest_path, "%s-%s.AppImage", app_name_for_filename, arch);
 
+            // store version number in generated AppImage filename
             if (version_env != NULL) {
-                sprintf(dest_path, "%s-%s-%s.AppImage", app_name_for_filename, version_env, arch);
-
-                // set VERSION in desktop file and save it
-                g_key_file_set_string(kf, G_KEY_FILE_DESKTOP_GROUP, "X-AppImage-Version", version_env);
-
-                if (!g_key_file_save_to_file(kf, desktop_file, NULL)) {
-                    fprintf(stderr, "Could not save modified desktop file\n");
-                    exit(1);
-                }
+                snprintf(dest_path, PATH_MAX-1, "%s-%s-%s.AppImage", app_name_for_filename, version_env, arch);
+            } else {
+                snprintf(dest_path, PATH_MAX-1, "%s-%s.AppImage", app_name_for_filename, arch);
             }
 
             destination = strdup(dest_path);
             replacestr(destination, " ", "_");
+        }
+
+        if (version_env != NULL) {
+            // set VERSION in desktop file and save it
+            g_key_file_set_string(kf, G_KEY_FILE_DESKTOP_GROUP, "X-AppImage-Version", version_env);
+
+            if (!g_key_file_save_to_file(kf, desktop_file, NULL)) {
+                fprintf(stderr, "Could not save modified desktop file\n");
+                exit(1);
+            }
         }
 
         fprintf (stdout, "%s should be packaged as %s\n", source, destination);
