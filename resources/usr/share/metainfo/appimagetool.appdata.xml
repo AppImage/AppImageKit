@@ -23,7 +23,7 @@
       You can also sign the AppImage with GPG.
     </p>
   </description>
-  <url type="homepage">https://github.com/probonopd/appimagetool</url>
+  <url type="homepage">https://github.com/AppImage/AppImageKit</url>
   <project_group>AppImage</project_group>
   <provides>
     <binary>appimagetool</binary>
