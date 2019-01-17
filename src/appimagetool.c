@@ -398,7 +398,7 @@ void find_arch(const gchar *real_path, const gchar *pattern, bool* archs) {
             if (g_file_test(full_name, G_FILE_TEST_IS_SYMLINK)) {
             } else if (g_file_test(full_name, G_FILE_TEST_IS_DIR)) {
                 find_arch(full_name, pattern, archs);
-            } else if (g_file_test(g_pattern_match_simple(pattern, entry))) {
+            } else if (g_pattern_match_simple(pattern, entry)) {
                 guess_arch_of_file(full_name, archs);
             }
         }
