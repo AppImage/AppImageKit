@@ -575,14 +575,14 @@ main (int argc, char *argv[])
                 if (ret != 0 ||error != NULL) {
                     g_printerr("Failed to run 'git rev-parse --short HEAD': %s\n", error->message);
                 } else if (exitcode != 0) {
-                    g_print("Failed to run 'git rev-parse --short HEAD': exited with code %d\n", exitcode);
+                    g_printerr("Failed to run 'git rev-parse --short HEAD': exited with code %d\n", exitcode);
                 } else {
                     version_env = g_strstrip(out);
 
                     if (version_env != NULL) {
-                        g_print("NOTE: Using the output of 'git rev-parse --short HEAD' as the version:\n");
-                        g_print("      %s\n", version_env);
-                        g_print("      Please set the $VERSION environment variable if this is not intended\n");
+                        g_printerr("NOTE: Using the output of 'git rev-parse --short HEAD' as the version:\n");
+                        g_printerr("      %s\n", version_env);
+                        g_printerr("      Please set the $VERSION environment variable if this is not intended\n");
                     }
                 }
             }
