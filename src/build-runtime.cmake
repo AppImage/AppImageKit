@@ -22,7 +22,7 @@ else()
 endif()
 
 set(runtime_cflags
-    -std=c99 -ffunction-sections -fdata-sections
+    -std=c99 -ffunction-sections -fdata-sections -flto
     -DGIT_COMMIT=\\"${GIT_COMMIT}\\"
     -I${squashfuse_INCLUDE_DIRS}
     -I${PROJECT_SOURCE_DIR}/include
@@ -30,7 +30,7 @@ set(runtime_cflags
     -I${PROJECT_SOURCE_DIR}/lib/libappimage/src/libappimage_hashlib/include
     ${DEPENDENCIES_CFLAGS}
 )
-set(runtime_ldflags -s -Wl,--gc-sections ${DEPENDENCIES_LDFLAGS})
+set(runtime_ldflags -s -Wl,--gc-sections -flto ${DEPENDENCIES_LDFLAGS})
 
 if(BUILD_DEBUG)
     message(WARNING "Debug build, adding debug information")
@@ -110,6 +110,7 @@ add_executable(runtime ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o notify.c)
 # CMake gets confused by the .o object, therefore we need to tell it that it shall link everything using the C compiler
 set_property(TARGET runtime PROPERTY LINKER_LANGUAGE C)
 target_link_libraries(runtime PRIVATE libsquashfuse dl xz libzlib pthread libappimage_shared libappimage_hashlib)
+target_link_options(runtime PRIVATE ${runtime_ldflags})
 target_include_directories(runtime PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
 if(BUILD_DEBUG)
