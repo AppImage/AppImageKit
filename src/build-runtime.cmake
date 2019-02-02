@@ -113,7 +113,8 @@ target_link_libraries(runtime PRIVATE libsquashfuse dl xz libzlib pthread libapp
 if(COMMAND target_link_options)
     target_link_options(runtime PRIVATE ${runtime_ldflags})
 else()
-    set_property(TARGET runtime PROPERTY LINK_FLAGS ${runtime_ldflags})
+    message(WARNING "CMake version < 3.13, falling back to using target_link_libraries instead of target_link_options")
+    target_link_libraries(runtime PRIVATE ${runtime_ldflags})
 endif()
 target_include_directories(runtime PRIVATE ${PROJECT_SOURCE_DIR}/include)
 
