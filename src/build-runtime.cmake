@@ -21,8 +21,9 @@ else()
     get_target_property(squashfuse_INCLUDE_DIRS libsquashfuse INTERFACE_INCLUDE_DIRECTORIES)
 endif()
 
+# must not include -flto in the following flags, otherwise the data sections will be stripped out
 set(runtime_cflags
-    -std=c99 -ffunction-sections -fdata-sections -flto
+    -std=c99 -ffunction-sections -fdata-sections
     -DGIT_COMMIT=\\"${GIT_COMMIT}\\"
     -I${squashfuse_INCLUDE_DIRS}
     -I${PROJECT_SOURCE_DIR}/include
@@ -30,7 +31,8 @@ set(runtime_cflags
     -I${PROJECT_SOURCE_DIR}/lib/libappimage/src/libappimage_hashlib/include
     ${DEPENDENCIES_CFLAGS}
 )
-set(runtime_ldflags -s -Wl,--gc-sections -flto ${DEPENDENCIES_LDFLAGS})
+# must not include -Wl,--gc-sections in the following flags, otherwise the data sections will be stripped out
+set(runtime_ldflags -s -ffunction-sections -fdata-sections -flto ${DEPENDENCIES_LDFLAGS})
 
 if(BUILD_DEBUG)
     message(WARNING "Debug build, adding debug information")
