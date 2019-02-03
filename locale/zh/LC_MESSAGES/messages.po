@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-12-10 18:03+0100\n"
-"PO-Revision-Date: 2019-02-02 08:09+0000\n"
+"PO-Revision-Date: 2019-02-07 05:00+0000\n"
 "Last-Translator: linsui <linsui555@gmail.com>\n"
 "Language-Team: Chinese <https://translate.assassinate-you.net/projects/"
 "appimage/website/zh/>\n"
@@ -22,11 +22,11 @@ msgstr ""
 
 #: index.jinja2:7
 msgid "page_title"
-msgstr "AppImage | 让Linux应用随处运行"
+msgstr "AppImage | 让  Linux 应用随处运行"
 
 #: index.jinja2:17
 msgid "meta_description"
-msgstr "AppImage | 让Linux应用随处运行"
+msgstr "AppImage | 让 Linux 应用随处运行"
 
 #: index.jinja2:58
 msgid "docs_link_title"
@@ -46,7 +46,7 @@ msgstr "论坛"
 
 #: index.jinja2:139
 msgid "linux_apps_that_run_anywhere"
-msgstr "让Linux应用随处运行"
+msgstr "让 Linux 应用随处运行"
 
 #: index.jinja2:143
 msgid "user_story_1"
