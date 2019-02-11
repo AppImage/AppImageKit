@@ -215,7 +215,7 @@ void
 print_help(const char *appimage_path)
 {
     // TODO: "--appimage-list                 List content from embedded filesystem image\n"
-    printf(
+    fprintf(stderr,
         "AppImage options:\n\n"
         "  --appimage-extract [<pattern>]  Extract content from embedded filesystem image\n"
         "                                  If pattern is passed, only extract matching files\n"
@@ -259,16 +259,16 @@ portable_option(const char *arg, const char *appimage_path, const char *name)
 
         ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
         if (length < 0) {
-            printf("Error getting realpath for %s\n", appimage_path);
+            fprintf(stderr, "Error getting realpath for %s\n", appimage_path);
             exit(EXIT_FAILURE);
         }
         fullpath[length] = '\0';
 
         sprintf(portable_dir, "%s.%s", fullpath, name);
         if (!mkdir(portable_dir, S_IRWXU))
-            printf("Portable %s directory created at %s\n", name, portable_dir);
+            fprintf(stderr, "Portable %s directory created at %s\n", name, portable_dir);
         else
-            printf("Error creating portable %s directory at %s: %s\n", name, portable_dir, strerror(errno));
+            fprintf(stderr, "Error creating portable %s directory at %s: %s\n", name, portable_dir, strerror(errno));
 
         exit(0);
     }
@@ -563,7 +563,7 @@ int main(int argc, char *argv[]) {
 
     // error check
     if (fs_offset < 0) {
-        printf("Failed to get fs offset for %s\n", appimage_path);
+        fprintf(stderr, "Failed to get fs offset for %s\n", appimage_path);
         exit(EXIT_EXECERROR);
     }
 
@@ -575,7 +575,7 @@ int main(int argc, char *argv[]) {
 
         ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
         if (length < 0) {
-            printf("Error getting realpath for %s\n", appimage_path);
+            fprintf(stderr, "Error getting realpath for %s\n", appimage_path);
             exit(EXIT_EXECERROR);
         }
         fullpath[length] = '\0';
@@ -737,8 +737,8 @@ int main(int argc, char *argv[]) {
         unsigned long offset = 0;
         unsigned long length = 0;
         appimage_get_elf_section_offset_and_length(appimage_path, ".upd_info", &offset, &length);
-        // printf("offset: %lu\n", offset);
-        // printf("length: %lu\n", length);
+        // fprintf(stderr, "offset: %lu\n", offset);
+        // fprintf(stderr, "length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
         appimage_print_binary(appimage_path, offset, length);
         exit(0);
@@ -748,8 +748,8 @@ int main(int argc, char *argv[]) {
         unsigned long offset = 0;
         unsigned long length = 0;
         appimage_get_elf_section_offset_and_length(appimage_path, ".sha256_sig", &offset, &length);
-        // printf("offset: %lu\n", offset);
-        // printf("length: %lu\n", length);
+        // fprintf(stderr, "offset: %lu\n", offset);
+        // fprintf(stderr, "length: %lu\n", length);
         // print_hex(appimage_path, offset, length);
         appimage_print_binary(appimage_path, offset, length);
         exit(0);
@@ -889,7 +889,7 @@ int main(int argc, char *argv[]) {
         strcpy (portable_home_dir, fullpath);
         strcat (portable_home_dir, ".home");
         if(is_writable_directory(portable_home_dir)){
-            printf("Setting $HOME to %s\n", portable_home_dir);
+            fprintf(stderr, "Setting $HOME to %s\n", portable_home_dir);
             setenv("HOME",portable_home_dir,1);
         }
 
@@ -897,7 +897,7 @@ int main(int argc, char *argv[]) {
         strcpy (portable_config_dir, fullpath);
         strcat (portable_config_dir, ".config");
         if(is_writable_directory(portable_config_dir)){
-            printf("Setting $XDG_CONFIG_HOME to %s\n", portable_config_dir);
+            fprintf(stderr, "Setting $XDG_CONFIG_HOME to %s\n", portable_config_dir);
             setenv("XDG_CONFIG_HOME",portable_config_dir,1);
         }
 
