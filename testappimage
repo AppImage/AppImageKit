@@ -35,7 +35,7 @@ mkdir -p /tmp/$PREF/iso
 mkdir -p /tmp/$PREF/workdir
 
 # openSUSE LEAP 42.2 does not have a tmpfs in /tmp but we need this
-mount | grep "/tmp type tmpfs" && sudo mount -t tmpfs tmpfs /tmp/
+mount | grep -q "/tmp type tmpfs" || sudo mount -t tmpfs tmpfs /tmp/
 
 # If ISO was specified, then mount it and find contained filesystem
 THEFS="$1"
