@@ -561,21 +561,33 @@ main (int argc, char *argv[])
      * git log -1 --format=%ci */
     gchar* version_env = getenv("VERSION");
 
-    if (guess_update_information){
+    if (guess_update_information) {
         if (g_find_program_in_path("git")) {
             if (version_env == NULL) {
                 GError* error = NULL;
-                gchar* out  = NULL;
+                gchar* out = NULL;
 
                 char command_line[] = "git rev-parse --short HEAD";
 
-                int exitcode = -1;
-                int ret = g_spawn_command_line_sync(command_line, &out, NULL, &exitcode, &error);
+                // *not* the exit code! must be interpreted via g_spawn_check_exit_status!
+                int exit_status = -1;
 
-                if (ret != 0 ||error != NULL) {
-                    g_printerr("Failed to run 'git rev-parse --short HEAD': %s\n", error->message);
-                } else if (exitcode != 0) {
-                    g_printerr("Failed to run 'git rev-parse --short HEAD': exited with code %d\n", exitcode);
+                // g_spawn_command_line_sync returns whether the program succeeded
+                gint ret = g_spawn_command_line_sync(command_line, &out, NULL, &exit_status, &error);
+
+                if (ret != 0 || error != NULL) {
+                    // g_spawn_command_line_sync might have set error already, in that case we don't want to overwrite
+                    if (error == NULL) {
+                        // to get a proper error message, we now fetch the message via the returned exit code
+                        // the call returns false if the call failed, and this is what we expect to have happened
+                        // hence we can assume that there must be an error in GLib if it returned true
+                        if (g_spawn_check_exit_status(exit_status, &error)) {
+                            g_printerr("Error: GLib is being inconsistent");
+                            exit(1);
+                        }
+                    }
+                    g_printerr("Failed to run 'git rev-parse --short HEAD: %s (code %d)\n", error->message,
+                               error->code);
                 } else {
                     version_env = g_strstrip(out);
 
