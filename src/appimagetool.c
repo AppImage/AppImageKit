@@ -79,7 +79,7 @@ static gboolean sign = FALSE;
 static gboolean no_appstream = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
-static gboolean guessupdateinformation = FALSE;
+static gboolean guess_update_information = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
@@ -464,7 +464,7 @@ static GOptionEntry entries[] =
 {
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
-    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI or GitLab environment variables", NULL },
+    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guess_update_information, "Guess update information based on Travis CI or GitLab environment variables", NULL },
     { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
@@ -559,12 +559,11 @@ main (int argc, char *argv[])
      * TODO: Might also want to somehow make use of
      * git rev-parse --abbrev-ref HEAD
      * git log -1 --format=%ci */
-    gchar *version_env; // In which cases do we need to malloc() here?
-    version_env = getenv("VERSION");
-    if(guessupdateinformation){
-        if(g_find_program_in_path ("git")) {
+    gchar* version_env = getenv("VERSION");
+
+    if (guess_update_information){
+        if (g_find_program_in_path("git")) {
             if (version_env == NULL) {
-<<<<<<< HEAD
                 GError* error = NULL;
                 gchar* out  = NULL;
 
@@ -585,24 +584,6 @@ main (int argc, char *argv[])
                         g_printerr("      %s\n", version_env);
                         g_printerr("      Please set the $VERSION environment variable if this is not intended\n");
                     }
-=======
-                GError *error = NULL;
-                gchar *out  = NULL;
-                GString *command_line = g_string_new("git");
-                g_string_append_printf(command_line, " rev-parse --short HEAD");
-                int ret = g_spawn_command_line_sync(command_line->str, &out, NULL, NULL, &error);
-                g_assert_no_error(error);
-                if (ret) {
-                    version_env = g_strstrip(out);
-                } else {
-                    g_print("Failed to run 'git rev-parse --short HEAD'");
-                }
-                g_string_free(command_line, true);
-                if (version_env != NULL) {
-                    g_print("NOTE: Using the output of 'git rev-parse --short HEAD' as the version:\n");
-                    g_print("      %s\n", version_env);
-                    g_print("      Please set the $VERSION environment variable if this is not intended\n");
->>>>>>> parent of a9f2597... Increase robustness of git commit version guessing
                 }
             }
         }
@@ -880,7 +861,7 @@ main (int argc, char *argv[])
         
         /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
-        if(guessupdateinformation){
+        if(guess_update_information){
             if(travis_repo_slug){
                 if(!github_token) {
                     printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
