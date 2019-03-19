@@ -564,6 +564,7 @@ main (int argc, char *argv[])
     if(guessupdateinformation){
         if(g_find_program_in_path ("git")) {
             if (version_env == NULL) {
+<<<<<<< HEAD
                 GError* error = NULL;
                 gchar* out  = NULL;
 
@@ -584,6 +585,24 @@ main (int argc, char *argv[])
                         g_printerr("      %s\n", version_env);
                         g_printerr("      Please set the $VERSION environment variable if this is not intended\n");
                     }
+=======
+                GError *error = NULL;
+                gchar *out  = NULL;
+                GString *command_line = g_string_new("git");
+                g_string_append_printf(command_line, " rev-parse --short HEAD");
+                int ret = g_spawn_command_line_sync(command_line->str, &out, NULL, NULL, &error);
+                g_assert_no_error(error);
+                if (ret) {
+                    version_env = g_strstrip(out);
+                } else {
+                    g_print("Failed to run 'git rev-parse --short HEAD'");
+                }
+                g_string_free(command_line, true);
+                if (version_env != NULL) {
+                    g_print("NOTE: Using the output of 'git rev-parse --short HEAD' as the version:\n");
+                    g_print("      %s\n", version_env);
+                    g_print("      Please set the $VERSION environment variable if this is not intended\n");
+>>>>>>> parent of a9f2597... Increase robustness of git commit version guessing
                 }
             }
         }
