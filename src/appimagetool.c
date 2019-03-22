@@ -581,9 +581,16 @@ main (int argc, char *argv[])
                         // to get a proper error message, we now fetch the message via the returned exit code
                         // the call returns false if the call failed, and this is what we expect to have happened
                         // hence we can assume that there must be an error in GLib if it returned true
-                        g_spawn_check_exit_status(exit_status, &error);
+                        if (g_spawn_check_exit_status(exit_status, &error)) {
+                            g_printerr("Failed to run 'git rev-parse --short HEAD, but GLib says the process didn't exit abnormally");
+                        }
                     }
-                    g_printerr("Failed to run 'git rev-parse --short HEAD: %s (code %d)\n", error->message, error->code);
+
+                    if (error == NULL) {
+                        g_printerr("Failed to run 'git rev-parse --short HEAD, but failed to interpret GLib error state: %d\n", exit_status);
+                    } else {
+                        g_printerr("Failed to run 'git rev-parse --short HEAD: %s (code %d)\n", error->message, error->code);
+                    }
                 } else {
                     version_env = g_strstrip(out);
 
