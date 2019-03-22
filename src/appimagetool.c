@@ -562,7 +562,9 @@ main (int argc, char *argv[])
     gchar* version_env = getenv("VERSION");
 
     if (guess_update_information) {
-        if (g_find_program_in_path("git")) {
+        char* gitPath = g_find_program_in_path("git");
+
+        if (gitPath != NULL) {
             if (version_env == NULL) {
                 GError* error = NULL;
                 gchar* out = NULL;
@@ -602,6 +604,8 @@ main (int argc, char *argv[])
                 }
             }
         }
+
+        free(gitPath);
     }
     
     if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
