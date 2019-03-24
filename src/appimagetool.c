@@ -1121,7 +1121,7 @@ main (int argc, char *argv[])
 
                 if (pclose(fp) != 0) {
                     fprintf(stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
-                    return 1;
+                    return 0;
                 }
 
                 fp = NULL;
