@@ -79,7 +79,7 @@ static gboolean sign = FALSE;
 static gboolean no_appstream = FALSE;
 gchar **remaining_args = NULL;
 gchar *updateinformation = NULL;
-static gboolean guessupdateinformation = FALSE;
+static gboolean guess_update_information = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
@@ -464,7 +464,7 @@ static GOptionEntry entries[] =
 {
     { "list", 'l', 0, G_OPTION_ARG_NONE, &list, "List files in SOURCE AppImage", NULL },
     { "updateinformation", 'u', 0, G_OPTION_ARG_STRING, &updateinformation, "Embed update information STRING; if zsyncmake is installed, generate zsync file", NULL },
-    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guessupdateinformation, "Guess update information based on Travis CI or GitLab environment variables", NULL },
+    { "guess", 'g', 0, G_OPTION_ARG_NONE, &guess_update_information, "Guess update information based on Travis CI or GitLab environment variables", NULL },
     { "bintray-user", 0, 0, G_OPTION_ARG_STRING, &bintray_user, "Bintray user name", NULL },
     { "bintray-repo", 0, 0, G_OPTION_ARG_STRING, &bintray_repo, "Bintray repository", NULL },
     { "version", 0, 0, G_OPTION_ARG_NONE, &showVersionOnly, "Show version number", NULL },
@@ -559,23 +559,40 @@ main (int argc, char *argv[])
      * TODO: Might also want to somehow make use of
      * git rev-parse --abbrev-ref HEAD
      * git log -1 --format=%ci */
-    gchar *version_env; // In which cases do we need to malloc() here?
-    version_env = getenv("VERSION");
-    if(guessupdateinformation){
-        if(g_find_program_in_path ("git")) {
+    gchar* version_env = getenv("VERSION");
+
+    if (guess_update_information) {
+        char* gitPath = g_find_program_in_path("git");
+
+        if (gitPath != NULL) {
             if (version_env == NULL) {
                 GError* error = NULL;
-                gchar* out  = NULL;
+                gchar* out = NULL;
 
                 char command_line[] = "git rev-parse --short HEAD";
 
-                int exitcode = -1;
-                int ret = g_spawn_command_line_sync(command_line, &out, NULL, &exitcode, &error);
+                // *not* the exit code! must be interpreted via g_spawn_check_exit_status!
+                int exit_status = -1;
 
-                if (ret != 0 ||error != NULL) {
-                    g_printerr("Failed to run 'git rev-parse --short HEAD': %s\n", error->message);
-                } else if (exitcode != 0) {
-                    g_printerr("Failed to run 'git rev-parse --short HEAD': exited with code %d\n", exitcode);
+                // g_spawn_command_line_sync returns whether the program succeeded
+                gint ret = g_spawn_command_line_sync(command_line, &out, NULL, &exit_status, &error);
+
+                if (ret != 0 || error != NULL) {
+                    // g_spawn_command_line_sync might have set error already, in that case we don't want to overwrite
+                    if (error == NULL) {
+                        // to get a proper error message, we now fetch the message via the returned exit code
+                        // the call returns false if the call failed, and this is what we expect to have happened
+                        // hence we can assume that there must be an error in GLib if it returned true
+                        if (g_spawn_check_exit_status(exit_status, &error)) {
+                            g_printerr("Failed to run 'git rev-parse --short HEAD, but GLib says the process didn't exit abnormally");
+                        }
+                    }
+
+                    if (error == NULL) {
+                        g_printerr("Failed to run 'git rev-parse --short HEAD, but failed to interpret GLib error state: %d\n", exit_status);
+                    } else {
+                        g_printerr("Failed to run 'git rev-parse --short HEAD: %s (code %d)\n", error->message, error->code);
+                    }
                 } else {
                     version_env = g_strstrip(out);
 
@@ -587,6 +604,8 @@ main (int argc, char *argv[])
                 }
             }
         }
+
+        free(gitPath);
     }
     
     if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
@@ -861,7 +880,7 @@ main (int argc, char *argv[])
         
         /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
-        if(guessupdateinformation){
+        if(guess_update_information){
             if(travis_repo_slug){
                 if(!github_token) {
                     printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
