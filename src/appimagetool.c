@@ -552,6 +552,62 @@ main (int argc, char *argv[])
     if (showVersionOnly)
         exit(0);
 
+    /* Parse VERSION environment variable.
+     * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6
+     * Also, if VERSION is not set and -g is called and if git is on the path, use 
+     * git rev-parse --short HEAD
+     * TODO: Might also want to somehow make use of
+     * git rev-parse --abbrev-ref HEAD
+     * git log -1 --format=%ci */
+    gchar* version_env = getenv("VERSION");
+
+    if (guess_update_information) {
+        char* gitPath = g_find_program_in_path("git");
+
+        if (gitPath != NULL) {
+            if (version_env == NULL) {
+                GError* error = NULL;
+                gchar* out = NULL;
+
+                char command_line[] = "git rev-parse --short HEAD";
+
+                // *not* the exit code! must be interpreted via g_spawn_check_exit_status!
+                int exit_status = -1;
+
+                // g_spawn_command_line_sync returns whether the program succeeded
+                gint ret = g_spawn_command_line_sync(command_line, &out, NULL, &exit_status, &error);
+
+                if (ret != 0 || error != NULL) {
+                    // g_spawn_command_line_sync might have set error already, in that case we don't want to overwrite
+                    if (error == NULL) {
+                        // to get a proper error message, we now fetch the message via the returned exit code
+                        // the call returns false if the call failed, and this is what we expect to have happened
+                        // hence we can assume that there must be an error in GLib if it returned true
+                        if (g_spawn_check_exit_status(exit_status, &error)) {
+                            g_printerr("Failed to run 'git rev-parse --short HEAD, but GLib says the process didn't exit abnormally");
+                        }
+                    }
+
+                    if (error == NULL) {
+                        g_printerr("Failed to run 'git rev-parse --short HEAD, but failed to interpret GLib error state: %d\n", exit_status);
+                    } else {
+                        g_printerr("Failed to run 'git rev-parse --short HEAD: %s (code %d)\n", error->message, error->code);
+                    }
+                } else {
+                    version_env = g_strstrip(out);
+
+                    if (version_env != NULL) {
+                        g_printerr("NOTE: Using the output of 'git rev-parse --short HEAD' as the version:\n");
+                        g_printerr("      %s\n", version_env);
+                        g_printerr("      Please set the $VERSION environment variable if this is not intended\n");
+                    }
+                }
+            }
+        }
+
+        free(gitPath);
+    }
+    
     if(!((0 == strcmp(sqfs_comp, "gzip")) || (0 ==strcmp(sqfs_comp, "xz"))))
         die("Only gzip (faster execution, larger files) and xz (slower execution, smaller files) compression is supported at the moment. Let us know if there are reasons for more, should be easy to add. You could help the project by doing some systematic size/performance measurements. Watch for size, execution speed, and zsync delta size.");
     /* Check for dependencies here. Better fail early if they are not present. */
@@ -600,63 +656,7 @@ main (int argc, char *argv[])
     }
     
     /* If the first argument is a directory, then we assume that we should package it */
-    if (g_file_test(remaining_args[0], G_FILE_TEST_IS_DIR)) {
-        /* Parse VERSION environment variable.
- * We cannot use g_environ_getenv (g_get_environ() since it is too new for CentOS 6
- * Also, if VERSION is not set and -g is called and if git is on the path, use
- * git rev-parse --short HEAD
- * TODO: Might also want to somehow make use of
- * git rev-parse --abbrev-ref HEAD
- * git log -1 --format=%ci */
-        gchar* version_env = getenv("VERSION");
-
-        if (guess_update_information) {
-            char* gitPath = g_find_program_in_path("git");
-
-            if (gitPath != NULL) {
-                if (version_env == NULL) {
-                    GError* error = NULL;
-                    gchar* out = NULL;
-
-                    char command_line[] = "git rev-parse --short HEAD";
-
-                    // *not* the exit code! must be interpreted via g_spawn_check_exit_status!
-                    int exit_status = -1;
-
-                    // g_spawn_command_line_sync returns whether the program succeeded
-                    gint ret = g_spawn_command_line_sync(command_line, &out, NULL, &exit_status, &error);
-
-                    if (ret != 0 || error != NULL) {
-                        // g_spawn_command_line_sync might have set error already, in that case we don't want to overwrite
-                        if (error == NULL) {
-                            // to get a proper error message, we now fetch the message via the returned exit code
-                            // the call returns false if the call failed, and this is what we expect to have happened
-                            // hence we can assume that there must be an error in GLib if it returned true
-                            if (g_spawn_check_exit_status(exit_status, &error)) {
-                                g_printerr("Failed to run 'git rev-parse --short HEAD, but GLib says the process didn't exit abnormally");
-                            }
-                        }
-
-                        if (error == NULL) {
-                            g_printerr("Failed to run 'git rev-parse --short HEAD, but failed to interpret GLib error state: %d\n", exit_status);
-                        } else {
-                            g_printerr("Failed to run 'git rev-parse --short HEAD: %s (code %d)\n", error->message, error->code);
-                        }
-                    } else {
-                        version_env = g_strstrip(out);
-
-                        if (version_env != NULL) {
-                            g_printerr("NOTE: Using the output of 'git rev-parse --short HEAD' as the version:\n");
-                            g_printerr("      %s\n", version_env);
-                            g_printerr("      Please set the $VERSION environment variable if this is not intended\n");
-                        }
-                    }
-                }
-            }
-
-            free(gitPath);
-        }
-
+    if (g_file_test (remaining_args[0], G_FILE_TEST_IS_DIR)){
         char *destination;
         char source[PATH_MAX];
         realpath(remaining_args[0], source);
@@ -1344,18 +1344,13 @@ main (int argc, char *argv[])
         fprintf(stderr, "Please consider submitting your AppImage to AppImageHub, the crowd-sourced\n");
         fprintf(stderr, "central directory of available AppImages, by opening a pull request\n");
         fprintf(stderr, "at https://github.com/AppImage/appimage.github.io\n");
-
-        return 0;
-    } else if (g_file_test(remaining_args[0], G_FILE_TEST_IS_REGULAR)) {
-        /* If the first argument is a regular file, then we assume that we should unpack it */
-        fprintf(stdout, "%s is a file, assuming it is an AppImage and should be unpacked\n", remaining_args[0]);
-        die("To be implemented");
-        return 1;
-    } else {
-        fprintf(stderr, "Error: no such file or directory: %s\n", remaining_args[0]);
-        return 1;
     }
-
-    // should never be reached
-    return 1;
+    
+    /* If the first argument is a regular file, then we assume that we should unpack it */
+    if (g_file_test (remaining_args[0], G_FILE_TEST_IS_REGULAR)){
+        fprintf (stdout, "%s is a file, assuming it is an AppImage and should be unpacked\n", remaining_args[0]);
+        die("To be implemented");
+    }
+    
+    return 0;    
 }
