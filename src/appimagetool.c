@@ -624,19 +624,11 @@ main (int argc, char *argv[])
                     int exit_status = -1;
 
                     // g_spawn_command_line_sync returns whether the program succeeded
-                    gint ret = g_spawn_command_line_sync(command_line, &out, NULL, &exit_status, &error);
+                    // its return value is buggy, hence we're using g_spawn_check_exit_status to check for errors
+                    g_spawn_command_line_sync(command_line, &out, NULL, &exit_status, &error);
 
-                    if (ret != 0 || error != NULL) {
-                        // g_spawn_command_line_sync might have set error already, in that case we don't want to overwrite
-                        if (error == NULL) {
-                            // to get a proper error message, we now fetch the message via the returned exit code
-                            // the call returns false if the call failed, and this is what we expect to have happened
-                            // hence we can assume that there must be an error in GLib if it returned true
-                            if (g_spawn_check_exit_status(exit_status, &error)) {
-                                g_printerr("Failed to run 'git rev-parse --short HEAD, but GLib says the process didn't exit abnormally");
-                            }
-                        }
-
+                    // g_spawn_command_line_sync might have set error already, in that case we don't want to overwrite
+                    if (error != NULL || !g_spawn_check_exit_status(exit_status, &error)) {
                         if (error == NULL) {
                             g_printerr("Failed to run 'git rev-parse --short HEAD, but failed to interpret GLib error state: %d\n", exit_status);
                         } else {
