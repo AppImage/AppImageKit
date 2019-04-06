@@ -496,6 +496,32 @@ bool rm_recursive(const char* const path) {
     return rv == 0;
 }
 
+bool build_mount_point(char* mount_dir, const char* const argv0, char const* const temp_base, const size_t templen) {
+    const size_t maxnamelen = 6;
+
+    // when running for another AppImage, we should use that for building the mountpoint name instead
+    char* target_appimage = getenv("TARGET_APPIMAGE");
+
+    char* path_basename;
+    if (target_appimage != NULL) {
+        path_basename = basename(target_appimage);
+    } else {
+        path_basename = basename(argv0);
+    }
+
+    size_t namelen = strlen(path_basename);
+    // limit length of tempdir name
+    if (namelen > maxnamelen) {
+        namelen = maxnamelen;
+    }
+
+    strcpy(mount_dir, temp_base);
+    strncpy(mount_dir + templen, "/.mount_", 8);
+    strncpy(mount_dir + templen + 8, path_basename, namelen);
+    strncpy(mount_dir+templen+8+namelen, "XXXXXX", 6);
+    mount_dir[templen+8+namelen+6] = 0; // null terminate destination
+}
+
 int main(int argc, char *argv[]) {
     char appimage_path[PATH_MAX];
     char argv0_path[PATH_MAX];
@@ -774,17 +800,7 @@ int main(int argc, char *argv[]) {
     // allocate enough memory (size of name won't exceed 60 bytes)
     char mount_dir[templen + 60];
 
-    size_t namelen = strlen(basename(argv[0]));
-    // limit length of tempdir name
-    if(namelen > 6){
-        namelen = 6;
-    }
-
-    strcpy(mount_dir, temp_base);
-    strncpy(mount_dir+templen, "/.mount_", 8);
-    strncpy(mount_dir+templen+8, basename(argv[0]), namelen);
-    strncpy(mount_dir+templen+8+namelen, "XXXXXX", 6);
-    mount_dir[templen+8+namelen+6] = 0; // null terminate destination
+    build_mount_point(mount_dir, argv[0], temp_base, templen);
 
     size_t mount_dir_size = strlen(mount_dir);
     pid_t pid;
