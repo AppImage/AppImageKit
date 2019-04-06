@@ -868,13 +868,23 @@ int main(int argc, char *argv[]) {
         }
         real_argv[i] = NULL;
 
-        if(arg && strcmp(arg,"appimage-mount")==0) {
+        if(arg && strcmp(arg, "appimage-mount") == 0) {
             char real_mount_dir[PATH_MAX];
-            if (realpath(mount_dir, real_mount_dir) == real_mount_dir)
+
+            if (realpath(mount_dir, real_mount_dir) == real_mount_dir) {
                 printf("%s\n", real_mount_dir);
-            else
+            } else {
                 printf("%s\n", mount_dir);
+            }
+
+            // stdout is, by default, buffered (unlike stderr), therefore in order to allow other processes to read
+            // the path from stdout, we need to flush the buffers now
+            // this is a less-invasive alternative to setbuf(stdout, NULL);
+            fflush(stdout);
+
             for (;;) pause();
+
+            exit(0);
         }
 
         /* Setting some environment variables that the app "inside" might use */
