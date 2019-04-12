@@ -81,6 +81,9 @@ elif [ "$ARCH" == "aarch64" ]; then
     export EXTRA_CMAKE_FLAGS="-DCMAKE_TOOLCHAIN_FILE=$HERE/cmake/toolchains/aarch64-linux-gnu.cmake"
 fi
 
+# Force large files support
+export CFLAGS="${CFLAGS} `getconf LFS_CFLAGS`"
+
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DAPPIMAGEKIT_PACKAGE_DEBS=ON "${EXTRA_CMAKE_FLAGS[@]}"
 make -j$JOBS
 make install DESTDIR=install_prefix/

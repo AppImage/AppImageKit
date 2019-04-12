@@ -25,6 +25,7 @@ endif()
 set(runtime_cflags
     -std=c99 -ffunction-sections -fdata-sections
     -DGIT_COMMIT=\\"${GIT_COMMIT}\\"
+    -D_FILE_OFFSET_BITS=64
     -I${squashfuse_INCLUDE_DIRS}
     -I${PROJECT_SOURCE_DIR}/include
     -I${PROJECT_SOURCE_DIR}/lib/libappimage/include
