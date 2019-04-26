@@ -1,0 +1,24 @@
+diff --git a/squashfs-tools/mksquashfs.c b/squashfs-tools/mksquashfs.c
+index d696a51..776e63e 100644
+--- a/squashfs-tools/mksquashfs.c
++++ b/squashfs-tools/mksquashfs.c
+@@ -49,6 +49,7 @@
+ #include <sys/wait.h>
+ #include <limits.h>
+ #include <ctype.h>
++#include <sys/sysmacros.h>
+ 
+ #ifndef linux
+ #define __BYTE_ORDER BYTE_ORDER
+diff --git a/squashfs-tools/unsquashfs.c b/squashfs-tools/unsquashfs.c
+index a57f85c..8b39ed2 100644
+--- a/squashfs-tools/unsquashfs.c
++++ b/squashfs-tools/unsquashfs.c
+@@ -38,6 +38,7 @@
+ #include <sys/resource.h>
+ #include <limits.h>
+ #include <ctype.h>
++#include <sys/sysmacros.h>
+ 
+ struct cache *fragment_cache, *data_cache;
+ struct queue *to_reader, *to_inflate, *to_writer, *from_writer;
