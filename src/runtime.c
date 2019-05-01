@@ -662,7 +662,7 @@ int main(int argc, char *argv[]) {
         free(abspath);
     }
 
-    if (arg && strcmp(arg, "appimage-extract-and-run") == 0) {
+    if (getenv("APPIMAGE_EXTRACT_AND_RUN") != NULL || (arg && strcmp(arg, "appimage-extract-and-run") == 0)) {
         char* hexlified_digest = NULL;
 
         // calculate MD5 hash of file, and use it to make extracted directory name "content-aware"
