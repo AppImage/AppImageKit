@@ -1,2 +1,166 @@
 msgid ""
-msgstr "X-Generator: Weblate\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr ""
+"PO-Revision-Date: 2019-06-09 00:36+0000\n"
+"Last-Translator: Enol P. <enolp@softastur.org>\n"
+"Language-Team: Asturian <https://translate.assassinate-you.net/projects/"
+"appimage-website/website/ast/>\n"
+"Language: ast\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 3.6.1\n"
+
+#: index.jinja2:58
+msgid "docs_link_title"
+msgstr "Documentación"
+
+#: index.jinja2:63
+msgid "source_link_title"
+msgstr "Códigu fonte"
+
+#: index.jinja2:68
+msgid "wiki_link_title"
+msgstr "Wiki"
+
+#: index.jinja2:73
+msgid "discourse_link_title"
+msgstr "Comunidá"
+
+#: index.jinja2:143
+msgid "user_story_1"
+msgstr ""
+"Como usuariu quiero baxar una aplicación y executala nel mio ordenador con "
+"GNU/Linux como si lo ficiere en Windows o Mac."
+
+#: index.jinja2:146
+msgid "user_story_2"
+msgstr ""
+"Como desendolcador quiero fornir paquetes a los sistemes de GNU/Linux ensin "
+"la necesidá d'enfocame nuna distribución en particular o compilar la mesma "
+"aplicación pa munches distribuciones estremaes."
+
+#: index.jinja2:158
+msgid "download_make_executable_run"
+msgstr ""
+"¡Baxa una aplicación, faila executable y execútala! Ensin necesidá "
+"d'instalar nada o alteriar les preferencies del sistema."
+
+#: index.jinja2:194
+msgid "what_people_think"
+msgstr "Qué piensa la xente"
+
+#: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
+#: index.jinja2:429
+msgid "picture:"
+msgstr "Semeya:"
+
+#: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
+msgid "licensed_under_CC-BY-NC-SA_4.0"
+msgstr "Llicencia: CC-BY-NC-SA 4.0."
+
+#: index.jinja2:217 index.jinja2:236
+msgid "original_picture"
+msgstr "Semeya orixinal"
+
+#: index.jinja2:229
+msgid "hohndel_quote"
+msgstr "La visión d'AppImage ye bien útil."
+
+#: index.jinja2:254
+msgid "copyright_aaron_hockley"
+msgstr "Copyright d'Aaron Hockley."
+
+#: index.jinja2:255
+msgid "licensed_under_CC-BY-SA_2.0"
+msgstr "Llicencia: CC-BY-SA 2.0."
+
+#: index.jinja2:272
+msgid "copyright_theassassin"
+msgstr "Copyright de TheAssassin."
+
+#: index.jinja2:325
+msgid "here_appimage_for_you_to_try"
+msgstr "Equí hai una aplicación empaquetada n'AppImage pa que la pruebes."
+
+#: index.jinja2:326
+msgid "just_download_make_executable_run"
+msgstr "¡Báxala, faila executable y execútala!"
+
+#: index.jinja2:327
+msgid "no_need_to_install"
+msgstr "Ensin necesidá d'instalala."
+
+#: index.jinja2:384
+msgid "watch_how_it_works"
+msgstr "Mira cómo funciona"
+
+#: index.jinja2:401
+msgid "buzzwords_easy_title"
+msgstr "Fácil."
+
+#: index.jinja2:404
+msgid "buzzwords_easy_description"
+msgstr ""
+"La idea principal del formatu AppImage ye <b>una aplicación = un ficheru</b>"
+". Cada AppImage contien una aplicación y tolos ficheros que precisa. N'otres "
+"pallabres, un AppImage nun tien más dependencies que les que s'inclúin nel "
+"sistema operativu de destín."
+
+#: index.jinja2:410
+msgid "buzzwords_trusted_title"
+msgstr "D'enfotu."
+
+#: index.jinja2:422
+msgid "buzzwords_fast_description"
+msgstr ""
+"Les AppImages puen baxase y executase <b>ensin instalales</b> o precisar "
+"drechos de root."
+
+#: index.jinja2:453
+msgid "buzzwords_open_source_description"
+msgstr ""
+"Como Linux, AppImageKit ye de códigu abiertu. Úsalu pa empaquetar "
+"aplicaciones llibres o propietaries."
+
+#: index.jinja2:480
+msgid "buzzwords_compatible_description"
+msgstr ""
+"Funciona na mayoría de distribuciones modernes de GNU/Linux. Bono, cuasi."
+
+#: index.jinja2:494
+msgid "get_started_title"
+msgstr "¡Entama a empaqueta aplicaciones!"
+
+#: index.jinja2:497
+msgid "get_started_description"
+msgstr ""
+"Deprendi cómo pues usar AppImageKit pa crear AppImages na wiki d'AppImageKit."
+
+#: index.jinja2:500
+msgid "wiki_title"
+msgstr "Wiki"
+
+#: index.jinja2:536
+msgid "live_chat_title"
+msgstr "Charra en direuto"
+
+#: index.jinja2:548
+msgid "#AppImage_on_freenode"
+msgstr "#AppImage en irc.freenode.net"
+
+#: index.jinja2:563
+msgid "contact_probono"
+msgstr "Contauta con probono"
+
+#: index.jinja2:570
+msgid "github_title"
+msgstr "GitHub"
+
+#: index.jinja2:578
+msgid "e-mail_title"
+msgstr "corréu"
+
+#: index.jinja2:586
+msgid "google+_title"
+msgstr "Google+"
