@@ -1,6 +1,8 @@
 # Contributing
 
-Welcome to AppImage. A good starting point for most questions is our wiki at https://github.com/AppImage/AppImageKit/wiki.
+Welcome to AppImage. A good starting point for most questions is our wiki at https://github.com/AppImage/AppImageKit/wiki
+
+## How to contribute
 
 ### I would like to request an AppImage for an application
 
@@ -23,3 +25,17 @@ Your contribution is especially welcome in these ares:
 * [Open bugs](https://github.com/search?utf8=%E2%9C%93&q=org%3AAppImage+label%3Abug+state%3Aopen&type=Issues)
 
 If you would like to report issues with AppImageKit itself, or would like to contribute to its development, please see get in touch with us in `#AppImage` on `irc.freenode.net`. We welcome pull requests addressing any of the open issues and/or other bugfixes and/or feature additions. In the case of complex feature additions, it is best to contact us first, before you spend much time.
+
+## Project governance
+
+Founder and project leader Simon Peter (probonopd) reserves the right to define the AppImage format, brand, high-level architecture, user experience, and project governance 
+
+## Rules for contributing
+
+* The only supported version is git master
+* We do not bugfix any versions other than git master
+* Versions other than git master are considered outdated and obsolete
+* Our software comes in AppImage format. Everything else is unsupported by us
+* If git master breaks, all other work stops and every contributor focuses exclusively on un-breaking master
+* Every contribution shall be sent as a pull request, which must build "green" before it is merged
+* Pinned issues shall be closed before other issues are being worked on
