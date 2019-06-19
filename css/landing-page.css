@@ -863,7 +863,7 @@ vertical-align: middle;
 }
 
 .section-no-padding{
-  padding-bottom: 0;
+  padding: 0;
 }
 .landing-page .footer{
   padding: 20px 0;
