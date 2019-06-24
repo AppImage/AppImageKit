@@ -743,22 +743,18 @@ main (int argc, char *argv[])
         gchar* icon_file_path = NULL;
         gchar* icon_file_png;
         gchar* icon_file_svg;
-        gchar* icon_file_svgz;
         gchar* icon_file_xpm;
         icon_file_png = g_strdup_printf("%s/%s.png", source, icon_name);
         icon_file_svg = g_strdup_printf("%s/%s.svg", source, icon_name);
-        icon_file_svgz = g_strdup_printf("%s/%s.svgz", source, icon_name);
         icon_file_xpm = g_strdup_printf("%s/%s.xpm", source, icon_name);
         if (g_file_test(icon_file_png, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_png;
         } else if(g_file_test(icon_file_svg, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_svg;
-        } else if(g_file_test(icon_file_svgz, G_FILE_TEST_IS_REGULAR)) {
-            icon_file_path = icon_file_svgz;
         } else if(g_file_test(icon_file_xpm, G_FILE_TEST_IS_REGULAR)) {
             icon_file_path = icon_file_xpm;
         } else {
-            fprintf (stderr, "%s{.png,.svg,.svgz,.xpm} defined in desktop file but not found\n", icon_name);
+            fprintf (stderr, "%s{.png,.svg,.xpm} defined in desktop file but not found\n", icon_name);
             fprintf (stderr, "For example, you could put a 256x256 pixel png into\n");
             gchar *icon_name_with_png = g_strconcat(icon_name, ".png", NULL);
             gchar *example_path = g_build_filename(source, "/", icon_name_with_png, NULL);
