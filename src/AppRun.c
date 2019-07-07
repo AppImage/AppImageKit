@@ -190,6 +190,9 @@ int main(int argc, char *argv[]) {
     old_env = getenv("QT_PLUGIN_PATH") ?: "";
     SET_NEW_ENV(new_qt_plugin_path, appdir_s*10 + strlen(old_env), "QT_PLUGIN_PATH=%s/usr/lib/qt4/plugins/:%s/usr/lib/i386-linux-gnu/qt4/plugins/:%s/usr/lib/x86_64-linux-gnu/qt4/plugins/:%s/usr/lib32/qt4/plugins/:%s/usr/lib64/qt4/plugins/:%s/usr/lib/qt5/plugins/:%s/usr/lib/i386-linux-gnu/qt5/plugins/:%s/usr/lib/x86_64-linux-gnu/qt5/plugins/:%s/usr/lib32/qt5/plugins/:%s/usr/lib64/qt5/plugins/:%s", appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, appdir, old_env);
 
+    SET_NEW_ENV(new_gspath, appdir_s + strlen(old_env), "GST_PLUGIN_SYSTEM_PATH=%s/usr/lib/gstreamer:%s", appdir, old_env);
+    SET_NEW_ENV(new_gspath1, appdir_s + strlen(old_env), "GST_PLUGIN_SYSTEM_PATH_1_0=%s/usr/lib/gstreamer-1.0:%s", appdir, old_env);
+    
     /* Otherwise may get errors because Python cannot write __pycache__ bytecode cache */
     putenv("PYTHONDONTWRITEBYTECODE=1");
 
