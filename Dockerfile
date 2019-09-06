@@ -14,7 +14,7 @@ RUN python translator.py --compile --render
 
 
 # deployment container
-FROM nginx:1.13-alpine
+FROM nginx:1-alpine
 
 COPY docker/nginx.conf /etc/nginx/
 
