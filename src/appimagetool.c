@@ -198,7 +198,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
             args[i++] = exclude_file;
         }
 
-        args[i++] = "-mkfs-fixed-time";
+        args[i++] = "-mkfs-time";
         args[i++] = "0";
 
         args[i++] = 0;
