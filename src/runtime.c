@@ -274,7 +274,7 @@ portable_option(const char *arg, const char *appimage_path, const char *name)
     }
 }
 
-bool extract_appimage(const char* const appimage_path, const char* const _prefix, const char* const _pattern, const bool overwrite) {
+bool extract_appimage(const char* const appimage_path, const char* const _prefix, const char* const _pattern, const bool overwrite, const bool verbose) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
     sqfs fs;
@@ -331,7 +331,10 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                 // fprintf(stderr, "inode.xtra.reg.file_size: %lu\n", inode.xtra.reg.file_size);
                 strcpy(prefixed_path_to_extract, "");
                 strcat(strcat(prefixed_path_to_extract, prefix), trv.path);
-                fprintf(stdout, "%s\n", prefixed_path_to_extract);
+
+                if (verbose)
+                    fprintf(stdout, "%s\n", prefixed_path_to_extract);
+
                 if (inode.base.inode_type == SQUASHFS_DIR_TYPE || inode.base.inode_type == SQUASHFS_LDIR_TYPE) {
                     // fprintf(stderr, "inode.xtra.dir.parent_inode: %ui\n", inode.xtra.dir.parent_inode);
                     // fprintf(stderr, "mkdir_p: %s/\n", prefixed_path_to_extract);
@@ -633,7 +636,7 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        if (!extract_appimage(appimage_path, "squashfs-root/", pattern, true)) {
+        if (!extract_appimage(appimage_path, "squashfs-root/", pattern, true, true)) {
             exit(1);
         }
 
@@ -694,7 +697,9 @@ int main(int argc, char *argv[]) {
         strcat(prefix, hexlified_digest);
         free(hexlified_digest);
 
-        if (!extract_appimage(appimage_path, prefix, NULL, false)) {
+        const bool verbose = (getenv("VERBOSE") != NULL);
+
+        if (!extract_appimage(appimage_path, prefix, NULL, false, verbose)) {
             fprintf(stderr, "Failed to extract AppImage\n");
             exit(EXIT_EXECERROR);
         }
