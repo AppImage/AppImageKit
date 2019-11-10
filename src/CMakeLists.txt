@@ -153,5 +153,5 @@ install(
 )
 
 install(FILES "${PROJECT_SOURCE_DIR}/resources/appimagetool.desktop" DESTINATION share/applications COMPONENT appimagetool EXCLUDE_FROM_ALL)
-install(FILES "${PROJECT_SOURCE_DIR}/resources/appimagetool.svg" DESTINATION share/icons/hicolor/scalable/apps COMPONENT appimagetool EXCLUDE_FROM_ALL)
+install(FILES "${PROJECT_SOURCE_DIR}/resources/appimagetool.png" DESTINATION share/icons/hicolor/128x128/apps COMPONENT appimagetool EXCLUDE_FROM_ALL)
 install(FILES "${PROJECT_SOURCE_DIR}/resources/usr/share/metainfo/appimagetool.appdata.xml" DESTINATION share/metainfo COMPONENT appimagetool EXCLUDE_FROM_ALL)

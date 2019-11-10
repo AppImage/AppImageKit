@@ -26,8 +26,8 @@ cp $(which desktop-file-validate) "$APPIMAGETOOL_APPDIR"/usr/bin/
 cp $(which zsyncmake) "$APPIMAGETOOL_APPDIR"/usr/bin/
 
 cp ../resources/appimagetool.desktop "$APPIMAGETOOL_APPDIR"
-cp ../resources/appimagetool.svg "$APPIMAGETOOL_APPDIR"/appimagetool.svg
-ln -s "$APPIMAGETOOL_APPDIR"/appimagetool.svg "$APPIMAGETOOL_APPDIR"/.DirIcon
+cp ../resources/appimagetool.png "$APPIMAGETOOL_APPDIR"/appimagetool.png
+cp "$APPIMAGETOOL_APPDIR"/appimagetool.png "$APPIMAGETOOL_APPDIR"/.DirIcon
 
 if [ -d /deps/ ]; then
     # deploy glib
