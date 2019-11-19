@@ -7,7 +7,7 @@ run on a variety of different target systems (base operating systems, distributi
 
 Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
 
-Copyright (c) 2004-18 Simon Peter <probono@puredarwin.org> and contributors.
+Copyright (c) 2004-19 Simon Peter <probono@puredarwin.org> and contributors.
 
 https://en.wikipedia.org/wiki/AppImage
 
