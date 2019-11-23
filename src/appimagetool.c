@@ -1062,22 +1062,31 @@ main (int argc, char *argv[])
 
                 fgets(output, sizeof(output) - 1, fp);
 
-                if (verbose)
-                    printf("%s: %s\n", using_shasum ? "shasum" : "sha256sum",
-                        g_strsplit_set(output, " ", -1)[0]);
-
-                FILE* fpx = fopen(digestfile, "w");
-
-                if (fpx != NULL) {
-                    fputs(g_strsplit_set(output, " ", -1)[0], fpx);
-                    fclose(fpx);
-                }
 
                 if (pclose(fp) != 0)
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
 
-                // print hash which is later signed for debugging purposes
-                printf("Signing using SHA256 digest: %s\n", output);
+                // let's use a new scope to avoid polluting the scope too much with temporary variables
+                {
+                    // the output of sha256sum is always <hash> <filename>
+                    // we have to split the string, the first item contains the hash then
+                    gchar** split_result = g_strsplit_set(output, " ", -1);
+
+                    // extract the first item reference, doesn't have to be free-d
+                    const gchar* digest_only = split_result[0];
+
+                    // print hash which is later signed for debugging purposes
+                    printf("Signing using SHA256 digest: %s\n", digest_only);
+
+                    FILE* fpx = fopen(digestfile, "w");
+
+                    if (fpx != NULL) {
+                        fputs(digest_only, fpx);
+                        fclose(fpx);
+                    }
+
+                    g_strfreev(split_result);
+                }
 
                 fp = NULL;
 
