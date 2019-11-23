@@ -1076,6 +1076,9 @@ main (int argc, char *argv[])
                 if (pclose(fp) != 0)
                     die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
 
+                // print hash which is later signed for debugging purposes
+                printf("Signing using SHA256 digest: %s\n", output);
+
                 fp = NULL;
 
                 if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
