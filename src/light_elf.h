@@ -117,7 +117,7 @@ typedef struct elf32_note {
 #define EI_DATA     5
 
 #ifdef _cplusplus
-extern "C" }
+}
 #endif
 
 #endif /* elf.h */
