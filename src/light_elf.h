@@ -26,7 +26,7 @@
 
 #include <inttypes.h>
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -116,7 +116,7 @@ typedef struct elf32_note {
 #define EI_CLASS    4
 #define EI_DATA     5
 
-#ifdef _cplusplus
+#ifdef __cplusplus
 }
 #endif
 
