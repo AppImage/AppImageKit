@@ -26,7 +26,9 @@
 
 #include <inttypes.h>
 
-__BEGIN_DECLS
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef uint16_t Elf32_Half;
 typedef uint16_t Elf64_Half;
@@ -114,6 +116,8 @@ typedef struct elf32_note {
 #define EI_CLASS    4
 #define EI_DATA     5
 
-__END_DECLS
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* elf.h */
