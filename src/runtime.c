@@ -194,7 +194,7 @@ mkdir_p(const char* const path)
             /* Temporarily truncate */
             *p = '\0';
 
-            if (mkdir(_path, S_IRWXU) != 0) {
+            if (mkdir(_path, 0755) != 0) {
                 if (errno != EEXIST)
                     return -1;
             }
@@ -203,7 +203,7 @@ mkdir_p(const char* const path)
         }
     }
 
-    if (mkdir(_path, S_IRWXU) != 0) {
+    if (mkdir(_path, 0755) != 0) {
         if (errno != EEXIST)
             return -1;
     }
