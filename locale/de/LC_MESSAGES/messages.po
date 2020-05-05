@@ -71,8 +71,7 @@ msgid "download_make_executable_run"
 msgstr ""
 "Laden Sie eine Anwendung herunter, machen Sie sie ausführbar und starten Sie "
 "sie! Es ist keine Installation erforderlich. Es werden keine "
-"Systembibliotheken oder Systemeinstellungen verändert. Kann auch in einer "
-"Sandbox wie Firejail laufen."
+"Systembibliotheken oder Systemeinstellungen verändert."
 
 #: index.jinja2:159
 #, python-format
