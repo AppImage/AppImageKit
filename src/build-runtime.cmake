@@ -86,21 +86,21 @@ add_custom_command(
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.2.o
-    COMMAND ${OBJCOPY} --add-section .upd_info=1024_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.1.o runtime.2.o
+    COMMAND ${OBJCOPY} --add-section .upd_info=1024_blank_bytes --set-section-flags .upd_info=noload,readonly runtime.1.o runtime.2.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.1.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/1024_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.3.o
-    COMMAND ${OBJCOPY} --add-section .sha256_sig=1024_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.2.o runtime.3.o
+    COMMAND ${OBJCOPY} --add-section .sha256_sig=1024_blank_bytes --set-section-flags .sha256_sig=noload,readonly runtime.2.o runtime.3.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.2.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/1024_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 add_custom_command(
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/runtime.4.o
-    COMMAND ${OBJCOPY} --add-section .sig_key=8192_blank_bytes --set-section-flags .digest_md5=noload,readonly runtime.3.o runtime.4.o
+    COMMAND ${OBJCOPY} --add-section .sig_key=8192_blank_bytes --set-section-flags .sig_key=noload,readonly runtime.3.o runtime.4.o
     MAIN_DEPENDENCY ${CMAKE_CURRENT_BINARY_DIR}/runtime.3.o
     DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/8192_blank_bytes
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
