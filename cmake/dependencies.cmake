@@ -30,7 +30,7 @@ set(CFLAGS ${DEPENDENCIES_CFLAGS})
 set(CPPFLAGS ${DEPENDENCIES_CPPFLAGS})
 set(LDFLAGS ${DEPENDENCIES_LDFLAGS})
 
-set(USE_SYSTEM_MKSQUASHFS OFF CACHE BOOL "Use system mksquashfs instead of downloading and building our own")
+set(USE_SYSTEM_MKSQUASHFS OFF CACHE BOOL "Use system mksquashfs instead of downloading and building our own. Warning: you need a recent version otherwise it might not work as intended.")
 
 if(NOT USE_SYSTEM_MKSQUASHFS)
     # TODO: allow using system wide mksquashfs
