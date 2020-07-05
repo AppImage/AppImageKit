@@ -33,7 +33,6 @@ set(LDFLAGS ${DEPENDENCIES_LDFLAGS})
 set(USE_SYSTEM_MKSQUASHFS OFF CACHE BOOL "Use system mksquashfs instead of downloading and building our own. Warning: you need a recent version otherwise it might not work as intended.")
 
 if(NOT USE_SYSTEM_MKSQUASHFS)
-    # TODO: allow using system wide mksquashfs
     set(mksquashfs_cflags "-DXZ_SUPPORT ${CFLAGS}")
 
     if(NOT xz_LIBRARIES OR xz_LIBRARIES STREQUAL "")
