@@ -908,28 +908,26 @@ main (int argc, char *argv[])
                         printf("Will not guess update information since zsyncmake is missing\n");
                     }
                 }
-		gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
-		if (zsyncmake_path){
-		   char buf[1024];
-		   printf("Running on GitHub Actions\n");
-		   if (strstr(github_ref, "/pull/")) {
-			printf("Will not calculate update information for GitHub because this is a pull request\n");
-		   } else {
-                        gchar **parts = g_strsplit (github_repository, "/", 0);
-
-			char* channel;
-			if (github_ref != "" && strstr(github_ref, "/continuous/")) {
-				channel = "latest";
-			} else {
-				channel = "continuous";
-			}
 			sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
-			updateinformation = buf;
-			printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
-			printf("%s\n", updateinformation);
-		   }
-		}
             } else if (github_repository != NULL && github_ref != NULL) {
+                printf("Running on GitHub Actions\n");
+                gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+                if (zsyncmake_path) {
+                    if (strstr(github_ref, "/pull/")) {
+                        printf("Will not calculate update information for GitHub because this is a pull request\n");
+                    } else {
+                        printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
+                        char buf[1024];
+                        gchar **parts = g_strsplit (github_repository, "/", 2);
+                        char* channel;
+                        if (github_ref != "" && strstr(github_ref, "/continuous/")) {
+                            channel = "latest";
+                        } else {
+                            channel = "continuous";
+                        }
+                        updateinformation = buf;
+                        printf("%s\n", updateinformation);
+                    }
             } else if(CI_COMMIT_REF_NAME){
                 // ${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/QtQuickApp-x86_64.AppImage?job=${CI_JOB_NAME}
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
