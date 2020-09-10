@@ -875,11 +875,10 @@ main (int argc, char *argv[])
                 printf("%s\n", updateinformation);
             }
         }
-        
-        /* If the user has not provided update information but we know this is a Travis CI build,
-         * then fill in update information based on TRAVIS_REPO_SLUG */
         if(guess_update_information){
             if(travis_repo_slug){
+                /* If the user has not provided update information but we know this is a Travis CI build,
+                * then fill in update information based on TRAVIS_REPO_SLUG */
                 if(!github_token) {
                     printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
                     if(0 != strcmp(travis_pull_request, "false")){
