@@ -908,7 +908,6 @@ main (int argc, char *argv[])
                         printf("Will not guess update information since zsyncmake is missing\n");
                     }
                 }
-	    } else if(github_repository){
 		gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
 		if (zsyncmake_path){
 		   char buf[1024];
@@ -930,6 +929,7 @@ main (int argc, char *argv[])
 			printf("%s\n", updateinformation);
 		   }
 		}
+            } else if (github_repository != NULL && github_ref != NULL) {
             } else if(CI_COMMIT_REF_NAME){
                 // ${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/QtQuickApp-x86_64.AppImage?job=${CI_JOB_NAME}
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
