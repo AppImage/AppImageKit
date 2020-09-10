@@ -908,7 +908,6 @@ main (int argc, char *argv[])
                         printf("Will not guess update information since zsyncmake is missing\n");
                     }
                 }
-			sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
             } else if (github_repository != NULL && github_ref != NULL) {
                 printf("Running on GitHub Actions\n");
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
@@ -924,6 +923,11 @@ main (int argc, char *argv[])
                             channel = "latest";
                         } else {
                             channel = "continuous";
+                        }
+                        int is_zsync_write_success = snprintf(buf, 1024, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        if (is_zsync_write_success < 0) {
+                            printf("Writing updateinformation failed. zsync information is too long. (> 1024)\n");
+                            exit(is_zsync_write_success);
                         }
                         updateinformation = buf;
                         printf("%s\n", updateinformation);
