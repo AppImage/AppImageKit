@@ -505,10 +505,8 @@ main (int argc, char *argv[])
     /* Parse GitHub CI environment variables.
      * https://docs.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
      */
-    char* GITHUB_REPOSITORY;
-    GITHUB_REPOSITORY = getenv("GITHUB_REPOSITORY");
-    char* GITHUB_REF;
-    GITHUB_REF = getenv("GITHUB_REF");
+    char* github_repository = getenv("GITHUB_REPOSITORY");
+    char* github_ref = getenv("GITHUB_REF");
 
     /* Parse GitLab CI environment variables.
      * https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
@@ -911,25 +909,25 @@ main (int argc, char *argv[])
                         printf("Will not guess update information since zsyncmake is missing\n");
                     }
                 }
-	    } else if(GITHUB_REPOSITORY){
+	    } else if(github_repository){
 		gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
 		if (zsyncmake_path){
 		   char buf[1024];
 		   printf("Running on GitHub Actions\n");
-		   if (strstr(GITHUB_REF, "/pull/")) {
+		   if (strstr(github_ref, "/pull/")) {
 			printf("Will not calculate update information for GitHub because this is a pull request\n");
 		   } else {
-                        gchar **parts = g_strsplit (GITHUB_REPOSITORY, "/", 0);
+                        gchar **parts = g_strsplit (github_repository, "/", 0);
 
 			char* channel;
-			if (GITHUB_REF != "" && strstr(GITHUB_REF, "/continuous/")) {
+			if (github_ref != "" && strstr(github_ref, "/continuous/")) {
 				channel = "latest";
 			} else {
 				channel = "continuous";
 			}
 			sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
 			updateinformation = buf;
-			printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", GITHUB_REPOSITORY, GITHUB_REF);
+			printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
 			printf("%s\n", updateinformation);
 		   }
 		}
