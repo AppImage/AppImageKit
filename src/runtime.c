@@ -31,7 +31,7 @@
 
 #include "squashfuse.h"
 #include <squashfs_fs.h>
-#include <nonstd.h>
+#include <squashfuse/nonstd.h>
 
 #include <limits.h>
 #include <stdlib.h>
@@ -54,7 +54,9 @@
 #ifndef ENABLE_DLOPEN
 #define ENABLE_DLOPEN
 #endif
+#ifdef ENABLE_SETPROCTITLE
 #include "squashfuse_dlopen.h"
+#endif
 
 /* Exit status to use when launching an AppImage fails.
  * For applications that assign meanings to exit status codes (e.g. rsync),
@@ -796,7 +798,9 @@ int main(int argc, char *argv[]) {
         exit(1);
     }
 
+#ifdef ENABLE_SETPROCTITLE
     LOAD_LIBRARY; /* exit if libfuse is missing */
+#endif
 
     int dir_fd, res;
 
