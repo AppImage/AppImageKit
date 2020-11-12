@@ -27,12 +27,14 @@ endif()
 #####################
 
 # determine Git commit ID
-execute_process(
-    COMMAND git rev-parse --short HEAD
-    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
-    OUTPUT_VARIABLE GIT_COMMIT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (NOT GIT_COMMIT)
+    execute_process(
+        COMMAND git rev-parse --short HEAD
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
 
 # set version and build number
 set(VERSION 1-alpha)
@@ -45,11 +47,13 @@ endif()
 mark_as_advanced(BUILD_NUMBER)
 
 # get current date
-execute_process(
-    COMMAND env LC_ALL=C date -u "+%Y-%m-%d %H:%M:%S %Z"
-    OUTPUT_VARIABLE DATE
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-)
+if (NOT DATE)
+    execute_process(
+        COMMAND env LC_ALL=C date -u "+%Y-%m-%d %H:%M:%S %Z"
+        OUTPUT_VARIABLE DATE
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+endif()
 
 # C and C++ versions
 set(CMAKE_C_STANDARD 99)
