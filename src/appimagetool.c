@@ -70,8 +70,12 @@ enum fARCH {
 };
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
-static char _exclude_file_desc[256];
 
+// maximum size that the updateinformation's buffer can hold
+// TODO: why 1024?
+const int UPDATE_INFORMATION_BUFFER_SIZE = 1024;
+
+static char _exclude_file_desc[256];
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
 static gboolean showVersionOnly = FALSE;
@@ -825,7 +829,7 @@ main (int argc, char *argv[])
         * should hopefully change that. */
 
         fprintf (stderr, "Generating squashfs...\n");
-        const int buffer_size = 1024;
+
         int size = 0;
 
 
@@ -873,7 +877,7 @@ main (int argc, char *argv[])
 
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
-                char buf[buffer_size];
+                char buf[UPDATE_INFORMATION_BUFFER_SIZE];
                 sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
                 updateinformation = buf;
                 printf("%s\n", updateinformation);
@@ -928,9 +932,9 @@ main (int argc, char *argv[])
                         } else {
                             channel = "continuous";
                         }
-                        int is_zsync_write_success = snprintf(buf, buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        int is_zsync_write_success = snprintf(buf, UPDATE_INFORMATION_BUFFER_SIZE, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                         if (is_zsync_write_success < 0) {
-                            printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", buffer_size);
+                            printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", UPDATE_INFORMATION_BUFFER_SIZE);
                             exit(is_zsync_write_success);
                         }
                         updateinformation = buf;
