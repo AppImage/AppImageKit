@@ -926,8 +926,8 @@ main (int argc, char *argv[])
                         printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
                         char buf[1024];
                         gchar **parts = g_strsplit (github_repository, "/", 2);
-                        char* channel;
-                        if (strcmp(github_ref, "") != 0 && strstr(github_ref, "/continuous/") != NULL) {
+                        const char* channel;
+                        if (strstr(github_ref, "/continuous/") != NULL) {
                             channel = "latest";
                         } else {
                             channel = "continuous";
