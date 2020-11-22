@@ -825,7 +825,10 @@ main (int argc, char *argv[])
         * should hopefully change that. */
 
         fprintf (stderr, "Generating squashfs...\n");
+        const int buffer_size = 1024;
         int size = 0;
+
+
         char* data = NULL;
         bool using_external_data = false;
         if (runtime_file != NULL) {
@@ -866,10 +869,11 @@ main (int argc, char *argv[])
             printf("Could not set executable bit, aborting\n");
             exit(1);
         }
-        
+
+
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
-                char buf[1024];
+                char buf[buffer_size];
                 sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
                 updateinformation = buf;
                 printf("%s\n", updateinformation);
@@ -924,7 +928,7 @@ main (int argc, char *argv[])
                         } else {
                             channel = "continuous";
                         }
-                        int is_zsync_write_success = snprintf(buf, 1024, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        int is_zsync_write_success = snprintf(buf, buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                         if (is_zsync_write_success < 0) {
                             printf("Writing updateinformation failed. zsync information is too long. (> 1024)\n");
                             exit(is_zsync_write_success);
