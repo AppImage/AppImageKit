@@ -917,7 +917,9 @@ main (int argc, char *argv[])
                 }
             } else if (github_repository != NULL && github_ref != NULL) {
                 printf("Running on GitHub Actions\n");
+                // get path to zsyncmake
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+
                 if (zsyncmake_path != NULL) {
                     if (strstr(github_ref, "/pull/") != NULL) {
                         printf("Will not calculate update information for GitHub because this is a pull request\n");
@@ -925,17 +927,23 @@ main (int argc, char *argv[])
                         printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
                         char updateinformation_buffer[1024];
                         gchar **parts = g_strsplit (github_repository, "/", 2);
+
                         const char* channel;
                         if (strstr(github_ref, "/continuous/") != NULL) {
                             channel = "latest";
                         } else {
                             channel = "continuous";
                         }
+
                         int is_zsync_write_success = snprintf(updateinformation_buffer, update_information_buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                         if (is_zsync_write_success < 0) {
                             printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", update_information_buffer_size);
                             exit(is_zsync_write_success);
                         }
+
+                        // free the pointers from g_strsplit, to avoid a memort leak
+                        g_strfreev(parts);
+
                         updateinformation = updateinformation_buffer;
                         printf("%s\n", updateinformation);
                     }
