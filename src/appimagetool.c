@@ -919,7 +919,7 @@ main (int argc, char *argv[])
             } else if (github_repository != NULL && github_ref != NULL) {
                 printf("Running on GitHub Actions\n");
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
-                if (zsyncmake_path) {
+                if (zsyncmake_path != NULL) {
                     if (strstr(github_ref, "/pull/") != NULL) {
                         printf("Will not calculate update information for GitHub because this is a pull request\n");
                     } else {
