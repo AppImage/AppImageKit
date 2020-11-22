@@ -71,10 +71,6 @@ enum fARCH {
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
 
-// maximum size that the updateinformation's buffer can hold
-// TODO: why 1024?
-const int UPDATE_INFORMATION_BUFFER_SIZE = 1024;
-
 static char _exclude_file_desc[256];
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
@@ -874,10 +870,13 @@ main (int argc, char *argv[])
             exit(1);
         }
 
+        // maximum size that the updateinformation's buffer can hold
+        // TODO: why 1024?
+        const int update_information_buffer_size = 1024;
 
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
-                char buf[UPDATE_INFORMATION_BUFFER_SIZE];
+                char buf[update_information_buffer_size];
                 sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
                 updateinformation = buf;
                 printf("%s\n", updateinformation);
@@ -932,9 +931,9 @@ main (int argc, char *argv[])
                         } else {
                             channel = "continuous";
                         }
-                        int is_zsync_write_success = snprintf(buf, UPDATE_INFORMATION_BUFFER_SIZE, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        int is_zsync_write_success = snprintf(buf, update_information_buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                         if (is_zsync_write_success < 0) {
-                            printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", UPDATE_INFORMATION_BUFFER_SIZE);
+                            printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", update_information_buffer_size);
                             exit(is_zsync_write_success);
                         }
                         updateinformation = buf;
