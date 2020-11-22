@@ -876,9 +876,9 @@ main (int argc, char *argv[])
 
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
-                char buf[update_information_buffer_size];
-                sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
-                updateinformation = buf;
+                char updateinformation_buffer[update_information_buffer_size];
+                sprintf(updateinformation_buffer, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
+                updateinformation = updateinformation_buffer;
                 printf("%s\n", updateinformation);
             }
         }
@@ -897,7 +897,7 @@ main (int argc, char *argv[])
                 } else {
                     gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
                     if(zsyncmake_path){
-                        char buf[1024];
+                        char updateinformation_buffer[1024];
                         gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
                         /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
                          * gh-releases-zsync|probono|AppImages|latest|Subsurface*-x86_64.AppImage.zsync */
@@ -907,8 +907,8 @@ main (int argc, char *argv[])
                                     channel = "latest";
                                 }
                             }
-                        sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
-                        updateinformation = buf;
+                        sprintf(updateinformation_buffer, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        updateinformation = updateinformation_buffer;
                         printf("Guessing update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
                         printf("%s\n", updateinformation);
                     } else {
@@ -923,7 +923,7 @@ main (int argc, char *argv[])
                         printf("Will not calculate update information for GitHub because this is a pull request\n");
                     } else {
                         printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
-                        char buf[1024];
+                        char updateinformation_buffer[1024];
                         gchar **parts = g_strsplit (github_repository, "/", 2);
                         const char* channel;
                         if (strstr(github_ref, "/continuous/") != NULL) {
@@ -931,12 +931,12 @@ main (int argc, char *argv[])
                         } else {
                             channel = "continuous";
                         }
-                        int is_zsync_write_success = snprintf(buf, update_information_buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        int is_zsync_write_success = snprintf(updateinformation_buffer, update_information_buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                         if (is_zsync_write_success < 0) {
                             printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", update_information_buffer_size);
                             exit(is_zsync_write_success);
                         }
-                        updateinformation = buf;
+                        updateinformation = updateinformation_buffer;
                         printf("%s\n", updateinformation);
                     }
                 } else {
