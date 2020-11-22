@@ -923,14 +923,14 @@ main (int argc, char *argv[])
                         char buf[1024];
                         gchar **parts = g_strsplit (github_repository, "/", 2);
                         char* channel;
-                        if (github_ref != "" && strstr(github_ref, "/continuous/")) {
+                        if (strcmp(github_ref, "") != 0 && strstr(github_ref, "/continuous/")) {
                             channel = "latest";
                         } else {
                             channel = "continuous";
                         }
                         int is_zsync_write_success = snprintf(buf, buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
                         if (is_zsync_write_success < 0) {
-                            printf("Writing updateinformation failed. zsync information is too long. (> 1024)\n");
+                            printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", buffer_size);
                             exit(is_zsync_write_success);
                         }
                         updateinformation = buf;
