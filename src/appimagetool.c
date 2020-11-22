@@ -916,14 +916,14 @@ main (int argc, char *argv[])
                 printf("Running on GitHub Actions\n");
                 gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
                 if (zsyncmake_path) {
-                    if (strstr(github_ref, "/pull/")) {
+                    if (strstr(github_ref, "/pull/") != NULL) {
                         printf("Will not calculate update information for GitHub because this is a pull request\n");
                     } else {
                         printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
                         char buf[1024];
                         gchar **parts = g_strsplit (github_repository, "/", 2);
                         char* channel;
-                        if (strcmp(github_ref, "") != 0 && strstr(github_ref, "/continuous/")) {
+                        if (strcmp(github_ref, "") != 0 && strstr(github_ref, "/continuous/") != NULL) {
                             channel = "latest";
                         } else {
                             channel = "continuous";
