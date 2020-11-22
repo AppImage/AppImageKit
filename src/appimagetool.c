@@ -37,7 +37,6 @@
 #include <stdio.h>
 #include <argp.h>
 
-#include <stdlib.h>
 #include <fcntl.h>
 #include "squashfuse.h"
 
