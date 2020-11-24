@@ -19,6 +19,7 @@
 typedef unsigned char byte;      
 
 char segment_name[] = ".sha256_sig";
+char segment_key_name[] = ".sig_key";
 
 int sha256_file(char *path, char outputBuffer[65], int skip_offset, int skip_length)
 {
@@ -109,38 +110,53 @@ int main(int argc,char **argv)	{
 
     char *filename = argv[1]; 
 
-    unsigned long skip_offset = 0;
-    unsigned long skip_length = 0;
+    unsigned long skip_offset_sig = 0;
+    unsigned long skip_length_sig = 0;
+
+    unsigned long skip_offset_key = 0;
+    unsigned long skip_length_key = 0;
   
-    if (!appimage_get_elf_section_offset_and_length(filename, ".sha256_sig", &skip_offset, &skip_length)) {
+    if (!appimage_get_elf_section_offset_and_length(filename, ".sha256_sig", &skip_offset_sig, &skip_length_sig)) {
         fprintf(stderr, "Failed to read .sha256_sig section");
         exit(1);
     }
+    if (!appimage_get_elf_section_offset_and_length(filename, ".sig_key", &skip_offset_key, &skip_length_key)) {
+        fprintf(stderr, "Failed to read .sig_key section");
+        exit(1);
+    }
 
-    if(skip_length > 0) {
-        fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_name, skip_offset, skip_length);
+    if(skip_length_sig > 0) {
+        fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_name, skip_offset_sig, skip_length_sig);
     } else {
         fprintf(stderr, "ELF section %s not found, is the file signed?\n", segment_name);
         exit(1);
     }
+    if(skip_length_key > 0) {
+        fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_key_name, skip_offset_key, skip_length_key);
+    } else {
+        fprintf(stderr, "ELF section %s not found, is the file signed?\n", segment_key_name);
+        exit(1);
+    }
+    int skip_offset = skip_offset_sig;
+    int skip_length = skip_length_sig + skip_length_key;
     
     char *digestfile;
     digestfile = g_strconcat("/tmp/", basename(g_strconcat(filename, ".digest", NULL)), NULL);
     char *signaturefile;
     signaturefile = g_strconcat("/tmp/", basename(g_strconcat(filename, ".sig", NULL)), NULL);
 
-    uint8_t *data = malloc(skip_length);
+    uint8_t *data = malloc(skip_length_sig);
     unsigned long k;
     FILE* fd = fopen(filename, "r");
-    fseek(fd, skip_offset, SEEK_SET);
-    fread(data, skip_length, sizeof(uint8_t), fd);
+    fseek(fd, skip_offset_sig, SEEK_SET);
+    fread(data, skip_length_sig, sizeof(uint8_t), fd);
     fclose(fd);
     FILE *fpdst2 = fopen(signaturefile, "w");
     if (fpdst2 == NULL) {
         fprintf(stderr, "Not able to open the signature file for writing, aborting");
         exit(1);
     }
-    for (k = 0; k < skip_length; k++) {
+    for (k = 0; k < skip_length_sig; k++) {
         fprintf(fpdst2, "%c", data[k]);
     }   
     fclose(fpdst2);
