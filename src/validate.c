@@ -121,8 +121,8 @@ int main(int argc,char **argv)	{
         exit(1);
     }
     if (!appimage_get_elf_section_offset_and_length(filename, ".sig_key", &skip_offset_key, &skip_length_key)) {
-        fprintf(stderr, "Failed to read .sig_key section");
-        exit(1);
+      skip_length_key = 0;
+      skip_offset_key = 0;
     }
 
     if(skip_length_sig > 0) {
@@ -134,10 +134,10 @@ int main(int argc,char **argv)	{
     if(skip_length_key > 0) {
         fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_key_name, skip_offset_key, skip_length_key);
     } else {
-        fprintf(stderr, "ELF section %s not found, is the file signed?\n", segment_key_name);
+        fprintf(stderr, "ELF section %s not found, assuming older AppImage Standard\n", segment_key_name);
         exit(1);
     }
-    if(skip_offset_sig + skip_length_sig != skip_offset_key) {
+    if(skip_offset_sig + skip_length_sig != skip_offset_key && skip_length_key != 0) {
       fprintf(stderr, "Validate only worlds when .sha256_sig and .sig_key are next to one another in the ELF\n");
       exit(0);
     }
