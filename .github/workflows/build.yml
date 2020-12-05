@@ -1,0 +1,104 @@
+name: Build
+
+on: 
+  push:
+    branches:
+      - 'master'
+  pull_request:
+
+
+jobs:
+  Build:
+    name: Build appimagetool
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        include:
+          - ARCH: 'x86_64'
+            docker-container: 'appimagebuild'
+          - ARCH: 'i386'
+            docker-container: 'appimagebuild-i386'
+          - ARCH: 'armhf'
+            docker-container: 'appimagebuild-armhf-cross'
+          - ARCH: 'aarch64'
+            docker-container: 'appimagebuild-aarch64-cross'
+      fail-fast: false
+    env:
+      DOCKER_IMAGE: quay.io/appimage/${{ matrix.docker-container }}
+      ARCH: ${{ matrix.ARCH }}
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Install dependencies for ARM and AARCH64
+      if: endsWith(matrix.docker-container, 'cross') 
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install binfmt-support qemu-user-static
+
+    - name: Build 
+      run: |
+        bash -ex travis/travis-build.sh
+
+    - name: List files
+      run: |
+        ls -lh out/*
+        ls -lh build/out/*
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        # Artifact name
+        name: appimagetool-${{ matrix.ARCH }}.AppImage.zip
+        path: build/out
+
+
+  Release:
+    needs: [Build]
+    runs-on: ubuntu-latest
+ 
+    steps:
+    - uses: actions/download-artifact@v1
+      with:
+        name: appimagetool-x86_64.AppImage.zip
+    - uses: actions/download-artifact@v1
+      with:
+        name: appimagetool-i386.AppImage.zip
+    - uses: actions/download-artifact@v1
+      with:
+        name: appimagetool-armhf.AppImage.zip
+    - uses: actions/download-artifact@v1
+      with:
+        name: appimagetool-aarch64.AppImage.zip
+
+    - name: Continuous Release
+      uses: marvinpinto/action-automatic-releases@latest
+      if: github.ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags/') != true
+      with:
+        prerelease: true
+        draft: false
+        automatic_release_tag: continuous
+        title: continuous
+        files: |
+          appimagetool-x86_64.AppImage.zip
+          appimagetool-i386.AppImage.zip
+          appimagetool-armhf.AppImage.zip
+          appimagetool-aarch64.AppImage.zip
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Tagged Release
+      uses: marvinpinto/action-automatic-releases@latest
+      if: startsWith(github.ref, 'refs/tags/v')
+      with:
+        prerelease: false
+        draft: true
+        automatic_release_tag: true
+        files: |
+          appimagetool-x86_64.AppImage.zip
+          appimagetool-i386.AppImage.zip
+          appimagetool-armhf.AppImage.zip
+          appimagetool-aarch64.AppImage.zip
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+

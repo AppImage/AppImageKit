@@ -31,7 +31,7 @@ mkdir -p ./out/
 # build AppImageKit
 docker run --rm \
     --device /dev/fuse:mrw \
-    -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
+    -e ARCH \
     -i \
     -v "${PWD}":/AppImageKit \
     -v "${PWD}"/travis/:/travis \
@@ -45,7 +45,7 @@ find build/out/appimagetool.AppDir/
 docker run --rm \
     --cap-add SYS_ADMIN \
     --device /dev/fuse:mrw \
-    -e ARCH -e TRAVIS -e TRAVIS_BUILD_NUMBER \
+    -e ARCH \
     -i \
     -v "${PWD}":/AppImageKit \
     -v "${PWD}"/travis/:/travis \
@@ -64,7 +64,7 @@ cd build/
 sudo apt-get install vim-common
 
 # fix permissions
-sudo chown -R travis.travis .
+sudo chown -R runner.runner .
 
 # remove binaries from output directory
 ls -al out/
