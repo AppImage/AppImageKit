@@ -39,7 +39,12 @@ jobs:
         sudo apt-get -y install binfmt-support qemu-user-static
 
     - name: Build 
+      shell: bash
       run: |
+        if [[ "$ARCH" == "i386" ]]; then
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+        fi
         bash -ex travis/travis-build.sh
 
     - name: List files
