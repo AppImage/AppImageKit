@@ -135,7 +135,6 @@ int main(int argc,char **argv)	{
         fprintf(stderr, "Skipping ELF section %s with offset %lu, length %lu\n", segment_key_name, skip_offset_key, skip_length_key);
     } else {
         fprintf(stderr, "ELF section %s not found, assuming older AppImage Standard\n", segment_key_name);
-        exit(1);
     }
     if(skip_offset_sig + skip_length_sig != skip_offset_key && skip_length_key != 0) {
       fprintf(stderr, "Validate only worlds when .sha256_sig and .sig_key are next to one another in the ELF\n");
