@@ -64,18 +64,8 @@ jobs:
     runs-on: ubuntu-latest
  
     steps:
-    - uses: actions/download-artifact@v1
-      with:
-        name: appimagetool-x86_64.AppImage.zip
-    - uses: actions/download-artifact@v1
-      with:
-        name: appimagetool-i386.AppImage.zip
-    - uses: actions/download-artifact@v1
-      with:
-        name: appimagetool-armhf.AppImage.zip
-    - uses: actions/download-artifact@v1
-      with:
-        name: appimagetool-aarch64.AppImage.zip
+    - name: Download Artifact
+      uses: actions/download-artifact@v1
 
     - name: Continuous Release
       uses: marvinpinto/action-automatic-releases@latest
