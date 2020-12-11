@@ -15,16 +15,16 @@ jobs:
       matrix:
         include:
           - ARCH: 'x86_64'
-            docker-container: 'appimagebuild'
+            docker-image: 'appimagebuild'
           - ARCH: 'i386'
-            docker-container: 'appimagebuild-i386'
+            docker-image: 'appimagebuild-i386'
           - ARCH: 'armhf'
-            docker-container: 'appimagebuild-armhf-cross'
+            docker-image: 'appimagebuild-armhf-cross'
           - ARCH: 'aarch64'
-            docker-container: 'appimagebuild-aarch64-cross'
+            docker-image: 'appimagebuild-aarch64-cross'
       fail-fast: false
     env:
-      DOCKER_IMAGE: quay.io/appimage/${{ matrix.docker-container }}
+      DOCKER_IMAGE: quay.io/appimage/${{ matrix.docker-image }}
       ARCH: ${{ matrix.ARCH }}
 
     steps:
@@ -33,7 +33,7 @@ jobs:
         submodules: true
 
     - name: Install dependencies for ARM and AARCH64
-      if: endsWith(matrix.docker-container, 'cross') 
+      if: endsWith(matrix.docker-image, 'cross') 
       run: |
         sudo apt-get update
         sudo apt-get -y install binfmt-support qemu-user-static
