@@ -28,35 +28,35 @@ jobs:
       ARCH: ${{ matrix.ARCH }}
 
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: true
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
 
-    - name: Install dependencies for ARM and AARCH64
-      if: endsWith(matrix.docker-image, 'cross') 
-      run: |
-        sudo apt-get update
-        sudo apt-get -y install binfmt-support qemu-user-static
-
-    - name: Build 
-      shell: bash
-      run: |
-        if [[ "$ARCH" == "i386" ]]; then
-          sudo dpkg --add-architecture i386
+      - name: Install dependencies for ARM and AARCH64
+        if: endsWith(matrix.docker-image, 'cross') 
+        run: |
           sudo apt-get update
-        fi
-        bash -ex ci/ci-build.sh
+          sudo apt-get -y install binfmt-support qemu-user-static
 
-    - name: List files
-      run: |
-        ls -lh build/out/*
+      - name: Build 
+        shell: bash
+        run: |
+          if [[ "$ARCH" == "i386" ]]; then
+            sudo dpkg --add-architecture i386
+            sudo apt-get update
+          fi
+          bash -ex ci/ci-build.sh
 
-    - name: Upload artifact
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        # Artifact name
-        name: appimagetool-${{ matrix.ARCH }}.AppImage.zip
-        path: build/out
+      - name: List files
+        run: |
+          ls -lh build/out/*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          # Artifact name
+          name: appimagetool-${{ matrix.ARCH }}.AppImage.zip
+          path: build/out
 
 
   Release:
@@ -64,35 +64,36 @@ jobs:
     runs-on: ubuntu-latest
  
     steps:
-    - name: Download Artifact
-      uses: actions/download-artifact@v1
+      - name: Download Artifact
+        uses: actions/download-artifact@v1
 
-    - name: Continuous Release
-      uses: marvinpinto/action-automatic-releases@latest
-      if: github.ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags/') != true
-      with:
-        prerelease: true
-        draft: false
-        automatic_release_tag: continuous
-        title: continuous
-        files: |
-          appimagetool-x86_64.AppImage.zip
-          appimagetool-i386.AppImage.zip
-          appimagetool-armhf.AppImage.zip
-          appimagetool-aarch64.AppImage.zip
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Continuous Release
+        uses: marvinpinto/action-automatic-releases@latest
+        if: github.ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags/') != true
+        with:
+          prerelease: true
+          draft: false
+          automatic_release_tag: continuous
+          title: continuous
+          files: |
+            appimagetool-x86_64.AppImage.zip
+            appimagetool-i386.AppImage.zip
+            appimagetool-armhf.AppImage.zip
+            appimagetool-aarch64.AppImage.zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Tagged Release
-      uses: marvinpinto/action-automatic-releases@latest
-      if: startsWith(github.ref, 'refs/tags/v')
-      with:
-        prerelease: false
-        draft: true
-        automatic_release_tag: true
-        files: |
-          appimagetool-x86_64.AppImage.zip
-          appimagetool-i386.AppImage.zip
-          appimagetool-armhf.AppImage.zip
-          appimagetool-aarch64.AppImage.zip
-        repo_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Tagged Release
+        uses: marvinpinto/action-automatic-releases@latest
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          prerelease: false
+          draft: true
+          automatic_release_tag: true
+          files: |
+            appimagetool-x86_64.AppImage.zip
+            appimagetool-i386.AppImage.zip
+            appimagetool-armhf.AppImage.zip
+            appimagetool-aarch64.AppImage.zip
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+
 
