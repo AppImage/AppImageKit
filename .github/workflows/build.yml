@@ -55,7 +55,7 @@ jobs:
         uses: actions/upload-artifact@v1.0.0
         with:
           # Artifact name
-          name: appimagetool-${{ matrix.ARCH }}.AppImage.zip
+          name: appimagetool-${{ matrix.ARCH }}.build.zip
           path: build/out
 
 
@@ -68,32 +68,10 @@ jobs:
         uses: actions/download-artifact@v1
 
       - name: Continuous Release
-        uses: marvinpinto/action-automatic-releases@latest
-        if: github.ref == 'refs/heads/master' && startsWith(github.ref, 'refs/tags/') != true
-        with:
-          prerelease: true
-          draft: false
-          automatic_release_tag: continuous
-          title: continuous
-          files: |
-            appimagetool-x86_64.AppImage.zip
-            appimagetool-i386.AppImage.zip
-            appimagetool-armhf.AppImage.zip
-            appimagetool-aarch64.AppImage.zip
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Tagged Release
-        uses: marvinpinto/action-automatic-releases@latest
-        if: startsWith(github.ref, 'refs/tags/v')
-        with:
-          prerelease: false
-          draft: true
-          automatic_release_tag: true
-          files: |
-            appimagetool-x86_64.AppImage.zip
-            appimagetool-i386.AppImage.zip
-            appimagetool-armhf.AppImage.zip
-            appimagetool-aarch64.AppImage.zip
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          wget -q https://github.com/TheAssassin/pyuploadtool/releases/download/continuous/pyuploadtool-x86_64.AppImage
+          chmod +x pyuploadtool-x86_64.AppImage
+          ./pyuploadtool-x86_64.AppImage **/appimagetool*.AppImage*
 
