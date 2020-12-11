@@ -45,7 +45,7 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update
         fi
-        bash -ex travis/travis-build.sh
+        bash -ex ci/ci-build.sh
 
     - name: List files
       run: |
