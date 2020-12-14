@@ -45,11 +45,12 @@ jobs:
 
 
   upload:
-    needs: [build]
+    name: Create release and upload artifacts
+    needs:
+      - build
     runs-on: ubuntu-latest
- 
     steps:
-      - name: Download Artifacts
+      - name: Download artifacts
         uses: actions/download-artifact@v2
       - name: Inspect directory after downloading artifacts
         run: ls -alFR
@@ -59,5 +60,4 @@ jobs:
         run: |
           wget -q https://github.com/TheAssassin/pyuploadtool/releases/download/continuous/pyuploadtool-x86_64.AppImage
           chmod +x pyuploadtool-x86_64.AppImage
-          ./pyuploadtool-x86_64.AppImage **/appimagetool*.AppImage*
-
+          ./pyuploadtool-x86_64.AppImage **/appimagetool*.AppImage **/AppRun*
