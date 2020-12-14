@@ -43,14 +43,14 @@ jobs:
 
       - name: List files
         run: |
-          ls -lh build/out/*
+          ls -lh out/*
 
       - name: Upload artifact
         uses: actions/upload-artifact@v1.0.0
         with:
           # Artifact name
           name: appimagetool-${{ matrix.ARCH }}.build
-          path: build/out
+          path: out/*
 
 
   upload:
