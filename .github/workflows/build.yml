@@ -33,11 +33,8 @@ jobs:
         with:
           submodules: true
 
-      - name: Install dependencies for ARM and AARCH64
-        if: endsWith(matrix.docker-image, 'cross') 
-        run: |
-          sudo apt-get update
-          sudo apt-get -y install binfmt-support qemu-user-static
+      - name: Set up QEMU integration for Docker
+        run: docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 
       - name: Build 
         shell: bash
