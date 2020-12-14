@@ -92,6 +92,6 @@ find "$install_prefix"
     -u "gh-releases-zsync|AppImage|AppImageKit|continuous|appimagetool-$ARCH.AppImage.zsync" \
     appimagetool-"$ARCH".AppImage
 
-mv appimagetool-"$ARCH".AppImage "$OLD_CWD"
+mv appimagetool-"$ARCH".AppImage* "$OLD_CWD"
 mv "$install_prefix"/usr/lib/appimagekit/runtime "$OLD_CWD"
 mv "$install_prefix"/usr/bin/* "$OLD_CWD"
