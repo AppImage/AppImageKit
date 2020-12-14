@@ -9,10 +9,11 @@ on:
 
 
 jobs:
-  Build:
+  build:
     name: Build appimagetool
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - ARCH: 'x86_64'
@@ -23,7 +24,7 @@ jobs:
             docker-image: 'appimagebuild-armhf-cross'
           - ARCH: 'aarch64'
             docker-image: 'appimagebuild-aarch64-cross'
-      fail-fast: false
+
     env:
       DOCKER_IMAGE: quay.io/appimage/${{ matrix.docker-image }}
       ARCH: ${{ matrix.ARCH }}
@@ -38,11 +39,7 @@ jobs:
 
       - name: Build 
         run: |
-          if [[ "$ARCH" == "i386" ]]; then
-            sudo dpkg --add-architecture i386
-            sudo apt-get update
-          fi
-          bash -ex ci/ci-build.sh
+          bash -ex ci/build-in-docker.sh
 
       - name: List files
         run: |
@@ -56,14 +53,15 @@ jobs:
           path: build/out
 
 
-  Release:
-    needs: [Build]
+  upload:
+    needs: [build]
     runs-on: ubuntu-latest
  
     steps:
-      - name: Download Artifact
+      - name: Download Artifacts
         uses: actions/download-artifact@v1
-
+      - name: Inspect directory after downloading artifacts
+        run: ls -alFR
       - name: Create release and upload artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
