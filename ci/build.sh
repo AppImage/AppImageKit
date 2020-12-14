@@ -8,6 +8,9 @@ if [[ "$ARCH" == "" ]]; then
     exit 2
 fi
 
+# TODO: fix inconsistency in architecture naming *everywhere*
+docker_arch=
+
 case "$ARCH" in
     "x86_64")
         export ARCH="x86_64"
@@ -15,6 +18,7 @@ case "$ARCH" in
         ;;
     "i386"|"i686")
         export ARCH="i686"
+        docker_arch="i386"
         docker_dist=centos7
         ;;
     armhf|aarch64)
@@ -47,7 +51,7 @@ this_dir="$(readlink -f "$(dirname "$0")")"
 repo_root="$this_dir"/..
 
 # docker image name
-docker_image=quay.io/appimage/appimagebuild:"$docker_dist"-"$ARCH"
+docker_image=quay.io/appimage/appimagebuild:"$docker_dist"-"${docker_arch:-ARCH}"
 # make sure it's up to date
 docker pull "$docker_image"
 
