@@ -4,22 +4,52 @@ set -e
 set -E
 set -o functrace
 
-# this script attempts to package appimagetool as an AppImage with... surprise, appimagetool
-
-tempdir=$(mktemp -d /tmp/appimage-test.XXXXXXXX)
-thisdir=$(dirname $(readlink -f "$0"))
-
-appimagetool=$(readlink -f "$1")
-
-# make sure to use the built mksquashfs
-export PATH=$(dirname "$appimagetool"):"$PATH"
-
-if [ ! -f "$appimagetool" ] || [ ! -x "$appimagetool" ]; then
-    echo "Usage: $0 <path to appimagetool>"
-    exit 1
+if [[ "$2" == "" ]]; then
+    echo "Usage: bash $0 <repo root> <appimagetool>"
+    exit 2
 fi
 
-if [ "$TRAVIS" == true ]; then
+# using shift makes adding/removing parameters easier
+repo_root="$(readlink -f "$1")"
+shift
+appimagetool="$(readlink -f "$1")"
+
+if [[ ! -x "$appimagetool" ]]; then
+    echo "Error: appimagetool $appimagetool is not an executable"
+    exit 3
+fi
+
+# this script attempts to package appimagetool as an AppImage with... surprise, appimagetool
+
+# we always build in a temporary directory
+# use RAM disk if possible
+if [ -d /dev/shm ] && mount | grep /dev/shm | grep -v -q noexec; then
+    TEMP_BASE=/dev/shm
+elif [ -d /docker-ramdisk ]; then
+    TEMP_BASE=/docker-ramdisk
+else
+    TEMP_BASE=/tmp
+fi
+
+BUILD_DIR="$(mktemp -d -p "$TEMP_BASE" appimagetool-test-XXXXXX)"
+
+cleanup () {
+    if [ -d "$BUILD_DIR" ]; then
+        rm -rf "$BUILD_DIR"
+    fi
+}
+
+trap cleanup EXIT
+
+REPO_ROOT="$(readlink -f "$(dirname "${BASH_SOURCE[0]}")"/..)"
+OLD_CWD="$(readlink -f .)"
+
+pushd "$BUILD_DIR"
+
+# make sure to use the built mksquashfs
+export PATH="$(dirname "$appimagetool")":"$PATH"
+
+if [ "$CI" == true ]; then
   # TODO: find way to get colored log on Travis
   log() { echo -e "\n$*\n"; }
 else
@@ -31,28 +61,24 @@ trap '[[ $FUNCNAME = exithook ]] || { last_lineno=$real_lineno; real_lineno=$LIN
 
 exithook() {
     local exitcode="$1"
-    local lineno=${last_lineno:-$2}
+    local lineno="${last_lineno:-$2}"
 
-    if [ $exitcode -ne 0 ]; then
+    if [ "$exitcode" -ne 0 ]; then
         echo "$(tput setaf 1)$(tput bold)Test run failed: error in line $lineno$(tput sgr0)"
     else
         log "Tests succeeded!"
     fi
 
-    rm -r "$tempdir";
-
-    exit $exitcode
+    exit "$exitcode"
 }
 
 trap 'exithook $? $LINENO ${BASH_LINENO[@]}' EXIT
 
 # real script begins here
-cd "$tempdir"
-
 log "create a sample AppDir"
 mkdir -p appimagetool.AppDir/usr/share/metainfo/
-cp "$thisdir"/resources/{appimagetool.*,AppRun} appimagetool.AppDir/
-#cp "$thisdir"/resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
+cp "$repo_root"/resources/{appimagetool.*,AppRun} appimagetool.AppDir/
+#cp "$repo_root"/resources/usr/share/metainfo/appimagetool.appdata.xml appimagetool.AppDir/usr/share/metainfo/
 cp "$appimagetool" appimagetool.AppDir/
 mkdir -p appimagetool.AppDir/usr/share/applications
 cp appimagetool.AppDir/appimagetool.desktop appimagetool.AppDir/usr/share/applications
