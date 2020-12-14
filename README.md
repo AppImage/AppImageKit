@@ -185,12 +185,14 @@ chmod a+x Your.AppImage
 
 __NOTE:__ The AppImage project supplies [binaries](https://github.com/AppImage/AppImageKit/releases/tag/continuous) that application developers can use. These binaries are built using the CentOS 6 Docker on Travis CI build system in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to AppImageKit, when needing another architecture than `x86_64`, or when trying to reproduce our binaries.
 
-On the oldest still-supported Ubuntu LTS release (at this point, 14.04):
+Our build system is based on Docker. To build your own binaries, please install Docker first. Then, follow the following steps:
 
 ```
 git clone --single-branch --recursive https://github.com/AppImage/AppImageKit
 cd AppImageKit/
-bash -ex build.sh
+bash ci/build.sh
 ```
+
+This will create the binaries in a directory called `out/`.
 
 Please note: It is not recommended nor supported to build AppImageKit on any newer build system than the oldest still-supported versions of major distributions for reasons outlined [here](https://github.com/AppImage/AppImageKit/wiki/Creating-AppImages#creating-appimages-that-are-compatible-with-many-systems). Currently we are targeting CentOS 6.x and Ubuntu 14.04 as build systems and we are not interested to build AppImageKit on newer versions anytime soon. Binaries built on those systems will run just fine on newer (later) target systems (distributions).
