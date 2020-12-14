@@ -64,7 +64,7 @@ jobs:
       - name: Download Artifact
         uses: actions/download-artifact@v1
 
-      - name: Continuous Release
+      - name: Create release and upload artifacts
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
