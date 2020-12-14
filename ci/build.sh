@@ -91,7 +91,7 @@ docker run --rm \
 # outside CI environments, we use APPIMAGE_EXTRACT_AND_RUN instead, which is safer, but gives less meaningful results
 # note: FUSE and QEMU don't like each other, so if we're running in emulated mode, we can't run these tests
 # therefore, by default, on ARM, these tests are not run
-if [[ "$ARCH" == "arm"* ]] || [[ "$ARCH" == "aarch"* ]]; then
+if [[ "$ARCH" != "arm"* ]] && [[ "$ARCH" != "aarch"* ]]; then
     docker_test_opts=("${common_docker_opts[@]}")
 
     if [[ "$CI" != "" ]]; then
