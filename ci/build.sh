@@ -96,6 +96,7 @@ if [[ "$CI" != "" ]]; then
     docker_test_opts+=(
         "--device" "/dev/fuse:mrw"
         "--cap-add" "SYS_ADMIN"
+        "--security-opt" "apparmor:unconfined"
     )
 else
     echo "Note: this is not a CI environment, using APPIMAGE_EXTRACT_AND_RUN and patching out magic bytes"
