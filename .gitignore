@@ -3,3 +3,14 @@
 cmake-build-*/
 .idea/
 Testing/
+*.swp
+runtime
+runtime-*
+AppRun
+AppRun-*
+validate
+validate-*
+digest
+digest-*
+appimagetool
+appimagetool-*
