@@ -61,7 +61,7 @@ if [ -d /deps/ ]; then
     if [ "$ARCH" == "x86_64" ]; then
         cp "$(ldconfig -p | grep libffi.so.6 | grep x86-64 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
     elif [ "$ARCH" == "i686" ]; then
-        cp "$(ldconfig -p | grep libffi.so.6 | grep i386 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
+        cp "$(ldconfig -p | grep libffi.so.6 | head -n1 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
     elif [ "$ARCH" == "armhf" ]; then
         cp "$(ldconfig -p | grep libffi.so.6 | grep arm | grep hf | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
     elif [ "$ARCH" == "aarch64" ]; then
