@@ -107,14 +107,8 @@ fi
 
 # to make fuse happy, we need to use a "real" user
 # as we don't want to use root, we use the user "build" we created in AppImageBuild
-# in the CI system, however, we must use root, as the build user doesn't have access to FUSE
-if [[ "$CI" != "" ]]; then
-    docker_test_opts+=("--user" "root")
-else
-    docker_test_opts+=("--user" "build")
-fi
-
 docker run --rm \
+    --user build \
     "${docker_test_opts[@]}" \
     "$docker_image" \
     /bin/bash -xc "cd /out && bash /ws/ci/test-appimage.sh ./appimagetool-\"$ARCH\".AppImage"
