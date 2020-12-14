@@ -52,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v1.0.0
         with:
           # Artifact name
-          name: appimagetool-${{ matrix.ARCH }}.build.zip
+          name: appimagetool-${{ matrix.ARCH }}.build
           path: build/out
 
 
