@@ -89,30 +89,34 @@ docker run --rm \
 # test appimagetool-"$ARCH".AppImage
 # note: if we're in a CI system, we allow the use of FUSE in the container, to make sure that this functionality works as intended
 # outside CI environments, we use APPIMAGE_EXTRACT_AND_RUN instead, which is safer, but gives less meaningful results
-docker_test_opts=("${common_docker_opts[@]}")
+# note: FUSE and QEMU don't like each other, so if we're running in emulated mode, we can't run these tests
+# therefore, by default, on ARM, these tests are not run
+if [[ "$ARCH" == "arm"* ]] || [[ "$ARCH" == "aarch"* ]]; then
+    docker_test_opts=("${common_docker_opts[@]}")
 
-if [[ "$CI" != "" ]]; then
-    echo "Warning: assuming this is running in a CI environment, allowing the use of FUSE in the container"
-    docker_test_opts+=(
-        "--device" "/dev/fuse:mrw"
-        "--cap-add" "SYS_ADMIN"
-        "--security-opt" "apparmor:unconfined"
-    )
-else
-    echo "Note: this is not a CI environment, using APPIMAGE_EXTRACT_AND_RUN and patching out magic bytes"
-    docker_test_opts+=(
-        "-e" "APPIMAGE_EXTRACT_AND_RUN=1"
-        "-e" "PATCH_OUT_MAGIC_BYTES=1"
-    )
+    if [[ "$CI" != "" ]]; then
+        echo "Warning: assuming this is running in a CI environment, allowing the use of FUSE in the container"
+        docker_test_opts+=(
+            "--device" "/dev/fuse:mrw"
+            "--cap-add" "SYS_ADMIN"
+            "--security-opt" "apparmor:unconfined"
+        )
+    else
+        echo "Note: this is not a CI environment, using APPIMAGE_EXTRACT_AND_RUN and patching out magic bytes"
+        docker_test_opts+=(
+            "-e" "APPIMAGE_EXTRACT_AND_RUN=1"
+            "-e" "PATCH_OUT_MAGIC_BYTES=1"
+        )
+    fi
+
+    # to make fuse happy, we need to use a "real" user
+    # as we don't want to use root, we use the user "build" we created in AppImageBuild
+    docker run --rm \
+        --user build \
+        "${docker_test_opts[@]}" \
+        "$docker_image" \
+        /bin/bash -xc "cd /out && bash /ws/ci/test-appimage.sh ./appimagetool-\"$ARCH\".AppImage"
 fi
-
-# to make fuse happy, we need to use a "real" user
-# as we don't want to use root, we use the user "build" we created in AppImageBuild
-docker run --rm \
-    --user build \
-    "${docker_test_opts[@]}" \
-    "$docker_image" \
-    /bin/bash -xc "cd /out && bash /ws/ci/test-appimage.sh ./appimagetool-\"$ARCH\".AppImage"
 
 # remove binaries from output directory
 ls -al out/
