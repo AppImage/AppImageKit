@@ -15,18 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - ARCH: 'x86_64'
-            docker-image: 'appimagebuild'
-          - ARCH: 'i386'
-            docker-image: 'appimagebuild-i386'
-          - ARCH: 'armhf'
-            docker-image: 'appimagebuild-armhf-cross'
-          - ARCH: 'aarch64'
-            docker-image: 'appimagebuild-aarch64-cross'
+        ARCH: ['x86_64', 'i386', 'armhf', 'aarch64']
 
     env:
-      DOCKER_IMAGE: quay.io/appimage/${{ matrix.docker-image }}
       ARCH: ${{ matrix.ARCH }}
 
     steps:
