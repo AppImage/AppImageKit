@@ -39,7 +39,7 @@ jobs:
 
       - name: Build 
         run: |
-          bash -ex ci/build-in-docker.sh
+          bash -ex ci/build.sh
 
       - name: List files
         run: |
