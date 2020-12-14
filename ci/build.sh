@@ -71,7 +71,7 @@ common_docker_opts=(
 )
 
 # make ctrl-c work
-if [[ "$CI" != "" ]] && [[ "$TERM" != "" ]]; then
+if [[ "$CI" == "" ]] && [[ "$TERM" != "" ]]; then
     common_docker_opts+=("-t")
 fi
 
