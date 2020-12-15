@@ -60,4 +60,4 @@ jobs:
         run: |
           wget -q https://github.com/TheAssassin/pyuploadtool/releases/download/continuous/pyuploadtool-x86_64.AppImage
           chmod +x pyuploadtool-x86_64.AppImage
-          ./pyuploadtool-x86_64.AppImage **/appimagetool*.AppImage **/AppRun*
+          ./pyuploadtool-x86_64.AppImage **/appimagetool*.AppImage **/AppRun* **/runtime-*
