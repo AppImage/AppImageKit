@@ -396,7 +396,6 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                             char buf[bytes_at_a_time];
                             if (sqfs_read_range(&fs, &inode, (sqfs_off_t) bytes_already_read, &bytes_at_a_time, buf)) {
                                 perror("sqfs_read_range error");
-                                fclose(f);
                                 rv = false;
                                 break;
                             }
