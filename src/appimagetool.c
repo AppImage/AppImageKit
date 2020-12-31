@@ -457,6 +457,41 @@ bool readFile(char* filename, int* size, char** buffer) {
     return TRUE;
 }
 
+/* run a command outside the current appimage, block environs like LD_LIBRARY_PATH */
+int run_external(const char *filename, char *const argv []) {
+    int pid = fork();
+    if (pid < 0) {
+        g_print("run_external: fork failed");
+        // fork failed
+        exit(1);
+    } else if (pid == 0) {
+        // blocks env defined in resources/AppRun
+        unsetenv("LD_LIBRARY_PATH");
+        unsetenv("PYTHONPATH");
+        unsetenv("XDG_DATA_DIRS");
+        unsetenv("PERLLIB");
+        unsetenv("GSETTINGS_SCHEMA_DIR");
+        unsetenv("QT_PLUGIN_PATH");
+        // runs command
+        execv(filename, argv);
+        // execv(3) returns, indicating error
+        g_print("run_external: subprocess execv(3) got error %s", g_strerror(errno));
+        exit(1);
+    } else {
+        int wstatus;
+        if (waitpid(pid, &wstatus, 0) == -1) {
+            g_print("run_external: wait failed");
+            return -1;
+        }
+        if (WIFEXITED(wstatus) && (WEXITSTATUS(wstatus) == 0)) {
+            return 0;
+        } else {
+            g_print("run_external: subprocess exited with status %d", WEXITSTATUS(wstatus));
+            return 1;
+        }
+    }
+}
+
 // #####################################################################
 
 static GOptionEntry entries[] =
@@ -794,19 +829,29 @@ main (int argc, char *argv[])
                 fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", application_id);
                 /* Use ximion's appstreamcli to make sure that desktop file and appdata match together */
                 if(g_find_program_in_path ("appstreamcli")) {
-                    sprintf (command, "%s validate-tree %s", g_find_program_in_path ("appstreamcli"), source);
+                    char *args[] = {
+                        "appstreamcli",
+                        "validate-tree",
+                        source,
+                        NULL
+                    };
                     g_print("Trying to validate AppStream information with the appstreamcli tool\n");
                     g_print("In case of issues, please refer to https://github.com/ximion/appstream\n");
-                    int ret = system(command);
+                    int ret = run_external(g_find_program_in_path ("appstreamcli"), args);
                     if (ret != 0)
                         die("Failed to validate AppStream information with appstreamcli");
                 }
                 /* It seems that hughsie's appstream-util does additional validations */
                 if(g_find_program_in_path ("appstream-util")) {
-                    sprintf (command, "%s validate-relax %s", g_find_program_in_path ("appstream-util"), appdata_path);
+                    char *args[] = {
+                        "appstream-util",
+                        "validate-relax",
+                        appdata_path,
+                        NULL
+                    };
                     g_print("Trying to validate AppStream information with the appstream-util tool\n");
                     g_print("In case of issues, please refer to https://github.com/hughsie/appstream-glib\n");
-                    int ret = system(command);
+                    int ret = run_external(g_find_program_in_path ("appstream-util"), args);
                     if (ret != 0)
                         die("Failed to validate AppStream information with appstream-util");
                 }
