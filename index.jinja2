@@ -12,6 +12,7 @@
     <link href="css/bootstrap.css" rel="stylesheet"/>
     <link href="css/landing-page.css" rel="stylesheet"/>
     <link href="css/fontawesome-all.min.css" rel="stylesheet">
+    <link href="css/appimage.org.css" rel="stylesheet">
 
     <!-- SEO -->
     <meta name="description" content="{{ _('meta_description') }}"/>
@@ -75,7 +76,7 @@
                 </li>
 
                 <li>
-                    <iframe style="margin-top:11%;margin-left:10%"
+                    <iframe class="ghbtns-frame"
                             src="https://ghbtns.com/github-btn.html?user=AppImage&repo=appimagekit&type=star&count=true&size=large"
                             frameborder="0" scrolling="0" width="160px"
                             height="30px"></iframe>
@@ -89,7 +90,7 @@
 </nav>
 <!-- social buttons right -->
 <div id="sidebar-social">
-        <div style="position: fixed; top: 20%; right: 50px; width: 50px; display: block; z-index: 9999; color: #888;">
+        <div class="social-buttons">
             <ul>
                 <a href="https://github.com/probonopd" class="btn btn-social btn-simple">
                     <i class="fab fa-github fa-fw fa-2x"></i>
@@ -268,13 +269,13 @@
                      data-ride="carousel">
                     <div class="carousel-inner">
                         <div class="item">
-                            <img src="images/tux.svg" style="max-height: 320px;">
+                            <img src="images/tux.svg" class=".carousel-img">
                             <span class="picture-copyright">
                                 {{ _('drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP') }}
                             </span>
                         </div>
                         <div class="item active">
-                            <img src="images/subsurface.svg" style="max-height: 315px; padding-bottom: 5px;">
+                            <img src="images/subsurface.svg" class="carousel-img-2">
                             <span class="picture-copyright">
                                 {{ _('logo:') }}
                                 {{ _('licensed_under_GPLv2') }}
@@ -457,7 +458,7 @@
 
 
 <div class="section section-no-padding">
-    <div class="full-background filter-gradient blue" style="background-image:url('images/background.jpg');">
+    <div class="full-background filter-gradient blue appimage-background">
         <div class="container">
             <div class="info">
                 <h1>
@@ -562,7 +563,7 @@
             &copy; 2015-19 <a href="https://github.com/probonopd">Simon Peter</a> &mdash; I <i class="fas fa-heart"></i> simplicity
         </nav>
 
-        <div class="social-area pull-right" style="color: #888; margin-top: 8px;">
+        <div class="social-area pull-right" class="social-networks">
             <a href="https://github.com/AppImage" class="btn btn-social btn-simple">
                 <i class="fab fa-github fa-fw fa-2x"></i>
                 <span class="network-name"></span>

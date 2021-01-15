@@ -1,0 +1,32 @@
+.ghbtns-frame {
+    margin-top: 11%;
+    margin-left: 10%;
+}
+
+.carousel-img {
+    max-height: 320px;
+}
+
+.carousel-img-2 {
+    max-height: 315px;
+    padding-bottom: 5px;
+}
+
+.appimage-background {
+    background-image:url('images/background.jpg');
+}
+
+.social-networks {
+    color: #888;
+    margin-top: 8px;
+}
+
+#sidebar-social div.social-buttons {
+    position: fixed;
+    top: 20%;
+    right: 50px;
+    width: 50px;
+    display: block;
+    z-index: 9999;
+    color: #888;
+}
