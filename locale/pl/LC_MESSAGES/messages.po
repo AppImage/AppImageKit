@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2020-02-20 11:50+0000\n"
-"Last-Translator: Dariusz Bogdanski <dariuszb@me.com>\n"
+"PO-Revision-Date: 2021-01-23 12:50+0000\n"
+"Last-Translator: Matteo Bernardini <mat_teobe@yahoo.it>\n"
 "Language-Team: Polish <https://translate.assassinate-you.net/projects/"
 "appimage-website/website/pl/>\n"
 "Language: pl\n"
@@ -10,7 +10,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2;\n"
-"X-Generator: Weblate 3.6.1\n"
+"X-Generator: Weblate 4.4.2\n"
 
 #: index.jinja2:7
 msgid "page_title"
@@ -131,7 +131,7 @@ msgstr "Copyright Aaron Hockley."
 
 #: index.jinja2:255
 msgid "licensed_under_CC-BY-SA_2.0"
-msgstr "Na licencji  CC-BY-SA 2.0."
+msgstr "Na licencji CC-BY-SA 2.0."
 
 #: index.jinja2:267
 msgid "richard_brown_quote"
