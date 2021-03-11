@@ -1,2 +1,58 @@
 msgid ""
-msgstr "X-Generator: Weblate\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr ""
+"PO-Revision-Date: 2021-03-12 17:21+0000\n"
+"Last-Translator: Peter J. Mello <admin@petermello.net>\n"
+"Language-Team: Portuguese <https://translate.assassinate-you.net/projects/"
+"appimage-website/website/pt/>\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 4.4.2\n"
+
+#: index.jinja2:156
+msgid "leading_linux_distributions"
+msgstr "Principais distribuições de Linux"
+
+#: index.jinja2:146
+msgid "user_story_2"
+msgstr ""
+"Como desenvolvedor de aplicações, quero fornecer pacotes para sistemas de "
+"desktop Linux sem a necessidade de colocar numa distribuição ou ter de "
+"compilar para um número infinito de distribuições diferentes."
+
+#: index.jinja2:143
+msgid "user_story_1"
+msgstr ""
+"Como um utilizador, quero descarregar uma aplicação do autor original, e "
+"executá-la no meu sistema desktop Linux, tal como faria com uma aplicação em "
+"Windows ou Mac."
+
+#: index.jinja2:139
+msgid "linux_apps_that_run_anywhere"
+msgstr "Aplicações para Linux que funcionam em qualquer lugar"
+
+#: index.jinja2:73
+msgid "discourse_link_title"
+msgstr "Comunidade"
+
+#: index.jinja2:68
+msgid "wiki_link_title"
+msgstr "Wiki"
+
+#: index.jinja2:63
+msgid "source_link_title"
+msgstr "Código fonte"
+
+#: index.jinja2:58
+msgid "docs_link_title"
+msgstr "Documentação"
+
+#: index.jinja2:17
+msgid "meta_description"
+msgstr "AppImage | Aplicações para Linux que funcionam em qualquer lugar"
+
+#: index.jinja2:7
+msgid "page_title"
+msgstr "AppImage | Aplicações para Linux que funcionam em qualquer lugar"
