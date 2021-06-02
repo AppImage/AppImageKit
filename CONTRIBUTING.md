@@ -24,7 +24,7 @@ Your contribution is especially welcome in these ares:
 * [Issues we need help with](https://github.com/search?utf8=%E2%9C%93&q=org%3AAppImage+state%3Aopen+label%3Ahigh-priority&type=Issues)
 * [Open bugs](https://github.com/search?utf8=%E2%9C%93&q=org%3AAppImage+label%3Abug+state%3Aopen&type=Issues)
 
-If you would like to report issues with AppImageKit itself, or would like to contribute to its development, please see get in touch with us in `#AppImage` on `irc.freenode.net`. We welcome pull requests addressing any of the open issues and/or other bugfixes and/or feature additions. In the case of complex feature additions, it is best to contact us first, before you spend much time.
+If you would like to report issues with AppImageKit itself, or would like to contribute to its development, please see get in touch with us in `#AppImage` on `irc.libera.chat`. We welcome pull requests addressing any of the open issues and/or other bugfixes and/or feature additions. In the case of complex feature additions, it is best to contact us first, before you spend much time.
 
 ## Project governance
 
