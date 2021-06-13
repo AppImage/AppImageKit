@@ -205,7 +205,7 @@ msgid ""
 msgstr ""
 "\n"
 "                    AppImages voor programma's als Atom, Arduino, "
-"Blender, Chromium, Firefox, LibreOffice en QCAD kunnen %(hier)s 1 "
+"Blender, Chromium, Firefox, LibreOffice en QCAD kunnen %(here)s 1 "
 "(64-bit) worden gedownload.\n"
 "                    "
 
