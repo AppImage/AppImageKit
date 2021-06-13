@@ -1,0 +1,311 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2021-06-13 12:44+0200\n"
+"PO-Revision-Date: 2021-03-12 17:21+0000\n"
+"Last-Translator: Peter J. Mello <admin@petermello.net>\n"
+"Language: pt\n"
+"Language-Team: Portuguese <https://translate.assassinate-you.net/projects"
+"/appimage-website/website/pt/>\n"
+"Plural-Forms: nplurals=2; plural=n > 1\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.6.0\n"
+
+#: index.jinja2:7
+msgid "page_title"
+msgstr "AppImage | Aplicações para Linux que funcionam em qualquer lugar"
+
+#: index.jinja2:18
+msgid "meta_description"
+msgstr "AppImage | Aplicações para Linux que funcionam em qualquer lugar"
+
+#: index.jinja2:59 index.jinja2:471
+msgid "docs_link_title"
+msgstr "Documentação"
+
+#: index.jinja2:64
+msgid "source_link_title"
+msgstr "Código fonte"
+
+#: index.jinja2:69
+msgid "wiki_link_title"
+msgstr "Wiki"
+
+#: index.jinja2:74
+msgid "discourse_link_title"
+msgstr "Comunidade"
+
+#: index.jinja2:133
+msgid "linux_apps_that_run_anywhere"
+msgstr "Aplicações para Linux que funcionam em qualquer lugar"
+
+#: index.jinja2:137
+msgid "user_story_1"
+msgstr ""
+"Como um utilizador, quero descarregar uma aplicação do autor original, e "
+"executá-la no meu sistema desktop Linux, tal como faria com uma aplicação"
+" em Windows ou Mac."
+
+#: index.jinja2:140
+msgid "user_story_2"
+msgstr ""
+"Como desenvolvedor de aplicações, quero fornecer pacotes para sistemas de"
+" desktop Linux sem a necessidade de colocar numa distribuição ou ter de "
+"compilar para um número infinito de distribuições diferentes."
+
+#: index.jinja2:150
+msgid "leading_linux_distributions"
+msgstr "Principais distribuições de Linux"
+
+#: index.jinja2:152
+msgid "download_make_executable_run"
+msgstr ""
+
+#: index.jinja2:153
+#, python-format
+msgid ""
+"\n"
+"                 can_run_in_sandboxes_like %(sandbox_name)s\n"
+"            "
+msgstr ""
+
+#: index.jinja2:177
+msgid "distribute_linux_apps_as_appimage_and_win_users"
+msgstr ""
+
+#: index.jinja2:178
+msgid "package_once_and_run_everywhere"
+msgstr ""
+
+#: index.jinja2:179
+msgid "reach_users_on_all_distros"
+msgstr ""
+
+#: index.jinja2:188
+msgid "what_people_think"
+msgstr ""
+
+#: index.jinja2:203
+msgid "torvalds_quote"
+msgstr ""
+
+#: index.jinja2:207 index.jinja2:226 index.jinja2:247 index.jinja2:400
+msgid "picture:"
+msgstr ""
+
+#: index.jinja2:208 index.jinja2:227
+msgid "copyright_faces_of_open_source_/_peter_adams"
+msgstr ""
+
+#: index.jinja2:209 index.jinja2:228 index.jinja2:403
+msgid "licensed_under_CC-BY-NC-SA_4.0"
+msgstr ""
+
+#: index.jinja2:211 index.jinja2:230
+msgid "original_picture"
+msgstr ""
+
+#: index.jinja2:223
+msgid "hohndel_quote"
+msgstr ""
+
+#: index.jinja2:243
+msgid "shuttleworth_quote"
+msgstr ""
+
+#: index.jinja2:248
+msgid "copyright_aaron_hockley"
+msgstr ""
+
+#: index.jinja2:249
+msgid "licensed_under_CC-BY-SA_2.0"
+msgstr ""
+
+#: index.jinja2:274
+msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
+msgstr ""
+
+#: index.jinja2:280
+msgid "logo:"
+msgstr ""
+
+#: index.jinja2:281
+msgid "licensed_under_GPLv2"
+msgstr ""
+
+#: index.jinja2:283
+msgid "see_more"
+msgstr ""
+
+#: index.jinja2:298
+msgid "see_it_in_action"
+msgstr ""
+
+#: index.jinja2:300
+msgid "here_appimage_for_you_to_try"
+msgstr ""
+
+#: index.jinja2:301
+msgid "just_download_make_executable_run"
+msgstr ""
+
+#: index.jinja2:302
+msgid "no_need_to_install"
+msgstr ""
+
+#: index.jinja2:303
+msgid "runs_on_most_desktops"
+msgstr ""
+
+#: index.jinja2:308
+msgid "try_subsurface_64-bit"
+msgstr ""
+
+#: index.jinja2:315
+#, python-format
+msgid ""
+"\n"
+"                    "
+"many_upstream_projects_like_%(krita)s_subsurface_musescore_kdevelop_and_digiKam_have_started_to_provide_appimages_directly_on_their_download_pages"
+"\n"
+"                    "
+msgstr ""
+
+#: index.jinja2:318
+#, python-format
+msgid ""
+"\n"
+"                    "
+"more_appimages_for_other_apps_like_atom_arduino_blender_chromium_firefox_libreoffice_and_qcad_can_be_downloaded_%(here)s_(64-bit)"
+"\n"
+"                    "
+msgstr ""
+
+#: index.jinja2:332
+msgid "how_to_run_an_appimage?"
+msgstr ""
+
+#: index.jinja2:340
+msgid "to_run_an_AppImage_simply:"
+msgstr ""
+
+#: index.jinja2:343
+msgid "make_it_executable"
+msgstr ""
+
+#: index.jinja2:347
+msgid "and_run!"
+msgstr ""
+
+#: index.jinja2:351
+msgid "that_was_easy_wasn't_it?"
+msgstr ""
+
+#: index.jinja2:355
+msgid "watch_how_it_works"
+msgstr ""
+
+#: index.jinja2:372
+msgid "buzzwords_easy_title"
+msgstr ""
+
+#: index.jinja2:375
+msgid "buzzwords_easy_description"
+msgstr ""
+
+#: index.jinja2:381
+msgid "buzzwords_trusted_title"
+msgstr ""
+
+#: index.jinja2:384
+msgid "buzzwords_trusted_description"
+msgstr ""
+
+#: index.jinja2:390
+msgid "buzzwords_fast_title"
+msgstr ""
+
+#: index.jinja2:393
+msgid "buzzwords_fast_description"
+msgstr ""
+
+#: index.jinja2:401
+msgid "copyright_andis_rado"
+msgstr ""
+
+#: index.jinja2:421
+msgid "buzzwords_open_source_title"
+msgstr ""
+
+#: index.jinja2:424
+msgid "buzzwords_open_source_description"
+msgstr ""
+
+#: index.jinja2:435
+msgid "buzzwords_proven_title"
+msgstr ""
+
+#: index.jinja2:438
+msgid "buzzwords_proven_description"
+msgstr ""
+
+#: index.jinja2:448
+msgid "buzzwords_compatible_title"
+msgstr ""
+
+#: index.jinja2:451
+msgid "buzzwords_compatible_description"
+msgstr ""
+
+#: index.jinja2:465
+msgid "get_started_title"
+msgstr ""
+
+#: index.jinja2:468
+msgid "get_started_description"
+msgstr ""
+
+#: index.jinja2:483
+msgid "forum_title"
+msgstr ""
+
+#: index.jinja2:486
+msgid "forum_description"
+msgstr ""
+
+#: index.jinja2:492
+msgid "forum_link_title"
+msgstr ""
+
+#: index.jinja2:507
+msgid "live_chat_title"
+msgstr ""
+
+#: index.jinja2:510
+msgid "live_chat_description"
+msgstr ""
+
+#: index.jinja2:513
+msgid "live_chat_join_us"
+msgstr ""
+
+#: index.jinja2:519
+msgid "#AppImage_on_libera.chat"
+msgstr ""
+
+#: index.jinja2:534
+msgid "contact_probono"
+msgstr ""
+
+#: index.jinja2:541
+msgid "github_title"
+msgstr ""
+
+#: index.jinja2:549
+msgid "e-mail_title"
+msgstr ""
+
