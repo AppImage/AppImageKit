@@ -1,4 +1,4 @@
-# Translations template for PROJECT.
+# Spanish translations for PROJECT.
 # Copyright (C) 2017 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
@@ -7,74 +7,73 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-12-10 18:03+0100\n"
+"POT-Creation-Date: 2021-06-13 12:44+0200\n"
 "PO-Revision-Date: 2019-02-16 05:09+0000\n"
 "Last-Translator: Weblate Admin <weblate@assassinate-you.net>\n"
-"Language-Team: Spanish <https://translate.assassinate-you.net/projects/"
-"appimage/website/es/>\n"
 "Language: es\n"
+"Language-Team: Spanish <https://translate.assassinate-"
+"you.net/projects/appimage/website/es/>\n"
+"Plural-Forms: nplurals=2; plural=n != 1\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 2.20\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: index.jinja2:7
 #, fuzzy
 msgid "page_title"
 msgstr "AppImage | Aplicaciones Linux que se ejecutan en cualquier lugar"
 
-#: index.jinja2:17
+#: index.jinja2:18
 msgid "meta_description"
 msgstr "AppImage | Aplicaciones Linux que se ejecutan en cualquier lugar"
 
-#: index.jinja2:58
+#: index.jinja2:59 index.jinja2:471
 msgid "docs_link_title"
 msgstr "Documentación"
 
-#: index.jinja2:63
+#: index.jinja2:64
 msgid "source_link_title"
 msgstr "Código Fuente"
 
-#: index.jinja2:68
+#: index.jinja2:69
 msgid "wiki_link_title"
 msgstr "Wiki"
 
-#: index.jinja2:73
+#: index.jinja2:74
 msgid "discourse_link_title"
 msgstr "Comunidad"
 
-#: index.jinja2:139
+#: index.jinja2:133
 msgid "linux_apps_that_run_anywhere"
 msgstr "Aplicaciones Linux que se ejecutan en cualquier lugar"
 
-#: index.jinja2:143
+#: index.jinja2:137
 msgid "user_story_1"
 msgstr ""
 "Como usuario, deseo descargar una aplicación de su autor original y "
-"ejecutarla en mi sistema Linux justo como lo haría con una aplicación para "
-"Windows o Mac."
+"ejecutarla en mi sistema Linux justo como lo haría con una aplicación "
+"para Windows o Mac."
 
-#: index.jinja2:146
+#: index.jinja2:140
 msgid "user_story_2"
 msgstr ""
-"Como autor de la aplicación, deseo proporcionar paquetes para sistemas de "
-"escritorio Linux, sin la necesidad de incluirlo en una distribución y sin "
-"tener que compilar para montones de diferentes distribuciones."
+"Como autor de la aplicación, deseo proporcionar paquetes para sistemas de"
+" escritorio Linux, sin la necesidad de incluirlo en una distribución y "
+"sin tener que compilar para montones de diferentes distribuciones."
 
-#: index.jinja2:156
+#: index.jinja2:150
 msgid "leading_linux_distributions"
 msgstr "Distribuciones líderes de Linux"
 
-#: index.jinja2:158
+#: index.jinja2:152
 msgid "download_make_executable_run"
 msgstr ""
 "Descarga una aplicación, hazla ejecutable y ejecuta! No es necesario "
-"instalar No se modifican las bibliotecas del sistema ni las preferencias del "
-"sistema."
+"instalar No se modifican las bibliotecas del sistema ni las preferencias "
+"del sistema."
 
-#: index.jinja2:159
+#: index.jinja2:153
 #, python-format
 msgid ""
 "\n"
@@ -82,121 +81,109 @@ msgid ""
 "            "
 msgstr ""
 "\n"
-"                 También se puede ejecutar en un sandbox como %(sandbox_name)"
-"s\n"
+"                 También se puede ejecutar en un sandbox como "
+"%(sandbox_name)s\n"
 "            "
 
-#: index.jinja2:183
+#: index.jinja2:177
 msgid "distribute_linux_apps_as_appimage_and_win_users"
 msgstr ""
-"Distribuya su aplicación Linux de escritorio en el formato AppImage y gane "
-"usuarios que ejecuten todas las distribuciones comunes de Linux."
+"Distribuya su aplicación Linux de escritorio en el formato AppImage y "
+"gane usuarios que ejecuten todas las distribuciones comunes de Linux."
 
-#: index.jinja2:184
+#: index.jinja2:178
 msgid "package_once_and_run_everywhere"
 msgstr "Empaquete una vez y corra a todas partes."
 
-#: index.jinja2:185
+#: index.jinja2:179
 msgid "reach_users_on_all_distros"
 msgstr ""
-"Llegue a los usuarios en todas las principales distribuciones de escritorio."
+"Llegue a los usuarios en todas las principales distribuciones de "
+"escritorio."
 
-#: index.jinja2:194
+#: index.jinja2:188
 msgid "what_people_think"
 msgstr "Lo que la gente piensa"
 
-#: index.jinja2:209
+#: index.jinja2:203
 msgid "torvalds_quote"
 msgstr "Esto es simplemente genial."
 
-#: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
-#: index.jinja2:429
+#: index.jinja2:207 index.jinja2:226 index.jinja2:247 index.jinja2:400
 msgid "picture:"
 msgstr "Imagen:"
 
-#: index.jinja2:214 index.jinja2:233
+#: index.jinja2:208 index.jinja2:227
 msgid "copyright_faces_of_open_source_/_peter_adams"
 msgstr "Caras de derechos de autor de código abierto / Peter Adams."
 
-#: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
+#: index.jinja2:209 index.jinja2:228 index.jinja2:403
 msgid "licensed_under_CC-BY-NC-SA_4.0"
 msgstr "Licencia bajo CC-BY-NC-SA 4.0."
 
-#: index.jinja2:217 index.jinja2:236
+#: index.jinja2:211 index.jinja2:230
 msgid "original_picture"
 msgstr "Imagen Original"
 
-#: index.jinja2:229
+#: index.jinja2:223
 msgid "hohndel_quote"
 msgstr "El enfoque de AppImage es realmente muy útil."
 
-#: index.jinja2:249
+#: index.jinja2:243
 msgid "shuttleworth_quote"
 msgstr ""
-"Las AppImages son una experiencia bastante limpia y admiro el trabajo detrás "
-"de ellas."
+"Las AppImages son una experiencia bastante limpia y admiro el trabajo "
+"detrás de ellas."
 
-#: index.jinja2:254
+#: index.jinja2:248
 msgid "copyright_aaron_hockley"
 msgstr "Derechos de autor Aaron Hockley."
 
-#: index.jinja2:255
+#: index.jinja2:249
 msgid "licensed_under_CC-BY-SA_2.0"
 msgstr "Licencia bajo CC-BY-SA 2.0."
 
-#: index.jinja2:267
-msgid "richard_brown_quote"
-msgstr "Ahora amo AppImage. Realmente amo AppImage."
-
-#: index.jinja2:272
-msgid "copyright_theassassin"
-msgstr "Derechos de autor TheAssassin."
-
-#: index.jinja2:299
+#: index.jinja2:274
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
 msgstr "Dibujo: lewing@isc.tamu.edu Larry Ewing y The GIMP."
 
-#: index.jinja2:305
+#: index.jinja2:280
 msgid "logo:"
 msgstr "Logo:"
 
-#: index.jinja2:306
+#: index.jinja2:281
 msgid "licensed_under_GPLv2"
 msgstr "Licencia bajo los términos de la GPLv2."
 
-#: index.jinja2:308
+#: index.jinja2:283
 msgid "see_more"
 msgstr "Ver además"
 
-#: index.jinja2:323
+#: index.jinja2:298
 msgid "see_it_in_action"
 msgstr "Verlo en accción"
 
-#: index.jinja2:325
+#: index.jinja2:300
 msgid "here_appimage_for_you_to_try"
 msgstr "Aquí hay una aplicación empaquetada como AppImage para que pruebes."
 
-#: index.jinja2:326
+#: index.jinja2:301
 msgid "just_download_make_executable_run"
 msgstr "¡Solo descarga la aplicación, hazla ejecutable y ejecuta!"
 
-#: index.jinja2:327
+#: index.jinja2:302
 msgid "no_need_to_install"
 msgstr "No necesita instalar."
 
-#: index.jinja2:328
+#: index.jinja2:303
 msgid "runs_on_most_desktops"
 msgstr "Se ejecuta en la mayoría de los escritorios Linux de 32 bits y 64 bits."
 
-#: index.jinja2:333
+#: index.jinja2:308
 msgid "try_subsurface_64-bit"
 msgstr "Pruebe la imagen de la aplicación subsuperficial (64 bits)"
 
-#: index.jinja2:337
-msgid "try_subsurface_32-bit"
-msgstr "Pruebe la AppImage de subsuperficial (32 bits)"
-
-#: index.jinja2:340
+#: index.jinja2:315
 #, python-format
 msgid ""
 "\n"
@@ -206,12 +193,12 @@ msgid ""
 "                    "
 msgstr ""
 "\n"
-"                    Muchos proyectos anteriores como %(krita)s, Subsurface, "
-"MuseScore, KDevelop y digiKam han comenzado a proporcionar AppImages "
-"directamente en sus páginas de descarga.\n"
+"                    Muchos proyectos anteriores como %(krita)s, "
+"Subsurface, MuseScore, KDevelop y digiKam han comenzado a proporcionar "
+"AppImages directamente en sus páginas de descarga.\n"
 "                    "
 
-#: index.jinja2:343
+#: index.jinja2:318
 #, python-format
 msgid ""
 "\n"
@@ -222,143 +209,154 @@ msgid ""
 msgstr ""
 "\n"
 "                    Se pueden descargar más AppImages para otras "
-"aplicaciones como Atom, Arduino, Blender, Chromium, Firefox, LibreOffice y "
-"QCAD %(here)s (64-bit).\n"
+"aplicaciones como Atom, Arduino, Blender, Chromium, Firefox, LibreOffice "
+"y QCAD %(here)s (64-bit).\n"
 "                    "
 
-#: index.jinja2:357
+#: index.jinja2:332
 msgid "how_to_run_an_appimage?"
 msgstr "Cómo ejecutar una AppImage?"
 
-#: index.jinja2:365
+#: index.jinja2:340
 msgid "to_run_an_AppImage_simply:"
 msgstr "Para ejecutar una AppImage, simplemente:"
 
-#: index.jinja2:368
+#: index.jinja2:343
 msgid "make_it_executable"
 msgstr "Hazlo ejecutable"
 
-#: index.jinja2:374
+#: index.jinja2:347
 msgid "and_run!"
 msgstr "y ejecute!"
 
-#: index.jinja2:380
+#: index.jinja2:351
 msgid "that_was_easy_wasn't_it?"
 msgstr "Eso fue fácil, ¿no?"
 
-#: index.jinja2:384
+#: index.jinja2:355
 msgid "watch_how_it_works"
 msgstr "Mira cómo funciona"
 
-#: index.jinja2:401
+#: index.jinja2:372
 msgid "buzzwords_easy_title"
 msgstr "Fácil."
 
-#: index.jinja2:404
+#: index.jinja2:375
 msgid "buzzwords_easy_description"
 msgstr ""
-"La idea clave del formato de AppImage es <b>un aplicación = un archivo</b>. "
-"Cada AppImage contiene una aplicación y todos los archivos que la aplicación "
-"necesita para ejecutarse. En otras palabras, cada AppImage no tiene "
-"dependencias que no sean las incluidas en los sistemas operativos básicos "
-"específicos."
+"La idea clave del formato de AppImage es <b>un aplicación = un "
+"archivo</b>. Cada AppImage contiene una aplicación y todos los archivos "
+"que la aplicación necesita para ejecutarse. En otras palabras, cada "
+"AppImage no tiene dependencias que no sean las incluidas en los sistemas "
+"operativos básicos específicos."
 
-#: index.jinja2:410
+#: index.jinja2:381
 msgid "buzzwords_trusted_title"
 msgstr ""
 
-#: index.jinja2:413
+#: index.jinja2:384
 msgid "buzzwords_trusted_description"
 msgstr ""
 
-#: index.jinja2:419
+#: index.jinja2:390
 msgid "buzzwords_fast_title"
 msgstr ""
 
-#: index.jinja2:422
+#: index.jinja2:393
 msgid "buzzwords_fast_description"
 msgstr ""
 
-#: index.jinja2:430
+#: index.jinja2:401
 msgid "copyright_andis_rado"
 msgstr ""
 
-#: index.jinja2:450
+#: index.jinja2:421
 msgid "buzzwords_open_source_title"
 msgstr ""
 
-#: index.jinja2:453
+#: index.jinja2:424
 msgid "buzzwords_open_source_description"
 msgstr ""
 
-#: index.jinja2:464
+#: index.jinja2:435
 msgid "buzzwords_proven_title"
 msgstr ""
 
-#: index.jinja2:467
+#: index.jinja2:438
 msgid "buzzwords_proven_description"
 msgstr ""
 
-#: index.jinja2:477
+#: index.jinja2:448
 msgid "buzzwords_compatible_title"
 msgstr ""
 
-#: index.jinja2:480
+#: index.jinja2:451
 msgid "buzzwords_compatible_description"
 msgstr ""
 
-#: index.jinja2:494
+#: index.jinja2:465
 msgid "get_started_title"
 msgstr ""
 
-#: index.jinja2:497
+#: index.jinja2:468
 msgid "get_started_description"
 msgstr ""
 
-#: index.jinja2:500
-msgid "wiki_title"
-msgstr ""
-
-#: index.jinja2:512
+#: index.jinja2:483
 msgid "forum_title"
 msgstr ""
 
-#: index.jinja2:515
+#: index.jinja2:486
 msgid "forum_description"
 msgstr ""
 
-#: index.jinja2:521
+#: index.jinja2:492
 msgid "forum_link_title"
 msgstr ""
 
-#: index.jinja2:536
+#: index.jinja2:507
 msgid "live_chat_title"
 msgstr ""
 
-#: index.jinja2:539
+#: index.jinja2:510
 msgid "live_chat_description"
 msgstr ""
 
-#: index.jinja2:542
+#: index.jinja2:513
 msgid "live_chat_join_us"
 msgstr ""
 
-#: index.jinja2:548
-msgid "#AppImage_on_freenode"
+#: index.jinja2:519
+msgid "#AppImage_on_libera.chat"
 msgstr ""
 
-#: index.jinja2:563
+#: index.jinja2:534
 msgid "contact_probono"
 msgstr ""
 
-#: index.jinja2:570
+#: index.jinja2:541
 msgid "github_title"
 msgstr ""
 
-#: index.jinja2:578
+#: index.jinja2:549
 msgid "e-mail_title"
 msgstr ""
 
-#: index.jinja2:586
-msgid "google+_title"
-msgstr ""
+#~ msgid "richard_brown_quote"
+#~ msgstr "Ahora amo AppImage. Realmente amo AppImage."
+
+#~ msgid "copyright_theassassin"
+#~ msgstr "Derechos de autor TheAssassin."
+
+#~ msgid "try_subsurface_32-bit"
+#~ msgstr "Pruebe la AppImage de subsuperficial (32 bits)"
+
+#~ msgid "wiki_title"
+#~ msgstr ""
+
+#~ msgid "#AppImage_on_freenode"
+#~ msgstr ""
+
+#~ msgid "google+_title"
+#~ msgstr ""
+

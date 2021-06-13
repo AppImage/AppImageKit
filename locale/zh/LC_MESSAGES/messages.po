@@ -1,4 +1,4 @@
-# Translations template for PROJECT.
+# Chinese translations for PROJECT.
 # Copyright (C) 2017 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2017.
@@ -7,64 +7,63 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-12-10 18:03+0100\n"
+"POT-Creation-Date: 2021-06-13 12:44+0200\n"
 "PO-Revision-Date: 2019-02-07 05:00+0000\n"
 "Last-Translator: linsui <linsui555@gmail.com>\n"
-"Language-Team: Chinese <https://translate.assassinate-you.net/projects/"
-"appimage/website/zh/>\n"
 "Language: zh\n"
+"Language-Team: Chinese <https://translate.assassinate-"
+"you.net/projects/appimage/website/zh/>\n"
+"Plural-Forms: nplurals=1; plural=0\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 2.20\n"
-"Generated-By: Babel 2.5.1\n"
+"Generated-By: Babel 2.6.0\n"
 
 #: index.jinja2:7
 msgid "page_title"
 msgstr "AppImage | 让  Linux 应用随处运行"
 
-#: index.jinja2:17
+#: index.jinja2:18
 msgid "meta_description"
 msgstr "AppImage | 让 Linux 应用随处运行"
 
-#: index.jinja2:58
+#: index.jinja2:59 index.jinja2:471
 msgid "docs_link_title"
 msgstr "文档"
 
-#: index.jinja2:63
+#: index.jinja2:64
 msgid "source_link_title"
 msgstr "代码"
 
-#: index.jinja2:68
+#: index.jinja2:69
 msgid "wiki_link_title"
 msgstr "Wiki"
 
-#: index.jinja2:73
+#: index.jinja2:74
 msgid "discourse_link_title"
 msgstr "论坛"
 
-#: index.jinja2:139
+#: index.jinja2:133
 msgid "linux_apps_that_run_anywhere"
 msgstr "让 Linux 应用随处运行"
 
-#: index.jinja2:143
+#: index.jinja2:137
 msgid "user_story_1"
 msgstr "作为一名用户，我在从原作者处下载到应用后，我希望能直接在Linux桌面上运行它，就像运行一个Windows或者Mac应用程序一样。"
 
-#: index.jinja2:146
+#: index.jinja2:140
 msgid "user_story_2"
 msgstr "作为一名应用开发者，我想为Linux桌面系统提供软件包的同时，不需要将其分发到每一个发行版中，也不必为不同的发行版编译多个版本。"
 
-#: index.jinja2:156
+#: index.jinja2:150
 msgid "leading_linux_distributions"
 msgstr "领先的Linux应用打包方式"
 
-#: index.jinja2:158
+#: index.jinja2:152
 msgid "download_make_executable_run"
 msgstr "下载一个应用程序，给予运行权限，双击运行！无需安装！不需要改变依赖或系统配置。"
 
-#: index.jinja2:159
+#: index.jinja2:153
 #, python-format
 msgid ""
 "\n"
@@ -75,112 +74,99 @@ msgstr ""
 "                 也可以使用例如%(sandbox_name)s的沙箱中运行。\n"
 "            "
 
-#: index.jinja2:183
+#: index.jinja2:177
 msgid "distribute_linux_apps_as_appimage_and_win_users"
 msgstr "使用AppImage格式分发Linux桌面应用程序，让所有常见发行版的用户运行它。"
 
-#: index.jinja2:184
+#: index.jinja2:178
 msgid "package_once_and_run_everywhere"
 msgstr "一次打包，到处运行。"
 
-#: index.jinja2:185
+#: index.jinja2:179
 msgid "reach_users_on_all_distros"
 msgstr "覆盖所有主流桌面系统。"
 
-#: index.jinja2:194
+#: index.jinja2:188
 msgid "what_people_think"
 msgstr "其他人如何看待"
 
-#: index.jinja2:209
+#: index.jinja2:203
 msgid "torvalds_quote"
 msgstr "这简直太酷了."
 
-#: index.jinja2:213 index.jinja2:232 index.jinja2:253 index.jinja2:271
-#: index.jinja2:429
+#: index.jinja2:207 index.jinja2:226 index.jinja2:247 index.jinja2:400
 msgid "picture:"
 msgstr "图片来源："
 
-#: index.jinja2:214 index.jinja2:233
+#: index.jinja2:208 index.jinja2:227
 msgid "copyright_faces_of_open_source_/_peter_adams"
 msgstr "开放源代码版权/ Peter Adams。"
 
-#: index.jinja2:215 index.jinja2:234 index.jinja2:273 index.jinja2:432
+#: index.jinja2:209 index.jinja2:228 index.jinja2:403
 msgid "licensed_under_CC-BY-NC-SA_4.0"
 msgstr "在CC-BY-NC-SA 4.0协议下许可。"
 
-#: index.jinja2:217 index.jinja2:236
+#: index.jinja2:211 index.jinja2:230
 msgid "original_picture"
 msgstr "原始图片"
 
-#: index.jinja2:229
+#: index.jinja2:223
 msgid "hohndel_quote"
 msgstr "AppImage真的真的很好用。"
 
-#: index.jinja2:249
+#: index.jinja2:243
 msgid "shuttleworth_quote"
 msgstr "AppImage给我一种相当洁净的感受，我很佩服他们背后所做的工作。"
 
-#: index.jinja2:254
+#: index.jinja2:248
 msgid "copyright_aaron_hockley"
 msgstr "版权Aaron Hockley。"
 
-#: index.jinja2:255
+#: index.jinja2:249
 msgid "licensed_under_CC-BY-SA_2.0"
 msgstr "在CC-BY-SA 2.0协议下许可。"
 
-#: index.jinja2:267
-msgid "richard_brown_quote"
-msgstr "我现在爱上了AppImage，我非常喜爱AppImage。"
-
-#: index.jinja2:272
-msgid "copyright_theassassin"
-msgstr "版权TheAssassin。"
-
-#: index.jinja2:299
+#: index.jinja2:274
 msgid "drawing_lewing@isc.tamu.edu_larry_ewing_and_the_GIMP"
 msgstr "图片:来自 lewing@isc.tamu.edu Larry Ewing 和GIMP。"
 
-#: index.jinja2:305
+#: index.jinja2:280
 msgid "logo:"
 msgstr "徽标:"
 
-#: index.jinja2:306
+#: index.jinja2:281
 msgid "licensed_under_GPLv2"
 msgstr "在GPLv2协议下许可。"
 
-#: index.jinja2:308
+#: index.jinja2:283
 msgid "see_more"
 msgstr "查看更多"
 
-#: index.jinja2:323
+#: index.jinja2:298
 msgid "see_it_in_action"
 msgstr "看看它的成果"
 
-#: index.jinja2:325
+#: index.jinja2:300
 msgid "here_appimage_for_you_to_try"
 msgstr "这有一份供你体验的AppImage格式的应用程序。"
 
-#: index.jinja2:326
+#: index.jinja2:301
 msgid "just_download_make_executable_run"
 msgstr "只需下载应用程序，给予执行权限，然后直接运行！"
 
-#: index.jinja2:327
+#: index.jinja2:302
 msgid "no_need_to_install"
 msgstr "无需安装。"
 
-#: index.jinja2:328
+#: index.jinja2:303
 msgid "runs_on_most_desktops"
 msgstr "可以在大多数64位Linux桌面上运行。"
 
-#: index.jinja2:333
+#: index.jinja2:308
 msgid "try_subsurface_64-bit"
 msgstr "尝试一下AppImage (64位版本)"
 
-#: index.jinja2:337
-msgid "try_subsurface_32-bit"
-msgstr "尝试一下AppImage (32位版本)"
-
-#: index.jinja2:340
+#: index.jinja2:315
 #, python-format
 msgid ""
 "\n"
@@ -191,10 +177,11 @@ msgid ""
 msgstr ""
 "\n"
 "                    "
-"例如%(krita)s，Subsurface，MuseScore，KDevelop，和digiKam等都已经在其下载页面上提供AppImage格式包。\n"
+"例如%(krita)s，Subsurface，MuseScore，KDevelop，和digiKam等都已经在其下载页面上提供AppImage格式包。"
+"\n"
 "                    "
 
-#: index.jinja2:343
+#: index.jinja2:318
 #, python-format
 msgid ""
 "\n"
@@ -204,142 +191,154 @@ msgid ""
 "                    "
 msgstr ""
 "\n"
-"                    程序如Atom，Arduino，Blender，Chromium，Firefox，LibreOffice，和QCA"
-"D等可以从%(here)s下载(64位版本)。\n"
+"                    "
+"程序如Atom，Arduino，Blender，Chromium，Firefox，LibreOffice，和QCAD等可以从%(here)s下载(64位版本)。"
+"\n"
 "                    "
 
-#: index.jinja2:357
+#: index.jinja2:332
 msgid "how_to_run_an_appimage?"
 msgstr "如何运行AppImage?"
 
-#: index.jinja2:365
+#: index.jinja2:340
 msgid "to_run_an_AppImage_simply:"
 msgstr "运行一个Appimage应用，如此简单:"
 
-#: index.jinja2:368
+#: index.jinja2:343
 msgid "make_it_executable"
 msgstr "给予它运行权限"
 
-#: index.jinja2:374
+#: index.jinja2:347
 msgid "and_run!"
 msgstr "然后直接运行！"
 
-#: index.jinja2:380
+#: index.jinja2:351
 msgid "that_was_easy_wasn't_it?"
 msgstr "非常简单，不是吗？"
 
-#: index.jinja2:384
+#: index.jinja2:355
 msgid "watch_how_it_works"
 msgstr "看看它的真实效果"
 
-#: index.jinja2:401
+#: index.jinja2:372
 msgid "buzzwords_easy_title"
 msgstr "简单."
 
-#: index.jinja2:404
+#: index.jinja2:375
 msgid "buzzwords_easy_description"
 msgstr ""
 "AppImage的核心思想是<b>一个应用程序 = 一个文件 "
 "</b>。每个AppImage都包含应用程序以及应用程序运行所需的所有文件。换句话说，除了操作系统本身的基础组件，Appimage不需要依赖包即可运行。"
 
-#: index.jinja2:410
+#: index.jinja2:381
 msgid "buzzwords_trusted_title"
 msgstr "可靠."
 
-#: index.jinja2:413
+#: index.jinja2:384
 msgid "buzzwords_trusted_description"
 msgstr ""
 "AppImage "
 "格式是<b>上游应用打包</b>的理想选择，这意味着你可以直接从开发者那里获取软件，而不需要任何中间步骤，这完全符合开发者意图。非常迅速。"
 
-#: index.jinja2:419
+#: index.jinja2:390
 msgid "buzzwords_fast_title"
 msgstr "快速."
 
-#: index.jinja2:422
+#: index.jinja2:393
 msgid "buzzwords_fast_description"
 msgstr "AppImage应用可以直接下载并且运行，<b>无需安装</b>，并且不需要root权限。"
 
-#: index.jinja2:430
+#: index.jinja2:401
 msgid "copyright_andis_rado"
 msgstr "版权Andis Rado。"
 
-#: index.jinja2:450
+#: index.jinja2:421
 msgid "buzzwords_open_source_title"
 msgstr "开源。"
 
-#: index.jinja2:453
+#: index.jinja2:424
 msgid "buzzwords_open_source_description"
 msgstr "像Linux本身一样，AppImageKit是开源的。用它来打包你的开源或商业应用程序。"
 
-#: index.jinja2:464
+#: index.jinja2:435
 msgid "buzzwords_proven_title"
 msgstr "久经验证。"
 
-#: index.jinja2:467
+#: index.jinja2:438
 msgid "buzzwords_proven_description"
 msgstr "AppImageKit及其前身klik已经开发超过十年。"
 
-#: index.jinja2:477
+#: index.jinja2:448
 msgid "buzzwords_compatible_title"
 msgstr "兼容性。"
 
-#: index.jinja2:480
+#: index.jinja2:451
 msgid "buzzwords_compatible_description"
 msgstr "适用于所有相当现代的Linux桌面发行版。好吧，是几乎所有的。"
 
-#: index.jinja2:494
+#: index.jinja2:465
 msgid "get_started_title"
 msgstr "开始打包你自己的AppImage应用程序吧！"
 
-#: index.jinja2:497
+#: index.jinja2:468
 msgid "get_started_description"
 msgstr "在AppImageKit Wiki中了解如何使用AppImageKit创建自己的AppImage。"
 
-#: index.jinja2:500
-msgid "wiki_title"
-msgstr "Wiki"
-
-#: index.jinja2:512
+#: index.jinja2:483
 msgid "forum_title"
 msgstr "论坛"
 
-#: index.jinja2:515
+#: index.jinja2:486
 msgid "forum_description"
 msgstr "在Discourse论坛和邮件列表上解答你的问题，让我们知道你正在做什么应用。并与其他AppImage用户讨论。"
 
-#: index.jinja2:521
+#: index.jinja2:492
 msgid "forum_link_title"
 msgstr "论坛"
 
-#: index.jinja2:536
+#: index.jinja2:507
 msgid "live_chat_title"
 msgstr "在线聊天"
 
-#: index.jinja2:539
+#: index.jinja2:510
 msgid "live_chat_description"
 msgstr "尽管提供反馈，建议，或只是打个招呼！"
 
-#: index.jinja2:542
+#: index.jinja2:513
 msgid "live_chat_join_us"
 msgstr "进入irc.freenode.net的#AppImage频道加入我们"
 
-#: index.jinja2:548
-msgid "#AppImage_on_freenode"
-msgstr "irc.freenode.net的#AppImage"
+#: index.jinja2:519
+msgid "#AppImage_on_libera.chat"
+msgstr ""
 
-#: index.jinja2:563
+#: index.jinja2:534
 msgid "contact_probono"
 msgstr "联系方式"
 
-#: index.jinja2:570
+#: index.jinja2:541
 msgid "github_title"
 msgstr "GitHub"
 
-#: index.jinja2:578
+#: index.jinja2:549
 msgid "e-mail_title"
 msgstr "电子邮件"
 
-#: index.jinja2:586
-msgid "google+_title"
-msgstr "Google+"
+#~ msgid "richard_brown_quote"
+#~ msgstr "我现在爱上了AppImage，我非常喜爱AppImage。"
+
+#~ msgid "copyright_theassassin"
+#~ msgstr "版权TheAssassin。"
+
+#~ msgid "try_subsurface_32-bit"
+#~ msgstr "尝试一下AppImage (32位版本)"
+
+#~ msgid "wiki_title"
+#~ msgstr "Wiki"
+
+#~ msgid "#AppImage_on_freenode"
+#~ msgstr "irc.freenode.net的#AppImage"
+
+#~ msgid "google+_title"
+#~ msgstr "Google+"
+
