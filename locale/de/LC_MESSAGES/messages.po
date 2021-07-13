@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2021-06-13 12:44+0200\n"
-"PO-Revision-Date: 2021-06-14 12:40+0000\n"
+"PO-Revision-Date: 2021-07-13 23:10+0000\n"
 "Last-Translator: Weblate Admin <weblate@assassinate-you.net>\n"
 "Language-Team: German <https://translate.assassinate-you.net/projects/"
 "appimage-website/website/de/>\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 4.6.2\n"
+"X-Generator: Weblate 4.7.1\n"
 "Generated-By: Babel 2.9.1\n"
 
 #: index.jinja2:7
@@ -339,7 +339,7 @@ msgstr ""
 
 #: index.jinja2:513
 msgid "live_chat_join_us"
-msgstr "Kommen Sie zu uns auf #AppImage auf irc.freenode.net"
+msgstr "Kommen Sie zu uns in #AppImage auf irc.libera.chat"
 
 #: index.jinja2:519
 msgid "#AppImage_on_libera.chat"
