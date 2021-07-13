@@ -334,7 +334,7 @@ msgstr ""
 
 #: index.jinja2:513
 msgid "live_chat_join_us"
-msgstr "Join us on #AppImage on irc.freenode.net"
+msgstr "Join us in #AppImage on irc.libera.chat"
 
 #: index.jinja2:519
 msgid "#AppImage_on_libera.chat"
