@@ -8,24 +8,25 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2021-06-13 12:44+0200\n"
-"PO-Revision-Date: 2018-05-18 15:47+0000\n"
-"Last-Translator: Weblate Admin <weblate@assassinate-you.net>\n"
+"PO-Revision-Date: 2021-10-13 11:53+0000\n"
+"Last-Translator: Heimen Stoffels <vistausss@outlook.com>\n"
+"Language-Team: Dutch <https://translate.assassinate-you.net/projects/"
+"appimage-website/website/nl/>\n"
 "Language: nl\n"
-"Language-Team: Dutch <https://translate.assassinate-"
-"you.net/projects/appimage/website/nl/>\n"
-"Plural-Forms: nplurals=2; plural=n != 1\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.8.1\n"
 "Generated-By: Babel 2.9.1\n"
 
 #: index.jinja2:7
 msgid "page_title"
-msgstr "AppImage | Linux-apps die overal op werken"
+msgstr "AppImage | Linux-programma's voor alle distributies"
 
 #: index.jinja2:18
 msgid "meta_description"
-msgstr "AppImage | Linux-apps die overal op werken"
+msgstr "AppImage | Linux-programma's voor alle distributies"
 
 #: index.jinja2:59 index.jinja2:471
 msgid "docs_link_title"
@@ -45,21 +46,21 @@ msgstr "Gemeenschap"
 
 #: index.jinja2:133
 msgid "linux_apps_that_run_anywhere"
-msgstr "Linux-apps die overal op werken"
+msgstr "Linux-programma's voor alle distributies"
 
 #: index.jinja2:137
 msgid "user_story_1"
 msgstr ""
-"Als gebruiker wil ik programma's van de oorspronkelijke maker downloaden "
-"en ze op mijn Linux-werkomgeving draaien, net zoals ik dat zou doen met "
-"een Windows- of Mac-programma."
+"Als gebruiker wil ik programma's van de oorspronkelijke maker downloaden en "
+"ze op mijn Linux-werkomgeving draaien, net zoals een Windows- of macOS-"
+"programma."
 
 #: index.jinja2:140
 msgid "user_story_2"
 msgstr ""
 "Als maker wil ik pakketten beschikbaar stellen voor Linux-distributies "
-"zonder dat ik me hoef te \\'verdiepen\\' in distributies, en zonder "
-"pakketten te hoeven bouwen voor tig distributies."
+"zonder dat ik me hoef te ‘verdiepen’ in distributies, en zonder pakketten te "
+"hoeven bouwen voor tig distributies."
 
 #: index.jinja2:150
 msgid "leading_linux_distributions"
@@ -68,9 +69,9 @@ msgstr "Toonaangevende Linux-distributies"
 #: index.jinja2:152
 msgid "download_make_executable_run"
 msgstr ""
-"Download een programma, maak het uitvoerbaar, en gaan met die banaan! "
-"Geen installatie benodigd, en ook geen aanpassingen aan "
-"systeembibliotheken of -instellingen."
+"Download een programma, maak het uitvoerbaar en gaan met die banaan! Geen "
+"installatie benodigd, en ook geen aanpassingen aan systeembibliotheken of "
+"-instellingen."
 
 #: index.jinja2:153
 #, python-format
@@ -86,12 +87,12 @@ msgstr ""
 #: index.jinja2:177
 msgid "distribute_linux_apps_as_appimage_and_win_users"
 msgstr ""
-"Verspreid uw Linux-programma's in het Appimage-formaat en maak gebruikers"
-" van alle gangbare Linux-distributies blij."
+"Verspreid uw Linux-programma's als AppImage en haal een wit voetje bij de "
+"gebruikers van alle gangbare Linux-distributies."
 
 #: index.jinja2:178
 msgid "package_once_and_run_everywhere"
-msgstr "Maak één keer een pakket en start het overal."
+msgstr "Maak één keer een pakket dat op alle distributies werkt."
 
 #: index.jinja2:179
 msgid "reach_users_on_all_distros"
@@ -99,7 +100,7 @@ msgstr "Bereik gebruikers op alle gangbare Linux-distributies."
 
 #: index.jinja2:188
 msgid "what_people_think"
-msgstr "Wat gebruikers vinden"
+msgstr "Hoe gebruikers erover denken"
 
 #: index.jinja2:203
 msgid "torvalds_quote"
@@ -127,7 +128,8 @@ msgstr "De AppImage-aanpak is héél erg nuttig."
 
 #: index.jinja2:243
 msgid "shuttleworth_quote"
-msgstr "AppImages bieden een fijne ervaring en ik bewonder het werk erachter."
+msgstr ""
+"AppImages zijn eenvoudig in het gebruik en ik bewonder het werk erachter."
 
 #: index.jinja2:248
 msgid "copyright_aaron_hockley"
@@ -165,7 +167,7 @@ msgstr ""
 
 #: index.jinja2:301
 msgid "just_download_make_executable_run"
-msgstr "Download het programma, maak het uitvoerbaar, en start het!"
+msgstr "Download het programma, maak het uitvoerbaar en start het!"
 
 #: index.jinja2:302
 msgid "no_need_to_install"
@@ -315,9 +317,9 @@ msgstr "Discourse-forum"
 #: index.jinja2:486
 msgid "forum_description"
 msgstr ""
-"Heeft u vragen? U kunt ze stellen op het Discourse-forum of de "
-"mailinglijst. Vertel ons welk programma u aan maken bent, of discussieer "
-"met andere AppImage-gebruikers."
+"Heeft u vragen? U kunt ze stellen op het Discourse-forum of de mailinglijst. "
+"Vertel ons welk programma u aan maken bent of discussieer met andere "
+"AppImage-gebruikers."
 
 #: index.jinja2:492
 msgid "forum_link_title"
@@ -329,17 +331,15 @@ msgstr "Live-chat"
 
 #: index.jinja2:510
 msgid "live_chat_description"
-msgstr ""
-"Wij krijgen graag uw feedback of suggesties door. Of zeg gewoon eens "
-"'hallo'!"
+msgstr "Wij horen graag uw feedback of suggesties. Of zeg gewoon eens ‘hallo’!"
 
 #: index.jinja2:513
 msgid "live_chat_join_us"
-msgstr "Praat met ons in #AppImage op irc.freenode.net"
+msgstr "Praat met ons in #AppImage op irc.libera.chat"
 
 #: index.jinja2:519
 msgid "#AppImage_on_libera.chat"
-msgstr ""
+msgstr "Praat met ons in #AppImage op irc.libera.chat"
 
 #: index.jinja2:534
 msgid "contact_probono"
@@ -351,7 +351,7 @@ msgstr "GitHub"
 
 #: index.jinja2:549
 msgid "e-mail_title"
-msgstr "e-mail"
+msgstr "E-mailadres"
 
 #~ msgid "richard_brown_quote"
 #~ msgstr "Ik houd van AppImage. Ik houd écht van AppImage."
@@ -367,4 +367,3 @@ msgstr "e-mail"
 
 #~ msgid "google+_title"
 #~ msgstr "Google+"
-
