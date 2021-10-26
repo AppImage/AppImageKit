@@ -5,15 +5,13 @@ run on a variety of different target systems (base operating systems, distributi
 
 ![appimagekitr](https://user-images.githubusercontent.com/2480569/34471155-5b53131a-ef41-11e7-90a0-8c57b3c21551.png)
 
-Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
+Using the AppImage format you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
 
 Copyright (c) 2004-21 Simon Peter <probono@puredarwin.org> and contributors.
 
 https://en.wikipedia.org/wiki/AppImage
 
-__AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and  provides  tools such as `appimagetool` and `appimaged` for conveniently handling AppImages.
-
-`appimagetool` converts an AppDir into a self-mounting filesystem image. `appimaged` is a daemon that handles registering and unregistering AppImages with the system (e.g., menu entries, icons, MIME types, binary delta updates, and such).
+__AppImageKit__  is a concrete implementation of the AppImage format, especially the tiny runtime that becomes part of each AppImage.
 
 Providing an [AppImage](http://appimage.org/) for distributing application has, among others, these advantages:
 - Applications packaged as an AppImage can run on many distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
