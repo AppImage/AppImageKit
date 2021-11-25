@@ -1,2 +1,320 @@
 msgid ""
-msgstr "X-Generator: Weblate\nMIME-Version: 1.0\nContent-Type: text/plain; charset=UTF-8\nContent-Transfer-Encoding: 8bit"
+msgstr ""
+"PO-Revision-Date: 2021-11-26 19:43+0000\n"
+"Last-Translator: Gustavo Costa <xfgusta@gmail.com>\n"
+"Language-Team: Portuguese (Brazil) <https://translate.assassinate-you.net/"
+"projects/appimage-website/website/pt_BR/>\n"
+"Language: pt_BR\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 4.9.1\n"
+
+#: index.jinja2:18
+msgid "meta_description"
+msgstr "AppImage | Aplicações Linux que rodam em qualquer lugar"
+
+#: index.jinja2:59 index.jinja2:471
+msgid "docs_link_title"
+msgstr "Documentação"
+
+#: index.jinja2:64
+msgid "source_link_title"
+msgstr "Código-fonte"
+
+#: index.jinja2:69
+msgid "wiki_link_title"
+msgstr "Wiki"
+
+#: index.jinja2:133
+msgid "linux_apps_that_run_anywhere"
+msgstr "Aplicações Linux que rodam em qualquer lugar"
+
+#: index.jinja2:150
+msgid "leading_linux_distributions"
+msgstr "Principais distribuições Linux"
+
+#: index.jinja2:153
+#, python-format
+msgid ""
+"\n"
+"                 can_run_in_sandboxes_like %(sandbox_name)s\n"
+"            "
+msgstr ""
+"\n"
+"                 Também pode ser executado em uma sandbox como "
+"%(sandbox_name)s\n"
+"            "
+
+#: index.jinja2:152
+msgid "download_make_executable_run"
+msgstr ""
+"Baixe um aplicativo, torne-o executável e o execute! Não há necessidade de "
+"instalar. Nenhuma biblioteca de sistemas ou preferências de sistema são "
+"alteradas."
+
+#: index.jinja2:177
+msgid "distribute_linux_apps_as_appimage_and_win_users"
+msgstr ""
+"Distribua seu aplicativo para desktop Linux no formato AppImage e ganhe "
+"usuários que usam todas as distribuições Linux comuns."
+
+#: index.jinja2:178
+msgid "package_once_and_run_everywhere"
+msgstr "Empacote uma vez e execute em qualquer lugar."
+
+#: index.jinja2:179
+msgid "reach_users_on_all_distros"
+msgstr "Alcance usuários em todas as principais distribuições de desktop."
+
+#: index.jinja2:188
+msgid "what_people_think"
+msgstr "O que as pessoas pensam"
+
+#: index.jinja2:203
+msgid "torvalds_quote"
+msgstr "Isso é muito legal."
+
+#: index.jinja2:207 index.jinja2:226 index.jinja2:247 index.jinja2:400
+msgid "picture:"
+msgstr "Foto:"
+
+#: index.jinja2:211 index.jinja2:230
+msgid "original_picture"
+msgstr "Foto original"
+
+#: index.jinja2:243
+msgid "shuttleworth_quote"
+msgstr ""
+"Os AppImages são uma experiência bastante limpa e admiro o trabalho por trás "
+"deles."
+
+#: index.jinja2:280
+msgid "logo:"
+msgstr "Logo:"
+
+#: index.jinja2:281
+msgid "licensed_under_GPLv2"
+msgstr "Licenciado sob os termos da GPLv2."
+
+#: index.jinja2:283
+msgid "see_more"
+msgstr "Veja mais"
+
+#: index.jinja2:298
+msgid "see_it_in_action"
+msgstr "Veja em ação"
+
+#: index.jinja2:301
+msgid "just_download_make_executable_run"
+msgstr "Basta baixar o aplicativo, torná-lo executável e executar!"
+
+#: index.jinja2:303
+msgid "runs_on_most_desktops"
+msgstr "Funciona na maioria dos desktops Linux de 32 e 64 bits."
+
+#: index.jinja2:308
+msgid "try_subsurface_64-bit"
+msgstr "Experimente Subsurface AppImage (64 bits)"
+
+#: index.jinja2:332
+msgid "how_to_run_an_appimage?"
+msgstr "Como executar um AppImage?"
+
+#: index.jinja2:347
+msgid "and_run!"
+msgstr "e execute!"
+
+#: index.jinja2:343
+msgid "make_it_executable"
+msgstr "Torne-o executável"
+
+#: index.jinja2:351
+msgid "that_was_easy_wasn't_it?"
+msgstr "Foi fácil, não foi?"
+
+#: index.jinja2:372
+msgid "buzzwords_easy_title"
+msgstr "Fácil."
+
+#: index.jinja2:355
+msgid "watch_how_it_works"
+msgstr "Veja como funciona"
+
+#: index.jinja2:381
+msgid "buzzwords_trusted_title"
+msgstr "Confiável."
+
+#: index.jinja2:435
+msgid "buzzwords_proven_title"
+msgstr "Comprovado."
+
+#: index.jinja2:438
+msgid "buzzwords_proven_description"
+msgstr ""
+"O AppImageKit e seu predecessor, klik, estão sendo criados há mais de uma "
+"década."
+
+#: index.jinja2:451
+msgid "buzzwords_compatible_description"
+msgstr ""
+"Funciona com as distribuições Linux de desktop mais recentes. Bem, quase "
+"todas."
+
+#: index.jinja2:465
+msgid "get_started_title"
+msgstr "Comece a empacotar seu aplicativo!"
+
+#: index.jinja2:468
+msgid "get_started_description"
+msgstr ""
+"Saiba como você pode usar o AppImageKit para criar seus próprios AppImages "
+"na wiki do AppImageKit."
+
+#: index.jinja2:510
+msgid "live_chat_description"
+msgstr ""
+"Sinta-se à vontade para enviar comentários, sugestões ou apenas dizer um olá!"
+
+#: index.jinja2:513
+msgid "live_chat_join_us"
+msgstr "Junte-se a nós em #AppImage em irc.libera.chat"
+
+#: index.jinja2:519
+msgid "#AppImage_on_libera.chat"
+msgstr "Junte-se a nós em #AppImage em irc.libera.chat"
+
+#: index.jinja2:534
+msgid "contact_probono"
+msgstr "Contate o probono"
+
+#: index.jinja2:541
+msgid "github_title"
+msgstr "GitHub"
+
+#: index.jinja2:549
+msgid "e-mail_title"
+msgstr "e-mail"
+
+#: index.jinja2:507
+msgid "live_chat_title"
+msgstr "Bate-papo ao vivo"
+
+#: index.jinja2:7
+msgid "page_title"
+msgstr "AppImage | Aplicações Linux que rodam em qualquer lugar"
+
+#: index.jinja2:74
+msgid "discourse_link_title"
+msgstr "Comunidade"
+
+#: index.jinja2:137
+msgid "user_story_1"
+msgstr ""
+"Como usuário, desejo baixar um aplicativo do criador e executá-lo em meu "
+"sistema de desktop Linux da mesma forma que faria com um aplicativo para "
+"Windows ou Mac."
+
+#: index.jinja2:140
+msgid "user_story_2"
+msgstr ""
+"Como um criador de aplicativo, desejo fornecer pacotes para sistemas de "
+"desktop Linux, sem a necessidade de colocá-lo numa distribuição e sem ter "
+"que compilar para zilhões de distribuições diferentes."
+
+#: index.jinja2:209 index.jinja2:228 index.jinja2:403
+msgid "licensed_under_CC-BY-NC-SA_4.0"
+msgstr "Licenciado sob CC-BY-NC-SA 4.0."
+
+#: index.jinja2:223
+msgid "hohndel_quote"
+msgstr "A abordagem AppImage é realmente muito útil."
+
+#: index.jinja2:249
+msgid "licensed_under_CC-BY-SA_2.0"
+msgstr "Licenciado sob CC-BY-SA 2.0."
+
+#: index.jinja2:300
+msgid "here_appimage_for_you_to_try"
+msgstr ""
+"Aqui está um aplicativo empacotado como AppImage para você experimentar."
+
+#: index.jinja2:302
+msgid "no_need_to_install"
+msgstr "Não precisa instalar."
+
+#: index.jinja2:340
+msgid "to_run_an_AppImage_simply:"
+msgstr "Para executar um AppImage, simplesmente:"
+
+#: index.jinja2:315
+#, python-format
+msgid ""
+"\n"
+"                    "
+"many_upstream_projects_like_%(krita)s_subsurface_musescore_kdevelop_and_digiKam_have_started_to_provide_appimages_directly_on_their_download_pages"
+"\n"
+"                    "
+msgstr ""
+"\n"
+"                    Muitos projetos upstream como %(krita)s, Subsurface, "
+"MuseScore, KDevelop e digiKam começaram a fornecer AppImages diretamente em "
+"suas páginas de download.\n"
+"                    "
+
+#: index.jinja2:318
+#, python-format
+msgid ""
+"\n"
+"                    "
+"more_appimages_for_other_apps_like_atom_arduino_blender_chromium_firefox_libreoffice_and_qcad_can_be_downloaded_%(here)s_(64-bit)"
+"\n"
+"                    "
+msgstr ""
+"\n"
+"                    Mais AppImages para outros aplicativos como Atom, "
+"Arduino, Blender, Chromium, Firefox, LibreOffice e QCAD podem ser baixados "
+"%(here)s (64 bits).\n"
+"                    "
+
+#: index.jinja2:390
+msgid "buzzwords_fast_title"
+msgstr "Rápido."
+
+#: index.jinja2:421
+msgid "buzzwords_open_source_title"
+msgstr "Código aberto."
+
+#: index.jinja2:448
+msgid "buzzwords_compatible_title"
+msgstr "Compatível."
+
+#: index.jinja2:424
+msgid "buzzwords_open_source_description"
+msgstr ""
+"Como o próprio Linux, o AppImageKit é de código aberto. Use-o para empacotar "
+"seus aplicativos gratuitos ou comerciais."
+
+#: index.jinja2:393
+msgid "buzzwords_fast_description"
+msgstr ""
+"AppImages podem ser baixados e executados <b>sem instalação</b> ou a "
+"necessidade de permissão root."
+
+#: index.jinja2:384
+msgid "buzzwords_trusted_description"
+msgstr ""
+"O formato AppImage é ideal para o <b>pacote upstream</b>, o que significa "
+"que você obtém o software diretamente do(s) autor(es) original(is) sem "
+"quaisquer intermediários, exatamente da maneira que o(s) autor(es) "
+"pretendiam. E rápido."
+
+#: index.jinja2:375
+msgid "buzzwords_easy_description"
+msgstr ""
+"A ideia principal do formato AppImage é <b>um aplicativo = um arquivo</b>. "
+"Cada AppImage contém um aplicativo e todos os arquivos de que o aplicativo "
+"precisa para ser executado. Em outras palavras, cada AppImage não tem "
+"dependências além do que está incluído na base do(s) sistema(s) "
+"operacional(is)."
