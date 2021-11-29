@@ -66,6 +66,8 @@ if [ -d /deps/ ]; then
         cp "$(ldconfig -p | grep libffi.so.6 | grep arm | grep hf | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
     elif [ "$ARCH" == "aarch64" ]; then
         cp "$(ldconfig -p | grep libffi.so.6 | grep aarch64 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
+    elif [ "$ARCH" == "loongarch64" ]; then
+        cp "$(ldconfig -p | grep libffi.so.6 | grep loongarch64 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
     else
         echo "WARNING: unknown architecture, not bundling libffi"
     fi

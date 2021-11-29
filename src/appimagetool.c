@@ -65,7 +65,9 @@ enum fARCH {
     fARCH_i386,
     fARCH_x86_64,
     fARCH_arm,
-    fARCH_aarch64
+    fARCH_aarch64,
+    fARCH_loongarch64,
+    fARCH_SIZE          // To get the number of architectures.
 };
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
@@ -288,7 +290,7 @@ static void replacestr(char *line, const char *search, const char *replace)
 int count_archs(bool* archs) {
     int countArchs = 0;
     int i;
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < fARCH_SIZE; i++) {
         countArchs += archs[i];
     }
     return countArchs;
@@ -303,11 +305,18 @@ gchar* getArchName(bool* archs) {
         return "armhf";
     else if (archs[fARCH_aarch64])
         return "aarch64";
+    else if (archs[fARCH_loongarch64])
+        return "loongarch64";
     else
         return "all";
 }
 
 void extract_arch_from_e_machine_field(int16_t e_machine, const gchar* sourcename, bool* archs) {
+    if (e_machine == 2) {
+        archs[fARCH_loongarch64] = 1;
+        if(verbose)
+            fprintf(stderr, "%s used for determining architecture loongarch64\n", sourcename);
+    }
     if (e_machine == 3) {
         archs[fARCH_i386] = 1;
         if(verbose)
@@ -363,6 +372,10 @@ void extract_arch_from_text(gchar *archname, const gchar* sourcename, bool* arch
                 archs[fARCH_aarch64] = 1;
                 if (verbose)
                     fprintf(stderr, "%s used for determining architecture ARM aarch64\n", sourcename);
+            } else if (g_ascii_strncasecmp("loongarch64", archname, 20) == 0) {
+                archs[fARCH_loongarch64] = 1;
+                if (verbose)
+                    fprintf(stderr, "%s used for determining architecture loongarch64\n", sourcename);
             }
         }
     }
@@ -720,7 +733,8 @@ main (int argc, char *argv[])
         }
 
         /* Determine the architecture */
-        bool archs[4] = {0, 0, 0, 0};
+        bool archs[fARCH_SIZE];
+        memset(archs,0,sizeof(bool)*fARCH_SIZE);
         extract_arch_from_text(getenv("ARCH"), "Environmental variable ARCH", archs);
         if (count_archs(archs) != 1) {
             /* If no $ARCH variable is set check a file */

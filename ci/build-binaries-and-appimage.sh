@@ -40,11 +40,23 @@ OLD_CWD="$(readlink -f .)"
 pushd "$BUILD_DIR"
 
 # configure build and generate build files
-cmake "$REPO_ROOT" \
-    -DCMAKE_INSTALL_PREFIX=/usr \
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
-    -DBUILD_TESTING=ON \
-    -DAPPIMAGEKIT_PACKAGE_DEBS=ON
+
+CMAKE_ARGS=(
+    "-DCMAKE_INSTALL_PREFIX=/usr"
+    "-DCMAKE_BUILD_TYPE=RelWithDebInfo"
+    "-DBUILD_TESTING=ON"
+    "-DAPPIMAGEKIT_PACKAGE_DEBS=ON"
+)
+
+if [[ "$ARCH" =~ loongarch ]]; then
+    CMAKE_ARGS=(
+        "${CMAKE_ARGS[@]}"
+        "-DBUILD_TESTING=ON"
+        "-DUSE_SYSTEM_LIBARCHIVE=ON"
+    )
+fi
+
+cmake "$REPO_ROOT" "${CMAKE_ARGS[@]}"
 
 # run build
 if [[ "$CI" != "" ]]; then
