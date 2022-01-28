@@ -79,6 +79,7 @@ fi
 # TODO: make gnupg home available, e.g., through "-v" "$HOME"/.gnupg:/root/.gnupg
 # TODO: this ^ won't work since we don't build as root any more
 # note: we enforce using the same UID in the container as outside, so that the created files are owned by the caller
+env PODMAN_USERNS=${PODMAN_USERNS:-keep-id} \
 docker run --rm \
     --user "$uid" \
     "${common_docker_opts[@]}" \
