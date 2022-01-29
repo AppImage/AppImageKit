@@ -61,6 +61,14 @@ mkdir -p out/
 # we run all builds with non-privileged user accounts to make sure the build doesn't depend on such features
 uid="$(id -u)"
 
+# When running under Podman (on hosts where `docker` is a shim that invokes `podman`),
+# UID/GID mappings may lead to permission errors when copying artifacts to `/out`.
+# We set the user namespace mode to `keep-id` to make sure that the host UID/GID
+# are mapped to the same values inside the container, but using this environment
+# variable (a) to not affect builds using Docker, and (b) to allow overriding the
+# user namespace mode easily if necessary.
+export PODMAN_USERNS="${PODMAN_USERNS:-keep-id}"
+
 # note: we cannot just use '-e ARCH', as this wouldn't overwrite the value set via ENV ARCH=... in the image
 common_docker_opts=(
     -e TERM="$TERM"
@@ -79,7 +87,6 @@ fi
 # TODO: make gnupg home available, e.g., through "-v" "$HOME"/.gnupg:/root/.gnupg
 # TODO: this ^ won't work since we don't build as root any more
 # note: we enforce using the same UID in the container as outside, so that the created files are owned by the caller
-env PODMAN_USERNS=${PODMAN_USERNS:-keep-id} \
 docker run --rm \
     --user "$uid" \
     "${common_docker_opts[@]}" \
