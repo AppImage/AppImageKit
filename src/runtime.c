@@ -528,9 +528,9 @@ int main(int argc, char *argv[]) {
      * functionality specifically for builds used by appimaged.
      */
     if (getenv("TARGET_APPIMAGE") == NULL) {
-        // for some reason, `fopen("/proc/self/exe", "rb")` tries to open
-        // the dynamic linker when running under gcompat, even though `readlink()`
-        // gives the right result, so use `readlink()` here
+        // when running under gcompat (e.g. on Alpine Linux),
+        // `fopen("/proc/self/exe", "rb")` tries to open the dynamic linker, even
+        // though `readlink()` gives the right result, so use `readlink()` here
         ssize_t len = readlink("/proc/self/exe", appimage_path, sizeof(appimage_path));
         if (len < 0) {
             perror("Failed to obtain AppImage path");
