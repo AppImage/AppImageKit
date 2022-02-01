@@ -517,7 +517,7 @@ bool build_mount_point(char* mount_dir, const char* const argv0, char const* con
 }
 
 int main(int argc, char *argv[]) {
-    char appimage_path[PATH_MAX];
+    char appimage_path[PATH_MAX + 1];
     char argv0_path[PATH_MAX];
     char * arg;
 
@@ -534,6 +534,10 @@ int main(int argc, char *argv[]) {
         ssize_t len = readlink("/proc/self/exe", appimage_path, sizeof(appimage_path));
         if (len < 0) {
             perror("Failed to obtain AppImage path");
+            exit(EXIT_EXECERROR);
+        }
+        if (len == sizeof(appimage_path)) {
+            fprintf(stderr, "AppImage path is too long (%d bytes, and PATH_MAX is %d bytes)", len, sizeof(appimage_path));
             exit(EXIT_EXECERROR);
         }
         appimage_path[len] = '\0';
