@@ -31,6 +31,7 @@ def render_pages():
         )
 
         locale = locale.split(".mo")[0]
+        lang_tag = locale.replace("_", "-")
 
         template = jinja_env.get_template("index.jinja2")
 
@@ -43,7 +44,7 @@ def render_pages():
         print("Rendering page %s for locale %s" % (filename, locale))
 
         with open(os.path.join(out_dir, filename), "w") as f:
-            html = template.render(languages=[locale])
+            html = template.render(languages=[locale], lang_tag=lang_tag)
             f.write(html)
 
     index_html_path = os.path.join(out_dir, "index.html")
