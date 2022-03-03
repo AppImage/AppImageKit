@@ -8,15 +8,16 @@ msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2021-06-13 12:44+0200\n"
-"PO-Revision-Date: 2019-01-12 12:46+0000\n"
-"Last-Translator: Simon Peter <probono@puredarwin.org>\n"
+"PO-Revision-Date: 2022-03-04 06:12+0000\n"
+"Last-Translator: Alvin Wong <alvin@alvinhc.com>\n"
+"Language-Team: English <https://translate.assassinate-you.net/projects/"
+"appimage-website/website/en/>\n"
 "Language: en\n"
-"Language-Team: English <https://translate.assassinate-"
-"you.net/projects/appimage/website/en/>\n"
-"Plural-Forms: nplurals=2; plural=n != 1\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 4.11\n"
 "Generated-By: Babel 2.9.1\n"
 
 #: index.jinja2:7
@@ -170,7 +171,7 @@ msgstr "No need to install."
 
 #: index.jinja2:303
 msgid "runs_on_most_desktops"
-msgstr "Runs on most 32-bit and 64-bit Linux desktops."
+msgstr "Runs on most 64-bit Linux desktops."
 
 #: index.jinja2:308
 msgid "try_subsurface_64-bit"
@@ -314,9 +315,8 @@ msgstr "Discourse Forum"
 #: index.jinja2:486
 msgid "forum_description"
 msgstr ""
-"Get your answers questioned on the Discourse forum and mailing list. Let "
-"us know what application you are working on. Discuss with other AppImage "
-"users."
+"Get your questions answered on the Discourse forum and mailing list. Let us "
+"know what application you are working on. Discuss with other AppImage users."
 
 #: index.jinja2:492
 msgid "forum_link_title"
@@ -650,4 +650,3 @@ msgstr "e-mail"
 
 #~ msgid "google+_title"
 #~ msgstr "Google+"
-
