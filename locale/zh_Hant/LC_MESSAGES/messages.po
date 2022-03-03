@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-03-02 17:36+0000\n"
+"PO-Revision-Date: 2022-03-04 06:12+0000\n"
 "Last-Translator: Alvin Wong <alvin@alvinhc.com>\n"
 "Language-Team: Chinese (Traditional) <https://translate.assassinate-you.net/"
 "projects/appimage-website/website/zh_Hant/>\n"
@@ -218,11 +218,11 @@ msgstr "版權所有 Andis Rado。"
 
 #: index.jinja2:421
 msgid "buzzwords_open_source_title"
-msgstr "開源。"
+msgstr "自由開源"
 
 #: index.jinja2:435
 msgid "buzzwords_proven_title"
-msgstr "經實證。"
+msgstr "技術成熟"
 
 #: index.jinja2:438
 msgid "buzzwords_proven_description"
@@ -230,7 +230,7 @@ msgstr "AppImageKit 與前身 klik 已經歷超過十年的開發過程。"
 
 #: index.jinja2:448
 msgid "buzzwords_compatible_title"
-msgstr "兼容。"
+msgstr "廣泛兼容"
 
 #: index.jinja2:451
 msgid "buzzwords_compatible_description"
@@ -246,8 +246,8 @@ msgstr "Discourse 討論區"
 
 #: index.jinja2:486
 msgid "forum_description"
-msgstr "在討論區和郵遞論壇上讓其他人解答您的疑問，或跟大家分享一下您在開發的軟體，"
-"亦可與其它 AppImage 使用者互相討論。"
+msgstr "在討論區和郵遞論壇上讓其他人解答您的疑問，或者跟大家分享一下您正在開發的軟體"
+"，亦可與其他 AppImage 使用者互相討論。"
 
 #: index.jinja2:492
 msgid "forum_link_title"
@@ -289,7 +289,7 @@ msgstr "畫作：lewing@isc.tamu.edu Larry Ewing 和 GIMP。"
 
 #: index.jinja2:303
 msgid "runs_on_most_desktops"
-msgstr "可以在大多數 32 位元和 64 位元的 Linux 桌面系統上執行。"
+msgstr "可以在大多數 64 位元的 Linux 桌面系統上執行。"
 
 #: index.jinja2:318
 #, python-format
@@ -309,7 +309,7 @@ msgstr ""
 #: index.jinja2:424
 msgid "buzzwords_open_source_description"
 msgstr "與 Linux 本身一樣，AppImageKit "
-"是開放原始碼的軟體。用它可以包裝您的自由軟體或商業援權軟體。"
+"是開放原始碼的軟體。您可以用它來包裝您的自由軟體或商業援權軟體。"
 
 #: index.jinja2:468
 msgid "get_started_description"
