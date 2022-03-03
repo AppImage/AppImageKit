@@ -36,6 +36,9 @@ def render_pages():
         template = jinja_env.get_template("index.jinja2")
 
         translation = babel.support.Translations.load(localedir, [locale])
+        if locale != "en":
+            fallback_translation = babel.support.Translations.load(localedir, ["en"])
+            translation.add_fallback(fallback_translation)
 
         jinja_env.install_gettext_translations(translation)
 
