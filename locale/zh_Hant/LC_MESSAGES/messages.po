@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"PO-Revision-Date: 2022-03-04 06:12+0000\n"
+"PO-Revision-Date: 2022-03-06 04:51+0000\n"
 "Last-Translator: Alvin Wong <alvin@alvinhc.com>\n"
 "Language-Team: Chinese (Traditional) <https://translate.assassinate-you.net/"
 "projects/appimage-website/website/zh_Hant/>\n"
@@ -9,7 +9,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Weblate 4.11\n"
+"X-Generator: Weblate 4.11.2\n"
 
 #: index.jinja2:7
 msgid "page_title"
@@ -74,7 +74,7 @@ msgstr "所有主流桌面發行版的使用者都觸手可及。"
 
 #: index.jinja2:188
 msgid "what_people_think"
-msgstr "大眾意見"
+msgstr "名人評語"
 
 #: index.jinja2:203
 msgid "torvalds_quote"
