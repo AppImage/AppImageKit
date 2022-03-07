@@ -1,6 +1,6 @@
 /**************************************************************************
  * 
- * Copyright (c) 2004-19 Simon Peter
+ * Copyright (c) 2004-21 Simon Peter and contributors
  * 
  * All Rights Reserved.
  * 
@@ -196,9 +196,6 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
             args[i++] = "-ef";
             args[i++] = exclude_file;
         }
-
-        args[i++] = "-mkfs-time";
-        args[i++] = "0";
 
         args[i++] = 0;
 
