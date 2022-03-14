@@ -82,6 +82,7 @@ static gboolean guess_update_information = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
+gchar *sqfs_compression_level = NULL;
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
 gchar *sign_args = NULL;
@@ -157,22 +158,24 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = offset_string;
         args[i++] = "-comp";
 
-        if (use_xz)
-            args[i++] = "xz";
-        else
-            args[i++] = sqfs_comp;
-
-        args[i++] = "-root-owned";
-        args[i++] = "-noappend";
-
         if (use_xz) {
+            args[i++] = "xz";
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
             // improved performance by using a 16384 block size with a sacrifice of around 3% more squashfs image space
             args[i++] = "-Xdict-size";
             args[i++] = "100%";
             args[i++] = "-b";
             args[i++] = "16384";
+        } else {
+            args[i++] = sqfs_comp;
+            if (sqfs_compression_level != NULL) {
+                args[i++] = "-Xcompression-level";
+                args[i++] = sqfs_compression_level;
+            }
         }
+
+        args[i++] = "-root-owned";
+        args[i++] = "-noappend";
 
         // check if ignore file exists and use it if possible
         if (access(APPIMAGEIGNORE, F_OK) >= 0) {
@@ -505,6 +508,7 @@ static GOptionEntry entries[] =
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
+    { "Xcompression-level", 0, 0, G_OPTION_ARG_STRING, &sqfs_compression_level, "Squashfs compression level (need comp=gzip|lzo|zstd)", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
