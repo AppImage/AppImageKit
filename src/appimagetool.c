@@ -1169,9 +1169,16 @@ main (int argc, char *argv[])
                     strcat(key_arg, "'");
                 }
 
+                // passing the passphrase via the environment is at least better than using a CLI parameter
+                gchar *sign_passphrase = getenv("APPIMAGETOOL_SIGN_PASSPHRASE");
+
                 sprintf(command,
-                    "%s --batch --detach-sign --armor %s %s %s",
-                    gpg2_path, key_arg ? key_arg : "", sign_args ? sign_args : "", digestfile
+                    "%s --detach-sign --armor %s %s %s %s",
+                    gpg2_path,
+                    key_arg ? key_arg : "",
+                    sign_args ? sign_args : "",
+                    sign_passphrase != NULL ? "--passphrase-fd 0 --pinentry-mode loopback" : "",
+                    digestfile
                 );
 
                 free(key_arg);
@@ -1180,12 +1187,25 @@ main (int argc, char *argv[])
                 if (verbose)
                     fprintf(stderr, "%s\n", command);
 
-                fp = popen(command, "r");
+                fp = popen(command, "w");
+
+                if (fp == NULL) {
+                    perror("ERROR: popen() call failed");
+                    exit(1);
+                }
+
+                // write passphrase to stdin (fd 0 of subprocess)
+                if (sign_passphrase != NULL) {
+                    if (fwrite(sign_passphrase, sizeof(char), strlen(sign_passphrase), fp) != strlen(sign_passphrase)) {
+                        perror("ERROR: failed to pass passphrase to process, exiting");
+                        exit(1);
+                    }
+                }
 
                 if (pclose(fp) != 0) {
-                    fprintf(stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
+                    int errno_backup = errno;
+                    fprintf(stderr, "ERROR: %s command did not succeed, could not sign (%s), continuing\n", using_gpg ? "gpg" : "gpg2", strerror(errno_backup));
                 } else {
-
                     fp = NULL;
 
                     FILE* destinationfp = fopen(destination, "r+");
