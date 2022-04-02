@@ -82,6 +82,7 @@ static gboolean guess_update_information = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
+gchar **sqfs_opts = NULL;
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
 gchar *sign_args = NULL;
@@ -142,7 +143,9 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         gchar* offset_string;
         offset_string = g_strdup_printf("%i", offset);
 
-        char* args[32];
+        guint sqfs_opts_len = sqfs_opts ? g_strv_length(sqfs_opts) : 0;
+
+        char* args[32 + sqfs_opts_len];
         bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
 
         int i = 0;
@@ -155,8 +158,8 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = destination;
         args[i++] = "-offset";
         args[i++] = offset_string;
-        args[i++] = "-comp";
 
+        args[i++] = "-comp";
         if (use_xz)
             args[i++] = "xz";
         else
@@ -199,6 +202,10 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         args[i++] = "-mkfs-time";
         args[i++] = "0";
+
+        for (guint sqfs_opts_idx = 0; sqfs_opts_idx < sqfs_opts_len; sqfs_opts_idx++) {
+            args[i++] = sqfs_opts[sqfs_opts_idx];
+        }
 
         args[i++] = 0;
 
@@ -505,6 +512,7 @@ static GOptionEntry entries[] =
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
+    { "mksquashfs-opt", 0, 0, G_OPTION_ARG_STRING_ARRAY, &sqfs_opts, "Argument to pass through to mksquashfs; can be specified multiple times", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
