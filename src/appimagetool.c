@@ -134,13 +134,26 @@ int sfs_ls(char* image) {
 * execlp(), execvp(), and execvpe() search on the $PATH */
 int sfs_mksquashfs(char *source, char *destination, int offset) {
     pid_t pid = fork();
-    
     if (pid == -1) {
-        // error, failed to fork()
+        perror("fork()");
         return(-1);
-    } else if (pid > 0) {
+    }
+
+    if (pid > 0) {
+        // This is the parent process. Wait for the child to termiante and check its exit status.
         int status;
-        waitpid(pid, &status, 0);
+        if(waitpid(pid, &status, 0) == -1) {
+            perror("waitpid()");
+            return(-1);
+        }
+        
+        int retcode = WEXITSTATUS(status);
+        if (retcode) {
+            fprintf(stderr, "mksquashfs (pid %ld) exited with code %d\n", (long)pid, retcode);
+            return(-1);
+        }
+        
+        return 0;
     } else {
         // we are the child
         gchar* offset_string;
@@ -226,8 +239,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 #else
         execvp(pathToMksquashfs, args);
 #endif
-
-        perror("execlp");   // exec*() returns only on error
+        perror("execvp()");   // exec*() returns only on error
         return -1; // exec never returns
     }
     return 0;
