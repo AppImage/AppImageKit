@@ -145,7 +145,8 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         guint sqfs_opts_len = sqfs_opts ? g_strv_length(sqfs_opts) : 0;
 
-        char* args[32 + sqfs_opts_len];
+        int max_num_args = sqfs_opts_len + 22;
+        char* args[max_num_args];
         bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
 
         int i = 0;
@@ -203,7 +204,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = "-mkfs-time";
         args[i++] = "0";
 
-        for (guint sqfs_opts_idx = 0; sqfs_opts_idx < sqfs_opts_len; sqfs_opts_idx++) {
+        for (guint sqfs_opts_idx = 0; sqfs_opts_idx < sqfs_opts_len; ++sqfs_opts_idx) {
             args[i++] = sqfs_opts[sqfs_opts_idx];
         }
 
