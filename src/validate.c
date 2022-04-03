@@ -12,8 +12,8 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#include "appimage/appimage.h"
-#include "appimage/appimage_shared.h"
+#include <appimage/appimage_shared.h>
+
 #include "light_elf.h"
 
 typedef unsigned char byte;      

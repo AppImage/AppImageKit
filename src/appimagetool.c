@@ -45,8 +45,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 
-#include "binreloc.h"
-
 #include <libgen.h>
 
 #include <unistd.h>
@@ -56,7 +54,9 @@
 #include <gpgme.h>
 #include <assert.h>
 
-#include "appimage/appimage.h"
+#include <appimage/appimage_shared.h>
+
+#include "binreloc.h"
 #include "appimagetool_sign.h"
 
 #ifdef __linux__

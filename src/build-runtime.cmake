@@ -27,8 +27,8 @@ set(runtime_cflags
     -DGIT_COMMIT=\\"${GIT_COMMIT}\\"
     -I${squashfuse_INCLUDE_DIRS}
     -I${PROJECT_SOURCE_DIR}/include
-    -I${PROJECT_SOURCE_DIR}/lib/libappimage/include
-    -I${PROJECT_SOURCE_DIR}/lib/libappimage/src/libappimage_hashlib/include
+    -I${libappimage_SOURCE_DIR}/include
+    -I${libappimage_SOURCE_DIR}/src/libappimage_hashlib/include
     ${DEPENDENCIES_CFLAGS}
 )
 # must not include -Wl,--gc-sections in the following flags, otherwise the data sections will be stripped out
