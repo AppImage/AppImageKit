@@ -135,7 +135,7 @@ int sfs_ls(char* image) {
 int sfs_mksquashfs(char *source, char *destination, int offset) {
     pid_t pid = fork();
     if (pid == -1) {
-        perror("fork()");
+        perror("sfs_mksquashfs fork() failed");
         return(-1);
     }
 
@@ -143,7 +143,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         // This is the parent process. Wait for the child to termiante and check its exit status.
         int status;
         if(waitpid(pid, &status, 0) == -1) {
-            perror("waitpid()");
+            perror("sfs_mksquashfs waitpid() failed");
             return(-1);
         }
         
@@ -236,10 +236,11 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
 #ifndef AUXILIARY_FILES_DESTINATION
         execvp("mksquashfs", args);
+        perror("execvp(\"mksquashfs\") failed");
 #else
         execvp(pathToMksquashfs, args);
+        fprintf(stderr, "execvp(\"%s\") failed: %s\n", pathToMksquashfs, strerror(errno));
 #endif
-        perror("execvp()");   // exec*() returns only on error
         return -1; // exec never returns
     }
     return 0;
