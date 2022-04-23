@@ -3,7 +3,6 @@
 #
 # Test an AppDir or AppImage on a given ISO or squashfs or ext3 base system
 # TODO:
-# - Make compatible with type 2 AppImages (currently we have to first mount them by hand)
 # - Check https://github.com/FGrose/livecd-tools/blob/liveimage-mount/tools/liveimage-mount
 #
 
@@ -152,7 +151,15 @@ if [ "x$MNT" == "x" ] ; then
     exit 1
 fi
 if [ -f "$2" ] ; then
-    mount "$2" /tmp/$PREF/union/$MNT -o loop,ro
+    if [ "$(dd if="$2" bs=4 count=1 status=none)" = "$(printf '\x7FELF')" ]
+    then
+        # Type 2 AppImage
+        mount -t tmpfs "$2" /tmp/$PREF/union/$MNT
+        cp "$2" "/tmp/$PREF/union/$MNT/AppRun"
+    else
+        # Type 1 AppImage
+        mount "$2" /tmp/$PREF/union/$MNT -o loop,ro
+    fi
 elif [ -d "$2" ] ; then
     mount "$2" /tmp/$PREF/union/$MNT -o bind
 else
