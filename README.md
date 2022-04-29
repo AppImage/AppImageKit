@@ -3,8 +3,6 @@
 The __AppImage__ format is a format for packaging applications in a way that allows them to
 run on a variety of different target systems (base operating systems, distributions) without further modification. 
 
-![appimagekitr](https://user-images.githubusercontent.com/2480569/34471155-5b53131a-ef41-11e7-90a0-8c57b3c21551.png)
-
 Using the AppImage format you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
 
 Copyright (c) 2004-22 Simon Peter <probono@puredarwin.org> and contributors.
