@@ -1,19 +1,15 @@
-# AppImageKit [![Build Status](https://travis-ci.org/AppImage/AppImageKit.svg?branch=appimagetool/master)](https://travis-ci.org/AppImage/AppImageKit) ![Downloads](https://img.shields.io/github/downloads/AppImage/AppImageKit/total.svg) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/ff60338a447941afb17c30f777314bee)](https://www.codacy.com/app/probonopd/AppImageKit?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=AppImage/AppImageKit&amp;utm_campaign=Badge_Grade) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/probonopd/AppImageKit?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20freenode-blue.svg)](https://webchat.freenode.net/?channels=AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
+# AppImageKit [![Build Status](https://travis-ci.org/AppImage/AppImageKit.svg?branch=appimagetool/master)](https://travis-ci.org/AppImage/AppImageKit) ![Downloads](https://img.shields.io/github/downloads/AppImage/AppImageKit/total.svg) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20libera.chat-blue.svg)](https://web.libera.chat/#AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
 
 The __AppImage__ format is a format for packaging applications in a way that allows them to
 run on a variety of different target systems (base operating systems, distributions) without further modification. 
 
-![appimagekitr](https://user-images.githubusercontent.com/2480569/34471155-5b53131a-ef41-11e7-90a0-8c57b3c21551.png)
+Using the AppImage format you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
 
-Using AppImageKit you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
-
-Copyright (c) 2004-19 Simon Peter <probono@puredarwin.org> and contributors.
+Copyright (c) 2004-22 Simon Peter <probono@puredarwin.org> and contributors.
 
 https://en.wikipedia.org/wiki/AppImage
 
-__AppImageKit__  is  a  concrete  implementation  of  the  AppImage  format  and  provides  tools such as `appimagetool` and `appimaged` for conveniently handling AppImages.
-
-`appimagetool` converts an AppDir into a self-mounting filesystem image. `appimaged` is a daemon that handles registering and unregistering AppImages with the system (e.g., menu entries, icons, MIME types, binary delta updates, and such).
+__AppImageKit__  is a concrete implementation of the AppImage format, especially the tiny runtime that becomes part of each AppImage.
 
 Providing an [AppImage](http://appimage.org/) for distributing application has, among others, these advantages:
 - Applications packaged as an AppImage can run on many distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
@@ -32,7 +28,7 @@ Providing an [AppImage](http://appimage.org/) for distributing application has, 
 
 [Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
 
-If you have questions, AppImage developers are on #AppImage on irc.freenode.net.
+If you have questions, AppImage developers are on #AppImage on irc.libera.chat.
 
 ## Motivation
 

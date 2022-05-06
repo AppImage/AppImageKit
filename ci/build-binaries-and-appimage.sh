@@ -15,8 +15,16 @@ export PATH=/deps/bin:"$PATH"
 echo "$KEY" | md5sum
 
 # we always build in a temporary directory
-# use RAM disk if possible
+# use RAM disk if possible and if enough space available
+USE_SHM=0
 if [ -d /dev/shm ] && mount | grep /dev/shm | grep -v -q noexec; then
+    SHM_FREE_KIB_MIN=$((1 * 1024 * 1024))
+    SHM_FREE_KIB=$(df -P -k /dev/shm | tail -n 1 | sed -e 's/ \+/ /g' | cut -d ' ' -f 4)
+    if [[ "$SHM_FREE_KIB" != "" ]] && [ $SHM_FREE_KIB -ge $SHM_FREE_KIB_MIN ]; then
+        USE_SHM=1
+    fi
+fi
+if [[ "$USE_SHM" = "1" ]]; then
     TEMP_BASE=/dev/shm
 elif [ -d /docker-ramdisk ]; then
     TEMP_BASE=/docker-ramdisk

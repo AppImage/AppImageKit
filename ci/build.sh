@@ -61,6 +61,14 @@ mkdir -p out/
 # we run all builds with non-privileged user accounts to make sure the build doesn't depend on such features
 uid="$(id -u)"
 
+# When running under Podman (on hosts where `docker` is a shim that invokes `podman`),
+# UID/GID mappings may lead to permission errors when copying artifacts to `/out`.
+# We set the user namespace mode to `keep-id` to make sure that the host UID/GID
+# are mapped to the same values inside the container, but using this environment
+# variable (a) to not affect builds using Docker, and (b) to allow overriding the
+# user namespace mode easily if necessary.
+export PODMAN_USERNS="${PODMAN_USERNS:-keep-id}"
+
 # note: we cannot just use '-e ARCH', as this wouldn't overwrite the value set via ENV ARCH=... in the image
 common_docker_opts=(
     -e TERM="$TERM"

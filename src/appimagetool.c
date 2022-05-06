@@ -82,6 +82,7 @@ static gboolean guess_update_information = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
+gchar **sqfs_opts = NULL;
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
 gchar *sign_args = NULL;
@@ -142,7 +143,10 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         gchar* offset_string;
         offset_string = g_strdup_printf("%i", offset);
 
-        char* args[32];
+        guint sqfs_opts_len = sqfs_opts ? g_strv_length(sqfs_opts) : 0;
+
+        int max_num_args = sqfs_opts_len + 22;
+        char* args[max_num_args];
         bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
 
         int i = 0;
@@ -155,8 +159,8 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = destination;
         args[i++] = "-offset";
         args[i++] = offset_string;
-        args[i++] = "-comp";
 
+        args[i++] = "-comp";
         if (use_xz)
             args[i++] = "xz";
         else
@@ -199,6 +203,10 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         args[i++] = "-mkfs-time";
         args[i++] = "0";
+
+        for (guint sqfs_opts_idx = 0; sqfs_opts_idx < sqfs_opts_len; ++sqfs_opts_idx) {
+            args[i++] = sqfs_opts[sqfs_opts_idx];
+        }
 
         args[i++] = 0;
 
@@ -507,6 +515,7 @@ static GOptionEntry entries[] =
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
+    { "mksquashfs-opt", 0, 0, G_OPTION_ARG_STRING_ARRAY, &sqfs_opts, "Argument to pass through to mksquashfs; can be specified multiple times", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
@@ -969,7 +978,8 @@ main (int argc, char *argv[])
             if(!g_str_has_prefix(updateinformation,"zsync|"))
                 if(!g_str_has_prefix(updateinformation,"bintray-zsync|"))
                     if(!g_str_has_prefix(updateinformation,"gh-releases-zsync|"))
-                        die("The provided updateinformation is not in a recognized format");
+                        if(!g_str_has_prefix(updateinformation,"pling-v1-zsync|"))
+                            die("The provided updateinformation is not in a recognized format");
                 
             gchar **ui_type = g_strsplit_set(updateinformation, "|", -1);
                         
@@ -1156,9 +1166,16 @@ main (int argc, char *argv[])
                     strcat(key_arg, "'");
                 }
 
+                // passing the passphrase via the environment is at least better than using a CLI parameter
+                gchar *sign_passphrase = getenv("APPIMAGETOOL_SIGN_PASSPHRASE");
+
                 sprintf(command,
-                    "%s --batch --detach-sign --armor %s %s %s",
-                    gpg2_path, key_arg ? key_arg : "", sign_args ? sign_args : "", digestfile
+                    "%s --detach-sign --armor %s %s %s %s",
+                    gpg2_path,
+                    key_arg ? key_arg : "",
+                    sign_args ? sign_args : "",
+                    sign_passphrase != NULL ? "--passphrase-fd 0 --pinentry-mode loopback" : "",
+                    digestfile
                 );
 
                 free(key_arg);
@@ -1167,12 +1184,25 @@ main (int argc, char *argv[])
                 if (verbose)
                     fprintf(stderr, "%s\n", command);
 
-                fp = popen(command, "r");
+                fp = popen(command, "w");
+
+                if (fp == NULL) {
+                    perror("ERROR: popen() call failed");
+                    exit(1);
+                }
+
+                // write passphrase to stdin (fd 0 of subprocess)
+                if (sign_passphrase != NULL) {
+                    if (fwrite(sign_passphrase, sizeof(char), strlen(sign_passphrase), fp) != strlen(sign_passphrase)) {
+                        perror("ERROR: failed to pass passphrase to process, exiting");
+                        exit(1);
+                    }
+                }
 
                 if (pclose(fp) != 0) {
-                    fprintf(stderr, "ERROR: %s command did not succeed, could not sign, continuing\n", using_gpg ? "gpg" : "gpg2");
+                    int errno_backup = errno;
+                    fprintf(stderr, "ERROR: %s command did not succeed, could not sign (%s), continuing\n", using_gpg ? "gpg" : "gpg2", strerror(errno_backup));
                 } else {
-
                     fp = NULL;
 
                     FILE* destinationfp = fopen(destination, "r+");
