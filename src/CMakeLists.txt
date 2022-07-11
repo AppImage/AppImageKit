@@ -35,6 +35,7 @@ target_link_libraries(appimagetool
     xdg-basedir
     libappimage_shared
     libglib
+    libgio
     libzlib
     xz
 )
