@@ -1201,6 +1201,7 @@ main (int argc, char *argv[])
                         g_ptr_array_add(sign_process_argv, "0");
                         g_ptr_array_add(sign_process_argv, "--pinentry-mode");
                         g_ptr_array_add(sign_process_argv, "loopback");
+                        g_ptr_array_add(sign_process_argv, "--batch");
                     }
 
                     g_ptr_array_add(sign_process_argv, digestfile);
