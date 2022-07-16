@@ -1232,9 +1232,16 @@ main (int argc, char *argv[])
                     }
 
                     if (!g_subprocess_wait_check(sign_proc, NULL, &error)) {
-                        fprintf(stderr, "ERROR: %s command did not succeed, could not sign (%s), continuing\n",
-                                using_gpg ? "gpg" : "gpg2", error->message);
                         g_object_unref(sign_proc);
+
+                        if (getenv("APPIMAGETOOL_FORCE_SIGN") != NULL) {
+                            fprintf(stderr, "ERROR: %s command did not succeed, could not sign (%s), aborting\n",
+                                    using_gpg ? "gpg" : "gpg2", error->message);
+                            exit(1);
+                        } else {
+                            fprintf(stderr, "ERROR: %s command did not succeed, could not sign (%s), continuing\n",
+                                    using_gpg ? "gpg" : "gpg2", error->message);
+                        }
                     } else {
                         g_object_unref(sign_proc);
 
