@@ -1233,8 +1233,6 @@ main (int argc, char *argv[])
                     if (sign_passphrase) {
                         bool success = g_subprocess_communicate_utf8(sign_proc, sign_passphrase, NULL, NULL, NULL, &error);
 
-                        free(sign_passphrase_buffer);
-
                         if (!success) {
                             fprintf(stderr, "ERROR: failed to pass passphrase to gpg process: %s\n", error->message);
                             g_object_unref(sign_proc);
