@@ -1215,7 +1215,14 @@ main (int argc, char *argv[])
                         fprintf(stderr, "\n");
                     }
 
-                    GSubprocess* sign_proc = g_subprocess_newv((const gchar* const*) sign_process_argv->pdata, G_SUBPROCESS_FLAGS_STDIN_PIPE, &error);
+                    // this should allow the user to, e.g., reply to a prompt
+                    GSubprocessFlags flags = G_SUBPROCESS_FLAGS_STDIN_INHERIT;
+
+                    if (sign_passphrase) {
+                        flags = G_SUBPROCESS_FLAGS_STDIN_PIPE;
+                    }
+
+                    GSubprocess* sign_proc = g_subprocess_newv((const gchar* const*) sign_process_argv->pdata, flags, &error);
 
                     if (sign_proc == NULL) {
                         fprintf(stderr, "ERROR: failed to create gpg process: %s\n", error->message);
@@ -1224,6 +1231,8 @@ main (int argc, char *argv[])
 
                     if (sign_passphrase) {
                         bool success = g_subprocess_communicate_utf8(sign_proc, sign_passphrase, NULL, NULL, NULL, &error);
+
+                        free(sign_passphrase_buffer);
 
                         if (!success) {
                             fprintf(stderr, "ERROR: failed to pass passphrase to gpg process: %s\n", error->message);
