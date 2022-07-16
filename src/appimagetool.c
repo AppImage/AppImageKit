@@ -1197,6 +1197,7 @@ main (int argc, char *argv[])
                     }
 
                     if (sign_passphrase) {
+                        fprintf(stderr, "Signing using passphrase from environment variable\n");
                         g_ptr_array_add(sign_process_argv, "--passphrase-fd");
                         g_ptr_array_add(sign_process_argv, "0");
                         g_ptr_array_add(sign_process_argv, "--pinentry-mode");
