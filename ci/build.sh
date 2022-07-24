@@ -22,7 +22,7 @@ case "$ARCH" in
         docker_dist=centos7
         ;;
     armhf|aarch64)
-        docker_dist=xenial
+        docker_dist=bionic
         ;;
     *)
         echo "Unknown architecture: $ARCH"
