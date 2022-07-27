@@ -347,8 +347,6 @@ bool sign_appimage(char* appimage_filename, char* key_id, bool verbose) {
 
     fprintf(stderr, "[sign] calculated digest: %s\n", hex_digest);
 
-    system("realpath sleep-x86_64.AppImage");
-
     gpg_check_call(gpgme_new(&gpgme_ctx));
 
     // we want an ASCII armored signature of plain text (hex string)
