@@ -322,7 +322,7 @@ bool embed_data_in_elf_section(const char* filename, const char* elf_section, gp
 }
 
 bool sign_appimage(char* appimage_filename, char* key_id, bool verbose) {
-    fprintf(stderr, "[sign] signing requested");
+    fprintf(stderr, "[sign] signing requested\n");
 
     // like gcrypt, gpgme must be initialized
     {
