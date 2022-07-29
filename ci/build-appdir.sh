@@ -55,26 +55,35 @@ cp "$appimagetool_appdir"/appimagetool.png "$appimagetool_appdir"/.DirIcon
 install -D "$(which desktop-file-validate)" "$appimagetool_appdir"/usr/bin/
 
 if [ -d /deps/ ]; then
-    # deploy GLib
+    # deploy GLib, gpgme and gcrypt
     mkdir -p "$appimagetool_appdir"/usr/lib/
+    cp /deps/lib/lib*.so* "$appimagetool_appdir"/usr/lib/
+
+
+    case "$ARCH" in
+        x86_64)
+            libarch=x86-64
+            ;;
+        i686)
+            libarch=i386
+            ;;
+        armhf)
+            libarch=arm
+            ;;
+        *)
+            libarch="$ARCH"
+            ;;
+    esac
 
     # libffi is a runtime dynamic dependency
     # see this thread for more information on the topic:
     # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
     # libpcre is used by desktop-file-validate
-    for library in libffi.so.6 libpcre.so.3; do
-        case "$ARCH" in
-            i686)
-                libarch=i386
-                ;;
-            armhf)
-                libarch=arm
-                ;;
-            *)
-                libarch="$ARCH"
-                ;;
-        esac
-
-        cp "$(ldconfig -p | grep libffi.so.6 | grep "$libarch" | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
+    for pattern in libffi libpcre; do
+        # even though it is likely not necessary, we deploy every viable version of the libraries just to make sure...
+        ldconfig -p | grep "$pattern" | grep "$libarch" | while read -r line; do
+            lib="$(echo "$line" | cut -d'>' -f2 | tr -d ' ')"
+            cp "$lib" "$appimagetool_appdir"/usr/lib/
+        done
     done
 fi
