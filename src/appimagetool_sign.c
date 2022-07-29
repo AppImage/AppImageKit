@@ -189,9 +189,9 @@ bool add_signers(const char* key_id) {
         // we could use the list stuff below, but using gpgme_get_key is a lot easier...
         gpg_check_call(gpgme_get_key(gpgme_ctx, key_id, &gpgme_key, true));
     } else {
-        // searching the "first available key" is a little complex in gpgme...
+        // searching the "first available secret key" is a little complex in gpgme...
         // since we are just looking for the first one, we don't need a loop at least
-        gpg_check_call(gpgme_op_keylist_start(gpgme_ctx, NULL, 0));
+        gpg_check_call(gpgme_op_keylist_start(gpgme_ctx, NULL, true));
         gpg_check_call(gpgme_op_keylist_next(gpgme_ctx, &gpgme_key));
     }
 
