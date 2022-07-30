@@ -65,7 +65,9 @@ if [ -d /deps/ ]; then
             libarch=x86-64
             ;;
         i686)
-            libarch=i386
+            # for some reason, ldconfig -p does not list entries with an architecture for i386...
+            # thankfully, grepping for an empty string is a no-op
+            libarch=
             ;;
         armhf)
             libarch=arm
