@@ -349,6 +349,12 @@ bool sign_appimage(char* appimage_filename, char* key_id, bool verbose) {
 
     gpg_check_call(gpgme_new(&gpgme_ctx));
 
+    if (verbose) {
+        // this should significantly increase the amount of logging we see in the status callback
+        fprintf(stderr, "[sign] running in verbose mode, enabling full-status flag on gpgme context\n");
+        gpg_check_call(gpgme_set_ctx_flag(gpgme_ctx, "full-status", "1"));
+    }
+
     // we want an ASCII armored signature of plain text (hex string)
     gpgme_set_textmode(gpgme_ctx, true);
     gpgme_set_armor(gpgme_ctx, true);
