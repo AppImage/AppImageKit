@@ -355,6 +355,7 @@ bool sign_appimage(char* appimage_filename, char* key_id, bool verbose) {
 
     // in case the user provides a passphrase in the environment, we have to set the pinentry mode to loopback, like with the CLI
     if (get_passphrase_from_environment() != NULL) {
+        fprintf(stderr, "[sign] passphrase available from environment, setting pinentry mode to loopback\n");
         gpgme_set_pinentry_mode(gpgme_ctx, GPGME_PINENTRY_MODE_LOOPBACK);
         gpgme_set_passphrase_cb(gpgme_ctx, gpgme_passphrase_callback, (void*) gpgme_hook);
     }
