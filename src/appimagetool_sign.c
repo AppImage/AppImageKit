@@ -11,6 +11,7 @@
 
 #include "binreloc.h"
 #include "appimage/appimage_shared.h"
+#include "appimagetool_sign.h"
 
 // used to identify calls to the callback
 static const char gpgme_hook[] = "appimagetool gpgme hook";
@@ -348,6 +349,54 @@ bool sign_appimage(char* appimage_filename, char* key_id, bool verbose) {
     fprintf(stderr, "[sign] calculated digest: %s\n", hex_digest);
 
     gpg_check_call(gpgme_new(&gpgme_ctx));
+
+
+    // make sure we have a compatible agent around
+    {
+        gpgme_engine_info_t engine_info;
+        gpg_check_call(gpgme_get_engine_info(&engine_info));
+
+        while (engine_info && engine_info->protocol != gpgme_get_protocol(gpgme_ctx)) {
+            engine_info = engine_info->next;
+        }
+
+        if (engine_info == NULL) {
+            fprintf(
+                stderr,
+                "[sign] could not detect gpg version for an unknown reason (engine name: %s)\n",
+                gpgme_get_protocol_name(engine_info->protocol)
+            );
+            exit(1);
+        }
+
+        fprintf(
+            stderr,
+            "[sign] using engine %s (found in %s), version %s, gpgme requires at least version %s\n",
+            gpgme_get_protocol_name(engine_info->protocol),
+            engine_info->file_name,
+            engine_info->version,
+            engine_info->req_version
+        );
+
+        // check whether the version is problematic
+        // we just need the first two items, and we assume the format will be something like "2.1*"
+        unsigned int major;
+        unsigned int minor;
+        if (sscanf(engine_info->version, "%u.%u", &major, &minor) == 2) {
+            if (major == 2) {
+                if (minor == 0) {
+                    fprintf(stderr, "[sign] warning: loopback pinentry mode not supported with gpg 2.0.x, %s may not work\n", FORCE_SIGN_ENV_VAR);
+                } else if (minor == 1) {
+                    fprintf(stderr, "[sign] warning: gpg 2.1.x detected, %s can only work with allow-loopback-entry set within the gpg-agent configuration\n", FORCE_SIGN_ENV_VAR);
+                }
+            } else {
+                fprintf(stderr, "[sign] error: unsupported engine version, aborting\n");
+                exit(1);
+            }
+        } else {
+            fprintf(stderr, "[sign] warning: failed to validate gpg version, expect problems\n");
+        }
+    }
 
     if (verbose) {
         // this should significantly increase the amount of logging we see in the status callback
