@@ -432,7 +432,7 @@ bool sign_appimage(char* appimage_filename, char* key_id, bool verbose) {
     gpg_check_call(gpgme_data_new(&gpgme_sig_data));
 
     // now, we can sign the data
-    gpg_check_call(gpgme_op_sign(gpgme_ctx, gpgme_appimage_file_data, gpgme_sig_data, GPGME_SIG_MODE_NORMAL));
+    gpg_check_call(gpgme_op_sign(gpgme_ctx, gpgme_appimage_file_data, gpgme_sig_data, GPGME_SIG_MODE_DETACHED));
 
     gpgme_sign_result_t sign_result = gpgme_op_sign_result(gpgme_ctx);
 
