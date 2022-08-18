@@ -149,7 +149,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         
         int retcode = WEXITSTATUS(status);
         if (retcode) {
-            fprintf(stderr, "mksquashfs (pid %ld) exited with code %d\n", (long)pid, retcode);
+            fprintf(stderr, "mksquashfs (pid %d) exited with code %d\n", pid, retcode);
             return(-1);
         }
         
