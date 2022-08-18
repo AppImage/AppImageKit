@@ -1,5 +1,5 @@
-# >= 3.11 required for FetchContent
-cmake_minimum_required(VERSION 3.11)
+# FetchContent_MakeAvailable() is only available in CMake 3.14 or newer
+cmake_minimum_required(VERSION 3.14)
 
 include(FetchContent)
 
@@ -13,7 +13,7 @@ FetchContent_MakeAvailable(libappimage_patch)
 FetchContent_Declare(libappimage
     # We can not use a URL source with a github-generated source archive: libappimage's gtest submodule would be missing
     GIT_REPOSITORY https://github.com/AppImage/libappimage
-    GIT_TAG 1d4d57622de2c7d39f7cc6c4980144c713cc59ca  # latest as of 2022-04-03
+    GIT_TAG aa7d9fb03d3d64415c37120f20faa05412458e94  # latest as of 2022-08-18
     # The patch command has || true to prevent the build from failing if the patch has already been applied
     PATCH_COMMAND patch -p 1 < ${libappimage_patch_SOURCE_DIR}/b3398bb496e47947864b4b8bc2999c8427f86a9a.patch || true
 )
