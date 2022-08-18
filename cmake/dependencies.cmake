@@ -5,17 +5,17 @@ include(FetchContent)
 
 # Need this patch until https://github.com/AppImage/libappimage/pull/160 is resolved
 FetchContent_Declare(libappimage_patch
-    URL https://github.com/AppImage/libappimage/commit/b3398bb496e47947864b4b8bc2999c8427f86a9a.patch
+    URL https://github.com/AppImage/libappimage/commit/ce0a186a5a3cd8f31f4afd216d5322410a0a8e26.patch
     DOWNLOAD_NO_EXTRACT TRUE
 )
 FetchContent_MakeAvailable(libappimage_patch)
 
 FetchContent_Declare(libappimage
     # We can not use a URL source with a github-generated source archive: libappimage's gtest submodule would be missing
-    GIT_REPOSITORY https://github.com/AppImage/libappimage
-    GIT_TAG aa7d9fb03d3d64415c37120f20faa05412458e94  # latest as of 2022-08-18
-    # The patch command has || true to prevent the build from failing if the patch has already been applied
-    PATCH_COMMAND patch -p 1 < ${libappimage_patch_SOURCE_DIR}/b3398bb496e47947864b4b8bc2999c8427f86a9a.patch || true
+    # If you update the GIT_TAG and the patch does not apply anymore you need to rebase libappimage_patch (see above)
+GIT_REPOSITORY https://github.com/AppImage/libappimage
+    GIT_TAG aa7d9fb03d3d64415c37120f20faa05412458e94  # Eventually we may want to use master, once that works reliably.
+    PATCH_COMMAND patch -p 1 --forward < ${libappimage_patch_SOURCE_DIR}/ce0a186a5a3cd8f31f4afd216d5322410a0a8e26.patch
 )
 FetchContent_MakeAvailable(libappimage)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${libappimage_SOURCE_DIR}/cmake)
