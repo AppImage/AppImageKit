@@ -89,7 +89,6 @@ gchar *sqfs_comp = "gzip";
 gchar **sqfs_opts = NULL;
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
-gchar *sign_args = NULL;
 gchar *sign_key = NULL;
 gchar *pathToMksquashfs = NULL;
 
@@ -522,7 +521,6 @@ static GOptionEntry entries[] =
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
     { "sign-key", 0, 0, G_OPTION_ARG_STRING, &sign_key, "Key ID to use for gpg[2] signatures", NULL},
-    { "sign-args", 0, 0, G_OPTION_ARG_STRING, &sign_args, "Extra arguments to use when signing with gpg[2]", NULL},
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
 };
