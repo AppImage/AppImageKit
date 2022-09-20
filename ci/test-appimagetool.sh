@@ -135,3 +135,12 @@ if [ "$hash1" == "$hash3" ]; then
     echo "Hashes of regular and mtime-modified AppImages don't differ"
     exit 1
 fi
+
+log "check mtimes are not lost when extracting"
+./appimagetool.AppImage.3 --appimage-extract
+if [ "$(stat -c %Y squashfs-root/appimagetool.png)" != "12345" ]; then
+    echo "mtime of appimagetool.png is not 12345 (as set by mksquashfs \"-all-time\"):"
+    ls -la squashfs-root
+    exit 1
+fi
+rm -rf squashfs-root

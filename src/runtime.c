@@ -403,6 +403,11 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                             fwrite(buf, 1, bytes_at_a_time, f);
                             bytes_already_read = bytes_already_read + bytes_at_a_time;
                         }
+                        fflush(f);
+                        int fd = fileno(f);
+                        struct timespec times[] = { st.st_atim, st.st_mtim };
+                        if (futimens(fd, times) != 0)
+                            fprintf(stderr, "futimens: %s\n", strerror(errno));
                         fclose(f);
                         chmod(prefixed_path_to_extract, st.st_mode);
                         if (!rv)
