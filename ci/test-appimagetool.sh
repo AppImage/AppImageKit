@@ -123,7 +123,7 @@ out=$("$appimagetool" appimagetool.AppDir appimagetool.AppImage --mksquashfs-opt
 echo "${out}" | grep -q "invalid option"
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage.1
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage.2 --mksquashfs-opt "-mem" --mksquashfs-opt "100M"
-"$appimagetool" appimagetool.AppDir appimagetool.AppImage.3 --mksquashfs-opt "-all-time" --mksquashfs-opt "12345"
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage.3 --mksquashfs-opt "-all-time" --mksquashfs-opt "1234567890"
 hash1=$(sha256sum appimagetool.AppImage.1 | awk '{print $1}')
 hash2=$(sha256sum appimagetool.AppImage.2 | awk '{print $1}')
 hash3=$(sha256sum appimagetool.AppImage.3 | awk '{print $1}')
@@ -137,10 +137,13 @@ if [ "$hash1" == "$hash3" ]; then
 fi
 
 log "check mtimes are not lost when extracting"
-./appimagetool.AppImage.3 --appimage-extract
-if [ "$(stat -c %Y squashfs-root/appimagetool.png)" != "12345" ]; then
-    echo "mtime of appimagetool.png is not 12345 (as set by mksquashfs \"-all-time\"):"
+if [[ "$(./appimagetool.AppImage.3 --appimage-extract 2>&1)" =~ "exec format error" ]]; then
+    echo "Can't extract AppImage on $(uname -m) (exec format error)"
+elif [ "$(stat -c %Y squashfs-root/appimagetool.png)" != "1234567890" ]; then
+    echo "mtime of appimagetool.png is not 1234567890 / 2009-02-14 (as set by mksquashfs \"-all-time\"):"
     ls -la squashfs-root
     exit 1
+else
+    ls -la squashfs-root/appimagetool.png
 fi
 rm -rf squashfs-root
