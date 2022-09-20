@@ -136,14 +136,14 @@ if [ "$hash1" == "$hash3" ]; then
     exit 1
 fi
 
-log "check mtimes are not lost when extracting"
+log "check mtimes are preserved when extracting squashfs"
 if [[ "$(./appimagetool.AppImage.3 --appimage-extract 2>&1)" =~ "exec format error" ]]; then
     echo "Can't extract AppImage on $(uname -m) (exec format error)"
-elif [ "$(stat -c %Y squashfs-root/appimagetool.png)" != "1234567890" ]; then
-    echo "mtime of appimagetool.png is not 1234567890 / 2009-02-14 (as set by mksquashfs \"-all-time\"):"
-    ls -la squashfs-root
-    exit 1
 else
-    ls -la squashfs-root/appimagetool.png
+    ls -la squashfs-root
+    if [ "$(stat -c %Y squashfs-root/appimagetool.png)" != "1234567890" ]; then
+    echo "mtime of appimagetool.png is not 1234567890 / 2009-02-14 (as set by mksquashfs \"-all-time\"):"
+    exit 1
+    fi
 fi
 rm -rf squashfs-root
