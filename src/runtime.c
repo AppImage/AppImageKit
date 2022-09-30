@@ -212,7 +212,7 @@ mkdir_p(const char* const path)
 }
 
 void
-print_help(const char *appimage_path)
+print_help(const char *appimage_full_path)
 {
     // TODO: "--appimage-list                 List content from embedded filesystem image\n"
     fprintf(stderr,
@@ -244,27 +244,19 @@ print_help(const char *appimage_path)
         "  and is neither moved nor renamed, the application contained inside this\n"
         "  AppImage to store its data in this directory rather than in your home\n"
         "  directory\n"
-    , appimage_path);
+    , appimage_full_path);
 }
 
 void
-portable_option(const char *arg, const char *appimage_path, const char *name)
+portable_option(const char *arg, const char *appimage_full_path, const char *name)
 {
     char option[32];
     sprintf(option, "appimage-portable-%s", name);
 
     if (arg && strcmp(arg, option)==0) {
         char portable_dir[PATH_MAX];
-        char fullpath[PATH_MAX];
 
-        ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
-        if (length < 0) {
-            fprintf(stderr, "Error getting realpath for %s\n", appimage_path);
-            exit(EXIT_FAILURE);
-        }
-        fullpath[length] = '\0';
-
-        sprintf(portable_dir, "%s.%s", fullpath, name);
+        sprintf(portable_dir, "%s.%s", appimage_full_path, name);
         if (!mkdir(portable_dir, S_IRWXU))
             fprintf(stderr, "Portable %s directory created at %s\n", name, portable_dir);
         else
@@ -525,7 +517,7 @@ bool build_mount_point(char* mount_dir, const char* const argv0, char const* con
 }
 
 int main(int argc, char *argv[]) {
-    char appimage_path[PATH_MAX];
+    char appimage_path[PATH_MAX + 1];
     char argv0_path[PATH_MAX];
     char * arg;
 
@@ -536,7 +528,19 @@ int main(int argc, char *argv[]) {
      * functionality specifically for builds used by appimaged.
      */
     if (getenv("TARGET_APPIMAGE") == NULL) {
-        strcpy(appimage_path, "/proc/self/exe");
+        // when running under gcompat (e.g. on Alpine Linux),
+        // `fopen("/proc/self/exe", "rb")` tries to open the dynamic linker, even
+        // though `readlink()` gives the right result, so use `readlink()` here
+        ssize_t len = readlink("/proc/self/exe", appimage_path, sizeof(appimage_path));
+        if (len < 0) {
+            perror("Failed to obtain AppImage path");
+            exit(EXIT_EXECERROR);
+        }
+        if (len == sizeof(appimage_path)) {
+            fprintf(stderr, "AppImage path is too long (%d bytes, and PATH_MAX is %d bytes)", len, sizeof(appimage_path));
+            exit(EXIT_EXECERROR);
+        }
+        appimage_path[len] = '\0';
         strcpy(argv0_path, argv[0]);
     } else {
         strcpy(appimage_path, getenv("TARGET_APPIMAGE"));
@@ -577,6 +581,24 @@ int main(int argc, char *argv[]) {
 #endif
     }
 
+    // calculate full path of AppImage
+    char appimage_full_path[PATH_MAX];
+
+    if(getenv("TARGET_APPIMAGE") == NULL) {
+        // If we are operating on this file itself, then we've already
+        // expanded the symlink at `/proc/self/exe` in order to work
+        // around the issue with gcompat described above
+        strcpy(appimage_full_path, appimage_path);
+    } else {
+        char* abspath = realpath(appimage_path, NULL);
+        if (abspath == NULL) {
+            perror("Failed to obtain realpath for $TARGET_APPIMAGE");
+            exit(EXIT_EXECERROR);
+        }
+        strcpy(appimage_full_path, abspath);
+        free(abspath);
+    }
+
     // temporary directories are required in a few places
     // therefore we implement the detection of the temp base dir at the top of the code to avoid redundancy
     char temp_base[PATH_MAX] = P_tmpdir;
@@ -599,16 +621,7 @@ int main(int argc, char *argv[]) {
 
     /* Print the help and then exit */
     if(arg && strcmp(arg,"appimage-help")==0) {
-        char fullpath[PATH_MAX];
-
-        ssize_t length = readlink(appimage_path, fullpath, sizeof(fullpath));
-        if (length < 0) {
-            fprintf(stderr, "Error getting realpath for %s\n", appimage_path);
-            exit(EXIT_EXECERROR);
-        }
-        fullpath[length] = '\0';
-
-        print_help(fullpath);
+        print_help(appimage_full_path);
         exit(0);
     }
 
@@ -640,28 +653,6 @@ int main(int argc, char *argv[]) {
         }
 
         exit(0);
-    }
-
-    // calculate full path of AppImage
-    int length;
-    char fullpath[PATH_MAX];
-
-    if(getenv("TARGET_APPIMAGE") == NULL) {
-        // If we are operating on this file itself
-        ssize_t len = readlink(appimage_path, fullpath, sizeof(fullpath));
-        if (len < 0) {
-            perror("Failed to obtain absolute path");
-            exit(EXIT_EXECERROR);
-        }
-        fullpath[len] = '\0';
-    } else {
-        char* abspath = realpath(appimage_path, NULL);
-        if (abspath == NULL) {
-            perror("Failed to obtain absolute path");
-            exit(EXIT_EXECERROR);
-        }
-        strcpy(fullpath, abspath);
-        free(abspath);
     }
 
     if (getenv("APPIMAGE_EXTRACT_AND_RUN") != NULL || (arg && strcmp(arg, "appimage-extract-and-run") == 0)) {
@@ -727,7 +718,7 @@ int main(int argc, char *argv[]) {
             new_argv[new_argc] = NULL;
 
             /* Setting some environment variables that the app "inside" might use */
-            setenv("APPIMAGE", fullpath, 1);
+            setenv("APPIMAGE", appimage_full_path, 1);
             setenv("ARGV0", argv0_path, 1);
             setenv("APPDIR", prefix, 1);
 
@@ -785,8 +776,8 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
 
-    portable_option(arg, appimage_path, "home");
-    portable_option(arg, appimage_path, "config");
+    portable_option(arg, appimage_full_path, "home");
+    portable_option(arg, appimage_full_path, "config");
 
     // If there is an argument starting with appimage- (but not appimage-mount which is handled further down)
     // then stop here and print an error message
@@ -908,7 +899,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* Setting some environment variables that the app "inside" might use */
-        setenv( "APPIMAGE", fullpath, 1 );
+        setenv( "APPIMAGE", appimage_full_path, 1 );
         setenv( "ARGV0", argv0_path, 1 );
         setenv( "APPDIR", mount_dir, 1 );
 
@@ -916,7 +907,7 @@ int main(int argc, char *argv[]) {
         char portable_config_dir[PATH_MAX];
 
         /* If there is a directory with the same name as the AppImage plus ".home", then export $HOME */
-        strcpy (portable_home_dir, fullpath);
+        strcpy (portable_home_dir, appimage_full_path);
         strcat (portable_home_dir, ".home");
         if(is_writable_directory(portable_home_dir)){
             fprintf(stderr, "Setting $HOME to %s\n", portable_home_dir);
@@ -924,7 +915,7 @@ int main(int argc, char *argv[]) {
         }
 
         /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
-        strcpy (portable_config_dir, fullpath);
+        strcpy (portable_config_dir, appimage_full_path);
         strcat (portable_config_dir, ".config");
         if(is_writable_directory(portable_config_dir)){
             fprintf(stderr, "Setting $XDG_CONFIG_HOME to %s\n", portable_config_dir);
