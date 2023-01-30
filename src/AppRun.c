@@ -32,6 +32,8 @@ THE SOFTWARE.
 #include <dirent.h>
 #include <string.h>
 #include <errno.h>
+#include <pwd.h>
+#include <sys/types.h>
 
 #define die(...)                                    \
     do {                                            \
@@ -192,9 +194,21 @@ int main(int argc, char *argv[]) {
 
     SET_NEW_ENV(new_gspath, appdir_s + strlen(old_env), "GST_PLUGIN_SYSTEM_PATH=%s/usr/lib/gstreamer:%s", appdir, old_env);
     SET_NEW_ENV(new_gspath1, appdir_s + strlen(old_env), "GST_PLUGIN_SYSTEM_PATH_1_0=%s/usr/lib/gstreamer-1.0:%s", appdir, old_env);
-    
+
     /* Otherwise may get errors because Python cannot write __pycache__ bytecode cache */
     putenv("PYTHONDONTWRITEBYTECODE=1");
+
+    // Create a symlink to the desktop file in the local app dir to make the window
+    // manager match the window to the desktop file on Wayland
+    old_env = getenv("XDG_DATA_HOME");
+    if (!old_env) {
+        struct passwd *pw = getpwuid(getuid());
+        old_env = (char *)calloc(LINE_SIZE, sizeof(char));
+        snprintf(old_env, LINE_SIZE, "%s/.local/share", pw->pw_dir);
+    }
+    char *symlinked_desktop_file = calloc(LINE_SIZE, sizeof(char));
+    snprintf(symlinked_desktop_file, LINE_SIZE, "%s/applications/%s", old_env, namelist[0]->d_name);
+    symlink(desktop_file, symlinked_desktop_file);
 
     /* Run */
     ret = execvp(exe, outargptrs);
@@ -206,6 +220,8 @@ int main(int argc, char *argv[]) {
 
     free(line);
     free(desktop_file);
+    remove(symlinked_desktop_file);
+    free(symlinked_desktop_file);
     free(usr_in_appdir);
     free(new_pythonhome);
     free(new_path);
