@@ -43,7 +43,7 @@ jobs:
     name: Create release and upload artifacts
     needs:
       - build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - name: Download artifacts
         uses: actions/download-artifact@v2
