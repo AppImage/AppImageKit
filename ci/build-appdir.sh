@@ -50,23 +50,42 @@ cp "$repo_root"/resources/appimagetool.desktop "$appimagetool_appdir"
 cp "$repo_root"/resources/appimagetool.png "$appimagetool_appdir"/appimagetool.png
 cp "$appimagetool_appdir"/appimagetool.png "$appimagetool_appdir"/.DirIcon
 
+# bundle desktop-file-validate
+# https://github.com/AppImage/AppImageKit/issues/1171
+install -D "$(which desktop-file-validate)" "$appimagetool_appdir"/usr/bin/
+
 if [ -d /deps/ ]; then
-    # deploy GLib
+    # deploy GLib, gpgme and gcrypt
     mkdir -p "$appimagetool_appdir"/usr/lib/
     cp /deps/lib/lib*.so* "$appimagetool_appdir"/usr/lib/
+
+
+    case "$ARCH" in
+        x86_64)
+            libarch=x86-64
+            ;;
+        i686)
+            # for some reason, ldconfig -p does not list entries with an architecture for i386...
+            # thankfully, grepping for an empty string is a no-op
+            libarch=
+            ;;
+        armhf)
+            libarch=arm
+            ;;
+        *)
+            libarch="$ARCH"
+            ;;
+    esac
 
     # libffi is a runtime dynamic dependency
     # see this thread for more information on the topic:
     # https://mail.gnome.org/archives/gtk-devel-list/2012-July/msg00062.html
-    if [ "$ARCH" == "x86_64" ]; then
-        cp "$(ldconfig -p | grep libffi.so.6 | grep x86-64 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
-    elif [ "$ARCH" == "i686" ]; then
-        cp "$(ldconfig -p | grep libffi.so.6 | head -n1 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
-    elif [ "$ARCH" == "armhf" ]; then
-        cp "$(ldconfig -p | grep libffi.so.6 | grep arm | grep hf | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
-    elif [ "$ARCH" == "aarch64" ]; then
-        cp "$(ldconfig -p | grep libffi.so.6 | grep aarch64 | cut -d'>' -f2 | tr -d ' ')" "$appimagetool_appdir"/usr/lib/
-    else
-        echo "WARNING: unknown architecture, not bundling libffi"
-    fi
+    # libpcre is used by desktop-file-validate
+    for pattern in libffi libpcre; do
+        # even though it is likely not necessary, we deploy every viable version of the libraries just to make sure...
+        ldconfig -p | grep "$pattern" | grep "$libarch" | while read -r line; do
+            lib="$(echo "$line" | cut -d'>' -f2 | tr -d ' ')"
+            cp "$lib" "$appimagetool_appdir"/usr/lib/
+        done
+    done
 fi
