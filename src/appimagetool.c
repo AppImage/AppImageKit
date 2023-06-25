@@ -85,7 +85,7 @@ gchar *updateinformation = NULL;
 static gboolean guess_update_information = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
-gchar *sqfs_comp = "gzip";
+gchar *sqfs_comp = "zstd";
 gchar **sqfs_opts = NULL;
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
@@ -163,6 +163,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         int max_num_args = sqfs_opts_len + 22;
         char* args[max_num_args];
+        bool use_zstd = strcmp(sqfs_comp, "zstd") >= 0;
         bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
 
         int i = 0;
@@ -177,6 +178,7 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = offset_string;
 
         args[i++] = "-comp";
+        
         if (use_xz)
             args[i++] = "xz";
         else
@@ -184,6 +186,12 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         args[i++] = "-root-owned";
         args[i++] = "-noappend";
+
+        if (use_zstd) {
+            // https://github.com/probonopd/go-appimage/blob/785b52511085b37e09e967c0bc2ebd7f9401e6b9/src/appimagetool/appimagetool.go#L440
+            args[i++] = "-b";
+            args[i++] = "1M";
+        }
 
         if (use_xz) {
             // https://jonathancarter.org/2015/04/06/squashfs-performance-testing/ says:
