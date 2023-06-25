@@ -179,8 +179,8 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
         args[i++] = "-comp";
         
-        if (use_xz)
-            args[i++] = "xz";
+        if (use_zstd)
+            args[i++] = "zstd";
         else
             args[i++] = sqfs_comp;
 
