@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "appimage-website"
+version = "0.0.1"
+description = "Source for appimage.org"
+authors = ["AppImage Team"]
+license = "Apache 2.0"
+
+[tool.poetry.dependencies]
+python = "^3.6"
+Jinja2 = "^3.0.1"
+Babel = "^2.9.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
