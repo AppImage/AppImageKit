@@ -242,7 +242,7 @@ print_help(const char *appimage_path)
         "  Or you can invoke this AppImage with the --appimage-portable-home option,\n"
         "  which will create this directory for you. As long as the directory exists\n"
         "  and is neither moved nor renamed, the application contained inside this\n"
-        "  AppImage to store its data in this directory rather than in your home\n"
+        "  AppImage will store its data in this directory rather than in your home\n"
         "  directory\n"
     , appimage_path);
 }
