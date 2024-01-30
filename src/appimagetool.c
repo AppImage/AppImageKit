@@ -73,8 +73,8 @@ enum fARCH {
 };
 
 static gchar const APPIMAGEIGNORE[] = ".appimageignore";
-static char _exclude_file_desc[256];
 
+static char _exclude_file_desc[256];
 static gboolean list = FALSE;
 static gboolean verbose = FALSE;
 static gboolean showVersionOnly = FALSE;
@@ -560,6 +560,12 @@ main (int argc, char *argv[])
     char* github_token;
     github_token = getenv("GITHUB_TOKEN");
 
+    /* Parse GitHub CI environment variables.
+     * https://docs.github.com/en/actions/configuring-and-managing-workflows/using-environment-variables#default-environment-variables
+     */
+    char* github_repository = getenv("GITHUB_REPOSITORY");
+    char* github_ref = getenv("GITHUB_REF");
+
     /* Parse GitLab CI environment variables.
      * https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
      * echo "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/QtQuickApp-x86_64.AppImage?job=${CI_JOB_NAME}"
@@ -885,7 +891,10 @@ main (int argc, char *argv[])
         * should hopefully change that. */
 
         fprintf (stderr, "Generating squashfs...\n");
+
         int size = 0;
+
+
         char* data = NULL;
         bool using_external_data = false;
         if (runtime_file != NULL) {
@@ -926,20 +935,23 @@ main (int argc, char *argv[])
             printf("Could not set executable bit, aborting\n");
             exit(1);
         }
-        
+
+        // maximum size that the updateinformation's buffer can hold
+        // TODO: why 1024?
+        const int update_information_buffer_size = 1024;
+
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
-                char buf[1024];
-                sprintf(buf, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
-                updateinformation = buf;
+                char updateinformation_buffer[update_information_buffer_size];
+                sprintf(updateinformation_buffer, "bintray-zsync|%s|%s|%s|%s-_latestVersion-%s.AppImage.zsync", bintray_user, bintray_repo, app_name_for_filename, app_name_for_filename, arch);
+                updateinformation = updateinformation_buffer;
                 printf("%s\n", updateinformation);
             }
         }
-        
-        /* If the user has not provided update information but we know this is a Travis CI build,
-         * then fill in update information based on TRAVIS_REPO_SLUG */
         if(guess_update_information){
             if(travis_repo_slug){
+                /* If the user has not provided update information but we know this is a Travis CI build,
+                * then fill in update information based on TRAVIS_REPO_SLUG */
                 if(!github_token) {
                     printf("Will not guess update information since $GITHUB_TOKEN is missing,\n");
                     if(0 != strcmp(travis_pull_request, "false")){
@@ -951,7 +963,7 @@ main (int argc, char *argv[])
                 } else {
                     gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
                     if(zsyncmake_path){
-                        char buf[1024];
+                        char updateinformation_buffer[1024];
                         gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
                         /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
                          * gh-releases-zsync|probono|AppImages|latest|Subsurface*-x86_64.AppImage.zsync */
@@ -961,13 +973,48 @@ main (int argc, char *argv[])
                                     channel = "latest";
                                 }
                             }
-                        sprintf(buf, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
-                        updateinformation = buf;
+                        sprintf(updateinformation_buffer, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        updateinformation = updateinformation_buffer;
                         printf("Guessing update information based on $TRAVIS_TAG=%s and $TRAVIS_REPO_SLUG=%s\n", travis_tag, travis_repo_slug);
                         printf("%s\n", updateinformation);
                     } else {
                         printf("Will not guess update information since zsyncmake is missing\n");
                     }
+                }
+            } else if (github_repository != NULL && github_ref != NULL) {
+                printf("Running on GitHub Actions\n");
+                // get path to zsyncmake
+                gchar *zsyncmake_path = g_find_program_in_path ("zsyncmake");
+
+                if (zsyncmake_path != NULL) {
+                    if (strstr(github_ref, "/pull/") != NULL) {
+                        printf("Will not calculate update information for GitHub because this is a pull request\n");
+                    } else {
+                        printf("Guessing update information based on $GITHUB_REPOSITORY=%s and $GITHUB_REF=%s\n", github_repository, github_ref);
+                        char updateinformation_buffer[1024];
+                        gchar **parts = g_strsplit (github_repository, "/", 2);
+
+                        const char* channel;
+                        if (strstr(github_ref, "/continuous/") != NULL) {
+                            channel = "latest";
+                        } else {
+                            channel = "continuous";
+                        }
+
+                        int is_zsync_write_success = snprintf(updateinformation_buffer, update_information_buffer_size, "gh-releases-zsync|%s|%s|%s|%s*-%s.AppImage.zsync", parts[0], parts[1], channel, app_name_for_filename, arch);
+                        if (is_zsync_write_success < 0) {
+                            printf("Writing updateinformation failed. zsync information is too long. (> %d)\n", update_information_buffer_size);
+                            exit(is_zsync_write_success);
+                        }
+
+                        // free the pointers from g_strsplit, to avoid a memort leak
+                        g_strfreev(parts);
+
+                        updateinformation = updateinformation_buffer;
+                        printf("%s\n", updateinformation);
+                    }
+                } else {
+                    printf("Will not guess update information since zsyncmake is missing\n");
                 }
             } else if(CI_COMMIT_REF_NAME){
                 // ${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/QtQuickApp-x86_64.AppImage?job=${CI_JOB_NAME}
