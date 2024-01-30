@@ -64,11 +64,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 ##########################
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake)
-
-# configure dependencies
-add_subdirectory(lib)
-
-include(lib/libappimage/cmake/tools.cmake)
 include(cmake/dependencies.cmake)
 
 
