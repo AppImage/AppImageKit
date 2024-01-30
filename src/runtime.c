@@ -361,7 +361,9 @@ bool extract_appimage(const char* const appimage_path, const char* const _prefix
                     } else {
                         struct stat st;
                         if (!overwrite && stat(prefixed_path_to_extract, &st) == 0 && st.st_size == inode.xtra.reg.file_size) {
-                            fprintf(stderr, "File exists and file size matches, skipping\n");
+                            if (verbose) {
+                                fprintf(stderr, "File exists and file size matches, skipping\n");
+                            }
                             continue;
                         }
 
@@ -656,7 +658,9 @@ int main(int argc, char *argv[]) {
             exit(1);
         }
 
-        if (!extract_appimage(appimage_path, "squashfs-root/", pattern, true, true)) {
+        const bool verbose = (getenv("VERBOSE") != NULL);
+
+        if (!extract_appimage(appimage_path, "squashfs-root/", pattern, true, verbose)) {
             exit(1);
         }
 
