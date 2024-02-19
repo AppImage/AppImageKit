@@ -18,6 +18,7 @@ include(build-runtime.cmake)
 
 add_executable(appimagetool
     appimagetool.c
+    appimagetool_sign.c
     binreloc.c
     runtime_embed.o
 )
@@ -27,6 +28,12 @@ target_include_directories(appimagetool
     INTERFACE $<INSTALL_INTERFACE:include/>
 )
 
+# required for appimagetool's signing
+# we're using CMake's functionality directly, since we want to link those statically
+find_package(PkgConfig)
+pkg_check_modules(libgpgme REQUIRED gpgme IMPORTED_TARGET)
+pkg_check_modules(libgcrypt REQUIRED libgcrypt IMPORTED_TARGET)
+
 # trick: list libraries on which imported static ones depend on in the PUBLIC section
 # CMake then adds them after the PRIVATE ones in the linker command
 target_link_libraries(appimagetool
@@ -35,7 +42,10 @@ target_link_libraries(appimagetool
     xdg-basedir
     libappimage_shared
     libglib
+    libgio
     libzlib
+    PkgConfig::libgcrypt
+    PkgConfig::libgpgme
     xz
 )
 

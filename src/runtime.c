@@ -242,7 +242,7 @@ print_help(const char *appimage_path)
         "  Or you can invoke this AppImage with the --appimage-portable-home option,\n"
         "  which will create this directory for you. As long as the directory exists\n"
         "  and is neither moved nor renamed, the application contained inside this\n"
-        "  AppImage to store its data in this directory rather than in your home\n"
+        "  AppImage will store its data in this directory rather than in your home\n"
         "  directory\n"
     , appimage_path);
 }
@@ -524,6 +524,27 @@ bool build_mount_point(char* mount_dir, const char* const argv0, char const* con
     mount_dir[templen+8+namelen+6] = 0; // null terminate destination
 }
 
+void set_portable_home_and_config(char *basepath) {
+    char portable_home_dir[PATH_MAX];
+    char portable_config_dir[PATH_MAX];
+
+    /* If there is a directory with the same name as the AppImage plus ".home", then export $HOME */
+    strcpy (portable_home_dir, basepath);
+    strcat (portable_home_dir, ".home");
+    if(is_writable_directory(portable_home_dir)){
+        fprintf(stderr, "Setting $HOME to %s\n", portable_home_dir);
+        setenv("HOME",portable_home_dir,1);
+    }
+
+    /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
+    strcpy (portable_config_dir, basepath);
+    strcat (portable_config_dir, ".config");
+    if(is_writable_directory(portable_config_dir)){
+        fprintf(stderr, "Setting $XDG_CONFIG_HOME to %s\n", portable_config_dir);
+        setenv("XDG_CONFIG_HOME",portable_config_dir,1);
+    }
+}
+
 int main(int argc, char *argv[]) {
     char appimage_path[PATH_MAX];
     char argv0_path[PATH_MAX];
@@ -731,6 +752,8 @@ int main(int argc, char *argv[]) {
             setenv("ARGV0", argv0_path, 1);
             setenv("APPDIR", prefix, 1);
 
+            set_portable_home_and_config(fullpath);
+
             execv(apprun_path, new_argv);
 
             int error = errno;
@@ -912,24 +935,7 @@ int main(int argc, char *argv[]) {
         setenv( "ARGV0", argv0_path, 1 );
         setenv( "APPDIR", mount_dir, 1 );
 
-        char portable_home_dir[PATH_MAX];
-        char portable_config_dir[PATH_MAX];
-
-        /* If there is a directory with the same name as the AppImage plus ".home", then export $HOME */
-        strcpy (portable_home_dir, fullpath);
-        strcat (portable_home_dir, ".home");
-        if(is_writable_directory(portable_home_dir)){
-            fprintf(stderr, "Setting $HOME to %s\n", portable_home_dir);
-            setenv("HOME",portable_home_dir,1);
-        }
-
-        /* If there is a directory with the same name as the AppImage plus ".config", then export $XDG_CONFIG_HOME */
-        strcpy (portable_config_dir, fullpath);
-        strcat (portable_config_dir, ".config");
-        if(is_writable_directory(portable_config_dir)){
-            fprintf(stderr, "Setting $XDG_CONFIG_HOME to %s\n", portable_config_dir);
-            setenv("XDG_CONFIG_HOME",portable_config_dir,1);
-        }
+        set_portable_home_and_config(fullpath);
 
         /* Original working directory */
         char cwd[1024];

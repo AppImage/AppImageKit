@@ -117,3 +117,29 @@ if [ "$hash1" != "$hash2" ]; then
     echo "Hash $hash1 doesn't match hash $hash2!"
     exit 1
 fi
+
+log "check --mksquashfs-opt forwarding"
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage.1
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage.2 --mksquashfs-opt "-mem" --mksquashfs-opt "100M"
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage.3 --mksquashfs-opt "-all-time" --mksquashfs-opt "12345"
+hash1=$(sha256sum appimagetool.AppImage.1 | awk '{print $1}')
+hash2=$(sha256sum appimagetool.AppImage.2 | awk '{print $1}')
+hash3=$(sha256sum appimagetool.AppImage.3 | awk '{print $1}')
+if [ "$hash1" != "$hash2" ]; then
+    echo "Hashes of regular and mem-restricted AppImages differ"
+    exit 1
+fi
+if [ "$hash1" == "$hash3" ]; then
+    echo "Hashes of regular and mtime-modified AppImages don't differ"
+    exit 1
+fi
+
+log "check appimagetool dies when mksquashfs fails"
+set +e # temporarily disable error trapping as next line is supposed to fail
+out=$("$appimagetool" appimagetool.AppDir appimagetool.AppImage --mksquashfs-opt "-misspelt-option" 2>&1)
+rc=$?
+set -e
+test ${rc} == 1
+echo "${out}" | grep -q "invalid option"
+echo "${out}" | grep -qP 'mksquashfs \(pid \d+\) exited with code 1'
+echo "${out}" | grep -q "sfs_mksquashfs error"

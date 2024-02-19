@@ -12,6 +12,7 @@ import_pkgconfig_target(TARGET_NAME libfuse PKGCONFIG_TARGET fuse)
 # openssl is required for optional tools only, and doesn't need to be enforced
 # FIXME: remove dependency to openssl by implementing own SHA hashes in libappimage_hashlib
 import_pkgconfig_target(TARGET_NAME libssl PKGCONFIG_TARGET openssl OPTIONAL)
+import_pkgconfig_target(TARGET_NAME libgio PKGCONFIG_TARGET gio OPTIONAL)
 
 
 if(USE_CCACHE)

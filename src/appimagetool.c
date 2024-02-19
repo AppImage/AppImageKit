@@ -32,6 +32,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
+#include <gio/gio.h>
 #include <stdlib.h>
 
 #include <stdio.h>
@@ -52,8 +53,11 @@
 #include <string.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <gpgme.h>
+#include <assert.h>
 
 #include "appimage/appimage.h"
+#include "appimagetool_sign.h"
 
 #ifdef __linux__
 #define HAVE_BINARY_RUNTIME
@@ -84,9 +88,9 @@ static gboolean guess_update_information = FALSE;
 gchar *bintray_user = NULL;
 gchar *bintray_repo = NULL;
 gchar *sqfs_comp = "gzip";
+gchar **sqfs_opts = NULL;
 gchar *exclude_file = NULL;
 gchar *runtime_file = NULL;
-gchar *sign_args = NULL;
 gchar *sign_key = NULL;
 gchar *pathToMksquashfs = NULL;
 
@@ -132,19 +136,35 @@ int sfs_ls(char* image) {
 * execlp(), execvp(), and execvpe() search on the $PATH */
 int sfs_mksquashfs(char *source, char *destination, int offset) {
     pid_t pid = fork();
-    
     if (pid == -1) {
-        // error, failed to fork()
+        perror("sfs_mksquashfs fork() failed");
         return(-1);
-    } else if (pid > 0) {
+    }
+
+    if (pid > 0) {
+        // This is the parent process. Wait for the child to termiante and check its exit status.
         int status;
-        waitpid(pid, &status, 0);
+        if(waitpid(pid, &status, 0) == -1) {
+            perror("sfs_mksquashfs waitpid() failed");
+            return(-1);
+        }
+        
+        int retcode = WEXITSTATUS(status);
+        if (retcode) {
+            fprintf(stderr, "mksquashfs (pid %d) exited with code %d\n", pid, retcode);
+            return(-1);
+        }
+        
+        return 0;
     } else {
         // we are the child
         gchar* offset_string;
         offset_string = g_strdup_printf("%i", offset);
 
-        char* args[32];
+        guint sqfs_opts_len = sqfs_opts ? g_strv_length(sqfs_opts) : 0;
+
+        int max_num_args = sqfs_opts_len + 22;
+        char* args[max_num_args];
         bool use_xz = strcmp(sqfs_comp, "xz") >= 0;
 
         int i = 0;
@@ -157,8 +177,8 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = destination;
         args[i++] = "-offset";
         args[i++] = offset_string;
-        args[i++] = "-comp";
 
+        args[i++] = "-comp";
         if (use_xz)
             args[i++] = "xz";
         else
@@ -202,6 +222,10 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
         args[i++] = "-mkfs-time";
         args[i++] = "0";
 
+        for (guint sqfs_opts_idx = 0; sqfs_opts_idx < sqfs_opts_len; ++sqfs_opts_idx) {
+            args[i++] = sqfs_opts[sqfs_opts_idx];
+        }
+
         args[i++] = 0;
 
         if (verbose) {
@@ -214,11 +238,11 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
 
 #ifndef AUXILIARY_FILES_DESTINATION
         execvp("mksquashfs", args);
+        perror("execvp(\"mksquashfs\") failed");
 #else
         execvp(pathToMksquashfs, args);
+        fprintf(stderr, "execvp(\"%s\") failed: %s\n", pathToMksquashfs, strerror(errno));
 #endif
-
-        perror("execlp");   // exec*() returns only on error
         return -1; // exec never returns
     }
     return 0;
@@ -518,11 +542,11 @@ static GOptionEntry entries[] =
     { "verbose", 'v', 0, G_OPTION_ARG_NONE, &verbose, "Produce verbose output", NULL },
     { "sign", 's', 0, G_OPTION_ARG_NONE, &sign, "Sign with gpg[2]", NULL },
     { "comp", 0, 0, G_OPTION_ARG_STRING, &sqfs_comp, "Squashfs compression", NULL },
+    { "mksquashfs-opt", 0, 0, G_OPTION_ARG_STRING_ARRAY, &sqfs_opts, "Argument to pass through to mksquashfs; can be specified multiple times", NULL },
     { "no-appstream", 'n', 0, G_OPTION_ARG_NONE, &no_appstream, "Do not check AppStream metadata", NULL },
     { "exclude-file", 0, 0, G_OPTION_ARG_STRING, &exclude_file, _exclude_file_desc, NULL },
     { "runtime-file", 0, 0, G_OPTION_ARG_STRING, &runtime_file, "Runtime file to use", NULL },
     { "sign-key", 0, 0, G_OPTION_ARG_STRING, &sign_key, "Key ID to use for gpg[2] signatures", NULL},
-    { "sign-args", 0, 0, G_OPTION_ARG_STRING, &sign_args, "Extra arguments to use when signing with gpg[2]", NULL},
     { G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &remaining_args, NULL, NULL },
     { 0,0,0,0,0,0,0 }
 };
@@ -575,7 +599,6 @@ main (int argc, char *argv[])
         
     GError *error = NULL;
     GOptionContext *context;
-    char command[PATH_MAX];
 
     // initialize help text of argument
     sprintf(_exclude_file_desc, "Uses given file as exclude file for mksquashfs, in addition to %s.", APPIMAGEIGNORE);
@@ -753,7 +776,6 @@ main (int argc, char *argv[])
         gchar* arch = getArchName(archs);
         fprintf(stderr, "Using architecture %s\n", arch);
 
-        FILE *fp;
         char app_name_for_filename[PATH_MAX];
         sprintf(app_name_for_filename, "%s", get_desktop_entry(kf, "Name"));
         replacestr(app_name_for_filename, " ", "_");
@@ -1072,309 +1094,12 @@ main (int argc, char *argv[])
         }
 
         if (sign) {
-            bool using_gpg = FALSE;
-            bool using_shasum = FALSE;
-
-            /* The user has indicated that he wants to sign */
-            gchar* gpg2_path = g_find_program_in_path("gpg2");
-
-            if (!gpg2_path) {
-                gpg2_path = g_find_program_in_path("gpg");
-                using_gpg = TRUE;
-            }
-
-            gchar* sha256sum_path = g_find_program_in_path("sha256sum");
-
-            if (!sha256sum_path) {
-                sha256sum_path = g_find_program_in_path("shasum");
-                using_shasum = 1;
-            }
-
-            if (!gpg2_path) {
-                fprintf(stderr, "gpg2 or gpg is not installed, cannot sign\n");
-            } else if (!sha256sum_path) {
-                fprintf(stderr, "sha256sum or shasum is not installed, cannot sign\n");
-            } else {
-                fprintf(stderr, "%s and %s are installed and user requested to sign, "
-                                "hence signing\n", using_gpg ? "gpg" : "gpg2",
-                    using_shasum ? "shasum" : "sha256sum");
-
-                char* digestfile;
-                digestfile = br_strcat(destination, ".digest");
-
-                char* ascfile;
-                ascfile = br_strcat(destination, ".digest.asc");
-
-                if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
-                    unlink(digestfile);
-
-                if (using_shasum)
-                    sprintf(command, "%s -a256 %s", sha256sum_path, destination);
-                else
-                    sprintf(command, "%s %s", sha256sum_path, destination);
-
-                if (verbose)
-                    fprintf(stderr, "%s\n", command);
-
-                fp = popen(command, "r");
-
-                if (fp == NULL)
-                    die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
-
-                char output[1024];
-
-                fgets(output, sizeof(output) - 1, fp);
-
-
-                if (pclose(fp) != 0)
-                    die(using_shasum ? "shasum command did not succeed" : "sha256sum command did not succeed");
-
-                // let's use a new scope to avoid polluting the scope too much with temporary variables
-                {
-                    // the output of sha256sum is always <hash> <filename>
-                    // we have to split the string, the first item contains the hash then
-                    gchar** split_result = g_strsplit_set(output, " ", -1);
-
-                    // extract the first item reference, doesn't have to be free-d
-                    const gchar* digest_only = split_result[0];
-
-                    // print hash which is later signed for debugging purposes
-                    printf("Signing using SHA256 digest: %s\n", digest_only);
-
-                    FILE* fpx = fopen(digestfile, "w");
-
-                    if (fpx != NULL) {
-                        fputs(digest_only, fpx);
-                        fclose(fpx);
-                    }
-
-                    g_strfreev(split_result);
-                }
-
-                fp = NULL;
-
-                if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
-                    unlink(ascfile);
-
-                char* key_arg = NULL;
-
-                if (sign_key && strlen(sign_key) > 0) {
-                    key_arg = calloc(sizeof(char), strlen(sign_key) + strlen("--local-user ''"));
-
-                    if (key_arg == NULL)
-                        die("malloc() failed");
-
-                    strcpy(key_arg, "--local-user '");
-                    strcat(key_arg, sign_key);
-                    strcat(key_arg, "'");
-                }
-
-                // passing the passphrase via the environment is at least better than using a CLI parameter
-                gchar *sign_passphrase = getenv("APPIMAGETOOL_SIGN_PASSPHRASE");
-
-                sprintf(command,
-                    "%s --detach-sign --armor %s %s %s %s",
-                    gpg2_path,
-                    key_arg ? key_arg : "",
-                    sign_args ? sign_args : "",
-                    sign_passphrase != NULL ? "--passphrase-fd 0 --pinentry-mode loopback" : "",
-                    digestfile
-                );
-
-                free(key_arg);
-                key_arg = NULL;
-
-                if (verbose)
-                    fprintf(stderr, "%s\n", command);
-
-                fp = popen(command, "w");
-
-                if (fp == NULL) {
-                    perror("ERROR: popen() call failed");
+            if (!sign_appimage(destination, sign_key, verbose)) {
+                if (getenv(FORCE_SIGN_ENV_VAR) != NULL) {
+                    fprintf(stderr, "ERROR: signing failed, aborting\n");
                     exit(1);
-                }
-
-                // write passphrase to stdin (fd 0 of subprocess)
-                if (sign_passphrase != NULL) {
-                    if (fwrite(sign_passphrase, sizeof(char), strlen(sign_passphrase), fp) != strlen(sign_passphrase)) {
-                        perror("ERROR: failed to pass passphrase to process, exiting");
-                        exit(1);
-                    }
-                }
-
-                if (pclose(fp) != 0) {
-                    int errno_backup = errno;
-                    fprintf(stderr, "ERROR: %s command did not succeed, could not sign (%s), continuing\n", using_gpg ? "gpg" : "gpg2", strerror(errno_backup));
                 } else {
-                    fp = NULL;
-
-                    FILE* destinationfp = fopen(destination, "r+");
-
-                    // calculate signature
-                    {
-                        unsigned long sig_offset = 0;
-                        unsigned long sig_length = 0;
-
-                        bool rv = appimage_get_elf_section_offset_and_length(destination, ".sha256_sig", &sig_offset,
-                                                                             &sig_length);
-
-                        if (!rv || sig_offset == 0 || sig_length == 0) {
-                            die("Could not find section .sha256_sig in runtime");
-                        }
-
-                        if (verbose) {
-                            printf("sig_offset: %lu\n", sig_offset);
-                            printf("sig_length: %lu\n", sig_length);
-                        }
-
-                        if (sig_offset == 0) {
-                            die("Could not determine offset for signature");
-                        }
-
-                        if (destinationfp == NULL)
-                            die("Not able to open the destination file for writing, aborting");
-
-                        // if(strlen(updateinformation)>sig_length)
-                        //     die("signature does not fit into segment, aborting");
-
-                        fseek(destinationfp, sig_offset, SEEK_SET);
-
-                        FILE* ascfilefp = fopen(ascfile, "rb");
-
-                        if (ascfilefp == NULL) {
-                            die("Not able to open the asc file for reading, aborting");
-                        }
-
-                        static const int bufsize = 1024;
-                        char buffer[bufsize];
-
-                        size_t totalBytesRead = 0;
-
-                        while (!feof(ascfilefp)) {
-                            size_t bytesRead = fread(buffer, sizeof(char), bufsize, ascfilefp);
-                            totalBytesRead += bytesRead;
-
-                            if (totalBytesRead > sig_length) {
-                                die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
-                            }
-
-                            size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
-
-                            if (bytesRead != bytesWritten) {
-                                char message[128];
-                                sprintf(message, "Bytes read and written differ: %lu != %lu", (long unsigned) bytesRead,
-                                        (long unsigned) bytesWritten);
-                                die(message);
-                            }
-                        }
-
-                        fclose(ascfilefp);
-                        if (g_file_test(digestfile, G_FILE_TEST_IS_REGULAR))
-                            unlink(digestfile);
-
-                        if (sign_key == NULL || strlen(sign_key) > 0) {
-                            // read which key was used to sign from signature
-                            sprintf(command, "%s --batch --list-packets %s", gpg2_path, ascfile);
-
-                            fp = popen(command, "r");
-
-                            if (fp == NULL)
-                                die("Failed to call gpg[2] to detect signature's key ID");
-
-                            while (!feof(fp)) {
-                                size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
-
-                                char* keyid_pos = strstr(buffer, "keyid");
-
-                                if (keyid_pos == NULL)
-                                    continue;
-
-                                char* keyIDBegin = keyid_pos + strlen("keyid ");
-                                char* endOfKeyID = strstr(keyIDBegin, "\n");
-
-                                sign_key = calloc(endOfKeyID - keyIDBegin, sizeof(char));
-                                memcpy(sign_key, keyIDBegin, endOfKeyID - keyIDBegin);
-                            }
-
-                            // read rest of process input to avoid broken pipe error
-                            while (!feof(fp)) {
-                                fread(buffer, sizeof(char), bufsize, fp);
-                            }
-
-                            int retval = pclose(fp);
-                            fp = NULL;
-
-                            if (retval != 0)
-                                die("Failed to call gpg[2] to detect signature's key ID");
-                        }
-
-                        if (g_file_test(ascfile, G_FILE_TEST_IS_REGULAR))
-                            unlink(ascfile);
-                    }
-
-                    // export key and write into section
-                    {
-                        sprintf(command, "%s --batch --export --armor %s", gpg2_path, sign_key);
-
-                        unsigned long key_offset = 0, key_length = 0;
-
-                        bool rv = appimage_get_elf_section_offset_and_length(destination, ".sig_key", &key_offset, &key_length);
-
-                        if (verbose) {
-                            printf("key_offset: %lu\n", key_offset);
-                            printf("key_length: %lu\n", key_length);
-                        }
-
-                        if (!rv || key_offset == 0 || key_length == 0) {
-                            die("Could not find section .sig_key in runtime");
-                        }
-
-                        fseek(destinationfp, key_offset, SEEK_SET);
-
-                        fp = popen(command, "r");
-
-                        if (fp == NULL)
-                            die("Failed to call gpg[2] to export the signature key");
-
-                        static const int bufsize = 1024;
-                        char buffer[bufsize];
-
-                        size_t totalBytesRead = 0;
-                        while (!feof(fp)) {
-                            size_t bytesRead = fread(buffer, sizeof(char), bufsize, fp);
-                            totalBytesRead += bytesRead;
-
-                            if (totalBytesRead > key_length) {
-                                // read rest of process input to avoid broken pipe error
-                                while (!feof(fp)) {
-                                    fread(buffer, sizeof(char), bufsize, fp);
-                                }
-
-                                pclose(fp);
-                                die("Error: cannot embed key in AppImage: size exceeds reserved ELF section size");
-                            }
-
-                            size_t bytesWritten = fwrite(buffer, sizeof(char), bytesRead, destinationfp);
-
-                            if (bytesRead != bytesWritten) {
-                                char message[128];
-                                sprintf(message, "Error: Bytes read and written differ: %lu != %lu",
-                                    (long unsigned) bytesRead, (long unsigned) bytesWritten);
-                                die(message);
-                            }
-                        }
-
-                        int exportexitcode = pclose(fp);
-                        fp = NULL;
-
-                        if (exportexitcode != 0) {
-                            char message[128];
-                            sprintf(message, "GPG key export failed: exit code %d", exportexitcode);
-                            die(message);
-                        }
-
-                        fclose(destinationfp);
-                    }
+                    fprintf(stderr, "ERROR: signing failed, continuing\n");
                 }
             }
         }
@@ -1388,38 +1113,36 @@ main (int argc, char *argv[])
                 fprintf(stderr, "zsyncmake is available and updateinformation is provided, "
                                 "hence generating zsync file\n");
 
-                int pid = fork();
+                const gchar* const zsyncmake_command[] = {zsyncmake_path, destination, "-u", basename(destination), NULL};
 
-                if (verbose)
-                    fprintf(stderr, "%s %s -u %s", zsyncmake_path, destination, basename(destination));
-
-                if (pid == -1) {
-                    // fork error
-                    die("fork() failed");
-                } else if (pid == 0) {
-                    char* zsyncmake_command[] = {zsyncmake_path, destination, "-u", basename(destination), NULL};
-
-                    // redirect stdout/stderr to /dev/null
-                    int fd = open("/dev/null", O_WRONLY);
-
-                    dup2(fd, 1);
-                    dup2(fd, 2);
-                    close(fd);
-
-                    execv(zsyncmake_path, zsyncmake_command);
-
-                    die("execv() should not return");
-                } else {
-                    int exitstatus;
-
-                    if (waitpid(pid, &exitstatus, 0) == -1) {
-                        perror("waitpid() failed");
-                        exit(EXIT_FAILURE);
+                if (verbose) {
+                    fprintf(stderr, "Running zsyncmake process: ");
+                    for (gint j = 0; j < (sizeof(zsyncmake_command) / sizeof(char*) - 1); ++j) {
+                        fprintf(stderr, "'%s' ", zsyncmake_command[j]);
                     }
-
-                    if (WEXITSTATUS(exitstatus) != 0)
-                        die("zsyncmake command did not succeed");
+                    fprintf(stderr, "\n");
                 }
+
+                GSubprocessFlags flags = G_SUBPROCESS_FLAGS_NONE;
+
+                if (!verbose) {
+                    flags = G_SUBPROCESS_FLAGS_STDERR_SILENCE | G_SUBPROCESS_FLAGS_STDOUT_SILENCE;
+                }
+
+                GSubprocess* proc = g_subprocess_newv(zsyncmake_command, flags, &error);
+
+                if (proc == NULL) {
+                    fprintf(stderr, "ERROR: failed to create zsyncmake process: %s\n", error->message);
+                    exit(1);
+                }
+
+                if (!g_subprocess_wait_check(proc, NULL, &error)) {
+                    fprintf(stderr, "ERROR: zsyncmake returned abnormal exit code: %s\n", error->message);
+                    g_object_unref(proc);
+                    exit(1);
+                }
+
+                g_object_unref(proc);
             }
         }
 
