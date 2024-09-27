@@ -53,7 +53,7 @@ if(NOT USE_SYSTEM_MKSQUASHFS)
 
     ExternalProject_Add(mksquashfs
         GIT_REPOSITORY https://github.com/plougher/squashfs-tools/
-        GIT_TAG 4.4
+        GIT_TAG 4.5
         UPDATE_COMMAND ""  # Make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
         CONFIGURE_COMMAND ${SED} -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += ${mksquashfs_cflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
         COMMAND ${SED} -i "s|LIBS += -llzma|LIBS += -Bstatic ${mksquashfs_ldflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
