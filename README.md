@@ -1,11 +1,11 @@
-# AppImageKit ![Downloads](https://img.shields.io/github/downloads/AppImage/AppImageKit/total.svg) [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20libera.chat-blue.svg)](https://web.libera.chat/#AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
+# AppImageKit  [![irc](https://img.shields.io/badge/IRC-%23AppImage%20on%20libera.chat-blue.svg)](https://web.libera.chat/#AppImage) [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=ZT9CL8M5TJU72)
 
 The __AppImage__ format is a format for packaging applications in a way that allows them to
 run on a variety of different target systems (base operating systems, distributions) without further modification. 
 
 Using the AppImage format you can package desktop applications as AppImages that run on common Linux-based operating systems, such as RHEL, CentOS, Ubuntu, Fedora, Debian and derivatives.
 
-Copyright (c) 2004-22 Simon Peter <probono@puredarwin.org> and contributors.
+Copyright (c) 2004-24 Simon Peter <probono@puredarwin.org> and contributors.
 
 https://en.wikipedia.org/wiki/AppImage
 
@@ -127,68 +127,17 @@ Leafpad-0.8.18.1.glibc2.4-x86_64.AppImage.config/leafpad/leafpadrc
 
 Note that the file `leafpadrc` was written in the directory we have created before.
 
-## appimagetool usage
+## appimagetool
 
-`appimagetool` is used to generate an AppImage from an existing `AppDir`. Higher-level tools such as [`linuxdeployqt`](https://github.com/probonopd/linuxdeployqt) use it internally. A precompiled version can be found on [GitHub Releases](https://github.com/AppImage/AppImageKit/releases).
+`appimagetool` is a low-level tool used to convert a valid AppDir into an AppImage. It us usually used by [higher-level tools](https://github.com/AppImageCommunity/awesome-appimage?tab=readme-ov-file#appimage-developer-tools) that can be used by application developers to provide AppImages of their applications to end users. `appimagetool` itself is not needed by end users, and is normally not used directly by developers.
+Please see https://github.com/AppImage/appimagetool.
 
-```
-wget "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-chmod a+x appimagetool-x86_64.AppImage
-```
+## AppImage runtime
 
-Usage in a nutshell, assuming that you already have an [AppDir](https://github.com/AppImage/AppImageSpec/blob/master/draft.md#appdir) in place:
+The AppImage runtime is a small piece of code that becomes part of every AppImage. It mounts the AppImage and executes the application contained in it.
+Please see https://github.com/AppImage/type2-runtime.
 
-```
-./appimagetool-x86_64.AppImage some.AppDir
-```
+## AppImageSpec
 
-Detailed usage:
-```
-Usage:
-  appimagetool [OPTION...] SOURCE [DESTINATION] - Generate, extract, and inspect AppImages
-
-Help Options:
-  -h, --help                  Show help options
-
-Application Options:
-  -l, --list                  List files in SOURCE AppImage
-  -u, --updateinformation     Embed update information STRING; if zsyncmake is installed, generate zsync file
-  -g, --guess                 Guess update information based on Travis CI or GitLab environment variables
-  --bintray-user              Bintray user name
-  --bintray-repo              Bintray repository
-  --version                   Show version number
-  -v, --verbose               Produce verbose output
-  -s, --sign                  Sign with gpg[2]
-  --comp                      Squashfs compression
-  -n, --no-appstream          Do not check AppStream metadata
-  --exclude-file              Uses given file as exclude file for mksquashfs, in addition to .appimageignore.
-  --runtime-file              Runtime file to use
-  --sign-key                  Key ID to use for gpg[2] signatures
-  --sign-args                 Extra arguments to use when signing with gpg[2]
-```
-
-If you want to generate an AppImage manually, you can:
-
-```
-mksquashfs Your.AppDir Your.squashfs -root-owned -noappend
-cat runtime >> Your.AppImage
-cat Your.squashfs >> Your.AppImage
-chmod a+x Your.AppImage
-```
-
-
-## Building
-
-__NOTE:__ The AppImage project supplies [binaries](https://github.com/AppImage/AppImageKit/releases/tag/continuous) that application developers can use. These binaries are built using the CentOS 6 Docker on Travis CI build system in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to AppImageKit, when needing another architecture than `x86_64`, or when trying to reproduce our binaries.
-
-Our build system is based on Docker. To build your own binaries, please install Docker first. Then, follow the following steps:
-
-```
-git clone --single-branch --recursive https://github.com/AppImage/AppImageKit
-cd AppImageKit/
-bash ci/build.sh
-```
-
-This will create the binaries in a directory called `out/`.
-
-Please note: It is not recommended nor supported to build AppImageKit on any newer build system than the oldest still-supported versions of major distributions for reasons outlined [here](https://github.com/AppImage/AppImageKit/wiki/Creating-AppImages#creating-appimages-that-are-compatible-with-many-systems). Currently we are targeting CentOS 6.x and Ubuntu 14.04 as build systems and we are not interested to build AppImageKit on newer versions anytime soon. Binaries built on those systems will run just fine on newer (later) target systems (distributions).
+The AppImageSpec defines the AppImage format.
+Please see https://github.com/AppImage/AppImageSpec.
