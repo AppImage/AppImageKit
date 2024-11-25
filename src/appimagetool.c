@@ -841,8 +841,16 @@ main (int argc, char *argv[])
             char application_id[PATH_MAX];
             sprintf (application_id,  "%s", basename(desktop_file));
             replacestr(application_id, ".desktop", ".appdata.xml");
-            gchar *appdata_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
-            if (! g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)){
+            gchar *appstream_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
+            if (g_file_test(appstream_path, G_FILE_TEST_IS_REGULAR)){
+                fprintf (stderr, "WARNING: AppStream files ending with .appdata.xml is deprecated.\n");
+                fprintf (stderr, "         Please use .metainfo.xml instead.\n");
+            }
+            else {
+                replacestr(application_id, ".appdata.xml", ".metainfo.xml");
+                appstream_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
+            }
+            if (! g_file_test(appstream_path, G_FILE_TEST_IS_REGULAR)){
                 fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
                 fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
                 fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps\n");
@@ -868,7 +876,7 @@ main (int argc, char *argv[])
                     char *args[] = {
                         "appstream-util",
                         "validate-relax",
-                        appdata_path,
+                        appstream_path,
                         NULL
                     };
                     g_print("Trying to validate AppStream information with the appstream-util tool\n");
