@@ -1,19 +1,19 @@
 /**************************************************************************
- * 
+ *
  * Copyright (c) 2004-19 Simon Peter
- * 
+ *
  * All Rights Reserved.
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,7 +21,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- * 
+ *
  **************************************************************************/
 
 #ident "AppImage by Simon Peter, http://appimage.org/"
@@ -65,7 +65,7 @@ extern char runtime[];
 extern unsigned int runtime_len;
 #endif
 
-enum fARCH { 
+enum fARCH {
     fARCH_i386,
     fARCH_x86_64,
     fARCH_arm,
@@ -105,7 +105,7 @@ int sfs_ls(char* image) {
     sqfs_err err = SQFS_OK;
     sqfs_traverse trv;
     sqfs fs;
-    
+
     ssize_t fs_offset = appimage_get_elf_size(image);
 
     // error check
@@ -114,7 +114,7 @@ int sfs_ls(char* image) {
 
     if ((err = sqfs_open_image(&fs, image, fs_offset)))
         die("sqfs_open_image error");
-    
+
     if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
         die("sqfs_traverse_open error");
     while (sqfs_traverse_next(&trv, &err)) {
@@ -125,12 +125,12 @@ int sfs_ls(char* image) {
     if (err)
         die("sqfs_traverse_next error");
     sqfs_traverse_close(&trv);
-    
+
     sqfs_fd_close(fs.fd);
     return 0;
 }
 
-/* Generate a squashfs filesystem using mksquashfs on the $PATH 
+/* Generate a squashfs filesystem using mksquashfs on the $PATH
 * execlp(), execvp(), and execvpe() search on the $PATH */
 int sfs_mksquashfs(char *source, char *destination, int offset) {
     pid_t pid = fork();
@@ -146,13 +146,13 @@ int sfs_mksquashfs(char *source, char *destination, int offset) {
             perror("sfs_mksquashfs waitpid() failed");
             return(-1);
         }
-        
+
         int retcode = WEXITSTATUS(status);
         if (retcode) {
             fprintf(stderr, "mksquashfs (pid %d) exited with code %d\n", pid, retcode);
             return(-1);
         }
-        
+
         return 0;
     } else {
         // we are the child
@@ -272,7 +272,7 @@ int validate_desktop_file(char *file) {
 }
 
 /* Generate a squashfs filesystem
-* The following would work if we link to mksquashfs.o after we renamed 
+* The following would work if we link to mksquashfs.o after we renamed
 * main() to mksquashfs_main() in mksquashfs.c but we don't want to actually do
 * this because squashfs-tools is not under a permissive license
 * i *nt sfs_mksquashfs(char *source, char *destination) {
@@ -291,19 +291,19 @@ int validate_desktop_file(char *file) {
 static void replacestr(char *line, const char *search, const char *replace)
 {
     char *sp = NULL;
-    
+
     if ((sp = strstr(line, search)) == NULL) {
         return;
     }
     int search_len = strlen(search);
     int replace_len = strlen(replace);
     int tail_len = strlen(sp+search_len);
-    
+
     memmove(sp+replace_len,sp+search_len,tail_len+1);
     memcpy(sp, replace, replace_len);
-    
+
     /* Do it recursively again until no more work to do */
-    
+
     if ((sp = strstr(line, search))) {
         replacestr(line, search, replace);
     }
@@ -447,7 +447,7 @@ gchar* find_first_matching_file_nonrecursive(const gchar *real_path, const gchar
         }
         g_dir_close(dir);
     }
-    else { 
+    else {
         g_warning("%s: %s", real_path, g_strerror(errno));
     }
     return NULL;
@@ -477,7 +477,7 @@ bool readFile(char* filename, int* size, char** buffer) {
     fread(indata, fsize, 1, f);
     fclose(f);
     *size = (int)fsize;
-    *buffer = indata; 
+    *buffer = indata;
     return TRUE;
 }
 
@@ -542,7 +542,7 @@ int
 main (int argc, char *argv[])
 {
 
-    /* Parse Travis CI environment variables. 
+    /* Parse Travis CI environment variables.
      * https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
      * TRAVIS_COMMIT: The commit that the current build is testing.
      * TRAVIS_REPO_SLUG: The slug (in form: owner_name/repo_name) of the repository currently being built.
@@ -563,18 +563,18 @@ main (int argc, char *argv[])
     /* Parse GitLab CI environment variables.
      * https://docs.gitlab.com/ee/ci/variables/#predefined-variables-environment-variables
      * echo "${CI_PROJECT_URL}/-/jobs/artifacts/${CI_COMMIT_REF_NAME}/raw/QtQuickApp-x86_64.AppImage?job=${CI_JOB_NAME}"
-     */    
+     */
     char* CI_PROJECT_URL;
     CI_PROJECT_URL = getenv("CI_PROJECT_URL");
     char* CI_COMMIT_REF_NAME;
     CI_COMMIT_REF_NAME = getenv("CI_COMMIT_REF_NAME"); // The branch or tag name for which project is built
     char* CI_JOB_NAME;
     CI_JOB_NAME = getenv("CI_JOB_NAME"); // The name of the job as defined in .gitlab-ci.yml
-    
+
     /* Parse OWD environment variable.
      * If it is available then cd there. It is the original CWD prior to running AppRun */
     char* owd_env = NULL;
-    owd_env = getenv("OWD");    
+    owd_env = getenv("OWD");
     if(NULL!=owd_env){
         int ret;
         ret = chdir(owd_env);
@@ -583,13 +583,13 @@ main (int argc, char *argv[])
             exit(1);
         }
     }
-        
+
     GError *error = NULL;
     GOptionContext *context;
 
     // initialize help text of argument
     sprintf(_exclude_file_desc, "Uses given file as exclude file for mksquashfs, in addition to %s.", APPIMAGEIGNORE);
-    
+
     context = g_option_context_new ("SOURCE [DESTINATION] - Generate, extract, and inspect AppImages");
     g_option_context_add_main_entries (context, entries, NULL);
     // g_option_context_add_group (context, gtk_get_option_group (TRUE));
@@ -646,16 +646,16 @@ main (int argc, char *argv[])
         g_print("WARNING: gpg2 or gpg command is missing, please install it if you want to create digital signatures\n");
     if(! g_find_program_in_path ("sha256sum") && ! g_find_program_in_path ("shasum"))
         g_print("WARNING: sha256sum or shasum command is missing, please install it if you want to create digital signatures\n");
-    
+
     if(!&remaining_args[0])
         die("SOURCE is missing");
-    
+
     /* If in list mode */
     if (list){
         sfs_ls(remaining_args[0]);
         exit(0);
     }
-    
+
     /* If the first argument is a directory, then we assume that we should package it */
     if (g_file_test(remaining_args[0], G_FILE_TEST_IS_DIR)) {
         /* Parse VERSION environment variable.
@@ -709,7 +709,7 @@ main (int argc, char *argv[])
         char *destination;
         char source[PATH_MAX];
         realpath(remaining_args[0], source);
-        
+
         /* Check if *.desktop file is present in source AppDir */
         gchar *desktop_file = find_first_matching_file_nonrecursive(source, "*.desktop");
         if(desktop_file == NULL){
@@ -732,7 +732,7 @@ main (int argc, char *argv[])
             die(".desktop file cannot be parsed");
         if (!get_desktop_entry(kf, "Categories"))
             die(".desktop file is missing a Categories= key");
-        
+
         if(verbose){
             fprintf (stderr,"Name: %s\n", get_desktop_entry(kf, "Name"));
             fprintf (stderr,"Icon: %s\n", get_desktop_entry(kf, "Icon"));
@@ -765,10 +765,10 @@ main (int argc, char *argv[])
         char app_name_for_filename[PATH_MAX];
         sprintf(app_name_for_filename, "%s", get_desktop_entry(kf, "Name"));
         replacestr(app_name_for_filename, " ", "_");
-        
+
         if(verbose)
             fprintf (stderr,"App name for filename: %s\n", app_name_for_filename);
-        
+
         if (remaining_args[1]) {
             destination = remaining_args[1];
         } else {
@@ -821,10 +821,10 @@ main (int argc, char *argv[])
             fprintf (stderr, "%s\n", example_path);
             exit(1);
         }
-       
+
         /* Check if .DirIcon is present in source AppDir */
         gchar *diricon_path = g_build_filename(source, ".DirIcon", NULL);
-        
+
         if (! g_file_test(diricon_path, G_FILE_TEST_EXISTS)){
             fprintf (stderr, "Deleting pre-existing .DirIcon\n");
             g_unlink(diricon_path);
@@ -835,20 +835,43 @@ main (int argc, char *argv[])
             if(res)
                 die("Could not symlink .DirIcon");
         }
-        
+
         /* Check if AppStream upstream metadata is present in source AppDir */
         if(! no_appstream){
-            char application_id[PATH_MAX];
-            sprintf (application_id,  "%s", basename(desktop_file));
-            replacestr(application_id, ".desktop", ".appdata.xml");
-            gchar *appdata_path = g_build_filename(source, "/usr/share/metainfo/", application_id, NULL);
-            if (! g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)){
-                fprintf (stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
-                fprintf (stderr, "         in usr/share/metainfo/%s\n", application_id);
-                fprintf (stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps\n");
-                fprintf (stderr, "         for more information or use the generator at http://output.jsbin.com/qoqukof.\n");
-            } else {
-                fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", application_id);
+        	bool appstream_found = false;
+        	char *appstream_filename;
+        	gchar **appstream_path;
+
+        	char metainfo_filename[PATH_MAX];
+        	sprintf(metainfo_filename, "%s", basename(desktop_file));
+        	replacestr(metainfo_filename, ".desktop", ".metainfo.xml");
+        	gchar *metainfo_path = g_build_filename(source, "/usr/share/metainfo/", metainfo_filename, NULL);
+        	if (!g_file_test(metainfo_path, G_FILE_TEST_IS_REGULAR)) {
+        		char appdata_filename[PATH_MAX];
+                sprintf(appdata_filename, "%s", basename(desktop_file));
+                replacestr(appdata_filename, ".desktop", ".appdata.xml");
+                gchar *appdata_path = g_build_filename(source, "/usr/share/metainfo/", appdata_filename, NULL);
+                if (!g_file_test(appdata_path, G_FILE_TEST_IS_REGULAR)) {
+                	fprintf(stderr, "WARNING: AppStream upstream metadata is missing, please consider creating it\n");
+                    fprintf(stderr, "         in usr/share/metainfo/%s\n", metainfo_filename);
+                    fprintf(stderr, "         Please see https://www.freedesktop.org/software/appstream/docs/chap-Quickstart.html#sect-Quickstart-DesktopApps\n");
+                    fprintf(stderr, "         for more information or use the generator at https://docs.appimage.org/packaging-guide/optional/appstream.html.\n");
+                } else {
+                	appstream_found = true;
+                	appstream_filename = &appdata_filename;
+                	appstream_path = &appdata_path;
+                	fprintf(stderr, "WARNING: The appstream upstream metadata file should be named %s.\n", metainfo_filename);
+                	fprintf(stderr, "         .appdata.xml is a legacy file ending and shouldn't be used in new AppImages anymore.\n");
+                	fprintf(stderr, "         See https://www.freedesktop.org/software/appstream/docs/sect-Metadata-Application.html.\n");
+                }
+        	} else {
+        		appstream_found = true;
+        		appstream_filename = &metainfo_filename;
+        		appstream_path = &metainfo_path;
+        	}
+
+        	if (appstream_found) {
+                fprintf (stderr, "AppStream upstream metadata found in usr/share/metainfo/%s\n", *appstream_filename);
                 /* Use ximion's appstreamcli to make sure that desktop file and appdata match together */
                 if(g_find_program_in_path ("appstreamcli")) {
                     char *args[] = {
@@ -868,7 +891,7 @@ main (int argc, char *argv[])
                     char *args[] = {
                         "appstream-util",
                         "validate-relax",
-                        appdata_path,
+                        *appstream_path,
                         NULL
                     };
                     g_print("Trying to validate AppStream information with the appstream-util tool\n");
@@ -879,7 +902,7 @@ main (int argc, char *argv[])
                 }
             }
         }
-        
+
         /* Upstream mksquashfs can currently not start writing at an offset,
         * so we need a patched one. https://github.com/plougher/squashfs-tools/pull/13
         * should hopefully change that. */
@@ -904,11 +927,11 @@ main (int argc, char *argv[])
         }
         if (verbose)
             printf("Size of the embedded runtime: %d bytes\n", size);
-        
+
         int result = sfs_mksquashfs(source, destination, size);
         if(result != 0)
             die("sfs_mksquashfs error");
-        
+
         fprintf (stderr, "Embedding ELF...\n");
         FILE *fpdst = fopen(destination, "rb+");
         if (fpdst == NULL) {
@@ -926,7 +949,7 @@ main (int argc, char *argv[])
             printf("Could not set executable bit, aborting\n");
             exit(1);
         }
-        
+
         if(bintray_user != NULL){
             if(bintray_repo != NULL){
                 char buf[1024];
@@ -935,7 +958,7 @@ main (int argc, char *argv[])
                 printf("%s\n", updateinformation);
             }
         }
-        
+
         /* If the user has not provided update information but we know this is a Travis CI build,
          * then fill in update information based on TRAVIS_REPO_SLUG */
         if(guess_update_information){
@@ -953,7 +976,7 @@ main (int argc, char *argv[])
                     if(zsyncmake_path){
                         char buf[1024];
                         gchar **parts = g_strsplit (travis_repo_slug, "/", 2);
-                        /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases 
+                        /* https://github.com/AppImage/AppImageSpec/blob/master/draft.md#github-releases
                          * gh-releases-zsync|probono|AppImages|latest|Subsurface*-x86_64.AppImage.zsync */
                         gchar *channel = "continuous";
                             if(travis_tag != NULL){
@@ -983,7 +1006,7 @@ main (int argc, char *argv[])
                 }
             }
         }
-        
+
         /* If updateinformation was provided, then we check and embed it */
         if(updateinformation != NULL){
             if(!g_str_has_prefix(updateinformation,"zsync|"))
@@ -991,14 +1014,14 @@ main (int argc, char *argv[])
                     if(!g_str_has_prefix(updateinformation,"gh-releases-zsync|"))
                         if(!g_str_has_prefix(updateinformation,"pling-v1-zsync|"))
                             die("The provided updateinformation is not in a recognized format");
-                
+
             gchar **ui_type = g_strsplit_set(updateinformation, "|", -1);
-                        
+
             if(verbose)
                 printf("updateinformation type: %s\n", ui_type[0]);
             /* TODO: Further checking of the updateinformation */
-            
-          
+
+
             unsigned long ui_offset = 0;
             unsigned long ui_length = 0;
 
