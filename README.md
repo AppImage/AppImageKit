@@ -55,7 +55,6 @@ Example: Imagine you want to use the Leafpad text editor, but carry its settings
 
 ```bash
 # Download Leafpad AppImage and make it executable
-Leafpad-0.8.18.1.glibc2.4-x86_64.AppImage
 chmod a+x Leafpad-0.8.18.1.glibc2.4-x86_64.AppImage
 
 # Create a directory with the same name as the AppImage plus the ".config" extension
