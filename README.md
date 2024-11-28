@@ -9,8 +9,6 @@ Copyright (c) 2004-24 Simon Peter <probono@puredarwin.org> and contributors.
 
 https://en.wikipedia.org/wiki/AppImage
 
-__AppImageKit__  is a concrete implementation of the AppImage format, especially the tiny runtime that becomes part of each AppImage.
-
 Providing an [AppImage](http://appimage.org/) for distributing application has, among others, these advantages:
 - Applications packaged as an AppImage can run on many distributions (including Ubuntu, Fedora, openSUSE, CentOS, elementaryOS, Linux Mint, and others)
 - One app = one file = super simple for users: just download one AppImage file, [make it executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80), and run
@@ -26,7 +24,7 @@ Providing an [AppImage](http://appimage.org/) for distributing application has, 
 - Can be listed in the [AppImageHub](https://appimage.github.io/apps) central directory of available AppImages
 - Can double as a self-extracting compressed archive with the `--appimage-extract` parameter
 
-[Here is an overview](https://appimage.github.io/apps) of projects that are already distributing upstream-provided, official AppImages.
+[Here is an overview](https://appimage.github.io/apps) of projects that are distributing AppImages.
 
 If you have questions, AppImage developers are on #AppImage on irc.libera.chat.
 
@@ -84,7 +82,7 @@ AppImage to the rescue!
 
 ## AppImage usage
 
-Running an AppImage mounts the filesystem image and transparently runs the contained application. So the usage of an AppImage normally should equal the usage of the application contained in it. However, there is special functionality, as described here. If an AppImage you have received does not support these options, ask the author of the AppImage to recreate it using the latest `appimagetool` (or `linuxdeployqt`).
+Running an AppImage mounts the filesystem image and transparently runs the contained application. So the usage of an AppImage normally should equal the usage of the application contained in it. However, there is special functionality, as described here. If an AppImage you have received does not support these options, ask the author of the AppImage to recreate it using the latest tooling).
 
 ### Command line arguments
 
@@ -109,7 +107,7 @@ Example: Imagine you want to use the Leafpad text editor, but carry its settings
 
 ```bash
 # Download Leafpad AppImage and make it executable
-wget -c "https://bintray.com/probono/AppImages/download_file?file_path=Leafpad-0.8.18.1.glibc2.4-x86_64.AppImage" -O Leafpad-0.8.18.1.glibc2.4-x86_64.AppImage
+Leafpad-0.8.18.1.glibc2.4-x86_64.AppImage
 chmod a+x Leafpad-0.8.18.1.glibc2.4-x86_64.AppImage
 
 # Create a directory with the same name as the AppImage plus the ".config" extension
