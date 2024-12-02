@@ -3,7 +3,6 @@
 #
 # Test an AppDir or AppImage on a given ISO or squashfs or ext3 base system
 # TODO:
-# - Make compatible with type 2 AppImages (currently we have to first mount them by hand)
 # - Check https://github.com/FGrose/livecd-tools/blob/liveimage-mount/tools/liveimage-mount
 #
 
@@ -15,13 +14,9 @@ xhost + # Workaround for: QXcbConnection: Could not connect to display :0
 HERE=$(dirname $(readlink -f "${0}"))
 export PATH=$HERE:$HERE/usr/bin:$PATH
 
-if [ "$1x" == "x" ] ; then
-    echo "Please specify a ISO or squashfs base system to run the AppImage on"
-    exit 1
-fi
-
-if [ "$2x" == "x" ] ; then
-    echo "Please specify an AppDir or AppImage outside the ISO or command inside the ISO to be run"
+if [ $# -lt 2 ]
+then
+    echo "Usage: $0 <iso name> <AppImage name> [<AppImage arguments>]" 1>&2
     exit 1
 fi
 
@@ -64,6 +59,12 @@ if [ ${1: -4} == "ext3" ] ; then
     ISO="$1"
     mount -o loop,ro "$ISO" /tmp/$PREF/unionfs/root
 fi
+
+shift
+
+cmd_all="$@"
+cmd_name="$1"
+shift
 
 echo ""
 echo "===================================================="
@@ -151,13 +152,20 @@ if [ "x$MNT" == "x" ] ; then
     echo "Could not find free mountpoint"
     exit 1
 fi
-if [ -f "$2" ] ; then
-    mount "$2" /tmp/$PREF/union/$MNT -o loop,ro
-elif [ -d "$2" ] ; then
-    mount "$2" /tmp/$PREF/union/$MNT -o bind
+if [ -f "$cmd_name" ] ; then
+    if [ "$(dd if="$cmd_name" bs=4 count=1 status=none)" = "$(printf '\x7FELF')" ]
+    then
+        # Type 2 AppImage
+        mount -t tmpfs "none" /tmp/$PREF/union/$MNT
+        cp "$cmd_name" "/tmp/$PREF/union/$MNT/AppRun"
+    else
+        # Type 1 AppImage
+        mount "$cmd_name" /tmp/$PREF/union/$MNT -o loop,ro
+    fi
+elif [ -d "$cmd_name" ] ; then
+    mount "$cmd_name" /tmp/$PREF/union/$MNT -o bind
 else
-    shift
-    export RUN_COMMAND=$1
+    export RUN_COMMAND=$cmd_name
     export RUN_INSIDE=$@
 fi
 
@@ -188,7 +196,7 @@ fi
 if [ $(which $RUN_COMMAND) ] ; then
     exec $RUN_INSIDE
 else
-    $MNT/AppRun && echo "+++++++++ SUCCESS $ISO $2 +++++++++"
+    $MNT/AppRun $@ && echo "+++++++++ SUCCESS $ISO $cmd_all +++++++++"
 fi
 EOF
 chmod a+x /tmp/$PREF/union/run.sh
