@@ -1,8 +1,26 @@
-# >= 3.2 required for ExternalProject_Add_StepDependencies
-cmake_minimum_required(VERSION 3.2)
+# FetchContent_MakeAvailable() is only available in CMake 3.14 or newer
+cmake_minimum_required(VERSION 3.14)
 
+include(FetchContent)
 
-include(${PROJECT_SOURCE_DIR}/lib/libappimage/cmake/scripts.cmake)
+# Need this patch until https://github.com/AppImage/libappimage/pull/160 is resolved
+FetchContent_Declare(libappimage_patch
+    URL https://github.com/AppImage/libappimage/commit/ce0a186a5a3cd8f31f4afd216d5322410a0a8e26.patch
+    DOWNLOAD_NO_EXTRACT TRUE
+)
+FetchContent_MakeAvailable(libappimage_patch)
+
+FetchContent_Declare(libappimage
+    # We can not use a URL source with a github-generated source archive: libappimage's gtest submodule would be missing
+    # If you update the GIT_TAG and the patch does not apply anymore you need to rebase libappimage_patch (see above)
+GIT_REPOSITORY https://github.com/AppImage/libappimage
+    GIT_TAG aa7d9fb03d3d64415c37120f20faa05412458e94  # Eventually we may want to use master, once that works reliably.
+    PATCH_COMMAND patch -p 1 --forward < ${libappimage_patch_SOURCE_DIR}/ce0a186a5a3cd8f31f4afd216d5322410a0a8e26.patch
+)
+FetchContent_MakeAvailable(libappimage)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${libappimage_SOURCE_DIR}/cmake)
+include(${libappimage_SOURCE_DIR}/cmake/scripts.cmake)
+include(${libappimage_SOURCE_DIR}/cmake/tools.cmake)
 
 
 # the names of the targets need to differ from the library filenames
@@ -53,9 +71,10 @@ if(NOT USE_SYSTEM_MKSQUASHFS)
 
     ExternalProject_Add(mksquashfs
         GIT_REPOSITORY https://github.com/plougher/squashfs-tools/
-        GIT_TAG 4.4
+        GIT_TAG 4.5.1
         UPDATE_COMMAND ""  # Make sure CMake won't try to fetch updates unnecessarily and hence rebuild the dependency every time
         CONFIGURE_COMMAND ${SED} -i "s|CFLAGS += -DXZ_SUPPORT|CFLAGS += ${mksquashfs_cflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
+        COMMAND ${SED} -i "/INSTALL_MANPAGES_DIR/d" <SOURCE_DIR>/squashfs-tools/Makefile
         COMMAND ${SED} -i "s|LIBS += -llzma|LIBS += -Bstatic ${mksquashfs_ldflags}|g" <SOURCE_DIR>/squashfs-tools/Makefile
         COMMAND ${SED} -i "s|install: mksquashfs unsquashfs|install: mksquashfs|g" squashfs-tools/Makefile
         COMMAND ${SED} -i "/cp unsquashfs/d" squashfs-tools/Makefile
