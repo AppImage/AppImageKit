@@ -121,7 +121,7 @@ fi
 log "check --mksquashfs-opt forwarding"
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage.1
 "$appimagetool" appimagetool.AppDir appimagetool.AppImage.2 --mksquashfs-opt "-mem" --mksquashfs-opt "100M"
-"$appimagetool" appimagetool.AppDir appimagetool.AppImage.3 --mksquashfs-opt "-all-time" --mksquashfs-opt "12345"
+"$appimagetool" appimagetool.AppDir appimagetool.AppImage.3 --mksquashfs-opt "-all-time" --mksquashfs-opt "1234567890"
 hash1=$(sha256sum appimagetool.AppImage.1 | awk '{print $1}')
 hash2=$(sha256sum appimagetool.AppImage.2 | awk '{print $1}')
 hash3=$(sha256sum appimagetool.AppImage.3 | awk '{print $1}')
@@ -133,6 +133,17 @@ if [ "$hash1" == "$hash3" ]; then
     echo "Hashes of regular and mtime-modified AppImages don't differ"
     exit 1
 fi
+
+log "check mtimes are preserved when extracting squashfs"
+./appimagetool.AppImage.3 --appimage-extract || echo "Can not extract AppImage on $(uname -m)"
+if [ -d squashfs-root ]; then
+    ls -la squashfs-root
+    if [ "$(stat -c %Y squashfs-root/appimagetool.png)" != "1234567890" ]; then
+    echo "mtime of appimagetool.png is not 1234567890 / 2009-02-14 (as set by mksquashfs \"-all-time\"):"
+    exit 1
+    fi
+fi
+rm -rf squashfs-root
 
 log "check appimagetool dies when mksquashfs fails"
 set +e # temporarily disable error trapping as next line is supposed to fail
