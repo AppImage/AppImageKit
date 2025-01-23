@@ -34,6 +34,7 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include <stdio.h>
 #include <argp.h>
@@ -99,13 +100,58 @@ static void die(const char *msg) {
     exit(1);
 }
 
+/* Sets the mode letters for one of u/g/o modes.
+ * ugo determines which: 2=u, 1=g, 0=o */
+static void mode_triplet(char *modes, int mode, int ugo) {
+    int m = mode >> (3 * ugo);
+    if (m & 0x4)
+        modes[0] = 'r';
+    if (m & 0x2)
+        modes[1] = 'w';
+    if (mode & (1 << ugo)) {
+        if (ugo == 0) {
+            if (mode & 0x1)
+                modes[2] = 't';
+            else
+                modes[2] = 'T';
+        } else {
+            if (mode & 0x1)
+                modes[2] = 's';
+            else
+                modes[2] = 'S';
+        }
+    } else if (mode & 0x1)
+        modes[2] = 'x';
+}
+
+static char type_letter(int type) {
+    if (type == SQUASHFS_REG_TYPE || type == SQUASHFS_LREG_TYPE)
+        return '-';
+    if (type == SQUASHFS_DIR_TYPE || type == SQUASHFS_LDIR_TYPE)
+        return 'd';
+    if (type == SQUASHFS_SYMLINK_TYPE || type == SQUASHFS_LSYMLINK_TYPE)
+        return 'l';
+    if (type == SQUASHFS_BLKDEV_TYPE || type == SQUASHFS_LBLKDEV_TYPE)
+        return 'b';
+    if (type == SQUASHFS_CHRDEV_TYPE || type == SQUASHFS_LCHRDEV_TYPE)
+        return 'c';
+    if (type == SQUASHFS_FIFO_TYPE || type == SQUASHFS_LFIFO_TYPE)
+        return 'p';
+    if (type == SQUASHFS_SOCKET_TYPE || type == SQUASHFS_LSOCKET_TYPE)
+        return 's';
+    return '?';
+}
+
 /* Function that prints the contents of a squashfs file
 * using libsquashfuse (#include "squashfuse.h") */
-int sfs_ls(char* image) {
+int sfs_ls(char* image, gboolean verbose) {
     sqfs_err err = SQFS_OK;
+    sqfs_inode inode;
     sqfs_traverse trv;
     sqfs fs;
-    
+    uid_t uid, gid;
+    struct tm *mtime;
+
     ssize_t fs_offset = appimage_get_elf_size(image);
 
     // error check
@@ -114,18 +160,129 @@ int sfs_ls(char* image) {
 
     if ((err = sqfs_open_image(&fs, image, fs_offset)))
         die("sqfs_open_image error");
-    
+
     if ((err = sqfs_traverse_open(&trv, &fs, sqfs_inode_root(&fs))))
         die("sqfs_traverse_open error");
     while (sqfs_traverse_next(&trv, &err)) {
         if (!trv.dir_end) {
-            printf("%s\n", trv.path);
+            if (verbose) {
+                time_t t;
+                char modes[10] = "---------";
+                if ((err = sqfs_inode_get(&fs, &inode, trv.entry.inode)))
+                    die("sqfs_inode_get error");
+                if ((err = sqfs_id_get(&fs, inode.base.uid, &uid)))
+                    die("sqfs_id_get error");
+                if ((err = sqfs_id_get(&fs, inode.base.guid, &gid)))
+                    die("sqfs_id_get error");
+                t = (time_t)inode.base.mtime;
+                mtime = localtime(&t);
+                mode_triplet(&modes[0], inode.base.mode, 2);
+                mode_triplet(&modes[3], inode.base.mode, 1);
+                mode_triplet(&modes[6], inode.base.mode, 0);
+
+                if (trv.entry.type == SQUASHFS_DIR_TYPE ||
+                    trv.entry.type == SQUASHFS_LDIR_TYPE)
+                    printf("%c%s%5u %-8u %-8u %9lu %04d-%02d-%02d %02d:%02d:%02d %s\n",
+                           type_letter(trv.entry.type),
+                           modes,
+                           inode.nlink,
+                           uid,
+                           gid,
+                           inode.xtra.dir.dir_size,
+                           mtime->tm_year + 1900,
+                           mtime->tm_mon + 1,
+                           mtime->tm_mday,
+                           mtime->tm_hour,
+                           mtime->tm_min,
+                           mtime->tm_sec,
+                           trv.path);
+                else if (trv.entry.type == SQUASHFS_SYMLINK_TYPE ||
+                         trv.entry.type == SQUASHFS_LSYMLINK_TYPE) {
+                    char *link;
+                    size_t link_size;
+                    /* Get size of link */
+                    if ((err = sqfs_readlink(&fs, &inode, NULL, &link_size)))
+                        die("sqfs_readlink error");
+                    if ((link = malloc(link_size)) == NULL)
+                        die("malloc error");
+                    if ((err = sqfs_readlink(&fs, &inode, link, &link_size)))
+                        die("sqfs_readlink error");
+                    printf("%c%s%5u %-8u %-8u %9lu %04d-%02d-%02d %02d:%02d:%02d %s -> %s\n",
+                           type_letter(trv.entry.type),
+                           modes,
+                           inode.nlink,
+                           uid,
+                           gid,
+                           inode.xtra.symlink_size,
+                           mtime->tm_year + 1900,
+                           mtime->tm_mon + 1,
+                           mtime->tm_mday,
+                           mtime->tm_hour,
+                           mtime->tm_min,
+                           mtime->tm_sec,
+                           trv.path,
+                           link);
+                    free(link);
+                } else if (trv.entry.type == SQUASHFS_BLKDEV_TYPE ||
+                    trv.entry.type == SQUASHFS_LBLKDEV_TYPE ||
+                    trv.entry.type == SQUASHFS_CHRDEV_TYPE ||
+                    trv.entry.type == SQUASHFS_LCHRDEV_TYPE)
+                    printf("%c%s%5u %-8u %-8u %4u,%4u %04d-%02d-%02d %02d:%02d:%02d %s\n",
+                           type_letter(trv.entry.type),
+                           modes,
+                           inode.nlink,
+                           uid,
+                           gid,
+                           inode.xtra.dev.major,
+                           inode.xtra.dev.minor,
+                           mtime->tm_year + 1900,
+                           mtime->tm_mon + 1,
+                           mtime->tm_mday,
+                           mtime->tm_hour,
+                           mtime->tm_min,
+                           mtime->tm_sec,
+                           trv.path);
+                else if (trv.entry.type == SQUASHFS_REG_TYPE ||
+                         trv.entry.type == SQUASHFS_LREG_TYPE)
+                    printf("%c%s%5u %-8u %-8u %9lu %04d-%02d-%02d %02d:%02d:%02d %s\n",
+                           type_letter(trv.entry.type),
+                           modes,
+                           inode.nlink,
+                           uid,
+                           gid,
+                           inode.xtra.reg.file_size,
+                           mtime->tm_year + 1900,
+                           mtime->tm_mon + 1,
+                           mtime->tm_mday,
+                           mtime->tm_hour,
+                           mtime->tm_min,
+                           mtime->tm_sec,
+                           trv.path);
+                else
+                    printf("%c%s%5u %-8u %-8u %9lu %04d-%02d-%02d %02d:%02d:%02d %s\n",
+                           type_letter(trv.entry.type),
+                           modes,
+                           inode.nlink,
+                           uid,
+                           gid,
+                           0,
+                           mtime->tm_year + 1900,
+                           mtime->tm_mon + 1,
+                           mtime->tm_mday,
+                           mtime->tm_hour,
+                           mtime->tm_min,
+                           mtime->tm_sec,
+                           trv.path);
+            } else {
+                printf("%s\n", trv.path);
+            }
+
         }
     }
     if (err)
         die("sqfs_traverse_next error");
     sqfs_traverse_close(&trv);
-    
+
     sqfs_fd_close(fs.fd);
     return 0;
 }
@@ -652,7 +809,7 @@ main (int argc, char *argv[])
     
     /* If in list mode */
     if (list){
-        sfs_ls(remaining_args[0]);
+        sfs_ls(remaining_args[0], verbose);
         exit(0);
     }
     
