@@ -25,6 +25,8 @@ RUN poetry run python translator.py --compile --render
 # deployment container
 FROM nginx:1-alpine
 
+LABEL org.opencontainers.image.source="https://github.com/AppImage/AppImageKit"
+
 COPY docker/nginx.conf /etc/nginx/
 
 # check nginx config
