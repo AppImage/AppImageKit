@@ -25,8 +25,6 @@ def render_pages():
             loader=jinja2.FileSystemLoader(this_dir),
             extensions=[
                 "jinja2.ext.i18n",
-                "jinja2.ext.autoescape",
-                "jinja2.ext.with_"
             ],
         )
 

@@ -1,7 +1,7 @@
 # build container
 FROM python:3-alpine as builder
 
-RUN apk add --no-cache gcc musl-dev libffi-dev rust cargo openssl-dev
+RUN apk add --no-cache gcc musl-dev libffi-dev rust cargo openssl-dev poetry
 
 # build as a regular user, not root, to avoid annoying warnings from pip
 RUN adduser -S build
@@ -11,16 +11,15 @@ WORKDIR /build
 
 COPY pyproject.toml /build/
 COPY poetry.lock /build/
-RUN pip install -U pip && \
-    pip install poetry && \
-    python3 -m poetry install
+
+RUN poetry install
 
 COPY --chown=build:nobody locale/ /build/locale/
 COPY --chown=build:nobody www/ /build/www/
 COPY *.py /build/
 COPY *.jinja2 /build/
 
-RUN python3 -m poetry run python translator.py --compile --render
+RUN poetry run python translator.py --compile --render
 
 
 # deployment container
