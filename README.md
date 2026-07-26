@@ -74,7 +74,7 @@ Note that the file `leafpadrc` was written in the directory we have created befo
 
 ## appimagetool
 
-`appimagetool` is a low-level tool used to convert a valid AppDir into an AppImage. It us usually used by [higher-level tools](https://github.com/AppImageCommunity/awesome-appimage?tab=readme-ov-file#appimage-developer-tools) that can be used by application developers to provide AppImages of their applications to end users. `appimagetool` itself is not needed by end users, and is normally not used directly by developers.
+`appimagetool` is a low-level tool used to convert a valid AppDir into an AppImage. It is usually used by [higher-level tools](https://github.com/AppImageCommunity/awesome-appimage?tab=readme-ov-file#appimage-developer-tools) that can be used by application developers to provide AppImages of their applications to end users. `appimagetool` itself is not needed by end users, and is normally not used directly by developers.
 Please see https://github.com/AppImage/appimagetool.
 
 ## AppImage runtime
