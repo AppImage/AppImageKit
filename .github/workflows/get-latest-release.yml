@@ -1,0 +1,43 @@
+name: Fetch and upload latest appimagetools and runtimes
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  schedule:
+    - cron: "0 7 1/30 * *"
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install wget
+        run: sudo apt update && sudo apt install wget
+
+      - name: Download latest appimagetools
+        run: |
+          wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage"
+          wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-armhf.AppImage"
+          wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-i686.AppImage"
+          wget "https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
+
+      - name: Download latest runtimes
+        run: |
+          wget "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-aarch64"
+          wget "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-armhf"
+          wget "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-i686"
+          wget "https://github.com/AppImage/type2-runtime/releases/download/continuous/runtime-x86_64"
+  
+      - name: Release Artifacts
+        uses: softprops/action-gh-release@v2.2.2
+        with:
+          name: "OBSOLETE"
+          tag_name: "14"
+          prerelease: false
+          draft: false
+          generate_release_notes: false
+          make_latest: true
+          files: |
+            *.AppImage
+            runtime-*
